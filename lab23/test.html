@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test VexFlow Local</title>
+  <script src="vexflow-debug.js"></script>
+</head>
+<body style="background:#0d1117;color:#00ff99;text-align:center;font-family:Arial;">
+  <h1>Test de Pentagrama VexFlow (local)</h1>
+  <div id="output" style="margin:auto;width:90%;height:200px;background:#1c2128;border:1px solid #00ff99;border-radius:10px;"></div>
+
+  <script>
+    window.addEventListener("load", () => {
+      const VF = Vex.Flow;
+      const div = document.getElementById("output");
+
+      const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+      renderer.resize(div.clientWidth, 180);
+      const context = renderer.getContext();
+      context.setStrokeStyle("#00ff99");
+      context.setFillStyle("#e6edf3");
+
+      const stave = new VF.Stave(10, 40, div.clientWidth - 20);
+      stave.addClef("treble").setContext(context).draw();
+
+      const notes = [new VF.StaveNote({ keys: ["c/4"], duration: "q" })];
+      const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
+      voice.addTickables(notes);
+      new VF.Formatter().joinVoices([voice]).format([voice], 300);
+      voice.draw(context, stave);
+    });
+  </script>
+</body>
+</html>

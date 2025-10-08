@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio Musical de Maximilian 23</title>
+  <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, #aee1f9 0%, #c7b5ff 100%);
+      font-family: "Comic Sans MS", "Comic Neue", cursive;
+      color: #222;
+      overflow-x: hidden;
+    }
+    main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    header {
+      background: linear-gradient(90deg, #4ae2f2, #6f9cff);
+      text-align: center;
+      padding: 20px 0 10px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      position: relative;
+    }
+    header img {
+      height: 90px;
+      vertical-align: middle;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.8));
+    }
+    header h1 {
+      display: inline-block;
+      margin: 0 0 10px 15px;
+      font-size: 2.5em;
+      color: #fff;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      vertical-align: middle;
+      animation: brillo 3s infinite alternate;
+    }
+    header p {
+      margin: 0;
+      color: #e9f8ff;
+      font-size: 1.1em;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+    @keyframes brillo {
+      from { text-shadow: 0 0 4px #fff, 0 0 8px #4ae2f2; }
+      to { text-shadow: 0 0 8px #fff, 0 0 14px #6f9cff; }
+    }
+    #barra-opciones {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+    #barra-opciones label {
+      font-weight: bold;
+      color: #333;
+    }
+    select {
+      border-radius: 10px;
+      border: 2px solid #4ae2f2;
+      padding: 8px 12px;
+      font-size: 1.1em;
+      background: #fff;
+      color: #333;
+      transition: 0.3s;
+    }
+    select:hover {
+      background: #eafcff;
+      transform: scale(1.05);
+    }
+    #pentagrama {
+      margin: 0 auto;
+      width: 95%;
+      height: calc(100vh - 300px);
+      background: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      position: relative;
+      overflow-x: auto;
+      border: 3px solid #4ae2f2;
+      flex-grow: 1;
+    }
+    #figuras {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+    .figura {
+      font-size: 2.6em;
+      width: 70px;
+      height: 70px;
+      line-height: 70px;
+      text-align: center;
+      border: 3px solid #4ae2f2;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .figura:hover, .figura.activa {
+      background: #4ae2f2;
+      color: #fff;
+      transform: scale(1.15);
+      border-color: #ffffff;
+      box-shadow: 0 0 12px #4ae2f2;
+    }
+    #controles {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 35px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 22px;
+      font-size: 1.1em;
+      background: linear-gradient(90deg, #4ae2f2, #6f9cff);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+    button:disabled {
+      background: #b8ddee;
+      cursor: not-allowed;
+    }
+    button.activa {
+      background: #ff80b5 !important;
+      box-shadow: 0 0 12px #ffaad4;
+    }
+    .nota {
+      position: absolute;
+      cursor: move;
+      z-index: 100;
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid #4ae2f2;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .nota.delete-mode {
+      background: rgba(255, 0, 0, 0.15);
+      border-color: #ff6666;
+    }
+    .nota .plus, .nota .minus {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .nota.show-controls .plus, .nota.show-controls .minus {
+      opacity: 1;
+    }
+    .nota .plus, .nota .minus {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 26px;
+      font-size: 1.1em;
+      background: #4ae2f2;
+      color: #fff;
+      border: 1px solid #ffffff;
+      position: absolute;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+    .nota .plus {
+      top: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nota .minus {
+      bottom: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .note-label {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #4ae2f2;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.9em;
+      color: #333;
+      text-align: center;
+      z-index: 150;
+    }
+    @media (max-width: 600px) {
+      header img {
+        height: 60px;
+      }
+      header h1 {
+        font-size: 1.8em;
+      }
+      header p {
+        font-size: 0.9em;
+      }
+      #barra-opciones {
+        gap: 10px;
+        margin: 15px 0;
+      }
+      select {
+        padding: 6px 10px;
+        font-size: 1em;
+      }
+      #pentagrama {
+        height: calc(100vh - 250px);
+      }
+      .figura {
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        font-size: 2em;
+      }
+      button {
+        padding: 8px 16px;
+        font-size: 1em;
+      }
+      #controles {
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .note-label {
+        font-size: 0.8em;
+        padding: 1px 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="https://mmfrutos.com/max23/Cabeza.png" alt="Maximilian 23">
+      <h1>Laboratorio Musical de Maximilian 23</h1>
+      <p>🎵 ¡Compón, juega y aprende con el robot más melódico del cole! 🎶</p>
+    </header>
+
+    <div id="barra-opciones">
+      <label for="clave">Clave:</label>
+      <select id="clave">
+        <option value="treble" selected>Sol</option>
+        <option value="bass">Fa</option>
+      </select>
+
+      <label for="compas">Compás:</label>
+      <select id="compas">
+        <option value="" selected>---</option>
+        <option value="2/4">2/4</option>
+        <option value="3/4">3/4</option>
+        <option value="4/4">4/4</option>
+      </select>
+
+      <label for="velocidad">Velocidad:</label>
+      <select id="velocidad">
+        <option value="" selected>---</option>
+        <option value="60">Lento (60 BPM)</option>
+        <option value="90">Moderado (90 BPM)</option>
+        <option value="120">Allegro (120 BPM)</option>
+        <option value="150">Presto (150 BPM)</option>
+      </select>
+    </div>
+
+    <div id="pentagrama"></div>
+
+    <div id="figuras">
+      <div class="figura" data-tipo="nota" data-duracion="w" style="color:#ff80b5;">𝅝</div>
+      <div class="figura" data-tipo="nota" data-duracion="h" style="color:#ffd966;">𝅗𝅥</div>
+      <div class="figura" data-tipo="nota" data-duracion="q" style="color:#7bdeff;">♩</div>
+      <div class="figura" data-tipo="nota" data-duracion="8" style="color:#9cffb0;">♪</div>
+      <div class="figura" data-tipo="silencio" data-duracion="w" style="color:#ff80b5;">𝄻</div>
+      <div class="figura" data-tipo="silencio" data-duracion="h" style="color:#ffd966;">𝄼</div>
+      <div class="figura" data-tipo="silencio" data-duracion="q" style="color:#7bdeff;">𝄽</div>
+      <div class="figura" data-tipo="silencio" data-duracion="8" style="color:#9cffb0;">𝄾</div>
+    </div>
+
+    <div id="controles">
+      <button id="cerrar-compas" disabled>➕ Cerrar Compás</button>
+      <button id="borrar-ultimo">⏪ Borrar Último</button>
+      <button id="limpiar">🧹 Limpiar</button>
+      <button id="papelera">🗑️ Papelera</button>
+      <button id="notas">🎵 Notas</button>
+      <button id="play-stop" disabled>▶️ Play</button>
+      <button id="metronomo">⏱️ Metrónomo</button>
+    </div>
+  </main>
+
+  <script>
+    const VF = Vex.Flow;
+    const div = document.getElementById("pentagrama");
+    const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+    let width = 800;
+    const minStaveWidth = 250;
+    renderer.resize(width, div.clientHeight);
+    const context = renderer.getContext();
+
+    let clave = "treble";
+    let compas = "";
+    let compases = [];
+    let figuraActiva = null;
+    let deleteMode = false;
+    let showNoteLabels = false;
+    let isPlaying = false;
+    let metronomeOn = false;
+    let metronomeLoop = null;
+
+    const noteMap = {
+      treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
+      bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
+    };
+    const noteNameMap = {
+      c: "Do",
+      d: "Re",
+      e: "Mi",
+      f: "Fa",
+      g: "Sol",
+      a: "La",
+      b: "Si"
+    };
+    const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
+    const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
+
+    // Initialize
+    function init() {
+      window.addEventListener('resize', () => {
+        if (compases.length > 0) {
+          width = Math.max(div.clientWidth || 800, compases.reduce((sum, c) => sum + c.staveWidth, 0) + 80);
+          renderer.resize(width, div.clientHeight);
+          redibujarPentagrama();
+        }
+      });
+    }
+
+    // Change clef
+    document.getElementById("clave").addEventListener("change", e => {
+      clave = e.target.value;
+      if (compas) {
+        compases = [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }];
+        redibujarPentagrama();
+      }
+      resetControles();
+    });
+
+    // Change time signature
+    document.getElementById("compas").addEventListener("change", e => {
+      compas = e.target.value;
+      compases = compas ? [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }] : [];
+      resetControles();
+      redibujarPentagrama();
+    });
+
+    // Change speed
+    document.getElementById("velocidad").addEventListener("change", e => {
+      document.getElementById("play-stop").disabled = !e.target.value;
+    });
+
+    function resetControles() {
+      document.getElementById("cerrar-compas").disabled = true;
+      document.getElementById("papelera").classList.remove("activa");
+      document.getElementById("notas").classList.remove("activa");
+      document.getElementById("play-stop").textContent = "▶️ Play";
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      document.getElementById("metronomo").classList.remove("activa");
+      deleteMode = false;
+      showNoteLabels = false;
+      isPlaying = false;
+      metronomeOn = false;
+      if (metronomeLoop) metronomeLoop.stop();
+      Tone.Transport.cancel();
+      Tone.Transport.stop();
+    }
+
+    // Redraw staff
+    function redibujarPentagrama() {
+      context.clear();
+      document.querySelectorAll(".note-label").forEach(label => label.remove());
+      if (!compas) {
+        compases = [];
+        return;
+      }
+      let xOffset = 40;
+      compases.forEach((compasData, index) => {
+        const voice = new VF.Voice({
+          num_beats: compas ? parseInt(compas.split("/")[0]) : 4,
+          beat_value: compas ? parseInt(compas.split("/")[1]) : 4
+        });
+        voice.setStrict(false);
+        if (compasData.notas.length > 0) {
+          voice.addTickables(compasData.notas.map(e => e.vf));
+        }
+        const formatter = new VF.Formatter();
+        if (compasData.notas.length > 0) {
+          formatter.joinVoices([voice]);
+        }
+        const noteCount = compasData.notas.length;
+        const eighthNoteCount = compasData.notas.filter(n => n.duracion === '8').length;
+        const otherNoteCount = noteCount - eighthNoteCount;
+        const extraWidth = eighthNoteCount * 30 + otherNoteCount * 15;
+        const staveWidth = Math.max(minStaveWidth, (compasData.notas.length > 0 ? formatter.preCalculateMinTotalWidth([voice]) + 80 + extraWidth : minStaveWidth));
+        compasData.staveWidth = staveWidth;
+        const stave = new VF.Stave(xOffset, 80, staveWidth, { spacing_between_lines_px: 18 });
+        if (index === 0) stave.addClef(clave).addTimeSignature(compas);
+        if (compasData.closed) stave.addModifier(new VF.Barline().setType(VF.Barline.type.SINGLE));
+        stave.setContext(context).draw();
+        compasData.stave = stave;
+        if (compasData.notas.length > 0) {
+          try {
+            formatter.format([voice], staveWidth - 80);
+            voice.draw(context, stave);
+          } catch (e) {
+            console.error("Error en formateo/dibujo:", e);
+          }
+        }
+        xOffset += staveWidth;
+      });
+      width = Math.max(div.clientWidth || 800, compases.reduce((sum, c) => sum + c.staveWidth, 0) + 80);
+      renderer.resize(width, div.clientHeight);
+      updateDraggableNotes();
+      const currentCompas = compases[compases.length - 1];
+      document.getElementById("cerrar-compas").disabled = !compas || currentCompas.closed || currentCompas.beats !== (compas ? parseInt(compas.split("/")[0]) : 4);
+    }
+
+    // Select figura
+    document.querySelectorAll(".figura").forEach(f => {
+      f.addEventListener("click", () => {
+        document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+        document.getElementById("papelera").classList.remove("activa");
+        document.getElementById("notas").classList.remove("activa");
+        deleteMode = false;
+        showNoteLabels = false;
+        f.classList.add("activa");
+        figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
+        document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      });
+    });
+
+    // Papelera toggle
+    document.getElementById("papelera").addEventListener("click", () => {
+      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+      document.getElementById("notas").classList.remove("activa");
+      figuraActiva = null;
+      showNoteLabels = false;
+      deleteMode = !deleteMode;
+      document.getElementById("papelera").classList.toggle("activa", deleteMode);
+      updateDraggableNotes();
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+    });
+
+    // Notas toggle
+    document.getElementById("notas").addEventListener("click", () => {
+      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+      document.getElementById("papelera").classList.remove("activa");
+      figuraActiva = null;
+      deleteMode = false;
+      showNoteLabels = !showNoteLabels;
+      document.getElementById("notas").classList.toggle("activa", showNoteLabels);
+      updateDraggableNotes();
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+    });
+
+    // Metronome toggle
+    document.getElementById("metronomo").addEventListener("click", () => {
+      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+      document.getElementById("papelera").classList.remove("activa");
+      document.getElementById("notas").classList.remove("activa");
+      figuraActiva = null;
+      deleteMode = false;
+      showNoteLabels = false;
+      metronomeOn = !metronomeOn;
+      document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      updateDraggableNotes();
+    });
+
+    // Play/Stop
+    document.getElementById("play-stop").addEventListener("click", async () => {
+      await Tone.start();
+      if (isPlaying) {
+        Tone.Transport.cancel();
+        Tone.Transport.stop();
+        if (metronomeLoop) metronomeLoop.stop();
+        document.querySelectorAll(".note-label").forEach(label => label.remove());
+        document.getElementById("play-stop").textContent = "▶️ Play";
+        document.getElementById("metronomo").classList.remove("activa");
+        metronomeOn = false;
+        isPlaying = false;
+      } else {
+        const bpm = document.getElementById("velocidad").value;
+        if (!bpm) {
+          alert("Selecciona una velocidad.");
+          return;
+        }
+        if (!compas) {
+          alert("Selecciona un compás.");
+          return;
+        }
+        Tone.Transport.bpm.value = parseInt(bpm);
+        const synth = new Tone.Synth().toDestination();
+        let time = 0;
+        let globalIndex = 0;
+        const events = [];
+        compases.forEach(compasData => {
+          compasData.notas.forEach(nota => {
+            if (nota.tipo === "nota") {
+              events.push({ time, note: nota.noteName, duration: duracionTiempo[nota.duracion], globalIndex });
+            }
+            time += Tone.Time(duracionTiempo[nota.duracion]).toSeconds();
+            globalIndex += nota.tipo === "nota" ? 1 : 1;
+          });
+        });
+        if (events.length > 0 || metronomeOn) {
+          Tone.Transport.cancel();
+          let metronomeOffset = 0;
+          if (metronomeOn) {
+            const metronomeSynth = new Tone.MembraneSynth().toDestination();
+            const numBeats = compas ? parseInt(compas.split("/")[0]) : 4;
+            const beatDuration = Tone.Time("4n").toSeconds();
+            // Initial empty measure
+            for (let i = 0; i < numBeats; i++) {
+              Tone.Transport.schedule(time => {
+                metronomeSynth.triggerAttackRelease("C2", "8n", time);
+              }, i * beatDuration);
+            }
+            metronomeOffset = numBeats * beatDuration;
+            // Continuous metronome during playback
+            metronomeLoop = new Tone.Loop(time => {
+              metronomeSynth.triggerAttackRelease("C2", "8n", time);
+            }, "4n").start(metronomeOffset);
+          }
+          if (showNoteLabels) {
+            const noteGs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
+            events.forEach(event => {
+              if (noteGs[event.globalIndex]) {
+                const bbox = noteGs[event.globalIndex].getBBox();
+                Tone.Transport.schedule(time => {
+                  document.querySelectorAll(".note-label").forEach(label => label.remove());
+                  const label = document.createElement("div");
+                  label.className = "note-label";
+                  const noteName = noteNameMap[event.note.split("/")[0]] + event.note.split("/")[1];
+                  label.textContent = noteName;
+                  label.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
+                  label.style.top = `${bbox.y + bbox.height + 10}px`;
+                  div.appendChild(label);
+                }, event.time + metronomeOffset);
+                Tone.Transport.schedule(time => {
+                  document.querySelectorAll(".note-label").forEach(label => label.remove());
+                }, event.time + Tone.Time(event.duration).toSeconds() + metronomeOffset);
+              }
+            });
+          }
+          events.forEach(event => {
+            Tone.Transport.schedule(time => {
+              synth.triggerAttackRelease(
+                event.note.split("/")[0].toUpperCase() + event.note.split("/")[1],
+                event.duration,
+                time
+              );
+            }, event.time + metronomeOffset);
+          });
+          Tone.Transport.schedule(time => {
+            document.querySelectorAll(".note-label").forEach(label => label.remove());
+            document.getElementById("play-stop").textContent = "▶️ Play";
+            document.getElementById("metronomo").classList.remove("activa");
+            metronomeOn = false;
+            isPlaying = false;
+            if (metronomeLoop) metronomeLoop.stop();
+            Tone.Transport.stop();
+          }, time + metronomeOffset);
+          Tone.Transport.start();
+          document.getElementById("play-stop").textContent = "⏹️ Stop";
+          isPlaying = true;
+        }
+      }
+    });
+
+    // Click to place note
+    div.addEventListener("click", async e => {
+      if (!figuraActiva || !compas || compases[compases.length - 1].closed || deleteMode) {
+        if (!compas) alert("Selecciona un compás.");
+        else if (compases[compases.length - 1].closed) alert("Compás cerrado. Cierra el compás actual o limpia.");
+        return;
+      }
+      const rect = div.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const noteName = getNoteFromY(y);
+      await addElemento(figuraActiva.tipo, figuraActiva.duracion, noteName);
+    });
+
+    // Get note from Y
+    function getNoteFromY(y) {
+      const stave = compases[compases.length - 1].stave;
+      const lineTop = stave.getYForLine(0);
+      const lineBottom = stave.getYForLine(4);
+      const numSteps = noteMap[clave].length - 1;
+      const step = (lineBottom - lineTop) / numSteps;
+      const idx = Math.round((lineBottom - y) / step);
+      return noteMap[clave][Math.max(0, Math.min(numSteps, idx))];
+    }
+
+    // Add note or rest
+    async function addElemento(tipo, duracion, noteName) {
+      const numBeats = compas ? parseInt(compas.split("/")[0]) : 4;
+      const currentCompas = compases[compases.length - 1];
+      const currentBeats = currentCompas.beats;
+      const newBeats = duracionBeats[duracion];
+      if (currentBeats + newBeats > numBeats) {
+        alert("Compás lleno.");
+        return;
+      }
+      let elemento;
+      if (tipo === "nota") {
+        elemento = new VF.StaveNote({ clef: clave, keys: [noteName], duration: duracion });
+      } else {
+        const restKey = clave === "treble" ? "b/4" : "d/3";
+        elemento = new VF.StaveNote({ clef: clave, keys: [restKey], duration: duracion + "r" });
+      }
+      currentCompas.notas.push({ tipo, duracion, noteName: tipo === "nota" ? noteName : null, vf: elemento });
+      currentCompas.beats += newBeats;
+      redibujarPentagrama();
+      if (tipo === "nota") await play(noteName);
+    }
+
+    // Play note
+    async function play(noteName) {
+      await Tone.start();
+      const synth = new Tone.Synth().toDestination();
+      const toneNote = noteName.split("/")[0].toUpperCase() + noteName.split("/")[1];
+      synth.triggerAttackRelease(toneNote, "8n");
+    }
+
+    // Change note pitch by half step
+    async function changeNotePitch(compasIndex, notaIndex, direction) {
+      const nota = compases[compasIndex].notas[notaIndex];
+      const currentNote = nota.noteName;
+      const noteList = noteMap[clave];
+      const currentIndex = noteList.indexOf(currentNote);
+      const newIndex = direction === "up" ? currentIndex + 1 : currentIndex - 1;
+      if (newIndex >= 0 && newIndex < noteList.length) {
+        nota.noteName = noteList[newIndex];
+        nota.vf = new VF.StaveNote({
+          clef: clave,
+          keys: [nota.noteName],
+          duration: nota.duracion
+        });
+        redibujarPentagrama();
+        await play(nota.noteName);
+      }
+    }
+
+    // Update draggable notes
+    function updateDraggableNotes() {
+      document.querySelectorAll(".nota").forEach(n => n.remove());
+      let globalIndex = 0;
+      compases.forEach((compasData, compasIndex) => {
+        const noteGs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
+        compasData.notas.forEach((nota, notaIndex) => {
+          if (nota.tipo === "silencio") {
+            globalIndex++;
+            return;
+          }
+          if (globalIndex < noteGs.length) {
+            const g = noteGs[globalIndex];
+            const bbox = g.getBBox();
+            const noteDiv = document.createElement("div");
+            noteDiv.className = `nota ${deleteMode ? 'delete-mode' : ''}`;
+            noteDiv.style.left = `${bbox.x}px`;
+            noteDiv.style.top = `${bbox.y}px`;
+            noteDiv.style.width = `${bbox.width}px`;
+            noteDiv.style.height = `${bbox.height}px`;
+            noteDiv.dataset.compasIndex = compasIndex;
+            noteDiv.dataset.notaIndex = notaIndex;
+
+            if (!deleteMode) {
+              const plus = document.createElement("div");
+              plus.textContent = "+";
+              plus.className = "plus";
+              const minus = document.createElement("div");
+              minus.textContent = "–";
+              minus.className = "minus";
+
+              let timeout;
+              function showControls() {
+                clearTimeout(timeout);
+                noteDiv.classList.add("show-controls");
+                timeout = setTimeout(() => {
+                  noteDiv.classList.remove("show-controls");
+                }, 2000);
+              }
+
+              plus.addEventListener("click", e => {
+                e.stopPropagation();
+                showControls();
+                changeNotePitch(compasIndex, notaIndex, "up");
+              });
+
+              minus.addEventListener("click", e => {
+                e.stopPropagation();
+                showControls();
+                changeNotePitch(compasIndex, notaIndex, "down");
+              });
+
+              noteDiv.addEventListener("mouseover", showControls);
+              noteDiv.addEventListener("click", e => {
+                if (!deleteMode) {
+                  e.stopPropagation();
+                  showControls();
+                }
+              });
+
+              noteDiv.appendChild(plus);
+              noteDiv.appendChild(minus);
+            }
+
+            div.appendChild(noteDiv);
+            if (deleteMode) {
+              noteDiv.addEventListener("click", () => {
+                compases[compasIndex].notas.splice(notaIndex, 1);
+                compases[compasIndex].beats -= duracionBeats[nota.duracion];
+                redibujarPentagrama();
+              });
+            } else {
+              interact(noteDiv).draggable({
+                listeners: {
+                  start() {
+                    noteDiv.setAttribute("data-y", 0);
+                  },
+                  move(event) {
+                    const target = event.target;
+                    const yOffset = parseFloat(target.getAttribute("data-y") || 0) + event.dy;
+                    target.style.transform = `translate(0px, ${yOffset}px)`;
+                    target.setAttribute("data-y", yOffset);
+                  },
+                  end(event) {
+                    const target = event.target;
+                    const rect = div.getBoundingClientRect();
+                    const y = event.clientY - rect.top;
+                    const newNoteName = getNoteFromY(y);
+                    const compasIndex = parseInt(target.dataset.compasIndex);
+                    const notaIndex = parseInt(target.dataset.notaIndex);
+                    compases[compasIndex].notas[notaIndex].noteName = newNoteName;
+                    compases[compasIndex].notas[notaIndex].vf = new VF.StaveNote({
+                      clef: clave,
+                      keys: [newNoteName],
+                      duration: compases[compasIndex].notas[notaIndex].duracion
+                    });
+                    target.remove();
+                    redibujarPentagrama();
+                    play(newNoteName);
+                  }
+                }
+              });
+            }
+            globalIndex++;
+          }
+        });
+      });
+    }
+
+    // Close measure
+    document.getElementById("cerrar-compas").addEventListener("click", () => {
+      const currentCompas = compases[compases.length - 1];
+      if (currentCompas.beats === (compas ? parseInt(compas.split("/")[0]) : 4) && !currentCompas.closed) {
+        currentCompas.closed = true;
+        compases.push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+        redibujarPentagrama();
+      }
+    });
+
+    // Delete last
+    document.getElementById("borrar-ultimo").addEventListener("click", () => {
+      const currentCompas = compases[compases.length - 1];
+      if (currentCompas.notas.length > 0) {
+        const lastNota = currentCompas.notas.pop();
+        currentCompas.beats -= duracionBeats[lastNota.duracion];
+        currentCompas.closed = false;
+        redibujarPentagrama();
+      } else if (compases.length > 1) {
+        compases.pop();
+        compases[compases.length - 1].closed = false;
+        redibujarPentagrama();
+      }
+    });
+
+    // Clear all
+    document.getElementById("limpiar").addEventListener("click", () => {
+      compases = compas ? [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }] : [];
+      document.getElementById("cerrar-compas").disabled = true;
+      document.getElementById("papelera").classList.remove("activa");
+      document.getElementById("notas").classList.remove("activa");
+      document.getElementById("play-stop").textContent = "▶️ Play";
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      document.getElementById("metronomo").classList.remove("activa");
+      deleteMode = false;
+      showNoteLabels = false;
+      isPlaying = false;
+      metronomeOn = false;
+      if (metronomeLoop) metronomeLoop.stop();
+      Tone.Transport.cancel();
+      Tone.Transport.stop();
+      width = 800;
+      renderer.resize(width, div.clientHeight);
+      redibujarPentagrama();
+    });
+
+    init();
+  </script>
+</body>
+</html>
