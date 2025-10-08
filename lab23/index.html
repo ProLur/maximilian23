@@ -205,15 +205,6 @@
       text-align: center;
       z-index: 150;
     }
-    .playback-marker {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #ff0000;
-      border-radius: 50%;
-      z-index: 200;
-      display: none;
-    }
     @media (max-width: 600px) {
       header img {
         height: 60px;
@@ -308,9 +299,6 @@
       <button id="limpiar">🧹 Limpiar</button>
       <button id="papelera">🗑️ Papelera</button>
       <button id="notas">🎵 Notas</button>
-      <button id="marcador">🔴 Marcador</button>
-      <button id="guardar">💾 Guardar</button>
-      <button id="abrir">📂 Abrir</button>
       <button id="play-stop" disabled>▶️ Play</button>
       <button id="metronomo">⏱️ Metrónomo</button>
     </div>
@@ -322,8 +310,6 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     let width = 800;
     const minStaveWidth = 250;
-    const maxStavePerLine = 4; // Maximum staves per line
-    const staveHeight = 200; // Height of each stave
     renderer.resize(width, div.clientHeight);
     const context = renderer.getContext();
 
@@ -333,7 +319,6 @@
     let figuraActiva = null;
     let deleteMode = false;
     let showNoteLabels = false;
-    let showPlaybackMarker = true; // Default to true for marker visibility
     let isPlaying = false;
     let metronomeOn = false;
     let metronomeLoop = null;
@@ -354,34 +339,15 @@
     const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
     const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
 
-    // Initialize playback marker
-    const playbackMarker = document.createElement("div");
-    playbackMarker.className = "playback-marker";
-    div.appendChild(playbackMarker);
-
     // Initialize
     function init() {
       window.addEventListener('resize', () => {
         if (compases.length > 0) {
-          width = Math.max(div.clientWidth || 800, Math.max(...compases.map((_, i) => calculateLineWidth(i))));
-          renderer.resize(width, calculateTotalHeight());
+          width = Math.max(div.clientWidth || 800, compases.reduce((sum, c) => sum + c.staveWidth, 0) + 80);
+          renderer.resize(width, div.clientHeight);
           redibujarPentagrama();
         }
       });
-    }
-
-    // Calculate width for a line
-    function calculateLineWidth(startIndex) {
-      let totalWidth = 0;
-      for (let i = startIndex; i < startIndex + maxStavePerLine && i < compases.length; i++) {
-        totalWidth += compases[i].staveWidth;
-      }
-      return totalWidth + 80;
-    }
-
-    // Calculate total height for all staves
-    function calculateTotalHeight() {
-      return Math.ceil(compases.length / maxStavePerLine) * staveHeight;
     }
 
     // Change clef
@@ -407,73 +373,10 @@
       document.getElementById("play-stop").disabled = !e.target.value;
     });
 
-    // Toggle playback marker
-    document.getElementById("marcador").addEventListener("click", () => {
-      showPlaybackMarker = !showPlaybackMarker;
-      document.getElementById("marcador").classList.toggle("activa", showPlaybackMarker);
-      playbackMarker.style.display = showPlaybackMarker && isPlaying ? "block" : "none";
-    });
-
-    // Save score
-    document.getElementById("guardar").addEventListener("click", () => {
-      const scoreData = {
-        clave,
-        compas,
-        compases,
-        velocidad: document.getElementById("velocidad").value
-      };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(scoreData));
-      const downloadAnchor = document.createElement("a");
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", "partitura.json");
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    });
-
-    // Open score
-    document.getElementById("abrir").addEventListener("click", () => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".json";
-      input.onchange = e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = event => {
-          try {
-            const scoreData = JSON.parse(event.target.result);
-            clave = scoreData.clave;
-            compas = scoreData.compas;
-            compases = scoreData.compases.map(c => ({
-              ...c,
-              notas: c.notas.map(n => ({
-                ...n,
-                vf: new VF.StaveNote({
-                  clef: clave,
-                  keys: [n.noteName || (clave === "treble" ? "b/4" : "d/3")],
-                  duration: n.duracion + (n.tipo === "silencio" ? "r" : "")
-                })
-              }))
-            }));
-            document.getElementById("clave").value = clave;
-            document.getElementById("compas").value = compas;
-            document.getElementById("velocidad").value = scoreData.velocidad;
-            document.getElementById("play-stop").disabled = !scoreData.velocidad;
-            redibujarPentagrama();
-          } catch (err) {
-            alert("Error al cargar la partitura.");
-          }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    });
-
     function resetControles() {
       document.getElementById("cerrar-compas").disabled = true;
       document.getElementById("papelera").classList.remove("activa");
       document.getElementById("notas").classList.remove("activa");
-      document.getElementById("marcador").classList.toggle("activa", showPlaybackMarker);
       document.getElementById("play-stop").textContent = "▶️ Play";
       document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
       document.getElementById("metronomo").classList.remove("activa");
@@ -484,27 +387,18 @@
       if (metronomeLoop) metronomeLoop.stop();
       Tone.Transport.cancel();
       Tone.Transport.stop();
-      playbackMarker.style.display = "none";
     }
 
     // Redraw staff
     function redibujarPentagrama() {
       context.clear();
       document.querySelectorAll(".note-label").forEach(label => label.remove());
-      playbackMarker.style.display = "none";
       if (!compas) {
         compases = [];
         return;
       }
       let xOffset = 40;
-      let yOffset = 80;
-      let staveCount = 0;
       compases.forEach((compasData, index) => {
-        if (staveCount >= maxStavePerLine) {
-          xOffset = 40;
-          yOffset += staveHeight;
-          staveCount = 0;
-        }
         const voice = new VF.Voice({
           num_beats: compas ? parseInt(compas.split("/")[0]) : 4,
           beat_value: compas ? parseInt(compas.split("/")[1]) : 4
@@ -523,12 +417,11 @@
         const extraWidth = eighthNoteCount * 30 + otherNoteCount * 15;
         const staveWidth = Math.max(minStaveWidth, (compasData.notas.length > 0 ? formatter.preCalculateMinTotalWidth([voice]) + 80 + extraWidth : minStaveWidth));
         compasData.staveWidth = staveWidth;
-        const stave = new VF.Stave(xOffset, yOffset, staveWidth, { spacing_between_lines_px: 18 });
-        if (index === 0 || staveCount === 0) stave.addClef(clave).addTimeSignature(compas);
+        const stave = new VF.Stave(xOffset, 80, staveWidth, { spacing_between_lines_px: 18 });
+        if (index === 0) stave.addClef(clave).addTimeSignature(compas);
         if (compasData.closed) stave.addModifier(new VF.Barline().setType(VF.Barline.type.SINGLE));
         stave.setContext(context).draw();
         compasData.stave = stave;
-        compasData.yOffset = yOffset; // Store yOffset for playback marker
         if (compasData.notas.length > 0) {
           try {
             formatter.format([voice], staveWidth - 80);
@@ -538,10 +431,9 @@
           }
         }
         xOffset += staveWidth;
-        staveCount++;
       });
-      width = Math.max(div.clientWidth || 800, Math.max(...Array(Math.ceil(compases.length / maxStavePerLine)).fill().map((_, i) => calculateLineWidth(i * maxStavePerLine))));
-      renderer.resize(width, calculateTotalHeight());
+      width = Math.max(div.clientWidth || 800, compases.reduce((sum, c) => sum + c.staveWidth, 0) + 80);
+      renderer.resize(width, div.clientHeight);
       updateDraggableNotes();
       const currentCompas = compases[compases.length - 1];
       document.getElementById("cerrar-compas").disabled = !compas || currentCompas.closed || currentCompas.beats !== (compas ? parseInt(compas.split("/")[0]) : 4);
@@ -607,7 +499,6 @@
         Tone.Transport.stop();
         if (metronomeLoop) metronomeLoop.stop();
         document.querySelectorAll(".note-label").forEach(label => label.remove());
-        playbackMarker.style.display = "none";
         document.getElementById("play-stop").textContent = "▶️ Play";
         document.getElementById("metronomo").classList.remove("activa");
         metronomeOn = false;
@@ -627,10 +518,10 @@
         let time = 0;
         let globalIndex = 0;
         const events = [];
-        compases.forEach((compasData, compasIndex) => {
+        compases.forEach(compasData => {
           compasData.notas.forEach(nota => {
             if (nota.tipo === "nota") {
-              events.push({ time, note: nota.noteName, duration: duracionTiempo[nota.duracion], globalIndex, compasIndex });
+              events.push({ time, note: nota.noteName, duration: duracionTiempo[nota.duracion], globalIndex });
             }
             time += Tone.Time(duracionTiempo[nota.duracion]).toSeconds();
             globalIndex += nota.tipo === "nota" ? 1 : 1;
@@ -643,44 +534,36 @@
             const metronomeSynth = new Tone.MembraneSynth().toDestination();
             const numBeats = compas ? parseInt(compas.split("/")[0]) : 4;
             const beatDuration = Tone.Time("4n").toSeconds();
+            // Initial empty measure
             for (let i = 0; i < numBeats; i++) {
               Tone.Transport.schedule(time => {
                 metronomeSynth.triggerAttackRelease("C2", "8n", time);
               }, i * beatDuration);
             }
             metronomeOffset = numBeats * beatDuration;
+            // Continuous metronome during playback
             metronomeLoop = new Tone.Loop(time => {
               metronomeSynth.triggerAttackRelease("C2", "8n", time);
             }, "4n").start(metronomeOffset);
           }
-          if (showNoteLabels || showPlaybackMarker) {
+          if (showNoteLabels) {
             const noteGs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
             events.forEach(event => {
               if (noteGs[event.globalIndex]) {
                 const bbox = noteGs[event.globalIndex].getBBox();
-                const yOffset = compases[event.compasIndex].yOffset || 80;
-                if (showNoteLabels) {
-                  Tone.Transport.schedule(time => {
-                    document.querySelectorAll(".note-label").forEach(label => label.remove());
-                    const label = document.createElement("div");
-                    label.className = "note-label";
-                    const noteName = noteNameMap[event.note.split("/")[0]] + event.note.split("/")[1];
-                    label.textContent = noteName;
-                    label.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
-                    label.style.top = `${yOffset + bbox.y + bbox.height + 10}px`;
-                    div.appendChild(label);
-                  }, event.time + metronomeOffset);
-                  Tone.Transport.schedule(time => {
-                    document.querySelectorAll(".note-label").forEach(label => label.remove());
-                  }, event.time + Tone.Time(event.duration).toSeconds() + metronomeOffset);
-                }
-                if (showPlaybackMarker) {
-                  Tone.Transport.schedule(time => {
-                    playbackMarker.style.display = "block";
-                    playbackMarker.style.left = `${bbox.x + bbox.width / 2 - 5}px`;
-                    playbackMarker.style.top = `${yOffset + bbox.y - 15}px`;
-                  }, event.time + metronomeOffset);
-                }
+                Tone.Transport.schedule(time => {
+                  document.querySelectorAll(".note-label").forEach(label => label.remove());
+                  const label = document.createElement("div");
+                  label.className = "note-label";
+                  const noteName = noteNameMap[event.note.split("/")[0]] + event.note.split("/")[1];
+                  label.textContent = noteName;
+                  label.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
+                  label.style.top = `${bbox.y + bbox.height + 10}px`;
+                  div.appendChild(label);
+                }, event.time + metronomeOffset);
+                Tone.Transport.schedule(time => {
+                  document.querySelectorAll(".note-label").forEach(label => label.remove());
+                }, event.time + Tone.Time(event.duration).toSeconds() + metronomeOffset);
               }
             });
           }
@@ -695,7 +578,6 @@
           });
           Tone.Transport.schedule(time => {
             document.querySelectorAll(".note-label").forEach(label => label.remove());
-            playbackMarker.style.display = "none";
             document.getElementById("play-stop").textContent = "▶️ Play";
             document.getElementById("metronomo").classList.remove("activa");
             metronomeOn = false;
@@ -798,11 +680,10 @@
           if (globalIndex < noteGs.length) {
             const g = noteGs[globalIndex];
             const bbox = g.getBBox();
-            const yOffset = compasData.yOffset || 80;
             const noteDiv = document.createElement("div");
             noteDiv.className = `nota ${deleteMode ? 'delete-mode' : ''}`;
             noteDiv.style.left = `${bbox.x}px`;
-            noteDiv.style.top = `${yOffset + bbox.y}px`;
+            noteDiv.style.top = `${bbox.y}px`;
             noteDiv.style.width = `${bbox.width}px`;
             noteDiv.style.height = `${bbox.height}px`;
             noteDiv.dataset.compasIndex = compasIndex;
@@ -935,7 +816,6 @@
       if (metronomeLoop) metronomeLoop.stop();
       Tone.Transport.cancel();
       Tone.Transport.stop();
-      playbackMarker.style.display = "none";
       width = 800;
       renderer.resize(width, div.clientHeight);
       redibujarPentagrama();
