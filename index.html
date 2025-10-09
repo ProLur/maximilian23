@@ -11,7 +11,7 @@
       color: #e6edf3;
       margin: 0;
       padding: 0;
-      height: 100dvh;   /* altura dinámica móvil */
+      height: 100dvh;   /* altura din&aacute;mica m&oacute;vil */
       display: flex;
       flex-direction: column;
       position: relative;
@@ -126,11 +126,6 @@
       outline: none;
     }
 
-    input:disabled {
-      background: #2a2f38;
-      cursor: not-allowed;
-    }
-
     button {
       background: #00ffcc;
       border: none;
@@ -143,7 +138,7 @@
       flex-shrink: 0;
     }
 
-    /* Animación typing */
+    /* Animaci&oacute;n typing */
     .typing {
       display: inline-block;
     }
@@ -216,7 +211,7 @@
   </div>
 
   <script>
-    // 👇 ahora apunta a Render
+    // &#128071; ahora apunta a Render
     const API_URL = "https://max23.onrender.com/chat";
 
     function linkify(text) {
@@ -255,7 +250,6 @@
       chat.scrollTop = chat.scrollHeight;
 
       input.value = "";
-      input.disabled = true; // Disable input while processing
       input.focus();
 
       const botBubble = document.createElement("div");
@@ -275,14 +269,9 @@
         let safeReply = linkify(data.reply);
 
         botBubble.innerHTML = "";
-        typeWriterEffect(botBubble, safeReply, 30, () => {
-          input.disabled = false; // Re-enable input after typing is complete
-          input.focus();
-        });
+        typeWriterEffect(botBubble, safeReply, 30);
       } catch (err) {
-        botBubble.textContent = "⚠️ Error de conexión.";
-        input.disabled = false; // Re-enable input on error
-        input.focus();
+        botBubble.textContent = "&#9888;&#65039; Error de conexi&oacute;n.";
       }
     }
 
@@ -293,7 +282,7 @@
       chat.appendChild(botBubble);
       typeWriterEffect(
         botBubble,
-        "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
+        "&#129302; Hola, soy Maximilian 23. Estoy aqu&iacute; para ayudarte con la informaci&oacute;n del colegio. &iquest;Qu&eacute; quieres saber?"
       );
       chat.scrollTop = chat.scrollHeight;
     });
