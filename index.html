@@ -57,6 +57,7 @@
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
+      cursor: pointer; /* Add cursor to indicate clickability */
     }
 
     .chat-panel {
@@ -209,7 +210,7 @@
 
   <div class="container">
     <div class="left-panel">
-      <img src="max.png" alt="Maximilian grande">
+      <img id="maxImage" src="max.png" alt="Maximilian grande">
     </div>
 
     <div class="chat-panel">
@@ -307,6 +308,22 @@
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
       );
       chat.scrollTop = chat.scrollHeight;
+    });
+
+    // New code for GIF playback on click
+    const maxImage = document.getElementById("maxImage");
+    const staticSrc = "max.png";
+    const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/1.gif";
+
+    maxImage.addEventListener("click", () => {
+      maxImage.src = gifSrc;
+      // Reset to static image after GIF plays once
+      maxImage.addEventListener("load", () => {
+        // Use a timeout to approximate GIF duration (adjust as needed)
+        setTimeout(() => {
+          maxImage.src = staticSrc;
+        }, 3000); // Adjust 3000ms to match your GIF's duration
+      }, { once: true }); // Ensure the load event only triggers once
     });
   </script>
 </body>
