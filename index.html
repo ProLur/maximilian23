@@ -11,7 +11,7 @@
       color: #e6edf3;
       margin: 0;
       padding: 0;
-      height: 100dvh;   /* altura dinámica móvil */
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -124,11 +124,15 @@
       border-radius: 5px;
       font-size: 16px;
       outline: none;
+      background: #fff;
+      color: #000;
     }
 
     input:disabled {
       background: #2a2f38;
+      color: #666;
       cursor: not-allowed;
+      opacity: 0.6;
     }
 
     button {
@@ -143,7 +147,12 @@
       flex-shrink: 0;
     }
 
-    /* Animación typing */
+    button:disabled {
+      background: #2a2f38;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .typing {
       display: inline-block;
     }
@@ -199,24 +208,21 @@
   </header>
 
   <div class="container">
-    <!-- Panel lateral -->
     <div class="left-panel">
       <img src="max.png" alt="Maximilian grande">
     </div>
 
-    <!-- Panel de chat -->
     <div class="chat-panel">
       <div id="chat"></div>
       <footer>
         <input type="text" id="message" placeholder="Escribe tu mensaje..."
-          onkeydown="if(event.key==='Enter'){sendMessage()}">
-        <button onclick="sendMessage()">Enviar</button>
+          onkeydown="if(event.key==='Enter' && !this.disabled){sendMessage()}">
+        <button onclick="sendMessage()" id="sendButton">Enviar</button>
       </footer>
     </div>
   </div>
 
   <script>
-    // 👇 ahora apunta a Render
     const API_URL = "https://max23.onrender.com/chat";
 
     function linkify(text) {
@@ -244,9 +250,14 @@
 
     async function sendMessage() {
       const input = document.getElementById("message");
+      const sendButton = document.getElementById("sendButton");
       const chat = document.getElementById("chat");
       const userMessage = input.value.trim();
       if (!userMessage) return;
+
+      // Disable input and button
+      input.disabled = true;
+      sendButton.disabled = true;
 
       const userBubble = document.createElement("div");
       userBubble.className = "user";
@@ -255,8 +266,6 @@
       chat.scrollTop = chat.scrollHeight;
 
       input.value = "";
-      input.disabled = true; // Disable input while processing
-      input.focus();
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
@@ -276,12 +285,14 @@
 
         botBubble.innerHTML = "";
         typeWriterEffect(botBubble, safeReply, 30, () => {
-          input.disabled = false; // Re-enable input after typing is complete
+          input.disabled = false;
+          sendButton.disabled = false;
           input.focus();
         });
       } catch (err) {
         botBubble.textContent = "⚠️ Error de conexión.";
-        input.disabled = false; // Re-enable input on error
+        input.disabled = false;
+        sendButton.disabled = false;
         input.focus();
       }
     }
