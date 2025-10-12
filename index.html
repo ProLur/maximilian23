@@ -47,7 +47,7 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      background: rgba(13,17,23,0.9);
+      background: #0d1117; /* Fondo de respaldo */
     }
 
     .left-panel video, .left-panel img {
@@ -57,11 +57,11 @@
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
       cursor: pointer;
-      background-color: transparent;
+      background-color: #0d1117; /* Fondo de respaldo para video */
       transition: opacity 0.3s ease;
     }
 
-    #maxVideo.fade-out {
+    .fade-out {
       opacity: 0;
     }
 
@@ -103,7 +103,6 @@
       border: 1px solid #00ffcc;
     }
 
-    /* 🔹 Enlaces más claros y legibles */
     .bot a {
       color: #7dfcff;
       font-weight: bold;
@@ -189,7 +188,7 @@
 
   <div class="container">
     <div class="left-panel">
-      <video id="maxVideo" src="waiting.mp4" autoplay muted></video>
+      <video id="maxVideo" src="waiting.mp4" autoplay muted preload="auto"></video>
       <img id="maxImage" src="max.png" alt="Maximilian grande" style="display:none">
     </div>
 
@@ -208,25 +207,33 @@
     const maxVideo = document.getElementById("maxVideo");
     const maxImage = document.getElementById("maxImage");
 
-    // 🔹 Transición de vídeo suave
+    // Transición de vídeo suave
     function smoothVideoTransition(newSrc) {
       maxVideo.classList.add("fade-out");
       setTimeout(() => {
-        maxVideo.pause();
         maxVideo.src = newSrc;
         maxVideo.load();
-        maxVideo.play().catch(() => {});
-        maxVideo.classList.remove("fade-out");
+        maxVideo.oncanplay = () => {
+          maxVideo.play().catch((err) => {
+            console.error("Error al reproducir el video:", err);
+          });
+          maxVideo.classList.remove("fade-out");
+          maxVideo.oncanplay = null; // Limpiar el evento
+        };
       }, 300);
     }
 
-    // ▶ Al terminar waiting.mp4 → mostrar imagen estática
+    // Al terminar waiting.mp4 → mostrar imagen estática
     maxVideo.addEventListener("ended", () => {
-      maxVideo.style.display = "none";
-      maxImage.style.display = "block";
+      maxVideo.classList.add("fade-out");
+      setTimeout(() => {
+        maxVideo.style.display = "none";
+        maxImage.style.display = "block";
+        maxVideo.classList.remove("fade-out");
+      }, 300);
     });
 
-    // ▶ Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
+    // Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
     maxImage.addEventListener("click", () => {
       const randomIndex = Math.floor(Math.random() * 3) + 1;
       const randomVideo = `${randomIndex}.mp4`;
@@ -235,9 +242,13 @@
       maxVideo.style.display = "block";
 
       maxVideo.onended = () => {
-        maxVideo.style.display = "none";
-        maxImage.style.display = "block";
-        maxVideo.onended = null;
+        maxVideo.classList.add("fade-out");
+        setTimeout(() => {
+          maxVideo.style.display = "none";
+          maxImage.style.display = "block";
+          maxVideo.classList.remove("fade-out");
+          maxVideo.onended = null;
+        }, 300);
       };
     });
 
@@ -276,7 +287,7 @@
       chat.appendChild(userBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      input.value = ""; // 🟩 Limpia el campo al instante
+      input.value = ""; // Limpia el campo al instante
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
@@ -284,7 +295,7 @@
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      // ▶ Mostrar thinking.mp4 mientras “piensa”
+      // Mostrar thinking.mp4 mientras “piensa”
       smoothVideoTransition("thinking.mp4");
       maxImage.style.display = "none";
       maxVideo.style.display = "block";
@@ -298,30 +309,38 @@
         const data = await response.json();
         const safeReply = linkify(data.reply);
 
-        // ▶ Volver a max.png al empezar la respuesta
-        maxVideo.pause();
-        maxVideo.removeAttribute("src");
-        maxVideo.load();
-        maxVideo.style.display = "none";
-        maxImage.style.display = "block";
+        // Volver a max.png al empezar la respuesta
+        maxVideo.classList.add("fade-out");
+        setTimeout(() => {
+          maxVideo.pause();
+          maxVideo.removeAttribute("src");
+          maxVideo.load();
+          maxVideo.style.display = "none";
+          maxImage.style.display = "block";
+          maxVideo.classList.remove("fade-out");
 
-        botBubble.innerHTML = "";
-        typeWriterEffect(botBubble, safeReply, 30, () => {
+          botBubble.innerHTML = "";
+          typeWriterEffect(botBubble, safeReply, 30, () => {
+            input.disabled = false;
+            sendButton.disabled = false;
+            input.focus();
+          });
+        }, 300);
+      } catch (err) {
+        maxVideo.classList.add("fade-out");
+        setTimeout(() => {
+          maxVideo.pause();
+          maxVideo.removeAttribute("src");
+          maxVideo.load();
+          maxVideo.style.display = "none";
+          maxImage.style.display = "block";
+          maxVideo.classList.remove("fade-out");
+
+          botBubble.textContent = "⚠️ Error de conexión.";
           input.disabled = false;
           sendButton.disabled = false;
-          input.focus(); // 🟩 Reactiva foco automáticamente
-        });
-      } catch (err) {
-        maxVideo.pause();
-        maxVideo.removeAttribute("src");
-        maxVideo.load();
-        maxVideo.style.display = "none";
-        maxImage.style.display = "block";
-
-        botBubble.textContent = "⚠️ Error de conexión.";
-        input.disabled = false;
-        sendButton.disabled = false;
-        input.focus();
+          input.focus();
+        }, 300);
       }
     }
 
