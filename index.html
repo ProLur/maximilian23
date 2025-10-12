@@ -242,7 +242,8 @@
       userBubble.textContent = userMessage;
       chat.appendChild(userBubble);
       chat.scrollTop = chat.scrollHeight;
-      input.value = ""; // ← Limpia el campo inmediatamente
+
+      input.value = ""; // 🟩 Limpia el campo al instante
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
@@ -280,7 +281,7 @@
         typeWriterEffect(botBubble, safeReply, 30, () => {
           input.disabled = false;
           sendButton.disabled = false;
-          input.focus();
+          input.focus(); // 🟩 Reactiva foco automáticamente
         });
       } catch (err) {
         maxVideo.pause();
