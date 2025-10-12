@@ -51,12 +51,13 @@
       background: rgba(13,17,23,0.9);
     }
 
-    .left-panel video {
+    .left-panel video, .left-panel img {
       max-width: 200px;
       height: auto;
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
+      cursor: pointer;
     }
 
     .chat-panel {
@@ -97,16 +98,6 @@
       border: 1px solid #00ffcc;
     }
 
-    .bot a {
-      color: #00ffcc;
-      font-weight: bold;
-      text-decoration: none;
-    }
-
-    .bot a:hover {
-      text-decoration: underline;
-    }
-
     footer {
       display: flex;
       padding: 8px;
@@ -118,7 +109,6 @@
 
     input {
       flex: 1;
-      min-width: 0;
       padding: 10px;
       border: none;
       border-radius: 5px;
@@ -126,13 +116,6 @@
       outline: none;
       background: #fff;
       color: #000;
-    }
-
-    input:disabled {
-      background: #2a2f38;
-      color: #666;
-      cursor: not-allowed;
-      opacity: 0.6;
     }
 
     button {
@@ -144,18 +127,8 @@
       cursor: pointer;
       font-weight: bold;
       font-size: 14px;
-      flex-shrink: 0;
     }
 
-    button:disabled {
-      background: #2a2f38;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    .typing {
-      display: inline-block;
-    }
     .typing span {
       display: inline-block;
       width: 6px;
@@ -165,25 +138,11 @@
       border-radius: 50%;
       animation: blink 1.4s infinite both;
     }
-    .typing span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    .typing span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
+
     @keyframes blink {
       0% { opacity: .2; }
       20% { opacity: 1; }
       100% { opacity: .2; }
-    }
-
-    @media (max-width: 480px) {
-      .user, .bot {
-        font-size: 15px;
-      }
-      header img {
-        height: 32px;
-      }
     }
 
     @media (min-width: 768px) {
@@ -209,7 +168,8 @@
 
   <div class="container">
     <div class="left-panel">
-      <video id="maxVideo" src="waiting.mp4" autoplay muted loop></video>
+      <video id="maxVideo" src="waiting.mp4" autoplay muted></video>
+      <img id="maxImage" src="max.png" alt="Maximilian grande" style="display:none">
     </div>
 
     <div class="chat-panel">
@@ -225,11 +185,34 @@
   <script>
     const API_URL = "https://max23.onrender.com/chat";
 
+    const maxVideo = document.getElementById("maxVideo");
+    const maxImage = document.getElementById("maxImage");
+
+    // 🔹 Al terminar waiting.mp4 → mostrar imagen estática
+    maxVideo.addEventListener("ended", () => {
+      maxVideo.style.display = "none";
+      maxImage.style.display = "block";
+    });
+
+    // 🔹 Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
+    maxImage.addEventListener("click", () => {
+      const randomIndex = Math.floor(Math.random() * 3) + 1;
+      const randomVideo = `${randomIndex}.mp4`;
+      maxVideo.src = randomVideo;
+      maxImage.style.display = "none";
+      maxVideo.style.display = "block";
+      maxVideo.play();
+
+      maxVideo.onended = () => {
+        maxVideo.style.display = "none";
+        maxImage.style.display = "block";
+        maxVideo.onended = null; // Limpia evento
+      };
+    });
+
     function linkify(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return text.replace(urlRegex, function(url) {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-      });
+      return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
     }
 
     function typeWriterEffect(element, text, delay = 30, callback = null) {
@@ -241,9 +224,7 @@
           element.parentElement.scrollTop = element.parentElement.scrollHeight;
           i++;
           setTimeout(typing, delay);
-        } else {
-          if (callback) callback();
-        }
+        } else if (callback) callback();
       }
       typing();
     }
@@ -252,7 +233,6 @@
       const input = document.getElementById("message");
       const sendButton = document.getElementById("sendButton");
       const chat = document.getElementById("chat");
-      const maxVideo = document.getElementById("maxVideo");
       const userMessage = input.value.trim();
       if (!userMessage) return;
 
@@ -263,8 +243,6 @@
       userBubble.className = "user";
       userBubble.textContent = userMessage;
       chat.appendChild(userBubble);
-      chat.scrollTop = chat.scrollHeight;
-      input.value = "";
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
@@ -272,12 +250,10 @@
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      // 🎬 Elegir aleatoriamente 1.mp4, 2.mp4 o 3.mp4
-      const randomIndex = Math.floor(Math.random() * 3) + 1;
-      const randomVideo = `${randomIndex}.mp4`;
-
-      // Cambiar el vídeo al aleatorio y reproducirlo
-      maxVideo.src = randomVideo;
+      // 🔹 Mostrar video thinking.mp4 mientras piensa
+      maxVideo.src = "thinking.mp4";
+      maxImage.style.display = "none";
+      maxVideo.style.display = "block";
       maxVideo.play();
 
       try {
@@ -287,12 +263,12 @@
           body: JSON.stringify({ message: userMessage })
         });
         const data = await response.json();
-
         const safeReply = linkify(data.reply);
 
-        // 🎬 Volver al vídeo normal (waiting.mp4)
-        maxVideo.src = "waiting.mp4";
-        maxVideo.play();
+        // 🔹 Cuando llega respuesta → volver a imagen normal
+        maxVideo.pause();
+        maxVideo.style.display = "none";
+        maxImage.style.display = "block";
 
         botBubble.innerHTML = "";
         typeWriterEffect(botBubble, safeReply, 30, () => {
@@ -301,8 +277,9 @@
           input.focus();
         });
       } catch (err) {
-        maxVideo.src = "waiting.mp4";
-        maxVideo.play();
+        maxVideo.pause();
+        maxVideo.style.display = "none";
+        maxImage.style.display = "block";
         botBubble.textContent = "⚠️ Error de conexión.";
         input.disabled = false;
         sendButton.disabled = false;
@@ -319,7 +296,6 @@
         botBubble,
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
       );
-      chat.scrollTop = chat.scrollHeight;
     });
   </script>
 </body>
