@@ -47,22 +47,30 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      background: #0d1117; /* Fondo de respaldo */
+      background: rgba(13,17,23,0.9);
+      position: relative;
     }
 
-    .left-panel video, .left-panel img {
+    video, img {
       max-width: 200px;
       height: auto;
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
+      position: absolute;
+      transition: opacity 0.4s ease;
+      background: transparent;
       cursor: pointer;
-      background-color: #0d1117; /* Fondo de respaldo para video */
-      transition: opacity 0.3s ease;
     }
 
-    .fade-out {
+    video.hidden, img.hidden {
       opacity: 0;
+      pointer-events: none;
+    }
+
+    video.visible, img.visible {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .chat-panel {
@@ -70,7 +78,6 @@
       display: flex;
       flex-direction: column;
       background: rgba(13, 17, 23, 0.9);
-      height: 100%;
     }
 
     #chat {
@@ -188,8 +195,9 @@
 
   <div class="container">
     <div class="left-panel">
-      <video id="maxVideo" src="waiting.mp4" autoplay muted preload="auto"></video>
-      <img id="maxImage" src="max.png" alt="Maximilian grande" style="display:none">
+      <video id="video1" class="visible" src="waiting.mp4" autoplay muted></video>
+      <video id="video2" class="hidden" muted></video>
+      <img id="maxImage" class="hidden" src="max.png" alt="Maximilian grande">
     </div>
 
     <div class="chat-panel">
@@ -204,51 +212,41 @@
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
-    const maxVideo = document.getElementById("maxVideo");
-    const maxImage = document.getElementById("maxImage");
+    const v1 = document.getElementById("video1");
+    const v2 = document.getElementById("video2");
+    const img = document.getElementById("maxImage");
 
-    // Transición de vídeo suave
-    function smoothVideoTransition(newSrc) {
-      maxVideo.classList.add("fade-out");
+    // 🔹 Controla qué vídeo está activo (para alternar)
+    let activeVideo = v1;
+
+    function playVideoSmooth(newSrc) {
+      const nextVideo = activeVideo === v1 ? v2 : v1;
+      nextVideo.src = newSrc;
+      nextVideo.load();
+      nextVideo.play().catch(()=>{});
+      nextVideo.classList.remove("hidden");
+      activeVideo.classList.add("hidden");
       setTimeout(() => {
-        maxVideo.src = newSrc;
-        maxVideo.load();
-        maxVideo.oncanplay = () => {
-          maxVideo.play().catch((err) => {
-            console.error("Error al reproducir el video:", err);
-          });
-          maxVideo.classList.remove("fade-out");
-          maxVideo.oncanplay = null; // Limpiar el evento
-        };
-      }, 300);
+        activeVideo.pause();
+        activeVideo = nextVideo;
+      }, 400);
     }
 
-    // Al terminar waiting.mp4 → mostrar imagen estática
-    maxVideo.addEventListener("ended", () => {
-      maxVideo.classList.add("fade-out");
-      setTimeout(() => {
-        maxVideo.style.display = "none";
-        maxImage.style.display = "block";
-        maxVideo.classList.remove("fade-out");
-      }, 300);
+    // ▶ Al terminar waiting.mp4 → mostrar imagen
+    v1.addEventListener("ended", () => {
+      v1.classList.add("hidden");
+      img.classList.remove("hidden");
     });
 
-    // Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
-    maxImage.addEventListener("click", () => {
-      const randomIndex = Math.floor(Math.random() * 3) + 1;
-      const randomVideo = `${randomIndex}.mp4`;
-      smoothVideoTransition(randomVideo);
-      maxImage.style.display = "none";
-      maxVideo.style.display = "block";
-
-      maxVideo.onended = () => {
-        maxVideo.classList.add("fade-out");
-        setTimeout(() => {
-          maxVideo.style.display = "none";
-          maxImage.style.display = "block";
-          maxVideo.classList.remove("fade-out");
-          maxVideo.onended = null;
-        }, 300);
+    // ▶ Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
+    img.addEventListener("click", () => {
+      const n = Math.floor(Math.random() * 3) + 1;
+      const file = `${n}.mp4`;
+      img.classList.add("hidden");
+      playVideoSmooth(file);
+      activeVideo.onended = () => {
+        activeVideo.classList.add("hidden");
+        img.classList.remove("hidden");
       };
     });
 
@@ -275,19 +273,19 @@
       const input = document.getElementById("message");
       const sendButton = document.getElementById("sendButton");
       const chat = document.getElementById("chat");
-      const userMessage = input.value.trim();
-      if (!userMessage) return;
+      const msg = input.value.trim();
+      if (!msg) return;
 
       input.disabled = true;
       sendButton.disabled = true;
 
       const userBubble = document.createElement("div");
       userBubble.className = "user";
-      userBubble.textContent = userMessage;
+      userBubble.textContent = msg;
       chat.appendChild(userBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      input.value = ""; // Limpia el campo al instante
+      input.value = ""; // limpia el campo
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
@@ -295,52 +293,36 @@
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      // Mostrar thinking.mp4 mientras “piensa”
-      smoothVideoTransition("thinking.mp4");
-      maxImage.style.display = "none";
-      maxVideo.style.display = "block";
+      // ▶ Thinking.mp4 sin parpadeo
+      img.classList.add("hidden");
+      playVideoSmooth("thinking.mp4");
 
       try {
-        const response = await fetch(API_URL, {
+        const r = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: userMessage })
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ message: msg })
         });
-        const data = await response.json();
+        const data = await r.json();
         const safeReply = linkify(data.reply);
 
-        // Volver a max.png al empezar la respuesta
-        maxVideo.classList.add("fade-out");
-        setTimeout(() => {
-          maxVideo.pause();
-          maxVideo.removeAttribute("src");
-          maxVideo.load();
-          maxVideo.style.display = "none";
-          maxImage.style.display = "block";
-          maxVideo.classList.remove("fade-out");
+        // ▶ Volver a imagen
+        activeVideo.classList.add("hidden");
+        img.classList.remove("hidden");
 
-          botBubble.innerHTML = "";
-          typeWriterEffect(botBubble, safeReply, 30, () => {
-            input.disabled = false;
-            sendButton.disabled = false;
-            input.focus();
-          });
-        }, 300);
-      } catch (err) {
-        maxVideo.classList.add("fade-out");
-        setTimeout(() => {
-          maxVideo.pause();
-          maxVideo.removeAttribute("src");
-          maxVideo.load();
-          maxVideo.style.display = "none";
-          maxImage.style.display = "block";
-          maxVideo.classList.remove("fade-out");
-
-          botBubble.textContent = "⚠️ Error de conexión.";
+        botBubble.innerHTML = "";
+        typeWriterEffect(botBubble, safeReply, 30, () => {
           input.disabled = false;
           sendButton.disabled = false;
           input.focus();
-        }, 300);
+        });
+      } catch {
+        activeVideo.classList.add("hidden");
+        img.classList.remove("hidden");
+        botBubble.textContent = "⚠️ Error de conexión.";
+        input.disabled = false;
+        sendButton.disabled = false;
+        input.focus();
       }
     }
 
@@ -349,8 +331,7 @@
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
       chat.appendChild(botBubble);
-      typeWriterEffect(
-        botBubble,
+      typeWriterEffect(botBubble,
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
       );
     });
