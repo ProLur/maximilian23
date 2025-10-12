@@ -57,7 +57,7 @@
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
-      cursor: pointer;
+      cursor: pointer; /* Add cursor to indicate clickability */
     }
 
     .chat-panel {
@@ -179,14 +179,26 @@
     }
 
     @media (max-width: 480px) {
-      .user, .bot { font-size: 15px; }
-      header img { height: 32px; }
+      .user, .bot {
+        font-size: 15px;
+      }
+      header img {
+        height: 32px;
+      }
     }
 
     @media (min-width: 768px) {
-      .container { flex-direction: row; }
-      .left-panel { display: flex; flex: 1; }
-      .chat-panel { flex: 2; border-left: 2px solid #00ffcc; }
+      .container {
+        flex-direction: row;
+      }
+      .left-panel {
+        display: flex;
+        flex: 1;
+      }
+      .chat-panel {
+        flex: 2;
+        border-left: 2px solid #00ffcc;
+      }
     }
   </style>
 </head>
@@ -213,9 +225,6 @@
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
-    const maxImage = document.getElementById("maxImage");
-    const staticSrc = "max.png";
-    const waitingGif = "waiting.gif";
 
     function linkify(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -227,8 +236,6 @@
     function typeWriterEffect(element, text, delay = 30, callback = null) {
       let i = 0;
       element.innerHTML = "";
-      // En cuanto empieza a escribir, volvemos a max.png
-      maxImage.src = staticSrc;
       function typing() {
         if (i < text.length) {
           element.innerHTML = text.substring(0, i + 1);
@@ -249,6 +256,7 @@
       const userMessage = input.value.trim();
       if (!userMessage) return;
 
+      // Disable input and button
       input.disabled = true;
       sendButton.disabled = true;
 
@@ -266,9 +274,6 @@
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      // Cambiar imagen a waiting.gif mientras "piensa"
-      maxImage.src = waitingGif;
-
       try {
         const response = await fetch(API_URL, {
           method: "POST",
@@ -278,16 +283,15 @@
         const data = await response.json();
 
         let safeReply = linkify(data.reply);
+
         botBubble.innerHTML = "";
         typeWriterEffect(botBubble, safeReply, 30, () => {
           input.disabled = false;
           sendButton.disabled = false;
           input.focus();
         });
-
       } catch (err) {
         botBubble.textContent = "⚠️ Error de conexión.";
-        maxImage.src = staticSrc;
         input.disabled = false;
         sendButton.disabled = false;
         input.focus();
@@ -304,6 +308,22 @@
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
       );
       chat.scrollTop = chat.scrollHeight;
+    });
+
+    // New code for GIF playback on click
+    const maxImage = document.getElementById("maxImage");
+    const staticSrc = "max.png";
+    const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+
+    maxImage.addEventListener("click", () => {
+      maxImage.src = gifSrc;
+      // Reset to static image after GIF plays once
+      maxImage.addEventListener("load", () => {
+        // Use a timeout to approximate GIF duration (adjust as needed)
+        setTimeout(() => {
+          maxImage.src = staticSrc;
+        }, 3000); // Adjust 3000ms to match your GIF's duration
+      }, { once: true }); // Ensure the load event only triggers once
     });
   </script>
 </body>
