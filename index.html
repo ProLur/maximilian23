@@ -242,6 +242,7 @@
       userBubble.textContent = userMessage;
       chat.appendChild(userBubble);
       chat.scrollTop = chat.scrollHeight;
+      input.value = ""; // ← Limpia el campo inmediatamente
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
