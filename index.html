@@ -51,13 +51,12 @@
       background: rgba(13,17,23,0.9);
     }
 
-    .left-panel img {
+    .left-panel video, .left-panel img {
       max-width: 200px;
       height: auto;
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
-      cursor: pointer; /* Add cursor to indicate clickability */
     }
 
     .chat-panel {
@@ -210,6 +209,7 @@
 
   <div class="container">
     <div class="left-panel">
+      <video id="maxVideo" src="thinking.mp4" style="display:none" autoplay muted loop></video>
       <img id="maxImage" src="max.png" alt="Maximilian grande">
     </div>
 
@@ -253,13 +253,16 @@
       const input = document.getElementById("message");
       const sendButton = document.getElementById("sendButton");
       const chat = document.getElementById("chat");
+      const maxImage = document.getElementById("maxImage");
+      const maxVideo = document.getElementById("maxVideo");
       const userMessage = input.value.trim();
       if (!userMessage) return;
 
-      // Disable input and button
+      // Desactiva entrada
       input.disabled = true;
       sendButton.disabled = true;
 
+      // Mensaje usuario
       const userBubble = document.createElement("div");
       userBubble.className = "user";
       userBubble.textContent = userMessage;
@@ -268,11 +271,17 @@
 
       input.value = "";
 
+      // Bot pensando
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
       botBubble.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
+
+      // Mostrar vídeo de pensamiento
+      maxImage.style.display = "none";
+      maxVideo.style.display = "block";
+      maxVideo.play();
 
       try {
         const response = await fetch(API_URL, {
@@ -282,7 +291,12 @@
         });
         const data = await response.json();
 
-        let safeReply = linkify(data.reply);
+        const safeReply = linkify(data.reply);
+
+        // Cuando empieza a escribir, vuelve la imagen normal
+        maxVideo.pause();
+        maxVideo.style.display = "none";
+        maxImage.style.display = "block";
 
         botBubble.innerHTML = "";
         typeWriterEffect(botBubble, safeReply, 30, () => {
@@ -291,6 +305,11 @@
           input.focus();
         });
       } catch (err) {
+        // Si hay error, vuelve a imagen normal
+        maxVideo.pause();
+        maxVideo.style.display = "none";
+        maxImage.style.display = "block";
+
         botBubble.textContent = "⚠️ Error de conexión.";
         input.disabled = false;
         sendButton.disabled = false;
@@ -310,20 +329,18 @@
       chat.scrollTop = chat.scrollHeight;
     });
 
-    // New code for GIF playback on click
+    // Animación del GIF al hacer clic
     const maxImage = document.getElementById("maxImage");
     const staticSrc = "max.png";
     const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
 
     maxImage.addEventListener("click", () => {
       maxImage.src = gifSrc;
-      // Reset to static image after GIF plays once
       maxImage.addEventListener("load", () => {
-        // Use a timeout to approximate GIF duration (adjust as needed)
         setTimeout(() => {
           maxImage.src = staticSrc;
-        }, 3000); // Adjust 3000ms to match your GIF's duration
-      }, { once: true }); // Ensure the load event only triggers once
+        }, 3000);
+      }, { once: true });
     });
   </script>
 </body>
