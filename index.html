@@ -57,6 +57,12 @@
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
       cursor: pointer;
+      background-color: transparent;
+      transition: opacity 0.3s ease;
+    }
+
+    #maxVideo.fade-out {
+      opacity: 0;
     }
 
     .chat-panel {
@@ -93,22 +99,24 @@
 
     .bot {
       background: #1e2d3d;
-      color: #00ffcc;
+      color: #7dfcff;
       border: 1px solid #00ffcc;
     }
 
-    /* 🔹 Enlaces dentro del bot */
+    /* 🔹 Enlaces más claros y legibles */
     .bot a {
-      color: #00ffcc;
+      color: #7dfcff;
       font-weight: bold;
       text-decoration: none;
-      border-bottom: 1px dotted #00ffcc;
-      transition: color 0.2s ease, border-bottom 0.2s ease;
+      border-bottom: 1px dotted #7dfcff;
+      text-shadow: 0 0 4px #7dfcff;
+      transition: color 0.2s ease, text-shadow 0.2s ease;
     }
 
     .bot a:hover {
-      color: #66fff2;
-      border-bottom: 1px solid #66fff2;
+      color: #bfffff;
+      text-shadow: 0 0 8px #bfffff;
+      border-bottom: 1px solid #bfffff;
     }
 
     footer {
@@ -200,6 +208,18 @@
     const maxVideo = document.getElementById("maxVideo");
     const maxImage = document.getElementById("maxImage");
 
+    // 🔹 Transición de vídeo suave
+    function smoothVideoTransition(newSrc) {
+      maxVideo.classList.add("fade-out");
+      setTimeout(() => {
+        maxVideo.pause();
+        maxVideo.src = newSrc;
+        maxVideo.load();
+        maxVideo.play().catch(() => {});
+        maxVideo.classList.remove("fade-out");
+      }, 300);
+    }
+
     // ▶ Al terminar waiting.mp4 → mostrar imagen estática
     maxVideo.addEventListener("ended", () => {
       maxVideo.style.display = "none";
@@ -210,10 +230,9 @@
     maxImage.addEventListener("click", () => {
       const randomIndex = Math.floor(Math.random() * 3) + 1;
       const randomVideo = `${randomIndex}.mp4`;
-      maxVideo.src = randomVideo;
+      smoothVideoTransition(randomVideo);
       maxImage.style.display = "none";
       maxVideo.style.display = "block";
-      maxVideo.play();
 
       maxVideo.onended = () => {
         maxVideo.style.display = "none";
@@ -266,14 +285,9 @@
       chat.scrollTop = chat.scrollHeight;
 
       // ▶ Mostrar thinking.mp4 mientras “piensa”
-      maxVideo.pause();
-      maxVideo.removeAttribute("src");
-      maxVideo.load();
-      maxVideo.src = "thinking.mp4";
-      maxVideo.muted = true;
+      smoothVideoTransition("thinking.mp4");
       maxImage.style.display = "none";
       maxVideo.style.display = "block";
-      maxVideo.play().catch(() => {});
 
       try {
         const response = await fetch(API_URL, {
