@@ -14,7 +14,6 @@
       height: 100dvh;
       display: flex;
       flex-direction: column;
-      position: relative;
     }
 
     header {
@@ -184,17 +183,16 @@
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
-
     const maxVideo = document.getElementById("maxVideo");
     const maxImage = document.getElementById("maxImage");
 
-    // 🔹 Al terminar waiting.mp4 → mostrar imagen estática
+    // ▶ Al terminar waiting.mp4 → mostrar imagen estática
     maxVideo.addEventListener("ended", () => {
       maxVideo.style.display = "none";
       maxImage.style.display = "block";
     });
 
-    // 🔹 Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
+    // ▶ Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
     maxImage.addEventListener("click", () => {
       const randomIndex = Math.floor(Math.random() * 3) + 1;
       const randomVideo = `${randomIndex}.mp4`;
@@ -206,7 +204,7 @@
       maxVideo.onended = () => {
         maxVideo.style.display = "none";
         maxImage.style.display = "block";
-        maxVideo.onended = null; // Limpia evento
+        maxVideo.onended = null;
       };
     });
 
@@ -243,6 +241,7 @@
       userBubble.className = "user";
       userBubble.textContent = userMessage;
       chat.appendChild(userBubble);
+      chat.scrollTop = chat.scrollHeight;
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
@@ -250,11 +249,15 @@
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      // 🔹 Mostrar video thinking.mp4 mientras piensa
+      // ▶ Mostrar thinking.mp4 mientras “piensa”
+      maxVideo.pause();
+      maxVideo.removeAttribute("src");
+      maxVideo.load();
       maxVideo.src = "thinking.mp4";
+      maxVideo.muted = true;
       maxImage.style.display = "none";
       maxVideo.style.display = "block";
-      maxVideo.play();
+      maxVideo.play().catch(() => {});
 
       try {
         const response = await fetch(API_URL, {
@@ -265,8 +268,10 @@
         const data = await response.json();
         const safeReply = linkify(data.reply);
 
-        // 🔹 Cuando llega respuesta → volver a imagen normal
+        // ▶ Volver a max.png al empezar la respuesta
         maxVideo.pause();
+        maxVideo.removeAttribute("src");
+        maxVideo.load();
         maxVideo.style.display = "none";
         maxImage.style.display = "block";
 
@@ -278,8 +283,11 @@
         });
       } catch (err) {
         maxVideo.pause();
+        maxVideo.removeAttribute("src");
+        maxVideo.load();
         maxVideo.style.display = "none";
         maxImage.style.display = "block";
+
         botBubble.textContent = "⚠️ Error de conexión.";
         input.disabled = false;
         sendButton.disabled = false;
