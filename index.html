@@ -51,7 +51,7 @@
       background: rgba(13,17,23,0.9);
     }
 
-    .left-panel video, .left-panel img {
+    .left-panel video {
       max-width: 200px;
       height: auto;
       border-radius: 10px;
@@ -209,8 +209,7 @@
 
   <div class="container">
     <div class="left-panel">
-      <video id="maxVideo" src="thinking.mp4" style="display:none" autoplay muted loop></video>
-      <img id="maxImage" src="max.png" alt="Maximilian grande">
+      <video id="maxVideo" src="waiting.mp4" autoplay muted loop></video>
     </div>
 
     <div class="chat-panel">
@@ -253,34 +252,32 @@
       const input = document.getElementById("message");
       const sendButton = document.getElementById("sendButton");
       const chat = document.getElementById("chat");
-      const maxImage = document.getElementById("maxImage");
       const maxVideo = document.getElementById("maxVideo");
       const userMessage = input.value.trim();
       if (!userMessage) return;
 
-      // Desactiva entrada
       input.disabled = true;
       sendButton.disabled = true;
 
-      // Mensaje usuario
       const userBubble = document.createElement("div");
       userBubble.className = "user";
       userBubble.textContent = userMessage;
       chat.appendChild(userBubble);
       chat.scrollTop = chat.scrollHeight;
-
       input.value = "";
 
-      // Bot pensando
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
       botBubble.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      // Mostrar vídeo de pensamiento
-      maxImage.style.display = "none";
-      maxVideo.style.display = "block";
+      // 🎬 Elegir aleatoriamente 1.mp4, 2.mp4 o 3.mp4
+      const randomIndex = Math.floor(Math.random() * 3) + 1;
+      const randomVideo = `${randomIndex}.mp4`;
+
+      // Cambiar el vídeo al aleatorio y reproducirlo
+      maxVideo.src = randomVideo;
       maxVideo.play();
 
       try {
@@ -293,10 +290,9 @@
 
         const safeReply = linkify(data.reply);
 
-        // Cuando empieza a escribir, vuelve la imagen normal
-        maxVideo.pause();
-        maxVideo.style.display = "none";
-        maxImage.style.display = "block";
+        // 🎬 Volver al vídeo normal (waiting.mp4)
+        maxVideo.src = "waiting.mp4";
+        maxVideo.play();
 
         botBubble.innerHTML = "";
         typeWriterEffect(botBubble, safeReply, 30, () => {
@@ -305,11 +301,8 @@
           input.focus();
         });
       } catch (err) {
-        // Si hay error, vuelve a imagen normal
-        maxVideo.pause();
-        maxVideo.style.display = "none";
-        maxImage.style.display = "block";
-
+        maxVideo.src = "waiting.mp4";
+        maxVideo.play();
         botBubble.textContent = "⚠️ Error de conexión.";
         input.disabled = false;
         sendButton.disabled = false;
@@ -327,20 +320,6 @@
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
       );
       chat.scrollTop = chat.scrollHeight;
-    });
-
-    // Animación del GIF al hacer clic
-    const maxImage = document.getElementById("maxImage");
-    const staticSrc = "max.png";
-    const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
-
-    maxImage.addEventListener("click", () => {
-      maxImage.src = gifSrc;
-      maxImage.addEventListener("load", () => {
-        setTimeout(() => {
-          maxImage.src = staticSrc;
-        }, 3000);
-      }, { once: true });
     });
   </script>
 </body>
