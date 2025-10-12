@@ -14,6 +14,7 @@
       height: 100dvh;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     header {
@@ -48,29 +49,15 @@
       justify-content: center;
       padding: 20px;
       background: rgba(13,17,23,0.9);
-      position: relative;
     }
 
-    video, img {
+    .left-panel img {
       max-width: 200px;
       height: auto;
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
-      position: absolute;
-      transition: opacity 0.4s ease;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    video.hidden, img.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    video.visible, img.visible {
-      opacity: 1;
-      pointer-events: auto;
+      cursor: pointer; /* Add cursor to indicate clickability */
     }
 
     .chat-panel {
@@ -78,6 +65,7 @@
       display: flex;
       flex-direction: column;
       background: rgba(13, 17, 23, 0.9);
+      height: 100%;
     }
 
     #chat {
@@ -106,23 +94,18 @@
 
     .bot {
       background: #1e2d3d;
-      color: #7dfcff;
+      color: #00ffcc;
       border: 1px solid #00ffcc;
     }
 
     .bot a {
-      color: #7dfcff;
+      color: #00ffcc;
       font-weight: bold;
       text-decoration: none;
-      border-bottom: 1px dotted #7dfcff;
-      text-shadow: 0 0 4px #7dfcff;
-      transition: color 0.2s ease, text-shadow 0.2s ease;
     }
 
     .bot a:hover {
-      color: #bfffff;
-      text-shadow: 0 0 8px #bfffff;
-      border-bottom: 1px solid #bfffff;
+      text-decoration: underline;
     }
 
     footer {
@@ -136,6 +119,7 @@
 
     input {
       flex: 1;
+      min-width: 0;
       padding: 10px;
       border: none;
       border-radius: 5px;
@@ -143,6 +127,13 @@
       outline: none;
       background: #fff;
       color: #000;
+    }
+
+    input:disabled {
+      background: #2a2f38;
+      color: #666;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
 
     button {
@@ -154,8 +145,18 @@
       cursor: pointer;
       font-weight: bold;
       font-size: 14px;
+      flex-shrink: 0;
     }
 
+    button:disabled {
+      background: #2a2f38;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .typing {
+      display: inline-block;
+    }
     .typing span {
       display: inline-block;
       width: 6px;
@@ -165,11 +166,25 @@
       border-radius: 50%;
       animation: blink 1.4s infinite both;
     }
-
+    .typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
     @keyframes blink {
       0% { opacity: .2; }
       20% { opacity: 1; }
       100% { opacity: .2; }
+    }
+
+    @media (max-width: 480px) {
+      .user, .bot {
+        font-size: 15px;
+      }
+      header img {
+        height: 32px;
+      }
     }
 
     @media (min-width: 768px) {
@@ -195,9 +210,7 @@
 
   <div class="container">
     <div class="left-panel">
-      <video id="video1" class="visible" src="waiting.mp4" autoplay muted></video>
-      <video id="video2" class="hidden" muted></video>
-      <img id="maxImage" class="hidden" src="max.png" alt="Maximilian grande">
+      <img id="maxImage" src="max.png" alt="Maximilian grande">
     </div>
 
     <div class="chat-panel">
@@ -212,47 +225,12 @@
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
-    const v1 = document.getElementById("video1");
-    const v2 = document.getElementById("video2");
-    const img = document.getElementById("maxImage");
-
-    // 🔹 Controla qué vídeo está activo (para alternar)
-    let activeVideo = v1;
-
-    function playVideoSmooth(newSrc) {
-      const nextVideo = activeVideo === v1 ? v2 : v1;
-      nextVideo.src = newSrc;
-      nextVideo.load();
-      nextVideo.play().catch(()=>{});
-      nextVideo.classList.remove("hidden");
-      activeVideo.classList.add("hidden");
-      setTimeout(() => {
-        activeVideo.pause();
-        activeVideo = nextVideo;
-      }, 400);
-    }
-
-    // ▶ Al terminar waiting.mp4 → mostrar imagen
-    v1.addEventListener("ended", () => {
-      v1.classList.add("hidden");
-      img.classList.remove("hidden");
-    });
-
-    // ▶ Al hacer clic en la imagen → reproducir 1, 2 o 3 aleatoriamente
-    img.addEventListener("click", () => {
-      const n = Math.floor(Math.random() * 3) + 1;
-      const file = `${n}.mp4`;
-      img.classList.add("hidden");
-      playVideoSmooth(file);
-      activeVideo.onended = () => {
-        activeVideo.classList.add("hidden");
-        img.classList.remove("hidden");
-      };
-    });
 
     function linkify(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+      return text.replace(urlRegex, function(url) {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      });
     }
 
     function typeWriterEffect(element, text, delay = 30, callback = null) {
@@ -264,7 +242,9 @@
           element.parentElement.scrollTop = element.parentElement.scrollHeight;
           i++;
           setTimeout(typing, delay);
-        } else if (callback) callback();
+        } else {
+          if (callback) callback();
+        }
       }
       typing();
     }
@@ -273,19 +253,20 @@
       const input = document.getElementById("message");
       const sendButton = document.getElementById("sendButton");
       const chat = document.getElementById("chat");
-      const msg = input.value.trim();
-      if (!msg) return;
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
 
+      // Disable input and button
       input.disabled = true;
       sendButton.disabled = true;
 
       const userBubble = document.createElement("div");
       userBubble.className = "user";
-      userBubble.textContent = msg;
+      userBubble.textContent = userMessage;
       chat.appendChild(userBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      input.value = ""; // limpia el campo
+      input.value = "";
 
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
@@ -293,22 +274,15 @@
       chat.appendChild(botBubble);
       chat.scrollTop = chat.scrollHeight;
 
-      // ▶ Thinking.mp4 sin parpadeo
-      img.classList.add("hidden");
-      playVideoSmooth("thinking.mp4");
-
       try {
-        const r = await fetch(API_URL, {
+        const response = await fetch(API_URL, {
           method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ message: msg })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMessage })
         });
-        const data = await r.json();
-        const safeReply = linkify(data.reply);
+        const data = await response.json();
 
-        // ▶ Volver a imagen
-        activeVideo.classList.add("hidden");
-        img.classList.remove("hidden");
+        let safeReply = linkify(data.reply);
 
         botBubble.innerHTML = "";
         typeWriterEffect(botBubble, safeReply, 30, () => {
@@ -316,9 +290,7 @@
           sendButton.disabled = false;
           input.focus();
         });
-      } catch {
-        activeVideo.classList.add("hidden");
-        img.classList.remove("hidden");
+      } catch (err) {
         botBubble.textContent = "⚠️ Error de conexión.";
         input.disabled = false;
         sendButton.disabled = false;
@@ -331,9 +303,27 @@
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
       chat.appendChild(botBubble);
-      typeWriterEffect(botBubble,
+      typeWriterEffect(
+        botBubble,
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
       );
+      chat.scrollTop = chat.scrollHeight;
+    });
+
+    // New code for GIF playback on click
+    const maxImage = document.getElementById("maxImage");
+    const staticSrc = "max.png";
+    const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+
+    maxImage.addEventListener("click", () => {
+      maxImage.src = gifSrc;
+      // Reset to static image after GIF plays once
+      maxImage.addEventListener("load", () => {
+        // Use a timeout to approximate GIF duration (adjust as needed)
+        setTimeout(() => {
+          maxImage.src = staticSrc;
+        }, 3000); // Adjust 3000ms to match your GIF's duration
+      }, { once: true }); // Ensure the load event only triggers once
     });
   </script>
 </body>
