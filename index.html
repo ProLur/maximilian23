@@ -102,6 +102,7 @@
       color: #00ffcc;
       font-weight: bold;
       text-decoration: none;
+      word-break: break-all;
     }
 
     .bot a:hover {
@@ -230,13 +231,16 @@
   <script>
     const API_URL = "https://max23.onrender.com/chat";
 
-    // ✅ linkify corregido y robusto
+    // ✅ linkify final (100% funcional)
     function linkify(text) {
-      const urlRegex = /(https?:\/\/[a-zA-Z0-9\-._~:/?#@!$&'()*+,;=%]+)(?=[^\w\/-]|$)/g;
-      return text.replace(urlRegex, function(url) {
-        const cleanUrl = url.replace(/[.,!?;:]+$/, ""); // quita signos finales
-        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
-      });
+      return text.replace(
+        /(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])(?![a-zA-Z0-9\/#?=&_%~\-])/g,
+        (url) => {
+          // Si hay un punto final justo después, se quita visualmente
+          const cleanUrl = url.replace(/[.,!?;:]+$/, "");
+          return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
+        }
+      );
     }
 
     function typeWriterEffect(element, text, delay = 30, callback = null) {
@@ -315,7 +319,7 @@
       chat.scrollTop = chat.scrollHeight;
     });
 
-    // Animación GIF al pulsar sobre la imagen
+    // 🎞️ Animación de la cabeza de Max
     const maxImage = document.getElementById("maxImage");
     const staticSrc = "max.png";
     const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
