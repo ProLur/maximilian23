@@ -57,7 +57,7 @@
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
-      cursor: pointer; /* Add cursor to indicate clickability */
+      cursor: pointer;
     }
 
     .chat-panel {
@@ -226,10 +226,12 @@
   <script>
     const API_URL = "https://max23.onrender.com/chat";
 
+    // ✅ Versión corregida de linkify
     function linkify(text) {
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const urlRegex = /(https?:\/\/[^\s.,!?;:(){}[\]<>"]+)/g;
       return text.replace(urlRegex, function(url) {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+        const cleanUrl = url.endsWith('.') ? url.slice(0, -1) : url;
+        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
       });
     }
 
@@ -256,7 +258,6 @@
       const userMessage = input.value.trim();
       if (!userMessage) return;
 
-      // Disable input and button
       input.disabled = true;
       sendButton.disabled = true;
 
@@ -310,20 +311,18 @@
       chat.scrollTop = chat.scrollHeight;
     });
 
-    // New code for GIF playback on click
+    // Animación GIF al pulsar sobre la imagen
     const maxImage = document.getElementById("maxImage");
     const staticSrc = "max.png";
     const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
 
     maxImage.addEventListener("click", () => {
       maxImage.src = gifSrc;
-      // Reset to static image after GIF plays once
       maxImage.addEventListener("load", () => {
-        // Use a timeout to approximate GIF duration (adjust as needed)
         setTimeout(() => {
           maxImage.src = staticSrc;
-        }, 3000); // Adjust 3000ms to match your GIF's duration
-      }, { once: true }); // Ensure the load event only triggers once
+        }, 3000);
+      }, { once: true });
     });
   </script>
 </body>
