@@ -5,17 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Maximilian 23</title>
 
-  <!-- 🧠 FAVICON -->
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
-
-  <!-- 🧾 METADATOS -->
-  <meta name="description" content="Maximilian 23 es el asistente de inteligencia artificial del CEIP Juan XXIII de Zafra. Informa, guía y acompaña a las familias del centro educativo.">
-  <meta name="keywords" content="Maximilian 23, CEIP Juan XXIII, inteligencia artificial educativa, asistente escolar, Zafra, Extremadura">
-  <meta name="author" content="CEIP Juan XXIII de Zafra">
-  <meta property="og:title" content="Maximilian 23 - Asistente IA del CEIP Juan XXIII">
-  <meta property="og:description" content="Primer asistente de inteligencia artificial incorporado en un colegio público de Extremadura.">
-  <meta property="og:image" content="https://maximilian23.com/Cabeza.png">
-  <meta property="og:url" content="https://maximilian23.com">
+  <meta name="description" content="Maximilian 23 es el asistente de inteligencia artificial del CEIP Juan XXIII de Zafra.">
   <meta name="theme-color" content="#00ffcc">
 
   <style>
@@ -29,6 +20,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      overflow: hidden;
     }
 
     header {
@@ -43,6 +35,7 @@
       color: #00ffcc;
       font-family: "Courier New", monospace;
       position: relative;
+      flex-shrink: 0;
     }
 
     header img {
@@ -50,7 +43,6 @@
       width: auto;
     }
 
-    /* ⚙️ Rueda alineada al título (solo visible en móvil) */
     #policyIcon {
       display: none;
       position: absolute;
@@ -60,59 +52,68 @@
       cursor: pointer;
       transition: transform .3s ease;
     }
-
     #policyIcon:hover { transform: rotate(30deg); }
-
-    @media (max-width:600px) {
-      #policyIcon { display: block; }
-    }
+    @media (max-width:600px) { #policyIcon { display: block; } }
 
     .container {
       flex: 1;
       display: flex;
-      flex-direction: column;
       overflow: hidden;
     }
 
     .left-panel {
       display: none;
+      flex: 1;
       align-items: center;
       justify-content: center;
-      padding: 20px;
       background: rgba(13,17,23,0.9);
+      border-right: 2px solid #00ffcc;
     }
 
     .left-panel img {
-      max-width: 200px;
+      max-width: 220px;
       height: auto;
       border-radius: 10px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 15px #00ffcc88;
       cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .left-panel img:hover {
+      transform: scale(1.05);
     }
 
     .chat-panel {
-      flex: 1;
+      flex: 2;
       display: flex;
       flex-direction: column;
       background: rgba(13,17,23,0.9);
+      height: 100%;
+    }
+
+    @media (min-width:768px) {
+      .left-panel { display: flex; }
+      .chat-panel { border-left: none; }
     }
 
     #chat {
       flex: 1;
       overflow-y: auto;
       padding: 15px;
+      scroll-behavior: smooth;
     }
 
     .user, .bot {
       padding: 12px;
-      margin: 16px 12px;
+      margin: 10px 12px;
       border-radius: 10px;
-      max-width: 75%;
+      max-width: 80%;
       font-family: "Courier New", monospace;
       white-space: pre-wrap;
-      font-size: 18px;
+      font-size: 17px;
       line-height: 1.5;
+      word-break: break-word;
     }
 
     .user {
@@ -133,8 +134,7 @@
       padding: 8px;
       background: rgba(22,27,34,0.95);
       border-top: 2px solid #00ffcc;
-      position: sticky;
-      bottom: 0;
+      flex-shrink: 0;
     }
 
     input {
@@ -159,7 +159,6 @@
       font-size: 14px;
     }
 
-    /* === Botón de políticas abajo izquierda (solo escritorio) === */
     #policyButton {
       position: fixed;
       bottom: 12px;
@@ -181,12 +180,8 @@
       border-color: #00ffcc;
       box-shadow: 0 0 6px #00ffcc88;
     }
+    @media (max-width:600px) { #policyButton { display: none; } }
 
-    @media (max-width:600px) {
-      #policyButton { display: none; }
-    }
-
-    /* === Modal === */
     #policyModal {
       display: none;
       position: fixed;
@@ -222,7 +217,6 @@
       box-shadow: 0 0 10px #00ffcc99;
     }
 
-    /* === Aviso de políticas === */
     #cookieBanner {
       position: fixed;
       bottom: -150px;
@@ -239,17 +233,6 @@
       z-index: 1000;
     }
     #cookieBanner.show { bottom: 0; }
-    #cookieBanner a { color: #00ffcc; text-decoration: underline; }
-    #cookieBanner button {
-      background: #00ffcc;
-      border: none;
-      color: #000;
-      padding: 8px 16px;
-      border-radius: 5px;
-      font-weight: bold;
-      margin-left: 8px;
-      cursor: pointer;
-    }
   </style>
 </head>
 
@@ -275,18 +258,13 @@
     </div>
   </div>
 
-  <!-- Aviso políticas -->
   <div id="cookieBanner">
-    <p>Usamos cookies y tecnologías similares para mejorar tu experiencia.
-      Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
-    </p>
+    <p>Usamos cookies y tecnologías similares. Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.</p>
     <button id="acceptCookies">Aceptar</button>
   </div>
 
-  <!-- Botón políticas escritorio -->
   <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
 
-  <!-- Modal políticas -->
   <div id="policyModal">
     <button id="closeModal">×</button>
     <iframe src=""></iframe>
@@ -295,23 +273,20 @@
   <script>
     const API_URL="https://max23.onrender.com/chat";
 
-    // 🚀 Ping inicial
     window.addEventListener("load",async()=>{
-      try{await fetch("https://max23.onrender.com/ping");console.log("Ping enviado a Render");}
-      catch{console.log("Ping fallido");}
+      try{await fetch("https://max23.onrender.com/ping");}catch{}
     });
 
     function linkify(t){
-      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
-        u=>`<a href="${u}" target="_blank">${u}</a>`);
+      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,u=>`<a href="${u}" target="_blank">${u}</a>`);
     }
+
+    function scrollToBottom(){const c=document.getElementById("chat");c.lastElementChild?.scrollIntoView({behavior:"smooth"});}
 
     function typeWriterEffect(e,t,d=30,c=null){
       let i=0;e.innerHTML="";
       (function typing(){
-        if(i<t.length){e.innerHTML=t.substring(0,++i);
-          e.parentElement.scrollTop=e.parentElement.scrollHeight;
-          setTimeout(typing,d);}else if(c)c();
+        if(i<t.length){e.innerHTML=t.substring(0,++i);scrollToBottom();setTimeout(typing,d);}else if(c)c();
       })();
     }
 
@@ -321,13 +296,14 @@
       i.disabled=b.disabled=true;
       const u=document.createElement("div");u.className="user";u.textContent=m;c.appendChild(u);
       const bot=document.createElement("div");bot.className="bot";
-      bot.innerHTML=`<div class="typing"><span></span><span></span><span></span></div>`;c.appendChild(bot);
-      c.scrollTop=c.scrollHeight;i.value="";
+      bot.innerHTML=`<div class="typing"><span></span><span></span><span></span></div>`;
+      c.appendChild(bot);scrollToBottom();
+      i.value="";
       try{
         const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:m})});
         const d=await r.json();bot.innerHTML="";
-        typeWriterEffect(bot,linkify(d.reply),30,()=>{i.disabled=b.disabled=false;i.focus();});
-      }catch{bot.textContent="⚠️ Error de conexión.";i.disabled=b.disabled=false;}
+        typeWriterEffect(bot,linkify(d.reply),30,()=>{i.disabled=b.disabled=false;i.focus();scrollToBottom();});
+      }catch{bot.textContent="⚠️ Error de conexión.";i.disabled=b.disabled=false;scrollToBottom();}
     }
 
     window.addEventListener("load",()=>{
@@ -340,7 +316,7 @@
         banner.classList.remove("show");setTimeout(()=>banner.remove(),800);});
     });
 
-    // 🎞️ Animación cabeza Max
+    // 🎞️ Animación del muñeco Maximilian
     const maxImage=document.getElementById("maxImage");
     maxImage.addEventListener("click",()=>{
       maxImage.src="https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
@@ -352,14 +328,10 @@
           modal=document.getElementById("policyModal"),
           frame=modal.querySelector("iframe"),
           close=document.getElementById("closeModal");
-
     openers.forEach(btn=>btn.addEventListener("click",()=>{
-      if(window.innerWidth>768){
-        frame.src="https://maximilian23.com/politica.html";
-        modal.style.display="flex";
-      }else window.open("https://maximilian23.com/politica.html","_blank");
+      if(window.innerWidth>768){frame.src="https://maximilian23.com/politica.html";modal.style.display="flex";}
+      else window.open("https://maximilian23.com/politica.html","_blank");
     }));
-
     close.addEventListener("click",()=>{modal.style.display="none";frame.src="";});
   </script>
 </body>
