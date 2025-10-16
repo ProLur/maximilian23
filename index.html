@@ -4,6 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Maximilian 23</title>
+
+  <!-- 🧠 FAVICON -->
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+
+  <!-- 🧾 METADATOS -->
+  <meta name="description" content="Maximilian 23 es el asistente de inteligencia artificial del CEIP Juan XXIII de Zafra. Informa, guía y acompaña a las familias del centro educativo.">
+  <meta name="keywords" content="Maximilian 23, CEIP Juan XXIII, inteligencia artificial educativa, asistente escolar, Zafra, Extremadura">
+  <meta name="author" content="CEIP Juan XXIII de Zafra">
+  <meta property="og:title" content="Maximilian 23 - Asistente IA del CEIP Juan XXIII">
+  <meta property="og:description" content="Primer asistente de inteligencia artificial incorporado en un colegio público de Extremadura.">
+  <meta property="og:image" content="https://maximilian23.com/Cabeza.png">
+  <meta property="og:url" content="https://maximilian23.com">
+  <meta name="theme-color" content="#00ffcc">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -205,8 +219,47 @@
         border-left: 2px solid #00ffcc;
       }
     }
+
+    /* === Aviso de políticas === */
+    #cookieBanner {
+      position: fixed;
+      bottom: -150px;
+      left: 0;
+      right: 0;
+      background: rgba(13,17,23,0.97);
+      color: #00ffcc;
+      text-align: center;
+      padding: 15px 10px;
+      font-family: "Courier New", monospace;
+      font-size: 15px;
+      border-top: 2px solid #00ffcc;
+      box-shadow: 0 -3px 10px rgba(0,255,204,0.3);
+      transition: bottom 0.8s ease;
+      z-index: 1000;
+    }
+
+    #cookieBanner.show {
+      bottom: 0;
+    }
+
+    #cookieBanner a {
+      color: #00ffcc;
+      text-decoration: underline;
+    }
+
+    #cookieBanner button {
+      background: #00ffcc;
+      border: none;
+      color: #000;
+      padding: 8px 16px;
+      border-radius: 5px;
+      font-weight: bold;
+      margin-left: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
   <header>
     <img src="Cabeza.png" alt="Maximilian">
@@ -228,6 +281,15 @@
     </div>
   </div>
 
+  <!-- === Aviso de políticas === -->
+  <div id="cookieBanner">
+    <p>
+      Usamos cookies y tecnologías similares para mejorar tu experiencia.
+      Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
+    </p>
+    <button id="acceptCookies">Aceptar</button>
+  </div>
+
   <script>
     const API_URL = "https://max23.onrender.com/chat";
 
@@ -236,7 +298,6 @@
       return text.replace(
         /(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])(?![a-zA-Z0-9\/#?=&_%~\-])/g,
         (url) => {
-          // Si hay un punto final justo después, se quita visualmente
           const cleanUrl = url.replace(/[.,!?;:]+$/, "");
           return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
         }
@@ -317,6 +378,21 @@
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
       );
       chat.scrollTop = chat.scrollHeight;
+
+      // Banner cookies
+      const banner = document.getElementById("cookieBanner");
+      const acceptBtn = document.getElementById("acceptCookies");
+      const accepted = localStorage.getItem("cookiesAccepted");
+
+      if (!accepted) {
+        setTimeout(() => banner.classList.add("show"), 800);
+      }
+
+      acceptBtn.addEventListener("click", () => {
+        localStorage.setItem("cookiesAccepted", "true");
+        banner.classList.remove("show");
+        setTimeout(() => banner.remove(), 800);
+      });
     });
 
     // 🎞️ Animación de la cabeza de Max
