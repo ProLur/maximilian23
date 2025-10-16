@@ -38,10 +38,7 @@
       flex-shrink: 0;
     }
 
-    header img {
-      height: 40px;
-      width: auto;
-    }
+    header img { height: 40px; width: auto; }
 
     #policyIcon {
       display: none;
@@ -79,7 +76,6 @@
       cursor: pointer;
       transition: transform 0.2s;
     }
-
     .left-panel img:hover { transform: scale(1.05); }
 
     .chat-panel {
@@ -92,7 +88,6 @@
 
     @media (min-width:768px) {
       .left-panel { display: flex; }
-      .chat-panel { border-left: none; }
     }
 
     #chat {
@@ -205,59 +200,6 @@
     }
 
     @media (max-width:600px) { #policyButton { display: none; } }
-
-    #policyModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,.8);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(3px);
-    }
-
-    #policyModal iframe {
-      width: 80%; height: 80%;
-      border: 2px solid #00ffcc;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #00ffcc88;
-      background: #0d1117;
-    }
-
-    #closeModal {
-      position: absolute;
-      top: 8%;
-      right: 11%;
-      background: #00ffcc;
-      border: none;
-      border-radius: 50%;
-      color: #000;
-      font-weight: bold;
-      width: 32px; height: 32px;
-      cursor: pointer;
-      font-size: 18px;
-      line-height: 1;
-      box-shadow: 0 0 10px #00ffcc99;
-    }
-
-    #cookieBanner {
-      position: fixed;
-      bottom: -150px;
-      left: 0; right: 0;
-      background: rgba(13,17,23,.97);
-      color: #00ffcc;
-      text-align: center;
-      padding: 15px 10px;
-      font-family: "Courier New", monospace;
-      font-size: 15px;
-      border-top: 2px solid #00ffcc;
-      box-shadow: 0 -3px 10px rgba(0,255,204,.3);
-      transition: bottom .8s ease;
-      z-index: 1000;
-    }
-
-    #cookieBanner.show { bottom: 0; }
   </style>
 </head>
 
@@ -283,88 +225,95 @@
     </div>
   </div>
 
-  <div id="cookieBanner">
-    <p>Usamos cookies y tecnologías similares. Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.</p>
-    <button id="acceptCookies">Aceptar</button>
-  </div>
-
   <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
-
-  <div id="policyModal">
-    <button id="closeModal">×</button>
-    <iframe src=""></iframe>
-  </div>
 
   <script>
     const API_URL="https://max23.onrender.com/chat";
 
     window.addEventListener("load",async()=>{
       try{await fetch("https://max23.onrender.com/ping");}catch{}
+      greet();
     });
 
+    function greet(){
+      const chat=document.getElementById("chat");
+      const b=document.createElement("div");
+      b.className="bot";
+      chat.appendChild(b);
+      typeWriterEffect(b,"🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
+      scrollBottom();
+    }
+
+    function scrollBottom(){
+      const chat=document.getElementById("chat");
+      chat.scrollTop=chat.scrollHeight;
+    }
+
     function linkify(t){
-      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,u=>`<a href="${u}" target="_blank">${u}</a>`);
+      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
+        u=>`<a href="${u}" target="_blank">${u}</a>`);
     }
 
-    function scrollToBottom(){
-      const c=document.getElementById("chat");
-      c.lastElementChild?.scrollIntoView({behavior:"smooth"});
-    }
-
-    function typeWriterEffect(e,t,d=30,c=null){
-      let i=0;e.innerHTML="";
-      (function typing(){
-        if(i<t.length){e.innerHTML=t.substring(0,++i);scrollToBottom();setTimeout(typing,d);}else if(c)c();
-      })();
+    function typeWriterEffect(el,text,delay=30,done=null){
+      let i=0; el.innerHTML="";
+      function step(){
+        if(i<text.length){
+          el.innerHTML=text.substring(0,++i);
+          setTimeout(step,delay);
+        }else if(done) done();
+      }
+      step();
     }
 
     async function sendMessage(){
-      const i=document.getElementById("message"),b=document.getElementById("sendButton"),c=document.getElementById("chat");
-      const m=i.value.trim();if(!m)return;
+      const i=document.getElementById("message");
+      const b=document.getElementById("sendButton");
+      const chat=document.getElementById("chat");
+      const msg=i.value.trim(); if(!msg) return;
+
       i.disabled=b.disabled=true;
-      const u=document.createElement("div");u.className="user";u.textContent=m;c.appendChild(u);
-      const bot=document.createElement("div");bot.className="bot";
-      bot.innerHTML=`<div class="typing"><span></span><span></span><span></span></div>`;
-      c.appendChild(bot);scrollToBottom();
+      const user=document.createElement("div");
+      user.className="user";
+      user.textContent=msg;
+      chat.appendChild(user);
+
+      const bot=document.createElement("div");
+      bot.className="bot";
+      bot.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+      chat.appendChild(bot);
+      scrollBottom();
+
       i.value="";
-      try{
-        const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:m})});
-        const d=await r.json();
+
+      try {
+        const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg})});
+        const data=await r.json();
+        const reply=linkify(data.reply);
         bot.innerHTML="";
-        typeWriterEffect(bot,linkify(d.reply),30,()=>{i.disabled=b.disabled=false;i.focus();scrollToBottom();});
-      }catch{
+        typeWriterEffect(bot,reply,30,()=>{
+          i.disabled=b.disabled=false;
+          i.focus();
+          scrollBottom();
+        });
+      } catch {
         bot.textContent="⚠️ Error de conexión.";
         i.disabled=b.disabled=false;
-        scrollToBottom();
+        scrollBottom();
       }
     }
 
-    window.addEventListener("load",()=>{
-      const c=document.getElementById("chat"),b=document.createElement("div");
-      b.className="bot";c.appendChild(b);
-      typeWriterEffect(b,"🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
-      const banner=document.getElementById("cookieBanner"),a=document.getElementById("acceptCookies");
-      if(!localStorage.getItem("cookiesAccepted"))setTimeout(()=>banner.classList.add("show"),800);
-      a.addEventListener("click",()=>{localStorage.setItem("cookiesAccepted","true");banner.classList.remove("show");setTimeout(()=>banner.remove(),800);});
-    });
+    // 🪟 Políticas (rueda o botón)
+    const opens=[document.getElementById("policyButton"),document.getElementById("policyIcon")];
+    opens.forEach(o=>o.addEventListener("click",()=>{
+      window.open("https://maximilian23.com/politica.html","_blank");
+    }));
 
-    // 🎞️ Animación del muñeco Maximilian
+    // 🎞️ Animación muñeco
     const maxImage=document.getElementById("maxImage");
     maxImage.addEventListener("click",()=>{
       maxImage.src="https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
       maxImage.addEventListener("load",()=>setTimeout(()=>maxImage.src="max.png",3000),{once:true});
     });
-
-    // 🪟 Modal políticas
-    const openers=[document.getElementById("policyButton"),document.getElementById("policyIcon")],
-          modal=document.getElementById("policyModal"),
-          frame=modal.querySelector("iframe"),
-          close=document.getElementById("closeModal");
-    openers.forEach(btn=>btn.addEventListener("click",()=>{
-      if(window.innerWidth>768){frame.src="https://maximilian23.com/politica.html";modal.style.display="flex";}
-      else window.open("https://maximilian23.com/politica.html","_blank");
-    }));
-    close.addEventListener("click",()=>{modal.style.display="none";frame.src="";});
   </script>
 </body>
 </html>
