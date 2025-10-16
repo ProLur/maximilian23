@@ -236,11 +236,17 @@
 
     function typeWriterEffect(el, text, delay = 30, done = null) {
       let i = 0; el.innerHTML = "";
+      const chat = document.getElementById("chat");
       function step() {
         if (i < text.length) {
           el.innerHTML = text.substring(0, ++i);
+          // desplaza solo cada 3 caracteres para fluidez
+          if (i % 3 === 0) chat.scrollTop = chat.scrollHeight;
           setTimeout(step, delay);
-        } else if (done) done();
+        } else {
+          chat.scrollTop = chat.scrollHeight;
+          if (done) done();
+        }
       }
       step();
     }
@@ -277,7 +283,6 @@
         typeWriterEffect(bot, reply, 30, () => {
           i.disabled = b.disabled = false;
           i.focus();
-          scrollBottom();
         });
       } catch {
         bot.textContent = "⚠️ Error de conexión.";
@@ -286,7 +291,7 @@
       }
     }
 
-    // 🟢 Mensaje de bienvenida (siempre visible)
+    // 🟢 Mensaje de bienvenida
     window.addEventListener("DOMContentLoaded", () => {
       const chat = document.getElementById("chat");
       const b = document.createElement("div");
@@ -297,7 +302,7 @@
       scrollBottom();
     });
 
-    // 🪟 Políticas
+    // ⚙️ Políticas
     const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
     opens.forEach(o => o.addEventListener("click", () => {
       window.open("https://maximilian23.com/politica.html", "_blank");
@@ -311,4 +316,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
