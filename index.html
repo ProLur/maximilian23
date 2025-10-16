@@ -224,32 +224,45 @@
       cursor: pointer;
     }
 
-    /* ⚙️ Rueda dentada (botón de políticas) */
+    /* === Botón políticas === */
     #policyButton {
       position: fixed;
-      top: 12px;
-      right: 12px;
+      bottom: 12px;
+      left: 12px;
       background: rgba(0, 255, 204, 0.08);
       border: 1px solid #00ffcc88;
       color: #00ffcc;
-      border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
       transition: all 0.3s ease;
-      z-index: 950;
-      backdrop-filter: blur(3px);
-      box-shadow: 0 0 6px #00ffcc55;
+      backdrop-filter: blur(4px);
+      z-index: 900;
+      cursor: pointer;
     }
 
     #policyButton:hover {
       background: rgba(0, 255, 204, 0.2);
-      box-shadow: 0 0 8px #00ffccaa;
-      transform: rotate(30deg);
+      border-color: #00ffcc;
+      box-shadow: 0 0 6px #00ffcc88;
+    }
+
+    /* 🔹 Versión móvil: icono arriba derecha */
+    @media (max-width: 600px) {
+      #policyButton {
+        top: 10px;
+        right: 10px;
+        left: auto;
+        bottom: auto;
+        border-radius: 50%;
+        padding: 10px;
+        font-size: 18px;
+        background: rgba(0, 255, 204, 0.1);
+        border: 1px solid #00ffcc66;
+        box-shadow: 0 0 8px #00ffcc44;
+      }
+      #policyButton::after { content: "⚙️"; }
     }
 
     /* === Modal === */
@@ -277,17 +290,19 @@
       position: absolute;
       top: 8%;
       right: 11%;
-      background: #00ffcc;
+      background: transparent;
       border: none;
-      border-radius: 50%;
-      color: #000;
+      color: #00ffcc;
       font-weight: bold;
-      width: 32px;
-      height: 32px;
+      font-size: 28px;
       cursor: pointer;
-      font-size: 18px;
       line-height: 1;
-      box-shadow: 0 0 10px #00ffcc99;
+      text-shadow: 0 0 10px #00ffcc;
+    }
+
+    #closeModal:hover {
+      color: #ffffff;
+      text-shadow: 0 0 15px #00ffcc;
     }
   </style>
 </head>
@@ -322,8 +337,8 @@
     <button id="acceptCookies">Aceptar</button>
   </div>
 
-  <!-- ⚙️ Rueda dentada -->
-  <div id="policyButton" title="Política de uso">⚙️</div>
+  <!-- ⚙️ Botón de políticas -->
+  <div id="policyButton" title="Política de uso">⚙️ Políticas</div>
 
   <!-- Modal políticas -->
   <div id="policyModal">
@@ -336,12 +351,11 @@
 
     // 🚀 Ping inicial
     window.addEventListener("load", async () => {
-      try { await fetch("https://max23.onrender.com/ping"); console.log("Ping enviado"); }
-      catch { console.log("Ping fallido"); }
+      try { await fetch("https://max23.onrender.com/ping"); } catch {}
     });
 
     function linkify(t) {
-      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])(?![a-zA-Z0-9\/#?=&_%~\-])/g,
+      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
         u => `<a href="${u}" target="_blank">${u}</a>`);
     }
 
@@ -403,4 +417,4 @@
     close.addEventListener("click", () => { modal.style.display = "none"; frame.src = ""; });
   </script>
 </body>
-  </html>
+</html>
