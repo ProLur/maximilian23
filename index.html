@@ -32,7 +32,7 @@
     }
 
     header {
-      background: rgba(22, 27, 34, 0.95);
+      background: rgba(22,27,34,0.95);
       padding: 8px 12px;
       display: flex;
       align-items: center;
@@ -42,12 +42,29 @@
       font-weight: bold;
       color: #00ffcc;
       font-family: "Courier New", monospace;
-      flex-shrink: 0;
+      position: relative;
     }
 
     header img {
       height: 40px;
       width: auto;
+    }
+
+    /* ⚙️ Rueda alineada al título (solo visible en móvil) */
+    #policyIcon {
+      display: none;
+      position: absolute;
+      right: 12px;
+      font-size: 22px;
+      color: #00ffcc;
+      cursor: pointer;
+      transition: transform .3s ease;
+    }
+
+    #policyIcon:hover { transform: rotate(30deg); }
+
+    @media (max-width:600px) {
+      #policyIcon { display: block; }
     }
 
     .container {
@@ -111,14 +128,6 @@
       border: 1px solid #00ffcc;
     }
 
-    .bot a {
-      color: #00ffcc;
-      font-weight: bold;
-      text-decoration: none;
-      word-break: break-all;
-    }
-    .bot a:hover { text-decoration: underline; }
-
     footer {
       display: flex;
       padding: 8px;
@@ -150,55 +159,7 @@
       font-size: 14px;
     }
 
-    .typing span {
-      display: inline-block;
-      width: 6px; height: 6px;
-      margin: 0 2px;
-      background: #00ffcc;
-      border-radius: 50%;
-      animation: blink 1.4s infinite both;
-    }
-    .typing span:nth-child(2){animation-delay:.2s;}
-    .typing span:nth-child(3){animation-delay:.4s;}
-    @keyframes blink{0%{opacity:.2;}20%{opacity:1;}100%{opacity:.2;}}
-
-    @media (min-width:768px){
-      .container{flex-direction:row;}
-      .left-panel{display:flex;flex:1;}
-      .chat-panel{flex:2;border-left:2px solid #00ffcc;}
-    }
-
-    /* === Aviso de políticas === */
-    #cookieBanner {
-      position: fixed;
-      bottom: -150px;
-      left: 0; right: 0;
-      background: rgba(13,17,23,.97);
-      color: #00ffcc;
-      text-align: center;
-      padding: 15px 10px;
-      font-family: "Courier New", monospace;
-      font-size: 15px;
-      border-top: 2px solid #00ffcc;
-      box-shadow: 0 -3px 10px rgba(0,255,204,.3);
-      transition: bottom .8s ease;
-      z-index: 1000;
-    }
-
-    #cookieBanner.show { bottom: 0; }
-    #cookieBanner a { color: #00ffcc; text-decoration: underline; }
-    #cookieBanner button {
-      background: #00ffcc;
-      border: none;
-      color: #000;
-      padding: 8px 16px;
-      border-radius: 5px;
-      font-weight: bold;
-      margin-left: 8px;
-      cursor: pointer;
-    }
-
-    /* === Botón de políticas === */
+    /* === Botón de políticas abajo izquierda (solo escritorio) === */
     #policyButton {
       position: fixed;
       bottom: 12px;
@@ -215,29 +176,14 @@
       z-index: 900;
       cursor: pointer;
     }
-
     #policyButton:hover {
       background: rgba(0,255,204,.2);
       border-color: #00ffcc;
       box-shadow: 0 0 6px #00ffcc88;
     }
 
-    /* 🔹 En móvil: solo engranaje arriba a la derecha */
-    @media (max-width:600px){
-      #policyButton {
-        top: 10px; right: 10px;
-        left: auto; bottom: auto;
-        border-radius: 50%;
-        padding: 10px;
-        font-size: 20px;
-        background: rgba(0,255,204,.1);
-        border: 1px solid #00ffcc66;
-        box-shadow: 0 0 8px #00ffcc44;
-        width: 42px; height: 42px;
-        display: flex; align-items: center; justify-content: center;
-      }
-      #policyButton::after { content: "⚙️"; }
-      #policyButton span { display: none; }
+    @media (max-width:600px) {
+      #policyButton { display: none; }
     }
 
     /* === Modal === */
@@ -275,6 +221,35 @@
       line-height: 1;
       box-shadow: 0 0 10px #00ffcc99;
     }
+
+    /* === Aviso de políticas === */
+    #cookieBanner {
+      position: fixed;
+      bottom: -150px;
+      left: 0; right: 0;
+      background: rgba(13,17,23,.97);
+      color: #00ffcc;
+      text-align: center;
+      padding: 15px 10px;
+      font-family: "Courier New", monospace;
+      font-size: 15px;
+      border-top: 2px solid #00ffcc;
+      box-shadow: 0 -3px 10px rgba(0,255,204,.3);
+      transition: bottom .8s ease;
+      z-index: 1000;
+    }
+    #cookieBanner.show { bottom: 0; }
+    #cookieBanner a { color: #00ffcc; text-decoration: underline; }
+    #cookieBanner button {
+      background: #00ffcc;
+      border: none;
+      color: #000;
+      padding: 8px 16px;
+      border-radius: 5px;
+      font-weight: bold;
+      margin-left: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -282,6 +257,7 @@
   <header>
     <img src="Cabeza.png" alt="Maximilian">
     Maximilian 23
+    <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
   </header>
 
   <div class="container">
@@ -307,8 +283,8 @@
     <button id="acceptCookies">Aceptar</button>
   </div>
 
-  <!-- Botón políticas -->
-  <div id="policyButton" title="Ver políticas de uso"><span>⚙️ Políticas</span></div>
+  <!-- Botón políticas escritorio -->
+  <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
 
   <!-- Modal políticas -->
   <div id="policyModal">
@@ -372,15 +348,18 @@
     });
 
     // 🪟 Modal políticas
-    const pb=document.getElementById("policyButton"),modal=document.getElementById("policyModal"),
-          frame=modal.querySelector("iframe"),close=document.getElementById("closeModal");
+    const openers=[document.getElementById("policyButton"),document.getElementById("policyIcon")],
+          modal=document.getElementById("policyModal"),
+          frame=modal.querySelector("iframe"),
+          close=document.getElementById("closeModal");
 
-    pb.addEventListener("click",()=>{
+    openers.forEach(btn=>btn.addEventListener("click",()=>{
       if(window.innerWidth>768){
         frame.src="https://maximilian23.com/politica.html";
         modal.style.display="flex";
       }else window.open("https://maximilian23.com/politica.html","_blank");
-    });
+    }));
+
     close.addEventListener("click",()=>{modal.style.display="none";frame.src="";});
   </script>
 </body>
