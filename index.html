@@ -119,9 +119,7 @@
       word-break: break-all;
     }
 
-    .bot a:hover {
-      text-decoration: underline;
-    }
+    .bot a:hover { text-decoration: underline; }
 
     footer {
       display: flex;
@@ -169,10 +167,6 @@
       opacity: 0.6;
     }
 
-    .typing {
-      display: inline-block;
-    }
-
     .typing span {
       display: inline-block;
       width: 6px;
@@ -183,13 +177,8 @@
       animation: blink 1.4s infinite both;
     }
 
-    .typing span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .typing span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes blink {
       0% { opacity: .2; }
@@ -197,27 +186,10 @@
       100% { opacity: .2; }
     }
 
-    @media (max-width: 480px) {
-      .user, .bot {
-        font-size: 15px;
-      }
-      header img {
-        height: 32px;
-      }
-    }
-
     @media (min-width: 768px) {
-      .container {
-        flex-direction: row;
-      }
-      .left-panel {
-        display: flex;
-        flex: 1;
-      }
-      .chat-panel {
-        flex: 2;
-        border-left: 2px solid #00ffcc;
-      }
+      .container { flex-direction: row; }
+      .left-panel { display: flex; flex: 1; }
+      .chat-panel { flex: 2; border-left: 2px solid #00ffcc; }
     }
 
     /* === Aviso de políticas === */
@@ -238,14 +210,9 @@
       z-index: 1000;
     }
 
-    #cookieBanner.show {
-      bottom: 0;
-    }
+    #cookieBanner.show { bottom: 0; }
 
-    #cookieBanner a {
-      color: #00ffcc;
-      text-decoration: underline;
-    }
+    #cookieBanner a { color: #00ffcc; text-decoration: underline; }
 
     #cookieBanner button {
       background: #00ffcc;
@@ -258,7 +225,7 @@
       cursor: pointer;
     }
 
-    /* === Botón de políticas permanente === */
+    /* === Botón de políticas === */
     #policyButton {
       position: fixed;
       bottom: 12px;
@@ -270,16 +237,73 @@
       border-radius: 6px;
       font-family: "Courier New", monospace;
       font-size: 13px;
-      text-decoration: none;
       transition: all 0.3s ease;
       backdrop-filter: blur(4px);
       z-index: 900;
+      cursor: pointer;
     }
 
     #policyButton:hover {
       background: rgba(0, 255, 204, 0.2);
       border-color: #00ffcc;
       box-shadow: 0 0 6px #00ffcc88;
+    }
+
+    /* 🔹 Versión móvil: solo icono arriba a la derecha */
+    @media (max-width: 600px) {
+      #policyButton {
+        top: 10px;
+        right: 10px;
+        left: auto;
+        bottom: auto;
+        border-radius: 50%;
+        padding: 10px;
+        font-size: 18px;
+        background: rgba(0, 255, 204, 0.1);
+        border: 1px solid #00ffcc66;
+        box-shadow: 0 0 8px #00ffcc44;
+      }
+      #policyButton::after {
+        content: "⚙️";
+      }
+    }
+
+    /* === Modal de políticas === */
+    #policyModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    #policyModal iframe {
+      width: 80%;
+      height: 80%;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #00ffcc88;
+      background: #0d1117;
+    }
+
+    #closeModal {
+      position: absolute;
+      top: 8%;
+      right: 11%;
+      background: #00ffcc;
+      border: none;
+      border-radius: 50%;
+      color: #000;
+      font-weight: bold;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      box-shadow: 0 0 10px #00ffcc99;
     }
   </style>
 </head>
@@ -305,7 +329,7 @@
     </div>
   </div>
 
-  <!-- === Aviso de políticas === -->
+  <!-- Aviso de políticas -->
   <div id="cookieBanner">
     <p>
       Usamos cookies y tecnologías similares para mejorar tu experiencia.
@@ -314,39 +338,45 @@
     <button id="acceptCookies">Aceptar</button>
   </div>
 
-  <!-- === Botón de políticas permanente === -->
-  <a href="https://maximilian23.com/politica.html" target="_blank" id="policyButton" title="Política de uso y privacidad">
-    ⚙️ Políticas
-  </a>
+  <!-- Botón políticas -->
+  <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
+
+  <!-- Modal políticas -->
+  <div id="policyModal">
+    <button id="closeModal">×</button>
+    <iframe src=""></iframe>
+  </div>
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
 
-    // ✅ linkify final (100% funcional)
+    // 🚀 Ping inicial para despertar Render
+    window.addEventListener("load", async () => {
+      try {
+        await fetch("https://max23.onrender.com/ping", { method: "GET", cache: "no-store" });
+        console.log("Ping enviado a Render");
+      } catch {
+        console.log("Ping fallido");
+      }
+    });
+
     function linkify(text) {
       return text.replace(
         /(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])(?![a-zA-Z0-9\/#?=&_%~\-])/g,
-        (url) => {
-          const cleanUrl = url.replace(/[.,!?;:]+$/, "");
-          return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
-        }
+        url => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
       );
     }
 
     function typeWriterEffect(element, text, delay = 30, callback = null) {
       let i = 0;
       element.innerHTML = "";
-      function typing() {
+      (function typing() {
         if (i < text.length) {
-          element.innerHTML = text.substring(0, i + 1);
+          element.innerHTML = text.substring(0, ++i);
           element.parentElement.scrollTop = element.parentElement.scrollHeight;
-          i++;
           setTimeout(typing, delay);
-        } else {
-          if (callback) callback();
-        }
-      }
-      typing();
+        } else if (callback) callback();
+      })();
     }
 
     async function sendMessage() {
@@ -364,7 +394,6 @@
       userBubble.textContent = userMessage;
       chat.appendChild(userBubble);
       chat.scrollTop = chat.scrollHeight;
-
       input.value = "";
 
       const botBubble = document.createElement("div");
@@ -380,20 +409,16 @@
           body: JSON.stringify({ message: userMessage })
         });
         const data = await response.json();
-
-        let safeReply = linkify(data.reply);
-
         botBubble.innerHTML = "";
-        typeWriterEffect(botBubble, safeReply, 30, () => {
+        typeWriterEffect(botBubble, linkify(data.reply), 30, () => {
           input.disabled = false;
           sendButton.disabled = false;
           input.focus();
         });
-      } catch (err) {
+      } catch {
         botBubble.textContent = "⚠️ Error de conexión.";
         input.disabled = false;
         sendButton.disabled = false;
-        input.focus();
       }
     }
 
@@ -402,21 +427,10 @@
       const botBubble = document.createElement("div");
       botBubble.className = "bot";
       chat.appendChild(botBubble);
-      typeWriterEffect(
-        botBubble,
-        "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
-      );
-      chat.scrollTop = chat.scrollHeight;
-
-      // Banner cookies
+      typeWriterEffect(botBubble, "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
       const banner = document.getElementById("cookieBanner");
       const acceptBtn = document.getElementById("acceptCookies");
-      const accepted = localStorage.getItem("cookiesAccepted");
-
-      if (!accepted) {
-        setTimeout(() => banner.classList.add("show"), 800);
-      }
-
+      if (!localStorage.getItem("cookiesAccepted")) setTimeout(() => banner.classList.add("show"), 800);
       acceptBtn.addEventListener("click", () => {
         localStorage.setItem("cookiesAccepted", "true");
         banner.classList.remove("show");
@@ -424,19 +438,32 @@
       });
     });
 
-    // 🎞️ Animación de la cabeza de Max
+    // 🎞️ Animación cabeza Max
     const maxImage = document.getElementById("maxImage");
-    const staticSrc = "max.png";
-    const gifSrc = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
-
     maxImage.addEventListener("click", () => {
-      maxImage.src = gifSrc;
-      maxImage.addEventListener("load", () => {
-        setTimeout(() => {
-          maxImage.src = staticSrc;
-        }, 3000);
-      }, { once: true });
+      maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+      maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
+    });
+
+    // 🪟 Modal políticas
+    const policyButton = document.getElementById("policyButton");
+    const modal = document.getElementById("policyModal");
+    const iframe = modal.querySelector("iframe");
+    const closeModal = document.getElementById("closeModal");
+
+    policyButton.addEventListener("click", () => {
+      if (window.innerWidth > 768) {
+        iframe.src = "https://maximilian23.com/politica.html";
+        modal.style.display = "flex";
+      } else {
+        window.open("https://maximilian23.com/politica.html", "_blank");
+      }
+    });
+
+    closeModal.addEventListener("click", () => {
+      modal.style.display = "none";
+      iframe.src = "";
     });
   </script>
 </body>
-</html>
+  </html>
