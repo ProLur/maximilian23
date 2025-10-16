@@ -257,6 +257,30 @@
       margin-left: 8px;
       cursor: pointer;
     }
+
+    /* === Botón de políticas permanente === */
+    #policyButton {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0, 255, 204, 0.08);
+      border: 1px solid #00ffcc88;
+      color: #00ffcc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+      z-index: 900;
+    }
+
+    #policyButton:hover {
+      background: rgba(0, 255, 204, 0.2);
+      border-color: #00ffcc;
+      box-shadow: 0 0 6px #00ffcc88;
+    }
   </style>
 </head>
 
@@ -289,6 +313,11 @@
     </p>
     <button id="acceptCookies">Aceptar</button>
   </div>
+
+  <!-- === Botón de políticas permanente === -->
+  <a href="https://maximilian23.com/politica.html" target="_blank" id="policyButton" title="Política de uso y privacidad">
+    ⚙️ Políticas
+  </a>
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
