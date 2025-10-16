@@ -19,7 +19,6 @@
       height: 100dvh;
       display: flex;
       flex-direction: column;
-      position: relative;
       overflow: hidden;
     }
 
@@ -35,7 +34,6 @@
       color: #00ffcc;
       font-family: "Courier New", monospace;
       position: relative;
-      flex-shrink: 0;
     }
 
     header img { height: 40px; width: auto; }
@@ -52,11 +50,7 @@
     #policyIcon:hover { transform: rotate(30deg); }
     @media (max-width:600px) { #policyIcon { display: block; } }
 
-    .container {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
+    .container { flex: 1; display: flex; overflow: hidden; }
 
     .left-panel {
       display: none;
@@ -76,6 +70,7 @@
       cursor: pointer;
       transition: transform 0.2s;
     }
+
     .left-panel img:hover { transform: scale(1.05); }
 
     .chat-panel {
@@ -151,7 +146,6 @@
       padding: 8px;
       background: rgba(22,27,34,0.95);
       border-top: 2px solid #00ffcc;
-      flex-shrink: 0;
     }
 
     input {
@@ -228,92 +222,93 @@
   <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
 
   <script>
-    const API_URL="https://max23.onrender.com/chat";
+    const API_URL = "https://max23.onrender.com/chat";
 
-    window.addEventListener("load",async()=>{
-      try{await fetch("https://max23.onrender.com/ping");}catch{}
-      greet();
-    });
-
-    function greet(){
-      const chat=document.getElementById("chat");
-      const b=document.createElement("div");
-      b.className="bot";
-      chat.appendChild(b);
-      typeWriterEffect(b,"🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
-      scrollBottom();
+    function scrollBottom() {
+      const chat = document.getElementById("chat");
+      chat.scrollTop = chat.scrollHeight;
     }
 
-    function scrollBottom(){
-      const chat=document.getElementById("chat");
-      chat.scrollTop=chat.scrollHeight;
-    }
-
-    function linkify(t){
+    function linkify(t) {
       return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
-        u=>`<a href="${u}" target="_blank">${u}</a>`);
+        u => `<a href="${u}" target="_blank">${u}</a>`);
     }
 
-    function typeWriterEffect(el,text,delay=30,done=null){
-      let i=0; el.innerHTML="";
-      function step(){
-        if(i<text.length){
-          el.innerHTML=text.substring(0,++i);
-          setTimeout(step,delay);
-        }else if(done) done();
+    function typeWriterEffect(el, text, delay = 30, done = null) {
+      let i = 0; el.innerHTML = "";
+      function step() {
+        if (i < text.length) {
+          el.innerHTML = text.substring(0, ++i);
+          setTimeout(step, delay);
+        } else if (done) done();
       }
       step();
     }
 
-    async function sendMessage(){
-      const i=document.getElementById("message");
-      const b=document.getElementById("sendButton");
-      const chat=document.getElementById("chat");
-      const msg=i.value.trim(); if(!msg) return;
+    async function sendMessage() {
+      const i = document.getElementById("message");
+      const b = document.getElementById("sendButton");
+      const chat = document.getElementById("chat");
+      const msg = i.value.trim(); if (!msg) return;
 
-      i.disabled=b.disabled=true;
-      const user=document.createElement("div");
-      user.className="user";
-      user.textContent=msg;
+      i.disabled = b.disabled = true;
+      const user = document.createElement("div");
+      user.className = "user";
+      user.textContent = msg;
       chat.appendChild(user);
 
-      const bot=document.createElement("div");
-      bot.className="bot";
-      bot.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+      const bot = document.createElement("div");
+      bot.className = "bot";
+      bot.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
       chat.appendChild(bot);
       scrollBottom();
 
-      i.value="";
+      i.value = "";
 
       try {
-        const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg})});
-        const data=await r.json();
-        const reply=linkify(data.reply);
-        bot.innerHTML="";
-        typeWriterEffect(bot,reply,30,()=>{
-          i.disabled=b.disabled=false;
+        const r = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await r.json();
+        const reply = linkify(data.reply);
+        bot.innerHTML = "";
+        typeWriterEffect(bot, reply, 30, () => {
+          i.disabled = b.disabled = false;
           i.focus();
           scrollBottom();
         });
       } catch {
-        bot.textContent="⚠️ Error de conexión.";
-        i.disabled=b.disabled=false;
+        bot.textContent = "⚠️ Error de conexión.";
+        i.disabled = b.disabled = false;
         scrollBottom();
       }
     }
 
-    // 🪟 Políticas (rueda o botón)
-    const opens=[document.getElementById("policyButton"),document.getElementById("policyIcon")];
-    opens.forEach(o=>o.addEventListener("click",()=>{
-      window.open("https://maximilian23.com/politica.html","_blank");
+    // 🟢 Mensaje de bienvenida (siempre visible)
+    window.addEventListener("DOMContentLoaded", () => {
+      const chat = document.getElementById("chat");
+      const b = document.createElement("div");
+      b.className = "bot";
+      chat.appendChild(b);
+      typeWriterEffect(b,
+        "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
+      scrollBottom();
+    });
+
+    // 🪟 Políticas
+    const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
+    opens.forEach(o => o.addEventListener("click", () => {
+      window.open("https://maximilian23.com/politica.html", "_blank");
     }));
 
     // 🎞️ Animación muñeco
-    const maxImage=document.getElementById("maxImage");
-    maxImage.addEventListener("click",()=>{
-      maxImage.src="https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
-      maxImage.addEventListener("load",()=>setTimeout(()=>maxImage.src="max.png",3000),{once:true});
+    const maxImage = document.getElementById("maxImage");
+    maxImage.addEventListener("click", () => {
+      maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+      maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
     });
   </script>
 </body>
-</html>
+  </html>
