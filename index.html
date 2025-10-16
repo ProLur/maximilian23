@@ -79,7 +79,6 @@
       display: flex;
       flex-direction: column;
       background: rgba(13, 17, 23, 0.9);
-      height: 100%;
     }
 
     #chat {
@@ -132,7 +131,6 @@
 
     input {
       flex: 1;
-      min-width: 0;
       padding: 10px;
       border: none;
       border-radius: 5px;
@@ -161,12 +159,6 @@
       flex-shrink: 0;
     }
 
-    button:disabled {
-      background: #2a2f38;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
     .typing span {
       display: inline-block;
       width: 6px;
@@ -176,133 +168,87 @@
       border-radius: 50%;
       animation: blink 1.4s infinite both;
     }
+    .typing span:nth-child(2){animation-delay:.2s;}
+    .typing span:nth-child(3){animation-delay:.4s;}
+    @keyframes blink{0%{opacity:.2;}20%{opacity:1;}100%{opacity:.2;}}
 
-    .typing span:nth-child(2) { animation-delay: 0.2s; }
-    .typing span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes blink {
-      0% { opacity: .2; }
-      20% { opacity: 1; }
-      100% { opacity: .2; }
-    }
-
-    @media (min-width: 768px) {
-      .container { flex-direction: row; }
-      .left-panel { display: flex; flex: 1; }
-      .chat-panel { flex: 2; border-left: 2px solid #00ffcc; }
+    @media (min-width:768px){
+      .container{flex-direction:row;}
+      .left-panel{display:flex;flex:1;}
+      .chat-panel{flex:2;border-left:2px solid #00ffcc;}
     }
 
     /* === Aviso de políticas === */
-    #cookieBanner {
-      position: fixed;
-      bottom: -150px;
-      left: 0;
-      right: 0;
-      background: rgba(13,17,23,0.97);
-      color: #00ffcc;
-      text-align: center;
-      padding: 15px 10px;
-      font-family: "Courier New", monospace;
-      font-size: 15px;
-      border-top: 2px solid #00ffcc;
-      box-shadow: 0 -3px 10px rgba(0,255,204,0.3);
-      transition: bottom 0.8s ease;
-      z-index: 1000;
+    #cookieBanner{
+      position:fixed;bottom:-150px;left:0;right:0;
+      background:rgba(13,17,23,.97);color:#00ffcc;text-align:center;
+      padding:15px 10px;font-family:"Courier New",monospace;font-size:15px;
+      border-top:2px solid #00ffcc;box-shadow:0 -3px 10px rgba(0,255,204,.3);
+      transition:bottom .8s ease;z-index:1000;
+    }
+    #cookieBanner.show{bottom:0;}
+    #cookieBanner a{color:#00ffcc;text-decoration:underline;}
+    #cookieBanner button{
+      background:#00ffcc;border:none;color:#000;
+      padding:8px 16px;border-radius:5px;font-weight:bold;margin-left:8px;cursor:pointer;
     }
 
-    #cookieBanner.show { bottom: 0; }
-    #cookieBanner a { color: #00ffcc; text-decoration: underline; }
-
-    #cookieBanner button {
-      background: #00ffcc;
-      border: none;
-      color: #000;
-      padding: 8px 16px;
-      border-radius: 5px;
-      font-weight: bold;
-      margin-left: 8px;
-      cursor: pointer;
+    /* === Botón de políticas === */
+    #policyButton{
+      position:fixed;
+      bottom:12px;left:12px;
+      background:rgba(0,255,204,.08);
+      border:1px solid #00ffcc88;
+      color:#00ffcc;
+      padding:6px 12px;
+      border-radius:6px;
+      font-family:"Courier New",monospace;
+      font-size:13px;
+      transition:all .3s ease;
+      backdrop-filter:blur(4px);
+      z-index:900;
+      cursor:pointer;
+    }
+    #policyButton:hover{
+      background:rgba(0,255,204,.2);
+      border-color:#00ffcc;
+      box-shadow:0 0 6px #00ffcc88;
     }
 
-    /* === Botón políticas === */
-    #policyButton {
-      position: fixed;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(0, 255, 204, 0.08);
-      border: 1px solid #00ffcc88;
-      color: #00ffcc;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-family: "Courier New", monospace;
-      font-size: 13px;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(4px);
-      z-index: 900;
-      cursor: pointer;
-    }
-
-    #policyButton:hover {
-      background: rgba(0, 255, 204, 0.2);
-      border-color: #00ffcc;
-      box-shadow: 0 0 6px #00ffcc88;
-    }
-
-    /* 🔹 Versión móvil: icono arriba derecha */
-    @media (max-width: 600px) {
-      #policyButton {
-        top: 10px;
-        right: 10px;
-        left: auto;
-        bottom: auto;
-        border-radius: 50%;
-        padding: 10px;
-        font-size: 18px;
-        background: rgba(0, 255, 204, 0.1);
-        border: 1px solid #00ffcc66;
-        box-shadow: 0 0 8px #00ffcc44;
+    /* 🔹 En móvil: solo engranaje arriba a la derecha */
+    @media (max-width:600px){
+      #policyButton{
+        top:10px;right:10px;left:auto;bottom:auto;
+        border-radius:50%;
+        padding:10px;
+        font-size:20px;
+        background:rgba(0,255,204,.1);
+        border:1px solid #00ffcc66;
+        box-shadow:0 0 8px #00ffcc44;
+        width:42px;height:42px;
+        display:flex;align-items:center;justify-content:center;
       }
-      #policyButton::after { content: "⚙️"; }
+      #policyButton::after{content:"⚙️";}
+      #policyButton span{display:none;}
     }
 
     /* === Modal === */
-    #policyModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(3px);
+    #policyModal{
+      display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,.8);z-index:2000;
+      align-items:center;justify-content:center;
+      backdrop-filter:blur(3px);
     }
-
-    #policyModal iframe {
-      width: 80%;
-      height: 80%;
-      border: 2px solid #00ffcc;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #00ffcc88;
-      background: #0d1117;
+    #policyModal iframe{
+      width:80%;height:80%;
+      border:2px solid #00ffcc;border-radius:10px;
+      box-shadow:0 0 25px #00ffcc88;background:#0d1117;
     }
-
-    #closeModal {
-      position: absolute;
-      top: 8%;
-      right: 11%;
-      background: transparent;
-      border: none;
-      color: #00ffcc;
-      font-weight: bold;
-      font-size: 28px;
-      cursor: pointer;
-      line-height: 1;
-      text-shadow: 0 0 10px #00ffcc;
-    }
-
-    #closeModal:hover {
-      color: #ffffff;
-      text-shadow: 0 0 15px #00ffcc;
+    #closeModal{
+      position:absolute;top:8%;right:11%;
+      background:#00ffcc;border:none;border-radius:50%;
+      color:#000;font-weight:bold;width:32px;height:32px;cursor:pointer;
+      font-size:18px;line-height:1;box-shadow:0 0 10px #00ffcc99;
     }
   </style>
 </head>
@@ -322,23 +268,22 @@
       <div id="chat"></div>
       <footer>
         <input type="text" id="message" placeholder="Escribe tu mensaje..."
-          onkeydown="if(event.key==='Enter' && !this.disabled){sendMessage()}">
+          onkeydown="if(event.key==='Enter'&&!this.disabled){sendMessage()}">
         <button onclick="sendMessage()" id="sendButton">Enviar</button>
       </footer>
     </div>
   </div>
 
-  <!-- Aviso de políticas -->
+  <!-- Aviso políticas -->
   <div id="cookieBanner">
-    <p>
-      Usamos cookies y tecnologías similares para mejorar tu experiencia.
+    <p>Usamos cookies y tecnologías similares para mejorar tu experiencia.
       Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
     </p>
     <button id="acceptCookies">Aceptar</button>
   </div>
 
-  <!-- ⚙️ Botón de políticas -->
-  <div id="policyButton" title="Política de uso">⚙️ Políticas</div>
+  <!-- Botón políticas -->
+  <div id="policyButton" title="Ver políticas de uso">⚙️ <span>Políticas</span></div>
 
   <!-- Modal políticas -->
   <div id="policyModal">
@@ -347,74 +292,71 @@
   </div>
 
   <script>
-    const API_URL = "https://max23.onrender.com/chat";
+    const API_URL="https://max23.onrender.com/chat";
 
     // 🚀 Ping inicial
-    window.addEventListener("load", async () => {
-      try { await fetch("https://max23.onrender.com/ping"); } catch {}
+    window.addEventListener("load",async()=>{
+      try{await fetch("https://max23.onrender.com/ping");console.log("Ping enviado a Render");}
+      catch{console.log("Ping fallido");}
     });
 
-    function linkify(t) {
+    function linkify(t){
       return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
-        u => `<a href="${u}" target="_blank">${u}</a>`);
+        u=>`<a href="${u}" target="_blank">${u}</a>`);
     }
 
-    function typeWriterEffect(e, t, d = 30, c = null) {
-      let i = 0; e.innerHTML = "";
-      (function typing() {
-        if (i < t.length) {
-          e.innerHTML = t.substring(0, ++i);
-          e.parentElement.scrollTop = e.parentElement.scrollHeight;
-          setTimeout(typing, d);
-        } else if (c) c();
+    function typeWriterEffect(e,t,d=30,c=null){
+      let i=0;e.innerHTML="";
+      (function typing(){
+        if(i<t.length){e.innerHTML=t.substring(0,++i);
+          e.parentElement.scrollTop=e.parentElement.scrollHeight;
+          setTimeout(typing,d);}else if(c)c();
       })();
     }
 
-    async function sendMessage() {
-      const i = document.getElementById("message"), b = document.getElementById("sendButton"), c = document.getElementById("chat");
-      const m = i.value.trim(); if (!m) return;
-      i.disabled = b.disabled = true;
-      const u = document.createElement("div"); u.className = "user"; u.textContent = m; c.appendChild(u);
-      const bot = document.createElement("div"); bot.className = "bot";
-      bot.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`; c.appendChild(bot);
-      c.scrollTop = c.scrollHeight; i.value = "";
-      try {
-        const r = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: m }) });
-        const d = await r.json(); bot.innerHTML = "";
-        typeWriterEffect(bot, linkify(d.reply), 30, () => { i.disabled = b.disabled = false; i.focus(); });
-      } catch {
-        bot.textContent = "⚠️ Error de conexión."; i.disabled = b.disabled = false;
-      }
+    async function sendMessage(){
+      const i=document.getElementById("message"),b=document.getElementById("sendButton"),c=document.getElementById("chat");
+      const m=i.value.trim();if(!m)return;
+      i.disabled=b.disabled=true;
+      const u=document.createElement("div");u.className="user";u.textContent=m;c.appendChild(u);
+      const bot=document.createElement("div");bot.className="bot";
+      bot.innerHTML=`<div class="typing"><span></span><span></span><span></span></div>`;c.appendChild(bot);
+      c.scrollTop=c.scrollHeight;i.value="";
+      try{
+        const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:m})});
+        const d=await r.json();bot.innerHTML="";
+        typeWriterEffect(bot,linkify(d.reply),30,()=>{i.disabled=b.disabled=false;i.focus();});
+      }catch{bot.textContent="⚠️ Error de conexión.";i.disabled=b.disabled=false;}
     }
 
-    window.addEventListener("load", () => {
-      const c = document.getElementById("chat"), b = document.createElement("div");
-      b.className = "bot"; c.appendChild(b);
-      typeWriterEffect(b, "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
-      const banner = document.getElementById("cookieBanner"), a = document.getElementById("acceptCookies");
-      if (!localStorage.getItem("cookiesAccepted")) setTimeout(() => banner.classList.add("show"), 800);
-      a.addEventListener("click", () => { localStorage.setItem("cookiesAccepted", "true"); banner.classList.remove("show"); setTimeout(() => banner.remove(), 800); });
+    window.addEventListener("load",()=>{
+      const c=document.getElementById("chat"),b=document.createElement("div");
+      b.className="bot";c.appendChild(b);
+      typeWriterEffect(b,"🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
+      const banner=document.getElementById("cookieBanner"),a=document.getElementById("acceptCookies");
+      if(!localStorage.getItem("cookiesAccepted"))setTimeout(()=>banner.classList.add("show"),800);
+      a.addEventListener("click",()=>{localStorage.setItem("cookiesAccepted","true");
+        banner.classList.remove("show");setTimeout(()=>banner.remove(),800);});
     });
 
     // 🎞️ Animación cabeza Max
-    const maxImage = document.getElementById("maxImage");
-    maxImage.addEventListener("click", () => {
-      maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
-      maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
+    const maxImage=document.getElementById("maxImage");
+    maxImage.addEventListener("click",()=>{
+      maxImage.src="https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+      maxImage.addEventListener("load",()=>setTimeout(()=>maxImage.src="max.png",3000),{once:true});
     });
 
     // 🪟 Modal políticas
-    const pb = document.getElementById("policyButton"), modal = document.getElementById("policyModal"),
-          frame = modal.querySelector("iframe"), close = document.getElementById("closeModal");
+    const pb=document.getElementById("policyButton"),modal=document.getElementById("policyModal"),
+          frame=modal.querySelector("iframe"),close=document.getElementById("closeModal");
 
-    pb.addEventListener("click", () => {
-      if (window.innerWidth > 768) {
-        frame.src = "https://maximilian23.com/politica.html";
-        modal.style.display = "flex";
-      } else window.open("https://maximilian23.com/politica.html", "_blank");
+    pb.addEventListener("click",()=>{
+      if(window.innerWidth>768){
+        frame.src="https://maximilian23.com/politica.html";
+        modal.style.display="flex";
+      }else window.open("https://maximilian23.com/politica.html","_blank");
     });
-
-    close.addEventListener("click", () => { modal.style.display = "none"; frame.src = ""; });
+    close.addEventListener("click",()=>{modal.style.display="none";frame.src="";});
   </script>
 </body>
-</html>
+  </html>
