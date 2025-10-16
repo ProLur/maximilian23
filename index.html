@@ -80,9 +80,7 @@
       transition: transform 0.2s;
     }
 
-    .left-panel img:hover {
-      transform: scale(1.05);
-    }
+    .left-panel img:hover { transform: scale(1.05); }
 
     .chat-panel {
       flex: 2;
@@ -127,6 +125,30 @@
       background: #1e2d3d;
       color: #00ffcc;
       border: 1px solid #00ffcc;
+    }
+
+    /* Animación de los tres puntos */
+    .typing {
+      display: inline-block;
+    }
+
+    .typing span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin: 0 2px;
+      background: #00ffcc;
+      border-radius: 50%;
+      animation: blink 1.4s infinite both;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0% { opacity: .2; }
+      20% { opacity: 1; }
+      100% { opacity: .2; }
     }
 
     footer {
@@ -175,11 +197,13 @@
       z-index: 900;
       cursor: pointer;
     }
+
     #policyButton:hover {
       background: rgba(0,255,204,.2);
       border-color: #00ffcc;
       box-shadow: 0 0 6px #00ffcc88;
     }
+
     @media (max-width:600px) { #policyButton { display: none; } }
 
     #policyModal {
@@ -232,6 +256,7 @@
       transition: bottom .8s ease;
       z-index: 1000;
     }
+
     #cookieBanner.show { bottom: 0; }
   </style>
 </head>
@@ -281,7 +306,10 @@
       return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,u=>`<a href="${u}" target="_blank">${u}</a>`);
     }
 
-    function scrollToBottom(){const c=document.getElementById("chat");c.lastElementChild?.scrollIntoView({behavior:"smooth"});}
+    function scrollToBottom(){
+      const c=document.getElementById("chat");
+      c.lastElementChild?.scrollIntoView({behavior:"smooth"});
+    }
 
     function typeWriterEffect(e,t,d=30,c=null){
       let i=0;e.innerHTML="";
@@ -301,9 +329,14 @@
       i.value="";
       try{
         const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:m})});
-        const d=await r.json();bot.innerHTML="";
+        const d=await r.json();
+        bot.innerHTML="";
         typeWriterEffect(bot,linkify(d.reply),30,()=>{i.disabled=b.disabled=false;i.focus();scrollToBottom();});
-      }catch{bot.textContent="⚠️ Error de conexión.";i.disabled=b.disabled=false;scrollToBottom();}
+      }catch{
+        bot.textContent="⚠️ Error de conexión.";
+        i.disabled=b.disabled=false;
+        scrollToBottom();
+      }
     }
 
     window.addEventListener("load",()=>{
@@ -312,8 +345,7 @@
       typeWriterEffect(b,"🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
       const banner=document.getElementById("cookieBanner"),a=document.getElementById("acceptCookies");
       if(!localStorage.getItem("cookiesAccepted"))setTimeout(()=>banner.classList.add("show"),800);
-      a.addEventListener("click",()=>{localStorage.setItem("cookiesAccepted","true");
-        banner.classList.remove("show");setTimeout(()=>banner.remove(),800);});
+      a.addEventListener("click",()=>{localStorage.setItem("cookiesAccepted","true");banner.classList.remove("show");setTimeout(()=>banner.remove(),800);});
     });
 
     // 🎞️ Animación del muñeco Maximilian
