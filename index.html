@@ -78,7 +78,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      background: rgba(13, 17, 23, 0.9);
+      background: rgba(13,17,23,0.9);
     }
 
     #chat {
@@ -117,13 +117,12 @@
       text-decoration: none;
       word-break: break-all;
     }
-
     .bot a:hover { text-decoration: underline; }
 
     footer {
       display: flex;
       padding: 8px;
-      background: rgba(22, 27, 34, 0.95);
+      background: rgba(22,27,34,0.95);
       border-top: 2px solid #00ffcc;
       position: sticky;
       bottom: 0;
@@ -140,13 +139,6 @@
       color: #000;
     }
 
-    input:disabled {
-      background: #2a2f38;
-      color: #666;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
     button {
       background: #00ffcc;
       border: none;
@@ -156,13 +148,11 @@
       cursor: pointer;
       font-weight: bold;
       font-size: 14px;
-      flex-shrink: 0;
     }
 
     .typing span {
       display: inline-block;
-      width: 6px;
-      height: 6px;
+      width: 6px; height: 6px;
       margin: 0 2px;
       background: #00ffcc;
       border-radius: 50%;
@@ -179,76 +169,111 @@
     }
 
     /* === Aviso de políticas === */
-    #cookieBanner{
-      position:fixed;bottom:-150px;left:0;right:0;
-      background:rgba(13,17,23,.97);color:#00ffcc;text-align:center;
-      padding:15px 10px;font-family:"Courier New",monospace;font-size:15px;
-      border-top:2px solid #00ffcc;box-shadow:0 -3px 10px rgba(0,255,204,.3);
-      transition:bottom .8s ease;z-index:1000;
+    #cookieBanner {
+      position: fixed;
+      bottom: -150px;
+      left: 0; right: 0;
+      background: rgba(13,17,23,.97);
+      color: #00ffcc;
+      text-align: center;
+      padding: 15px 10px;
+      font-family: "Courier New", monospace;
+      font-size: 15px;
+      border-top: 2px solid #00ffcc;
+      box-shadow: 0 -3px 10px rgba(0,255,204,.3);
+      transition: bottom .8s ease;
+      z-index: 1000;
     }
-    #cookieBanner.show{bottom:0;}
-    #cookieBanner a{color:#00ffcc;text-decoration:underline;}
-    #cookieBanner button{
-      background:#00ffcc;border:none;color:#000;
-      padding:8px 16px;border-radius:5px;font-weight:bold;margin-left:8px;cursor:pointer;
+
+    #cookieBanner.show { bottom: 0; }
+    #cookieBanner a { color: #00ffcc; text-decoration: underline; }
+    #cookieBanner button {
+      background: #00ffcc;
+      border: none;
+      color: #000;
+      padding: 8px 16px;
+      border-radius: 5px;
+      font-weight: bold;
+      margin-left: 8px;
+      cursor: pointer;
     }
 
     /* === Botón de políticas === */
-    #policyButton{
-      position:fixed;
-      bottom:12px;left:12px;
-      background:rgba(0,255,204,.08);
-      border:1px solid #00ffcc88;
-      color:#00ffcc;
-      padding:6px 12px;
-      border-radius:6px;
-      font-family:"Courier New",monospace;
-      font-size:13px;
-      transition:all .3s ease;
-      backdrop-filter:blur(4px);
-      z-index:900;
-      cursor:pointer;
+    #policyButton {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0,255,204,.08);
+      border: 1px solid #00ffcc88;
+      color: #00ffcc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      transition: all .3s ease;
+      backdrop-filter: blur(4px);
+      z-index: 900;
+      cursor: pointer;
     }
-    #policyButton:hover{
-      background:rgba(0,255,204,.2);
-      border-color:#00ffcc;
-      box-shadow:0 0 6px #00ffcc88;
+
+    #policyButton:hover {
+      background: rgba(0,255,204,.2);
+      border-color: #00ffcc;
+      box-shadow: 0 0 6px #00ffcc88;
     }
 
     /* 🔹 En móvil: solo engranaje arriba a la derecha */
     @media (max-width:600px){
-      #policyButton{
-        top:10px;right:10px;left:auto;bottom:auto;
-        border-radius:50%;
-        padding:10px;
-        font-size:20px;
-        background:rgba(0,255,204,.1);
-        border:1px solid #00ffcc66;
-        box-shadow:0 0 8px #00ffcc44;
-        width:42px;height:42px;
-        display:flex;align-items:center;justify-content:center;
+      #policyButton {
+        top: 10px; right: 10px;
+        left: auto; bottom: auto;
+        border-radius: 50%;
+        padding: 10px;
+        font-size: 20px;
+        background: rgba(0,255,204,.1);
+        border: 1px solid #00ffcc66;
+        box-shadow: 0 0 8px #00ffcc44;
+        width: 42px; height: 42px;
+        display: flex; align-items: center; justify-content: center;
       }
-      #policyButton::after{content:"⚙️";}
-      #policyButton span{display:none;}
+      #policyButton::after { content: "⚙️"; }
+      #policyButton span { display: none; }
     }
 
     /* === Modal === */
-    #policyModal{
-      display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-      background:rgba(0,0,0,.8);z-index:2000;
-      align-items:center;justify-content:center;
-      backdrop-filter:blur(3px);
+    #policyModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
     }
-    #policyModal iframe{
-      width:80%;height:80%;
-      border:2px solid #00ffcc;border-radius:10px;
-      box-shadow:0 0 25px #00ffcc88;background:#0d1117;
+
+    #policyModal iframe {
+      width: 80%; height: 80%;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #00ffcc88;
+      background: #0d1117;
     }
-    #closeModal{
-      position:absolute;top:8%;right:11%;
-      background:#00ffcc;border:none;border-radius:50%;
-      color:#000;font-weight:bold;width:32px;height:32px;cursor:pointer;
-      font-size:18px;line-height:1;box-shadow:0 0 10px #00ffcc99;
+
+    #closeModal {
+      position: absolute;
+      top: 8%;
+      right: 11%;
+      background: #00ffcc;
+      border: none;
+      border-radius: 50%;
+      color: #000;
+      font-weight: bold;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      box-shadow: 0 0 10px #00ffcc99;
     }
   </style>
 </head>
@@ -283,7 +308,7 @@
   </div>
 
   <!-- Botón políticas -->
-  <div id="policyButton" title="Ver políticas de uso">⚙️ <span>Políticas</span></div>
+  <div id="policyButton" title="Ver políticas de uso"><span>⚙️ Políticas</span></div>
 
   <!-- Modal políticas -->
   <div id="policyModal">
@@ -359,4 +384,4 @@
     close.addEventListener("click",()=>{modal.style.display="none";frame.src="";});
   </script>
 </body>
-  </html>
+</html>
