@@ -194,6 +194,40 @@
     }
 
     @media (max-width:600px) { #policyButton { display: none; } }
+
+    /* 🧾 Cortina de políticas */
+    #policyBanner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(13,17,23,0.97);
+      color: #00ffcc;
+      text-align: center;
+      padding: 18px 10px;
+      border-top: 2px solid #00ffcc;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      transform: translateY(100%);
+      transition: transform 0.6s ease;
+      z-index: 999;
+    }
+
+    #policyBanner.show {
+      transform: translateY(0);
+    }
+
+    #acceptPolicies {
+      background: #00ffcc;
+      color: #000;
+      border: none;
+      padding: 6px 12px;
+      margin-left: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
   </style>
 </head>
 
@@ -221,6 +255,13 @@
 
   <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
 
+  <!-- 🧾 Banner de políticas -->
+  <div id="policyBanner">
+    Este sitio utiliza cookies y almacena datos de sesión para ofrecer un mejor servicio.
+    Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
+    <button id="acceptPolicies">Aceptar</button>
+  </div>
+
   <script>
     const API_URL = "https://max23.onrender.com/chat";
 
@@ -240,7 +281,6 @@
       function step() {
         if (i < text.length) {
           el.innerHTML = text.substring(0, ++i);
-          // desplaza solo cada 3 caracteres para fluidez
           if (i % 3 === 0) chat.scrollTop = chat.scrollHeight;
           setTimeout(step, delay);
         } else {
@@ -300,6 +340,12 @@
       typeWriterEffect(b,
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
       scrollBottom();
+
+      // 🧾 Mostrar cortina de políticas si no se ha aceptado
+      const accepted = localStorage.getItem("policiesAccepted");
+      if (!accepted) {
+        document.getElementById("policyBanner").classList.add("show");
+      }
     });
 
     // ⚙️ Políticas
@@ -313,6 +359,12 @@
     maxImage.addEventListener("click", () => {
       maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
       maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
+    });
+
+    // 🧾 Botón de aceptar políticas
+    document.getElementById("acceptPolicies").addEventListener("click", () => {
+      localStorage.setItem("policiesAccepted", "true");
+      document.getElementById("policyBanner").classList.remove("show");
     });
   </script>
 </body>
