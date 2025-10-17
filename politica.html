@@ -45,6 +45,24 @@
       font-size: 14px;
       color: #00ffcc99;
     }
+
+    button {
+      margin-top: 10px;
+      background: #00ffcc;
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-family: "Courier New", monospace;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #00e0b8;
+      box-shadow: 0 0 8px #00ffcc88;
+    }
   </style>
 </head>
 <body>
@@ -91,7 +109,23 @@
 
   <footer>
     © 2025 CEIP Juan XXIII de Zafra · Asistente Maximilian 23  
-    | <a href="https://maximilian23.com">Volver al asistente</a>
+    <br>
+    <button id="closeBtn">Cerrar</button>
   </footer>
+
+  <script>
+    document.getElementById("closeBtn").addEventListener("click", () => {
+      // Intenta cerrar la ventana si fue abierta por script
+      window.open('', '_self');
+      window.close();
+
+      // Si no se puede cerrar (por ejemplo, pestaña normal), redirige al asistente
+      setTimeout(() => {
+        if (!window.closed) {
+          window.location.href = "https://maximilian23.com";
+        }
+      }, 300);
+    });
+  </script>
 </body>
 </html>
