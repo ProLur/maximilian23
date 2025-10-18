@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maximilian 23</title>
+
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <meta name="description" content="Maximilian 23 es el asistente de inteligencia artificial del CEIP Juan XXIII de Zafra.">
+  <meta name="theme-color" content="#00ffcc">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      margin: 0;
+      padding: 0;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      background: rgba(22,27,34,0.95);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #00ffcc;
+      font-family: "Courier New", monospace;
+      position: relative;
+    }
+
+    header img { height: 40px; width: auto; }
+
+    #policyIcon {
+      display: none;
+      position: absolute;
+      right: 12px;
+      font-size: 22px;
+      color: #00ffcc;
+      cursor: pointer;
+      transition: transform .3s ease;
+    }
+    #policyIcon:hover { transform: rotate(30deg); }
+    @media (max-width:600px) { #policyIcon { display: block; } }
+
+    .container { flex: 1; display: flex; overflow: hidden; }
+
+    .left-panel {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,17,23,0.9);
+      border-right: 2px solid #00ffcc;
+    }
+
+    .left-panel img {
+      max-width: 220px;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid #00ffcc;
+      box-shadow: 0 0 15px #00ffcc88;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .left-panel img:hover { transform: scale(1.05); }
+
+    .chat-panel {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      background: rgba(13,17,23,0.9);
+      height: 100%;
+    }
+
+    @media (min-width:768px) {
+      .left-panel { display: flex; }
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      scroll-behavior: smooth;
+    }
+
+    .user, .bot {
+      padding: 12px;
+      margin: 10px 12px;
+      border-radius: 10px;
+      max-width: 80%;
+      font-family: "Courier New", monospace;
+      white-space: pre-wrap;
+      font-size: 17px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .user {
+      background: #243b4a;
+      color: #00ffcc;
+      margin-left: auto;
+      border: 1px solid #00ffcc;
+    }
+
+    .bot {
+      background: #1e2d3d;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+    }
+
+    /* Animación de los tres puntos */
+    .typing {
+      display: inline-block;
+    }
+
+    .typing span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin: 0 2px;
+      background: #00ffcc;
+      border-radius: 50%;
+      animation: blink 1.4s infinite both;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0% { opacity: .2; }
+      20% { opacity: 1; }
+      100% { opacity: .2; }
+    }
+
+    footer {
+      display: flex;
+      padding: 8px;
+      background: rgba(22,27,34,0.95);
+      border-top: 2px solid #00ffcc;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      outline: none;
+      background: #fff;
+      color: #000;
+    }
+
+    button {
+      background: #00ffcc;
+      border: none;
+      padding: 10px 14px;
+      margin-left: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    #policyButton {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0,255,204,.08);
+      border: 1px solid #00ffcc88;
+      color: #00ffcc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      transition: all .3s ease;
+      backdrop-filter: blur(4px);
+      z-index: 900;
+      cursor: pointer;
+    }
+
+    #policyButton:hover {
+      background: rgba(0,255,204,.2);
+      border-color: #00ffcc;
+      box-shadow: 0 0 6px #00ffcc88;
+    }
+
+    @media (max-width:600px) { #policyButton { display: none; } }
+
+    /* 🧾 Cortina de políticas */
+    #policyBanner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(13,17,23,0.97);
+      color: #00ffcc;
+      text-align: center;
+      padding: 18px 10px;
+      border-top: 2px solid #00ffcc;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      transform: translateY(100%);
+      transition: transform 0.6s ease;
+      z-index: 999;
+    }
+
+    #policyBanner.show {
+      transform: translateY(0);
+    }
+
+    #policyBanner a {
+      color: #00ffcc;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+
+    #policyBanner a:hover {
+      color: #33ffe6;
+    }
+
+    #acceptPolicies {
+      background: #00ffcc;
+      color: #000;
+      border: none;
+      padding: 6px 12px;
+      margin-left: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    /* 🩹 Ajuste para modo escritorio en ventana pequeña */
+    html, body {
+      height: 100%;
+      min-height: 100%;
+    }
+
+    .container, .chat-panel {
+      height: 100%;
+    }
+
+    @media (min-width: 601px) and (max-height: 650px) {
+      footer {
+        padding-bottom: 50px; /* deja espacio para el botón fijo */
+      }
+      #policyButton {
+        bottom: 60px; /* eleva el botón */
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="Cabeza.png" alt="Maximilian">
+    Maximilian 23
+    <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
+  </header>
+
+  <div class="container">
+    <div class="left-panel">
+      <img id="maxImage" src="max.png" alt="Maximilian grande">
+    </div>
+
+    <div class="chat-panel">
+      <div id="chat"></div>
+      <footer>
+        <input type="text" id="message" placeholder="Escribe tu mensaje..."
+          onkeydown="if(event.key==='Enter'&&!this.disabled){sendMessage()}">
+        <button onclick="sendMessage()" id="sendButton">Enviar</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
+
+  <!-- 🧾 Banner de políticas -->
+  <div id="policyBanner">
+    Este sitio utiliza cookies y almacena datos de sesión para ofrecer un mejor servicio.
+    Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
+    <button id="acceptPolicies">Aceptar</button>
+  </div>
+
+  <script>
+    const API_URL = "https://max23.onrender.com/chat";
+
+    function scrollBottom() {
+      const chat = document.getElementById("chat");
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function linkify(t) {
+      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
+        u => `<a href="${u}" target="_blank">${u}</a>`);
+    }
+
+    function typeWriterEffect(el, text, delay = 30, done = null) {
+      let i = 0; el.innerHTML = "";
+      const chat = document.getElementById("chat");
+      function step() {
+        if (i < text.length) {
+          el.innerHTML = text.substring(0, ++i);
+          if (i % 3 === 0) chat.scrollTop = chat.scrollHeight;
+          setTimeout(step, delay);
+        } else {
+          chat.scrollTop = chat.scrollHeight;
+          if (done) done();
+        }
+      }
+      step();
+    }
+
+    async function sendMessage() {
+      const i = document.getElementById("message");
+      const b = document.getElementById("sendButton");
+      const chat = document.getElementById("chat");
+      const msg = i.value.trim(); if (!msg) return;
+
+      i.disabled = b.disabled = true;
+      const user = document.createElement("div");
+      user.className = "user";
+      user.textContent = msg;
+      chat.appendChild(user);
+
+      const bot = document.createElement("div");
+      bot.className = "bot";
+      bot.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+      chat.appendChild(bot);
+      scrollBottom();
+
+      i.value = "";
+
+      try {
+        const r = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await r.json();
+        const reply = linkify(data.reply);
+        bot.innerHTML = "";
+        typeWriterEffect(bot, reply, 30, () => {
+          i.disabled = b.disabled = false;
+          i.focus();
+        });
+      } catch {
+        bot.textContent = "⚠️ Error de conexión.";
+        i.disabled = b.disabled = false;
+        scrollBottom();
+      }
+    }
+
+    // 🟢 Mensaje de bienvenida
+    window.addEventListener("DOMContentLoaded", () => {
+      const chat = document.getElementById("chat");
+      const b = document.createElement("div");
+      b.className = "bot";
+      chat.appendChild(b);
+      typeWriterEffect(b,
+        "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. Recuerda que la primera consulta puede tomar algo más de tiempo. ¿Qué quieres saber?");
+      scrollBottom();
+
+      const accepted = localStorage.getItem("policiesAccepted");
+      if (!accepted) {
+        document.getElementById("policyBanner").classList.add("show");
+      }
+    });
+
+    const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
+    opens.forEach(o => o.addEventListener("click", () => {
+      window.open("https://maximilian23.com/politica.html", "_blank");
+    }));
+
+    const maxImage = document.getElementById("maxImage");
+    maxImage.addEventListener("click", () => {
+      maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+      maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
+    });
+
+    document.getElementById("acceptPolicies").addEventListener("click", () => {
+      localStorage.setItem("policiesAccepted", "true");
+      document.getElementById("policyBanner").classList.remove("show");
+    });
+  </script>
+</body>
+</html>
