@@ -192,22 +192,37 @@
     /* ============================================================
        ⚙️ BOTÓN DE POLÍTICAS
     ============================================================ */
-    #policyButton {
-      position: fixed;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(0,255,204,.08);
-      border: 1px solid #00ffcc88;
-      color: #00ffcc;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-family: "Courier New", monospace;
-      font-size: 13px;
-      transition: all .3s ease;
-      backdrop-filter: blur(4px);
-      z-index: 900;
-      cursor: pointer;
-    }
+    /* ⚙️ BOTÓN DE POLÍTICAS – siempre visible sin tapar el footer */
+#policyButton {
+  position: fixed;
+  bottom: 72px; /* 🔼 Subimos el botón para no tapar el textbox */
+  left: 12px;
+  background: rgba(0,255,204,.08);
+  border: 1px solid #00ffcc88;
+  color: #00ffcc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  transition: all .3s ease;
+  backdrop-filter: blur(4px);
+  z-index: 900;
+  cursor: pointer;
+}
+
+/* Cuando esté expandido (pantalla completa), bajamos el botón */
+@media (min-height: 700px) {
+  #policyButton {
+    bottom: 18px; /* 🔽 vuelve abajo en modo pantalla completa */
+  }
+}
+
+#policyButton:hover {
+  background: rgba(0,255,204,.2);
+  border-color: #00ffcc;
+  box-shadow: 0 0 6px #00ffcc88;
+}
+
 
     #policyButton:hover {
       background: rgba(0,255,204,.2);
