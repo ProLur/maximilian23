@@ -189,49 +189,35 @@
       font-size: 14px;
     }
 
-   /* ============================================================
-   ⚙️ BOTÓN DE POLÍTICAS
-=========================================================== */
-#policyButton {
-  position: fixed;
-  bottom: 12px;
-  left: 12px;
-  background: rgba(0,255,204,.08);
-  border: 1px solid #00ffcc88;
-  color: #00ffcc;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-family: "Courier New", monospace;
-  font-size: 13px;
-  transition: all .3s ease;
-  backdrop-filter: blur(4px);
-  z-index: 900;
-  cursor: pointer;
-}
+    /* ============================================================
+       ⚙️ BOTÓN DE POLÍTICAS
+    ============================================================ */
+    #policyButton {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0,255,204,.08);
+      border: 1px solid #00ffcc88;
+      color: #00ffcc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      transition: all .3s ease;
+      backdrop-filter: blur(4px);
+      z-index: 900;
+      cursor: pointer;
+    }
 
-#policyButton:hover {
-  background: rgba(0,255,204,.2);
-  border-color: #00ffcc;
-  box-shadow: 0 0 6px #00ffcc88;
-}
+    #policyButton:hover {
+      background: rgba(0,255,204,.2);
+      border-color: #00ffcc;
+      box-shadow: 0 0 6px #00ffcc88;
+    }
 
-@media (max-width:600px) {
-  #policyButton { display: none; }
-}
-
-/* Ajuste para pantallas de ordenador con altura limitada o ventana no maximizada */
-@media (min-width:601px) {
-  #policyButton {
-    bottom: calc(12px + 50px); /* Ajusta la posición sumando la altura aproximada del footer */
-  }
-}
-
-/* Ajuste adicional para pantallas con altura muy baja */
-@media (min-width:601px) and (max-height:650px) {
-  #policyButton {
-    bottom: calc(12px + 60px); /* Mayor separación si la altura es limitada */
-  }
-}
+    @media (max-width:767px) {
+      #policyButton { display: none; }
+    }
 
     /* ============================================================
        🧾 BANNER DE POLÍTICAS
@@ -283,7 +269,6 @@
 
     @media (min-width:601px) and (max-height:650px) {
       footer { padding-bottom: 50px; }
-      #policyButton { bottom: 60px; }
     }
   </style>
 </head>
