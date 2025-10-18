@@ -172,9 +172,11 @@
       font-size: 14px;
     }
 
+    /* ⚙️ Botón flotante de políticas */
     #policyButton {
       position: fixed;
-      left: 16px;
+      bottom: 18px;
+      right: 18px;
       background: rgba(0,255,204,.08);
       border: 1px solid #00ffcc88;
       color: #00ffcc;
@@ -182,7 +184,7 @@
       border-radius: 6px;
       font-family: "Courier New", monospace;
       font-size: 13px;
-      transition: all .3s ease;
+      transition: all .4s ease;
       backdrop-filter: blur(4px);
       z-index: 900;
       cursor: pointer;
@@ -194,9 +196,16 @@
       box-shadow: 0 0 6px #00ffcc88;
     }
 
+    /* cuando el banner se muestra, el botón pasa a la izquierda */
+    #policyButton.left {
+      right: auto;
+      left: 18px;
+      bottom: 22px;
+    }
+
     @media (max-width:600px) { #policyButton { display: none; } }
 
-    /* 🧾 Cortina de políticas */
+    /* 🧾 Banner de políticas */
     #policyBanner {
       position: fixed;
       bottom: 0;
@@ -214,9 +223,7 @@
       z-index: 999;
     }
 
-    #policyBanner.show {
-      transform: translateY(0);
-    }
+    #policyBanner.show { transform: translateY(0); }
 
     #policyBanner a {
       color: #00ffcc;
@@ -224,9 +231,7 @@
       font-weight: bold;
     }
 
-    #policyBanner a:hover {
-      color: #33ffe6;
-    }
+    #policyBanner a:hover { color: #33ffe6; }
 
     #acceptPolicies {
       background: #00ffcc;
@@ -355,32 +360,25 @@
       const accepted = localStorage.getItem("policiesAccepted");
       if (!accepted) {
         document.getElementById("policyBanner").classList.add("show");
+        document.getElementById("policyButton").classList.add("left");
       }
-
-      adjustPolicyButton(); // posición inicial
     });
 
-    // 🧠 Botón de políticas adaptativo
-    function adjustPolicyButton() {
-      const btn = document.getElementById("policyButton");
-      const footer = document.querySelector("footer");
-      const footerRect = footer.getBoundingClientRect();
-      const newBottom = window.innerHeight - footerRect.top + 12;
-      btn.style.bottom = `${newBottom}px`;
-    }
-
-    window.addEventListener("resize", adjustPolicyButton);
-    window.addEventListener("scroll", adjustPolicyButton);
-
     // 🧾 Acciones del botón y banner
-    const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
-    opens.forEach(o => o.addEventListener("click", () => {
-      window.open("https://maximilian23.com/politica.html", "_blank");
+    const policyButton = document.getElementById("policyButton");
+    const policyIcon = document.getElementById("policyIcon");
+    const banner = document.getElementById("policyBanner");
+
+    [policyButton, policyIcon].forEach(btn => btn.addEventListener("click", () => {
+      const visible = banner.classList.toggle("show");
+      policyButton.classList.toggle("left", visible);
+      if (visible) window.open("https://maximilian23.com/politica.html", "_blank");
     }));
 
     document.getElementById("acceptPolicies").addEventListener("click", () => {
       localStorage.setItem("policiesAccepted", "true");
-      document.getElementById("policyBanner").classList.remove("show");
+      banner.classList.remove("show");
+      policyButton.classList.remove("left");
     });
 
     const maxImage = document.getElementById("maxImage");
