@@ -20,6 +20,7 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background 0.3s ease;
     }
 
     header {
@@ -34,6 +35,7 @@
       color: #00ffcc;
       font-family: "Courier New", monospace;
       position: relative;
+      z-index: 20;
     }
 
     header img { height: 40px; width: auto; }
@@ -47,6 +49,7 @@
       cursor: pointer;
       transition: transform .3s ease;
     }
+
     #policyIcon:hover { transform: rotate(30deg); }
     @media (max-width:600px) { #policyIcon { display: block; } }
 
@@ -79,6 +82,7 @@
       flex-direction: column;
       background: rgba(13,17,23,0.9);
       height: 100%;
+      position: relative;
     }
 
     @media (min-width:768px) {
@@ -117,30 +121,6 @@
       border: 1px solid #00ffcc;
     }
 
-    /* Animación de los tres puntos */
-    .typing {
-      display: inline-block;
-    }
-
-    .typing span {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      margin: 0 2px;
-      background: #00ffcc;
-      border-radius: 50%;
-      animation: blink 1.4s infinite both;
-    }
-
-    .typing span:nth-child(2) { animation-delay: 0.2s; }
-    .typing span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes blink {
-      0% { opacity: .2; }
-      20% { opacity: 1; }
-      100% { opacity: .2; }
-    }
-
     footer {
       display: flex;
       padding: 8px;
@@ -172,11 +152,9 @@
       font-size: 14px;
     }
 
-    /* ⚙️ Botón flotante de políticas */
+    /* ⚙️ Botón de políticas flotante */
     #policyButton {
       position: fixed;
-      bottom: 18px;
-      right: 18px;
       background: rgba(0,255,204,.08);
       border: 1px solid #00ffcc88;
       color: #00ffcc;
@@ -184,10 +162,12 @@
       border-radius: 6px;
       font-family: "Courier New", monospace;
       font-size: 13px;
-      transition: all .4s ease;
+      transition: all .5s ease;
       backdrop-filter: blur(4px);
       z-index: 900;
       cursor: pointer;
+      bottom: 100px;   /* un poco por encima del cuadro de texto */
+      right: 20px;     /* lado derecho por defecto */
     }
 
     #policyButton:hover {
@@ -196,14 +176,12 @@
       box-shadow: 0 0 6px #00ffcc88;
     }
 
-    /* cuando el banner se muestra, el botón pasa a la izquierda */
-    #policyButton.left {
+    /* Modo expandido: pasa al lado izquierdo */
+    body.expanded #policyButton {
+      bottom: 95px; /* ligeramente sobre el cuadro de texto */
       right: auto;
-      left: 18px;
-      bottom: 22px;
+      left: 22px;
     }
-
-    @media (max-width:600px) { #policyButton { display: none; } }
 
     /* 🧾 Banner de políticas */
     #policyBanner {
@@ -347,7 +325,7 @@
       }
     }
 
-    // 🟢 Mensaje de bienvenida
+    // 🟢 Bienvenida
     window.addEventListener("DOMContentLoaded", () => {
       const chat = document.getElementById("chat");
       const b = document.createElement("div");
@@ -356,29 +334,25 @@
       typeWriterEffect(b,
         "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
       scrollBottom();
-
-      const accepted = localStorage.getItem("policiesAccepted");
-      if (!accepted) {
-        document.getElementById("policyBanner").classList.add("show");
-        document.getElementById("policyButton").classList.add("left");
-      }
     });
 
-    // 🧾 Acciones del botón y banner
+    // 🧾 Botón y banner de políticas
     const policyButton = document.getElementById("policyButton");
-    const policyIcon = document.getElementById("policyIcon");
     const banner = document.getElementById("policyBanner");
+    const policyIcon = document.getElementById("policyIcon");
 
-    [policyButton, policyIcon].forEach(btn => btn.addEventListener("click", () => {
-      const visible = banner.classList.toggle("show");
-      policyButton.classList.toggle("left", visible);
-      if (visible) window.open("https://maximilian23.com/politica.html", "_blank");
-    }));
+    [policyButton, policyIcon].forEach(el =>
+      el.addEventListener("click", () => {
+        document.body.classList.toggle("expanded");
+        banner.classList.toggle("show");
+        window.open("https://maximilian23.com/politica.html", "_blank");
+      })
+    );
 
     document.getElementById("acceptPolicies").addEventListener("click", () => {
-      localStorage.setItem("policiesAccepted", "true");
       banner.classList.remove("show");
-      policyButton.classList.remove("left");
+      document.body.classList.remove("expanded");
+      localStorage.setItem("policiesAccepted", "true");
     });
 
     const maxImage = document.getElementById("maxImage");
