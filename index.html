@@ -165,8 +165,6 @@
       padding: 8px;
       background: rgba(22,27,34,0.95);
       border-top: 2px solid #00ffcc;
-      position: relative; /* Asegura que el footer sea un contenedor relativo */
-      z-index: 1000; /* Coloca el footer por encima del botón de políticas */
     }
 
     input {
@@ -196,7 +194,7 @@
     ============================================================ */
     #policyButton {
       position: fixed;
-      bottom: 60px; /* Aumentado para dejar espacio al footer */
+      bottom: 12px;
       left: 12px;
       background: rgba(0,255,204,.08);
       border: 1px solid #00ffcc88;
@@ -207,7 +205,7 @@
       font-size: 13px;
       transition: all .3s ease;
       backdrop-filter: blur(4px);
-      z-index: 900; /* Menor que el footer para evitar superposición */
+      z-index: 900;
       cursor: pointer;
     }
 
@@ -215,16 +213,6 @@
       background: rgba(0,255,204,.2);
       border-color: #00ffcc;
       box-shadow: 0 0 6px #00ffcc88;
-    }
-
-    /* Ajustes para pantallas de altura limitada (ventanas no maximizadas) */
-    @media (max-width: 768px) and (max-height: 650px) {
-      footer {
-        padding-bottom: 50px; /* Espacio adicional para evitar superposición */
-      }
-      #policyButton {
-        bottom: 70px; /* Ajusta la posición del botón */
-      }
     }
 
     @media (max-width:600px) {
@@ -278,6 +266,11 @@
     ============================================================ */
     html, body { height: 100%; min-height: 100%; }
     .container, .chat-panel { height: 100%; }
+
+    @media (min-width:601px) and (max-height:650px) {
+      footer { padding-bottom: 50px; }
+      #policyButton { bottom: 60px; }
+    }
   </style>
 </head>
 
