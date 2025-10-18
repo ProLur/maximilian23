@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <meta name="description" content="Maximilian 23 es el asistente de inteligencia artificial del CEIP Juan XXIII de Zafra.">
   <meta name="theme-color" content="#00ffcc">
+  <meta name="robots" content="index,follow">
 
   <style>
     body {
@@ -16,10 +17,9 @@
       color: #e6edf3;
       margin: 0;
       padding: 0;
-      height: 100dvh;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      /* overflow: hidden; */
     }
 
     header {
@@ -146,6 +146,8 @@
       padding: 8px;
       background: rgba(22,27,34,0.95);
       border-top: 2px solid #00ffcc;
+      position: relative;
+      z-index: 10;
     }
 
     input {
@@ -172,8 +174,7 @@
 
     #policyButton {
       position: fixed;
-      bottom: 12px;
-      left: 12px;
+      left: 16px;
       background: rgba(0,255,204,.08);
       border: 1px solid #00ffcc88;
       color: #00ffcc;
@@ -238,31 +239,12 @@
       font-weight: bold;
       font-size: 13px;
     }
-
-    /* 🩹 Ajuste para modo escritorio en ventana pequeña */
-    html, body {
-      height: 100%;
-      min-height: 100%;
-    }
-
-    .container, .chat-panel {
-      height: 100%;
-    }
-
-    @media (min-width: 601px) and (max-height: 650px) {
-      footer {
-        padding-bottom: 50px; /* deja espacio para el botón fijo */
-      }
-      #policyButton {
-        bottom: 60px; /* eleva el botón */
-      }
-    }
   </style>
 </head>
 
 <body>
   <header>
-    <img src="Cabeza.png" alt="Maximilian">
+    <img src="Cabeza.png" alt="Cabeza del asistente Maximilian 23">
     Maximilian 23
     <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
   </header>
@@ -374,22 +356,37 @@
       if (!accepted) {
         document.getElementById("policyBanner").classList.add("show");
       }
+
+      adjustPolicyButton(); // posición inicial
     });
 
+    // 🧠 Botón de políticas adaptativo
+    function adjustPolicyButton() {
+      const btn = document.getElementById("policyButton");
+      const footer = document.querySelector("footer");
+      const footerRect = footer.getBoundingClientRect();
+      const newBottom = window.innerHeight - footerRect.top + 12;
+      btn.style.bottom = `${newBottom}px`;
+    }
+
+    window.addEventListener("resize", adjustPolicyButton);
+    window.addEventListener("scroll", adjustPolicyButton);
+
+    // 🧾 Acciones del botón y banner
     const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
     opens.forEach(o => o.addEventListener("click", () => {
       window.open("https://maximilian23.com/politica.html", "_blank");
     }));
 
+    document.getElementById("acceptPolicies").addEventListener("click", () => {
+      localStorage.setItem("policiesAccepted", "true");
+      document.getElementById("policyBanner").classList.remove("show");
+    });
+
     const maxImage = document.getElementById("maxImage");
     maxImage.addEventListener("click", () => {
       maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
       maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
-    });
-
-    document.getElementById("acceptPolicies").addEventListener("click", () => {
-      localStorage.setItem("policiesAccepted", "true");
-      document.getElementById("policyBanner").classList.remove("show");
     });
   </script>
 </body>
