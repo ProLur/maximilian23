@@ -40,18 +40,39 @@
 
     header img { height: 40px; width: auto; }
 
-    #policyIcon {
-      display: none;
+    /* ⚙️ Botón Políticas en modo embebido */
+    #policyButton {
       position: absolute;
-      right: 12px;
-      font-size: 22px;
+      right: 14px;
+      top: 10px;
+      background: rgba(0,255,204,.08);
+      border: 1px solid #00ffcc88;
       color: #00ffcc;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      transition: all .4s ease;
+      backdrop-filter: blur(4px);
+      z-index: 900;
       cursor: pointer;
-      transition: transform .3s ease;
     }
 
-    #policyIcon:hover { transform: rotate(30deg); }
-    @media (max-width:600px) { #policyIcon { display: block; } }
+    #policyButton:hover {
+      background: rgba(0,255,204,.2);
+      border-color: #00ffcc;
+      box-shadow: 0 0 6px #00ffcc88;
+    }
+
+    /* Cuando se expande, se mueve debajo de la imagen */
+    body.expanded #policyButton {
+      position: fixed;
+      top: auto;
+      bottom: 95px; /* encima del cuadro de texto */
+      left: 40px;  /* debajo de la imagen */
+      right: auto;
+      background: rgba(0,255,204,.08);
+    }
 
     .container { flex: 1; display: flex; overflow: hidden; }
 
@@ -62,6 +83,7 @@
       justify-content: center;
       background: rgba(13,17,23,0.9);
       border-right: 2px solid #00ffcc;
+      position: relative;
     }
 
     .left-panel img {
@@ -152,37 +174,6 @@
       font-size: 14px;
     }
 
-    /* ⚙️ Botón de políticas flotante */
-    #policyButton {
-      position: fixed;
-      background: rgba(0,255,204,.08);
-      border: 1px solid #00ffcc88;
-      color: #00ffcc;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-family: "Courier New", monospace;
-      font-size: 13px;
-      transition: all .5s ease;
-      backdrop-filter: blur(4px);
-      z-index: 900;
-      cursor: pointer;
-      bottom: 100px;   /* un poco por encima del cuadro de texto */
-      right: 20px;     /* lado derecho por defecto */
-    }
-
-    #policyButton:hover {
-      background: rgba(0,255,204,.2);
-      border-color: #00ffcc;
-      box-shadow: 0 0 6px #00ffcc88;
-    }
-
-    /* Modo expandido: pasa al lado izquierdo */
-    body.expanded #policyButton {
-      bottom: 95px; /* ligeramente sobre el cuadro de texto */
-      right: auto;
-      left: 22px;
-    }
-
     /* 🧾 Banner de políticas */
     #policyBanner {
       position: fixed;
@@ -229,7 +220,7 @@
   <header>
     <img src="Cabeza.png" alt="Cabeza del asistente Maximilian 23">
     Maximilian 23
-    <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
+    <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
   </header>
 
   <div class="container">
@@ -247,9 +238,6 @@
     </div>
   </div>
 
-  <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
-
-  <!-- 🧾 Banner de políticas -->
   <div id="policyBanner">
     Este sitio utiliza cookies y almacena datos de sesión para ofrecer un mejor servicio.
     Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
@@ -336,23 +324,18 @@
       scrollBottom();
     });
 
-    // 🧾 Botón y banner de políticas
+    // 🧭 Botón Políticas
     const policyButton = document.getElementById("policyButton");
-    const banner = document.getElementById("policyBanner");
-    const policyIcon = document.getElementById("policyIcon");
+    policyButton.addEventListener("click", () => {
+      window.open("https://maximilian23.com/politica.html", "_blank");
+    });
 
-    [policyButton, policyIcon].forEach(el =>
-      el.addEventListener("click", () => {
-        document.body.classList.toggle("expanded");
-        banner.classList.toggle("show");
-        window.open("https://maximilian23.com/politica.html", "_blank");
-      })
-    );
+    // Simulación de modo expandido (puedes activar/desactivar con JS real del sitio)
+    // document.body.classList.add("expanded");
 
     document.getElementById("acceptPolicies").addEventListener("click", () => {
-      banner.classList.remove("show");
-      document.body.classList.remove("expanded");
       localStorage.setItem("policiesAccepted", "true");
+      document.getElementById("policyBanner").classList.remove("show");
     });
 
     const maxImage = document.getElementById("maxImage");
