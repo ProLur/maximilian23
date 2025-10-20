@@ -504,6 +504,7 @@
       updateDraggableNotes();
       const currentCompas = compases[compases.length - 1];
       document.getElementById("cerrar-compas").disabled = !compas || currentCompas.closed || currentCompas.beats !== parseInt(compas.split("/")[0]);
+      console.log("Score state:", compases);
     }
 
     document.getElementById("cerrar-compas").addEventListener("click", () => {
@@ -688,10 +689,10 @@
     document.getElementById("play-stop").addEventListener("click", async () => {
       try {
         await Tone.start();
-        console.log("Audio context started");
+        console.log("Audio context started successfully");
       } catch (err) {
-        console.error("Error starting Tone.js:", err);
-        alert("No se pudo iniciar el audio. Asegúrate de interactuar con la página primero.");
+        console.error("Error starting Tone.js audio context:", err);
+        alert("No se pudo iniciar el audio. Interactúa con la página (ej., haz clic en un botón) y intenta de nuevo.");
         return;
       }
 
@@ -704,89 +705,106 @@
         document.getElementById("metronomo").classList.remove("activa");
         metronomeOn = false;
         isPlaying = false;
+        console.log("Playback stopped");
       } else {
         if (!velocidad) {
-          alert("Selecciona una velocidad.");
+          alert("Selecciona una velocidad (BPM).");
           return;
         }
         if (!clave || !compas) {
           alert("Selecciona una clave y un compás.");
           return;
         }
+
         Tone.Transport.bpm.value = parseInt(velocidad);
+        console.log(`BPM set to: ${velocidad}`);
+
         const synth = new Tone.Synth().toDestination();
         let time = 0;
-        let globalIndex = 0;
         const events = [];
-        compases.forEach(compasData => {
+        let globalIndex = 0;
+        compases.forEach((compasData, compasIndex) => {
           compasData.notas.forEach(nota => {
             if (nota.tipo === "nota") {
-              events.push({ time, note: nota.noteName, duration: duracionTiempo[nota.duracion], globalIndex });
+              events.push({ time, note: nota.noteName, duration: duracionTiempo[nota.duracion], globalIndex, compasIndex });
             }
             time += Tone.Time(duracionTiempo[nota.duracion]).toSeconds();
-            globalIndex += nota.tipo === "nota" ? 1 : 1;
+            globalIndex++;
           });
         });
-        if (events.length > 0 || metronomeOn) {
-          Tone.Transport.cancel();
-          let metronomeOffset = 0;
-          if (metronomeOn) {
-            const metronomeSynth = new Tone.MembraneSynth().toDestination();
-            const numBeats = parseInt(compas.split("/")[0]);
-            const beatDuration = Tone.Time("4n").toSeconds();
-            for (let i = 0; i < numBeats; i++) {
-              Tone.Transport.schedule(time => {
-                metronomeSynth.triggerAttackRelease("C2", "8n", time);
-              }, i * beatDuration);
-            }
-            metronomeOffset = numBeats * beatDuration;
-            metronomeLoop = new Tone.Loop(time => {
+        console.log("Events to play:", events);
+
+        if (events.length === 0 && !metronomeOn) {
+          alert("No hay notas para reproducir y el metrónomo está desactivado.");
+          return;
+        }
+
+        Tone.Transport.cancel();
+
+        let metronomeOffset = 0;
+        if (metronomeOn) {
+          const metronomeSynth = new Tone.MembraneSynth().toDestination();
+          const numBeats = parseInt(compas.split("/")[0]);
+          const beatDuration = Tone.Time("4n").toSeconds();
+          console.log(`Metronome: ${numBeats} beats, duration per beat: ${beatDuration}s`);
+          for (let i = 0; i < numBeats; i++) {
+            Tone.Transport.schedule(time => {
               metronomeSynth.triggerAttackRelease("C2", "8n", time);
-            }, "4n").start(metronomeOffset);
+              console.log(`Metronome tick at ${time}s`);
+            }, i * beatDuration);
           }
-          if (showNoteLabels) {
-            const noteGs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
-            events.forEach(event => {
-              if (noteGs[event.globalIndex]) {
-                const bbox = noteGs[event.globalIndex].getBBox();
-                Tone.Transport.schedule(time => {
-                  document.querySelectorAll(".note-label").forEach(label => label.remove());
-                  const label = document.createElement("div");
-                  label.className = "note-label";
-                  const noteName = noteNameMap[event.note.split("/")[0]] + event.note.split("/")[1];
-                  label.textContent = noteName;
-                  label.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
-                  label.style.top = `${bbox.y + bbox.height + 10}px`;
-                  div.appendChild(label);
-                }, event.time + metronomeOffset);
-                Tone.Transport.schedule(time => {
-                  document.querySelectorAll(".note-label").forEach(label => label.remove());
-                }, event.time + Tone.Time(event.duration).toSeconds() + metronomeOffset);
-              }
-            });
-          }
+          metronomeOffset = numBeats * beatDuration;
+          metronomeLoop = new Tone.Loop(time => {
+            metronomeSynth.triggerAttackRelease("C2", "8n", time);
+            console.log(`Metronome loop tick at ${time}s`);
+          }, "4n").start(metronomeOffset);
+        }
+
+        if (events.length > 0) {
+          const noteGs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
+          console.log(`Found ${noteGs.length} SVG notes`);
           events.forEach(event => {
             Tone.Transport.schedule(time => {
-              synth.triggerAttackRelease(
-                event.note.split("/")[0].toUpperCase() + event.note.split("/")[1],
-                event.duration,
-                time
-              );
+              const toneNote = event.note.split("/")[0].toUpperCase() + event.note.split("/")[1];
+              synth.triggerAttackRelease(toneNote, event.duration, time);
+              console.log(`Playing note ${toneNote} at ${time}s for ${event.duration}`);
             }, event.time + metronomeOffset);
+
+            if (showNoteLabels && noteGs[event.globalIndex]) {
+              const bbox = noteGs[event.globalIndex].getBBox();
+              Tone.Transport.schedule(time => {
+                document.querySelectorAll(".note-label").forEach(label => label.remove());
+                const label = document.createElement("div");
+                label.className = "note-label";
+                const noteName = noteNameMap[event.note.split("/")[0]] + event.note.split("/")[1];
+                label.textContent = noteName;
+                label.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
+                label.style.top = `${bbox.y + bbox.height + 10}px`;
+                div.appendChild(label);
+                console.log(`Showing label for ${noteName} at ${time}s`);
+              }, event.time + metronomeOffset);
+              Tone.Transport.schedule(time => {
+                document.querySelectorAll(".note-label").forEach(label => label.remove());
+              }, event.time + Tone.Time(event.duration).toSeconds() + metronomeOffset);
+            }
           });
-          Tone.Transport.schedule(time => {
-            document.querySelectorAll(".note-label").forEach(label => label.remove());
-            document.getElementById("play-stop").textContent = "▶️ Play";
-            document.getElementById("metronomo").classList.remove("activa");
-            metronomeOn = false;
-            isPlaying = false;
-            if (metronomeLoop) metronomeLoop.stop();
-            Tone.Transport.stop();
-          }, time + metronomeOffset);
-          Tone.Transport.start();
-          document.getElementById("play-stop").textContent = "⏹️ Stop";
-          isPlaying = true;
         }
+
+        Tone.Transport.schedule(time => {
+          document.querySelectorAll(".note-label").forEach(label => label.remove());
+          document.getElementById("play-stop").textContent = "▶️ Play";
+          document.getElementById("metronomo").classList.remove("activa");
+          metronomeOn = false;
+          isPlaying = false;
+          if (metronomeLoop) metronomeLoop.stop();
+          Tone.Transport.stop();
+          console.log("Playback completed");
+        }, time + metronomeOffset);
+
+        Tone.Transport.start();
+        document.getElementById("play-stop").textContent = "⏹️ Stop";
+        isPlaying = true;
+        console.log("Playback started");
       }
     });
 
@@ -850,6 +868,7 @@
         const synth = new Tone.Synth().toDestination();
         const toneNote = noteName.split("/")[0].toUpperCase() + noteName.split("/")[1];
         synth.triggerAttackRelease(toneNote, "8n");
+        console.log(`Played single note: ${toneNote}`);
       } catch (err) {
         console.error("Error playing note:", err);
       }
