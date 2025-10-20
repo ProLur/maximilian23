@@ -112,6 +112,10 @@
       overflow-y: auto;
       border: 3px solid #4ae2f2;
       min-height: 200px;
+      pointer-events: auto; /* Asegura que los eventos de clic se capturen */
+    }
+    #pentagrama svg {
+      pointer-events: none; /* Evita que el SVG bloquee los clics */
     }
     #figuras {
       display: flex;
@@ -386,10 +390,13 @@
       if (metronomeLoop) metronomeLoop.stop();
       Tone.Transport.cancel();
       Tone.Transport.stop();
+      figuraActiva = null;
+      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
     }
 
     function redibujarPentagrama() {
       context.clear();
+      document.querySelectorAll(".nota").forEach(n => n.remove()); // Limpia notas interactivas
       document.querySelectorAll(".note-label").forEach(label => label.remove());
       if (!clave || !compas) {
         compases = [];
@@ -429,9 +436,9 @@
         currentLineWidth += staveWidth;
       });
 
-      // Calcular el alto total necesario para todas las líneas
+      // Calcular el alto total necesario
       const totalLines = lines.length;
-      const totalHeight = Math.max(div.clientHeight, totalLines * lineSpacing + 60); // Margen adicional para título
+      const totalHeight = Math.max(div.clientHeight, totalLines * lineSpacing + 60);
       renderer.resize(width, totalHeight);
 
       // Añadir título
@@ -442,10 +449,10 @@
           justification: VF.TextNote.Justification.CENTER,
           line: -1
         }).setContext(context);
-        textNote.setXShift(maxWidthPerLine / 2 - 40).setLine(-1).draw();
+        textNote.setXShift(maxWidthPerLine / 2 - 40).setLine(-2).draw(); // Ajustado para no interferir
       }
 
-      // Calcular yOffset para centrar una sola línea o usar margen fijo
+      // Calcular yOffset
       let yOffset = totalLines === 1 ? (div.clientHeight - staveHeight) / 2 : 40;
 
       // Dibujar los pentagramas
@@ -535,18 +542,27 @@
       reader.onload = event => {
         try {
           const partitura = JSON.parse(event.target.result);
+          if (!partitura.clave || !partitura.compas || !partitura.compases) {
+            throw new Error("Archivo JSON inválido: falta clave, compás o compases.");
+          }
           titulo = partitura.titulo || "Mi Partitura";
           document.getElementById("titulo").value = titulo;
-          clave = partitura.clave || "";
+          clave = partitura.clave;
           document.getElementById("clave").value = clave;
-          compas = partitura.compas || "";
+          compas = partitura.compas;
           document.getElementById("compas").value = compas;
           velocidad = partitura.velocidad || "";
           document.getElementById("velocidad").value = velocidad;
           compases = partitura.compases.map(compas => {
             const notas = compas.notas.map(nota => {
+              if (!nota.tipo || !nota.duracion) {
+                throw new Error("Nota inválida en el archivo JSON.");
+              }
               let vf;
               if (nota.tipo === "nota") {
+                if (!nota.noteName || !noteMap[clave].includes(nota.noteName)) {
+                  throw new Error(`Nombre de nota inválido: ${nota.noteName}`);
+                }
                 vf = new VF.StaveNote({ clef: clave, keys: [nota.noteName], duration: nota.duracion });
                 const noteList = noteMap[clave];
                 const noteIndex = noteList.indexOf(nota.noteName);
@@ -562,8 +578,8 @@
             });
             return {
               notas,
-              beats: compas.beats,
-              closed: compas.closed,
+              beats: compas.beats || 0,
+              closed: !!compas.closed,
               staveWidth: minStaveWidth
             };
           });
@@ -622,8 +638,8 @@
       showNoteLabels = false;
       metronomeOn = !metronomeOn;
       document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
-      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
       updateDraggableNotes();
+      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
     });
 
     document.getElementById("play-stop").addEventListener("click", async () => {
@@ -736,7 +752,8 @@
     });
 
     function getNoteFromY(y) {
-      const stave = compases[compases.length - 1].stave;
+      const stave = compases[compases.length - 1]?.stave;
+      if (!stave) return noteMap[clave][0]; // Fallback si no hay stave
       const lineTop = stave.getYForLine(0);
       const lineBottom = stave.getYForLine(4);
       const numSteps = noteMap[clave].length - 1;
@@ -884,75 +901,4 @@
                     const newNoteName = getNoteFromY(y);
                     const compasIndex = parseInt(target.dataset.compasIndex);
                     const notaIndex = parseInt(target.dataset.notaIndex);
-                    compases[compasIndex].notas[notaIndex].noteName = newNoteName;
-                    compases[compasIndex].notas[notaIndex].vf = new VF.StaveNote({
-                      clef: clave,
-                      keys: [newNoteName],
-                      duration: compases[compasIndex].notas[notaIndex].duracion
-                    });
-                    const noteList = noteMap[clave];
-                    const noteIndex = noteList.indexOf(newNoteName);
-                    const bIndex = noteList.indexOf(clave === "treble" ? "b/4" : "b/3");
-                    if (noteIndex >= bIndex) {
-                      compases[compasIndex].notas[notaIndex].vf.setStemDirection(VF.Stem.DOWN);
-                    }
-                    target.remove();
-                    redibujarPentagrama();
-                    play(newNoteName);
-                  }
-                }
-              });
-            }
-            globalIndex++;
-          }
-        });
-      });
-    }
-
-    document.getElementById("cerrar-compas").addEventListener("click", () => {
-      const currentCompas = compases[compases.length - 1];
-      if (currentCompas.beats === parseInt(compas.split("/")[0]) && !currentCompas.closed) {
-        currentCompas.closed = true;
-        compases.push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
-        redibujarPentagrama();
-      }
-    });
-
-    document.getElementById("borrar-ultimo").addEventListener("click", () => {
-      const currentCompas = compases[compases.length - 1];
-      if (currentCompas.notas.length > 0) {
-        const lastNota = currentCompas.notas.pop();
-        currentCompas.beats -= duracionBeats[lastNota.duracion];
-        currentCompas.closed = false;
-        redibujarPentagrama();
-      } else if (compases.length > 1) {
-        compases.pop();
-        compases[compases.length - 1].closed = false;
-        redibujarPentagrama();
-      }
-    });
-
-    document.getElementById("limpiar").addEventListener("click", () => {
-      compases = clave && compas ? [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }] : [];
-      document.getElementById("cerrar-compas").disabled = true;
-      document.getElementById("papelera").classList.remove("activa");
-      document.getElementById("notas").classList.remove("activa");
-      document.getElementById("play-stop").textContent = "▶️ Play";
-      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
-      document.getElementById("metronomo").classList.remove("activa");
-      deleteMode = false;
-      showNoteLabels = false;
-      isPlaying = false;
-      metronomeOn = false;
-      if (metronomeLoop) metronomeLoop.stop();
-      Tone.Transport.cancel();
-      Tone.Transport.stop();
-      width = 800;
-      renderer.resize(width, div.clientHeight);
-      redibujarPentagrama();
-    });
-
-    init();
-  </script>
-</body>
-</html>
+                    compases
