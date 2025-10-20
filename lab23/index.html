@@ -89,8 +89,11 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       position: relative;
       overflow-x: auto;
+      overflow-y: auto;
       border: 3px solid #4ae2f2;
       min-height: 200px;
+      display: flex;
+      align-items: center;
     }
     #figuras {
       display: flex;
@@ -229,7 +232,8 @@
     <div id="barra-opciones">
       <label for="clave">Clave:</label>
       <select id="clave">
-        <option value="treble" selected>Sol</option>
+        <option value="" selected>---</option>
+        <option value="treble">Sol</option>
         <option value="bass">Fa</option>
       </select>
       <label for="compas">Compás:</label>
@@ -275,9 +279,11 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     let width = 800;
     const minStaveWidth = 250;
+    const staveHeight = 100; // Altura estimada de cada pentagrama (ajustada para líneas adicionales)
+    const lineSpacing = 120; // Espacio entre líneas de pentagramas
     renderer.resize(width, div.clientHeight);
     const context = renderer.getContext();
-    let clave = "treble";
+    let clave = "";
     let compas = "";
     let compases = [];
     let figuraActiva = null;
@@ -297,9 +303,7 @@
 
     function init() {
       window.addEventListener('resize', () => {
-        if (compases.length > 0) {
-          width = Math.max(div.clientWidth || 800, compases.reduce((sum, c) => sum + c.staveWidth, 0) + 80);
-          renderer.resize(width, div.clientHeight);
+        if (compases.length > 0 && clave && compas) {
           redibujarPentagrama();
         }
       });
@@ -307,22 +311,32 @@
 
     document.getElementById("clave").addEventListener("change", e => {
       clave = e.target.value;
-      if (compas) {
+      if (clave && compas) {
         compases = [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }];
         redibujarPentagrama();
+      } else {
+        compases = [];
+        context.clear();
+        renderer.resize(width, div.clientHeight);
       }
       resetControles();
     });
 
     document.getElementById("compas").addEventListener("change", e => {
       compas = e.target.value;
-      compases = compas ? [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }] : [];
+      if (clave && compas) {
+        compases = [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }];
+        redibujarPentagrama();
+      } else {
+        compases = [];
+        context.clear();
+        renderer.resize(width, div.clientHeight);
+      }
       resetControles();
-      redibujarPentagrama();
     });
 
     document.getElementById("velocidad").addEventListener("change", e => {
-      document.getElementById("play-stop").disabled = !e.target.value;
+      document.getElementById("play-stop").disabled = !e.target.value || !clave || !compas;
     });
 
     function resetControles() {
@@ -330,7 +344,7 @@
       document.getElementById("papelera").classList.remove("activa");
       document.getElementById("notas").classList.remove("activa");
       document.getElementById("play-stop").textContent = "▶️ Play";
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
       document.getElementById("metronomo").classList.remove("activa");
       deleteMode = false;
       showNoteLabels = false;
@@ -344,13 +358,20 @@
     function redibujarPentagrama() {
       context.clear();
       document.querySelectorAll(".note-label").forEach(label => label.remove());
-      if (!compas) {
+      if (!clave || !compas) {
         compases = [];
+        renderer.resize(width, div.clientHeight);
         return;
       }
-      let xOffset = 40;
-      compases.forEach((compasData, index) => {
-        const voice = new VF.Voice({ num_beats: compas ? parseInt(compas.split("/")[0]) : 4, beat_value: compas ? parseInt(compas.split("/")[1]) : 4 });
+
+      // Calcular el número de compases por línea
+      const maxWidthPerLine = div.clientWidth || 800;
+      let currentLineWidth = 40; // Margen inicial
+      let currentLine = 0;
+      let lines = [[]]; // Array de líneas, cada una contiene índices de compases
+      compases.forEach((_, index) => {
+        const compasData = compases[index];
+        const voice = new VF.Voice({ num_beats: parseInt(compas.split("/")[0]), beat_value: parseInt(compas.split("/")[1]) });
         voice.setStrict(false);
         if (compasData.notas.length > 0) {
           voice.addTickables(compasData.notas.map(e => e.vf));
@@ -365,26 +386,59 @@
         const extraWidth = eighthNoteCount * 30 + otherNoteCount * 15;
         const staveWidth = Math.max(minStaveWidth, (compasData.notas.length > 0 ? formatter.preCalculateMinTotalWidth([voice]) + 80 + extraWidth : minStaveWidth));
         compasData.staveWidth = staveWidth;
-        const stave = new VF.Stave(xOffset, 80, staveWidth, { spacing_between_lines_px: 18 });
-        if (index === 0) stave.addClef(clave).addTimeSignature(compas);
-        if (compasData.closed) stave.addModifier(new VF.Barline().setType(VF.Barline.type.SINGLE));
-        stave.setContext(context).draw();
-        compasData.stave = stave;
-        if (compasData.notas.length > 0) {
-          try {
-            formatter.format([voice], staveWidth - 80);
-            voice.draw(context, stave);
-          } catch (e) {
-            console.error("Error en formateo/dibujo:", e);
-          }
+
+        if (currentLineWidth + staveWidth > maxWidthPerLine) {
+          currentLine++;
+          lines.push([]);
+          currentLineWidth = 40;
         }
-        xOffset += staveWidth;
+        lines[currentLine].push(index);
+        currentLineWidth += staveWidth;
       });
-      width = Math.max(div.clientWidth || 800, compases.reduce((sum, c) => sum + c.staveWidth, 0) + 80);
-      renderer.resize(width, div.clientHeight);
+
+      // Calcular el alto total necesario para todas las líneas
+      const totalLines = lines.length;
+      const totalHeight = Math.max(div.clientHeight, totalLines * lineSpacing);
+      renderer.resize(width, totalHeight);
+
+      // Dibujar los pentagramas
+      let xOffset = 40;
+      let yOffset = (div.clientHeight - staveHeight) / 2; // Centrar verticalmente en el contenedor
+      if (totalLines > 1) {
+        yOffset = 20; // Margen superior para múltiples líneas
+      }
+
+      lines.forEach((line, lineIndex) => {
+        xOffset = 40; // Reiniciar X para cada línea
+        line.forEach(compasIndex => {
+          const compasData = compases[compasIndex];
+          const stave = new VF.Stave(xOffset, yOffset + lineIndex * lineSpacing, compasData.staveWidth, { spacing_between_lines_px: 14 });
+          if (compasIndex === 0 || lines[lineIndex - 1]?.includes(compasIndex - 1)) {
+            stave.addClef(clave).addTimeSignature(compas);
+          }
+          if (compasData.closed) {
+            stave.addModifier(new VF.Barline().setType(VF.Barline.type.SINGLE));
+          }
+          stave.setContext(context).draw();
+          compasData.stave = stave;
+
+          if (compasData.notas.length > 0) {
+            const voice = new VF.Voice({ num_beats: parseInt(compas.split("/")[0]), beat_value: parseInt(compas.split("/")[1]) });
+            voice.setStrict(false);
+            voice.addTickables(compasData.notas.map(e => e.vf));
+            const formatter = new VF.Formatter();
+            formatter.joinVoices([voice]).format([voice], compasData.staveWidth - 80);
+            voice.draw(context, stave);
+          }
+          xOffset += compasData.staveWidth;
+        });
+      });
+
+      width = Math.max(div.clientWidth || 800, Math.max(...lines.map(line => line.reduce((sum, idx) => sum + compases[idx].staveWidth, 40))));
+      renderer.resize(width, totalHeight);
       updateDraggableNotes();
       const currentCompas = compases[compases.length - 1];
-      document.getElementById("cerrar-compas").disabled = !compas || currentCompas.closed || currentCompas.beats !== (compas ? parseInt(compas.split("/")[0]) : 4);
+      document.getElementById("cerrar-compas").disabled = !compas || currentCompas.closed || currentCompas.beats !== parseInt(compas.split("/")[0]);
     }
 
     document.querySelectorAll(".figura").forEach(f => {
@@ -396,7 +450,7 @@
         showNoteLabels = false;
         f.classList.add("activa");
         figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
-        document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+        document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
       });
     });
 
@@ -408,7 +462,7 @@
       deleteMode = !deleteMode;
       document.getElementById("papelera").classList.toggle("activa", deleteMode);
       updateDraggableNotes();
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
     });
 
     document.getElementById("notas").addEventListener("click", () => {
@@ -419,7 +473,7 @@
       showNoteLabels = !showNoteLabels;
       document.getElementById("notas").classList.toggle("activa", showNoteLabels);
       updateDraggableNotes();
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
     });
 
     document.getElementById("metronomo").addEventListener("click", () => {
@@ -431,7 +485,7 @@
       showNoteLabels = false;
       metronomeOn = !metronomeOn;
       document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
       updateDraggableNotes();
     });
 
@@ -452,8 +506,8 @@
           alert("Selecciona una velocidad.");
           return;
         }
-        if (!compas) {
-          alert("Selecciona un compás.");
+        if (!clave || !compas) {
+          alert("Selecciona una clave y un compás.");
           return;
         }
         Tone.Transport.bpm.value = parseInt(bpm);
@@ -475,7 +529,7 @@
           let metronomeOffset = 0;
           if (metronomeOn) {
             const metronomeSynth = new Tone.MembraneSynth().toDestination();
-            const numBeats = compas ? parseInt(compas.split("/")[0]) : 4;
+            const numBeats = parseInt(compas.split("/")[0]);
             const beatDuration = Tone.Time("4n").toSeconds();
             for (let i = 0; i < numBeats; i++) {
               Tone.Transport.schedule(time => {
@@ -534,8 +588,8 @@
     });
 
     div.addEventListener("click", async e => {
-      if (!figuraActiva || !compas || compases[compases.length - 1].closed || deleteMode) {
-        if (!compas) alert("Selecciona un compás.");
+      if (!figuraActiva || !clave || !compas || compases[compases.length - 1].closed || deleteMode) {
+        if (!clave || !compas) alert("Selecciona una clave y un compás.");
         else if (compases[compases.length - 1].closed) alert("Compás cerrado. Cierra el compás actual o limpia.");
         return;
       }
@@ -556,7 +610,7 @@
     }
 
     async function addElemento(tipo, duracion, noteName) {
-      const numBeats = compas ? parseInt(compas.split("/")[0]) : 4;
+      const numBeats = parseInt(compas.split("/")[0]);
       const currentCompas = compases[compases.length - 1];
       const currentBeats = currentCompas.beats;
       const newBeats = duracionBeats[duracion];
@@ -721,7 +775,7 @@
 
     document.getElementById("cerrar-compas").addEventListener("click", () => {
       const currentCompas = compases[compases.length - 1];
-      if (currentCompas.beats === (compas ? parseInt(compas.split("/")[0]) : 4) && !currentCompas.closed) {
+      if (currentCompas.beats === parseInt(compas.split("/")[0]) && !currentCompas.closed) {
         currentCompas.closed = true;
         compases.push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
         redibujarPentagrama();
@@ -743,12 +797,12 @@
     });
 
     document.getElementById("limpiar").addEventListener("click", () => {
-      compases = compas ? [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }] : [];
+      compases = clave && compas ? [{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }] : [];
       document.getElementById("cerrar-compas").disabled = true;
       document.getElementById("papelera").classList.remove("activa");
       document.getElementById("notas").classList.remove("activa");
       document.getElementById("play-stop").textContent = "▶️ Play";
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value;
+      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
       document.getElementById("metronomo").classList.remove("activa");
       deleteMode = false;
       showNoteLabels = false;
