@@ -52,6 +52,26 @@
       font-size: 1.1em;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
+    #titulo {
+      margin: 10px auto;
+      width: 80%;
+      max-width: 600px;
+      padding: 8px 12px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      border: 2px solid #4ae2f2;
+      background: #fff;
+      color: #333;
+      text-align: center;
+      font-family: "Comic Sans MS", "Comic Neue", cursive;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    #titulo:focus {
+      outline: none;
+      transform: scale(1.05);
+      background: #eafcff;
+    }
     @keyframes brillo {
       from { text-shadow: 0 0 4px #fff, 0 0 8px #4ae2f2; }
       to { text-shadow: 0 0 8px #fff, 0 0 14px #6f9cff; }
@@ -83,7 +103,7 @@
     #pentagrama {
       margin: 0 auto;
       width: 95%;
-      height: 50vh; /* Altura fija para evitar que crezca */
+      height: 50vh;
       background: #ffffff;
       border-radius: 15px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
@@ -206,13 +226,17 @@
       text-align: center;
       z-index: 150;
     }
+    #abrir-input {
+      display: none;
+    }
     @media (max-width: 600px) {
       header img { height: 60px; }
       header h1 { font-size: 1.8em; }
       header p { font-size: 0.9em; }
+      #titulo { font-size: 1em; padding: 6px 10px; }
       #barra-opciones { gap: 10px; margin: 10px 0; }
       select { padding: 6px 10px; font-size: 1em; }
-      #pentagrama { min-height: 150px; height: 40vh; } /* Ajuste para móviles */
+      #pentagrama { min-height: 150px; height: 40vh; }
       .figura { width: 50px; height: 50px; line-height: 50px; font-size: 2em; }
       button { padding: 8px 16px; font-size: 1em; }
       #controles { gap: 10px; margin: 10px 0; }
@@ -226,6 +250,7 @@
       <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
       <h1>Laboratorio Musical de Maximilian 23</h1>
       <p>🎵 ¡Compón, juega y aprende con el robot más melódico del cole! 🎶</p>
+      <input type="text" id="titulo" value="Mi Partitura" placeholder="Título de la partitura">
     </header>
     <div id="barra-opciones">
       <label for="clave">Clave:</label>
@@ -269,6 +294,9 @@
       <button id="notas">🎵 Notas</button>
       <button id="play-stop" disabled>▶️ Play</button>
       <button id="metronomo">⏱️ Metrónomo</button>
+      <button id="guardar">💾 Guardar</button>
+      <button id="abrir">📂 Abrir</button>
+      <input type="file" id="abrir-input" accept=".json">
     </div>
   </main>
   <script>
@@ -277,12 +305,14 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     let width = 800;
     const minStaveWidth = 250;
-    const staveHeight = 100; // Altura estimada de cada pentagrama
-    const lineSpacing = 120; // Espacio entre líneas de pentagramas
+    const staveHeight = 100;
+    const lineSpacing = 120;
     renderer.resize(width, div.clientHeight);
     const context = renderer.getContext();
     let clave = "";
     let compas = "";
+    let velocidad = "";
+    let titulo = "Mi Partitura";
     let compases = [];
     let figuraActiva = null;
     let deleteMode = false;
@@ -304,6 +334,10 @@
         if (compases.length > 0 && clave && compas) {
           redibujarPentagrama();
         }
+      });
+      document.getElementById("titulo").addEventListener("input", e => {
+        titulo = e.target.value || "Mi Partitura";
+        redibujarPentagrama();
       });
     }
 
@@ -334,7 +368,8 @@
     });
 
     document.getElementById("velocidad").addEventListener("change", e => {
-      document.getElementById("play-stop").disabled = !e.target.value || !clave || !compas;
+      velocidad = e.target.value;
+      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
     });
 
     function resetControles() {
@@ -342,7 +377,7 @@
       document.getElementById("papelera").classList.remove("activa");
       document.getElementById("notas").classList.remove("activa");
       document.getElementById("play-stop").textContent = "▶️ Play";
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
+      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
       document.getElementById("metronomo").classList.remove("activa");
       deleteMode = false;
       showNoteLabels = false;
@@ -364,9 +399,9 @@
 
       // Calcular el número de compases por línea
       const maxWidthPerLine = div.clientWidth || 800;
-      let currentLineWidth = 40; // Margen inicial
+      let currentLineWidth = 40;
       let currentLine = 0;
-      let lines = [[]]; // Array de líneas, cada una contiene índices de compases
+      let lines = [[]];
       compases.forEach((_, index) => {
         const compasData = compases[index];
         const voice = new VF.Voice({ num_beats: parseInt(compas.split("/")[0]), beat_value: parseInt(compas.split("/")[1]) });
@@ -396,23 +431,32 @@
 
       // Calcular el alto total necesario para todas las líneas
       const totalLines = lines.length;
-      const totalHeight = Math.max(div.clientHeight, totalLines * lineSpacing + 40); // Margen de 40px
+      const totalHeight = Math.max(div.clientHeight, totalLines * lineSpacing + 60); // Margen adicional para título
       renderer.resize(width, totalHeight);
 
-      // Calcular yOffset para centrar una sola línea o usar margen fijo para múltiples líneas
-      let yOffset = totalLines === 1 ? (div.clientHeight - staveHeight) / 2 : 20;
+      // Añadir título
+      if (titulo) {
+        const textNote = new VF.TextNote({
+          text: titulo,
+          font: { family: "Comic Sans MS", size: 16, weight: "bold" },
+          justification: VF.TextNote.Justification.CENTER,
+          line: -1
+        }).setContext(context);
+        textNote.setXShift(maxWidthPerLine / 2 - 40).setLine(-1).draw();
+      }
+
+      // Calcular yOffset para centrar una sola línea o usar margen fijo
+      let yOffset = totalLines === 1 ? (div.clientHeight - staveHeight) / 2 : 40;
 
       // Dibujar los pentagramas
       lines.forEach((line, lineIndex) => {
-        let xOffset = 40; // Margen inicial para cada línea
+        let xOffset = 40;
         line.forEach((compasIndex, staveIndex) => {
           const compasData = compases[compasIndex];
           const stave = new VF.Stave(xOffset, yOffset + lineIndex * lineSpacing, compasData.staveWidth, { spacing_between_lines_px: 14 });
-          // Añadir clave solo al primer compás de cada línea
           if (staveIndex === 0) {
             stave.addClef(clave);
           }
-          // Añadir compás solo en el primer compás de la primera línea
           if (lineIndex === 0 && compasIndex === 0) {
             stave.addTimeSignature(compas);
           }
@@ -440,15 +484,99 @@
       // Centrar la pantalla en la última línea
       if (totalLines > 1) {
         const lastLineY = yOffset + (totalLines - 1) * lineSpacing;
-        div.scrollTop = lastLineY - (div.clientHeight - staveHeight) / 2; // Centrar la última línea
+        div.scrollTop = lastLineY - (div.clientHeight - staveHeight) / 2;
       } else {
-        div.scrollTop = 0; // Para una sola línea, permanecer en la parte superior
+        div.scrollTop = 0;
       }
 
       updateDraggableNotes();
       const currentCompas = compases[compases.length - 1];
       document.getElementById("cerrar-compas").disabled = !compas || currentCompas.closed || currentCompas.beats !== parseInt(compas.split("/")[0]);
     }
+
+    document.getElementById("guardar").addEventListener("click", () => {
+      if (!clave || !compas) {
+        alert("Selecciona una clave y un compás antes de guardar.");
+        return;
+      }
+      const partitura = {
+        titulo,
+        clave,
+        compas,
+        velocidad,
+        compases: compases.map(compas => ({
+          notas: compas.notas.map(nota => ({
+            tipo: nota.tipo,
+            duracion: nota.duracion,
+            noteName: nota.noteName
+          })),
+          beats: compas.beats,
+          closed: compas.closed
+        }))
+      };
+      const json = JSON.stringify(partitura, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${titulo || "partitura"}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("abrir").addEventListener("click", () => {
+      document.getElementById("abrir-input").click();
+    });
+
+    document.getElementById("abrir-input").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = event => {
+        try {
+          const partitura = JSON.parse(event.target.result);
+          titulo = partitura.titulo || "Mi Partitura";
+          document.getElementById("titulo").value = titulo;
+          clave = partitura.clave || "";
+          document.getElementById("clave").value = clave;
+          compas = partitura.compas || "";
+          document.getElementById("compas").value = compas;
+          velocidad = partitura.velocidad || "";
+          document.getElementById("velocidad").value = velocidad;
+          compases = partitura.compases.map(compas => {
+            const notas = compas.notas.map(nota => {
+              let vf;
+              if (nota.tipo === "nota") {
+                vf = new VF.StaveNote({ clef: clave, keys: [nota.noteName], duration: nota.duracion });
+                const noteList = noteMap[clave];
+                const noteIndex = noteList.indexOf(nota.noteName);
+                const bIndex = noteList.indexOf(clave === "treble" ? "b/4" : "b/3");
+                if (noteIndex >= bIndex) {
+                  vf.setStemDirection(VF.Stem.DOWN);
+                }
+              } else {
+                const restKey = clave === "treble" ? "b/4" : "d/3";
+                vf = new VF.StaveNote({ clef: clave, keys: [restKey], duration: nota.duracion + "r" });
+              }
+              return { tipo: nota.tipo, duracion: nota.duracion, noteName: nota.noteName, vf };
+            });
+            return {
+              notas,
+              beats: compas.beats,
+              closed: compas.closed,
+              staveWidth: minStaveWidth
+            };
+          });
+          redibujarPentagrama();
+          resetControles();
+          document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
+        } catch (err) {
+          alert("Error al cargar el archivo JSON: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
 
     document.querySelectorAll(".figura").forEach(f => {
       f.addEventListener("click", () => {
@@ -459,7 +587,7 @@
         showNoteLabels = false;
         f.classList.add("activa");
         figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
-        document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
+        document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
       });
     });
 
@@ -471,7 +599,7 @@
       deleteMode = !deleteMode;
       document.getElementById("papelera").classList.toggle("activa", deleteMode);
       updateDraggableNotes();
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
+      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
     });
 
     document.getElementById("notas").addEventListener("click", () => {
@@ -482,7 +610,7 @@
       showNoteLabels = !showNoteLabels;
       document.getElementById("notas").classList.toggle("activa", showNoteLabels);
       updateDraggableNotes();
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
+      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
     });
 
     document.getElementById("metronomo").addEventListener("click", () => {
@@ -494,7 +622,7 @@
       showNoteLabels = false;
       metronomeOn = !metronomeOn;
       document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
+      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
       updateDraggableNotes();
     });
 
@@ -510,8 +638,7 @@
         metronomeOn = false;
         isPlaying = false;
       } else {
-        const bpm = document.getElementById("velocidad").value;
-        if (!bpm) {
+        if (!velocidad) {
           alert("Selecciona una velocidad.");
           return;
         }
@@ -519,7 +646,7 @@
           alert("Selecciona una clave y un compás.");
           return;
         }
-        Tone.Transport.bpm.value = parseInt(bpm);
+        Tone.Transport.bpm.value = parseInt(velocidad);
         const synth = new Tone.Synth().toDestination();
         let time = 0;
         let globalIndex = 0;
@@ -811,7 +938,7 @@
       document.getElementById("papelera").classList.remove("activa");
       document.getElementById("notas").classList.remove("activa");
       document.getElementById("play-stop").textContent = "▶️ Play";
-      document.getElementById("play-stop").disabled = !document.getElementById("velocidad").value || !clave || !compas;
+      document.getElementById("play-stop").disabled = !velocidad || !clave || !compas;
       document.getElementById("metronomo").classList.remove("activa");
       deleteMode = false;
       showNoteLabels = false;
