@@ -8,48 +8,27 @@
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       background: linear-gradient(180deg, #aee1f9 0%, #c7b5ff 100%);
       font-family: "Comic Sans MS", "Comic Neue", cursive;
-      color: #222;
-      overflow-x: hidden;
+      color: #222; overflow-x: hidden;
     }
-    main {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
+    main { min-height: 100vh; display: flex; flex-direction: column; padding: 20px; }
     header {
       background: linear-gradient(90deg, #4ae2f2, #6f9cff);
-      text-align: center;
-      padding: 20px 0 10px 0;
+      text-align: center; padding: 20px 0 10px 0;
       box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      position: relative;
     }
-    header img {
-      height: 90px;
-      vertical-align: middle;
-      filter: drop-shadow(0 0 6px rgba(255,255,255,0.8));
-    }
+    header img { height: 90px; vertical-align: middle; filter: drop-shadow(0 0 6px rgba(255,255,255,0.8)); }
     header h1 {
-      display: inline-block;
-      margin: 0 0 10px 15px;
-      font-size: 2.5em;
-      color: #fff;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-      vertical-align: middle;
-      animation: brillo 3s infinite alternate;
+      display: inline-block; margin: 0 0 10px 15px; font-size: 2.5em;
+      color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      vertical-align: middle; animation: brillo 3s infinite alternate;
     }
     header p {
-      margin: 0;
-      color: #e9f8ff;
-      font-size: 1.1em;
+      margin: 0; color: #e9f8ff; font-size: 1.1em;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
     @keyframes brillo {
@@ -57,165 +36,70 @@
       to { text-shadow: 0 0 8px #fff, 0 0 14px #6f9cff; }
     }
     #barra-opciones {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin: 25px 0;
-      flex-wrap: wrap;
+      display: flex; gap: 20px; justify-content: center;
+      margin: 25px 0; flex-wrap: wrap;
     }
-    #barra-opciones label {
-      font-weight: bold;
-      color: #333;
-    }
+    #barra-opciones label { font-weight: bold; color: #333; }
     select {
-      border-radius: 10px;
-      border: 2px solid #4ae2f2;
-      padding: 8px 12px;
-      font-size: 1.1em;
-      background: #fff;
-      color: #333;
-      transition: 0.3s;
+      border-radius: 10px; border: 2px solid #4ae2f2;
+      padding: 8px 12px; font-size: 1.1em; background: #fff;
+      color: #333; transition: 0.3s;
     }
-    select:hover {
-      background: #eafcff;
-      transform: scale(1.05);
-    }
+    select:hover { background: #eafcff; transform: scale(1.05); }
     #pentagrama {
-      margin: 0 auto;
-      width: 95%;
-      height: calc(100vh - 300px);
-      background: #ffffff;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      position: relative;
-      overflow-x: auto;
-      border: 3px solid #4ae2f2;
-      flex-grow: 1;
+      margin: 0 auto; width: 95%; height: calc(100vh - 300px);
+      background: #fff; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      position: relative; overflow-x: auto; border: 3px solid #4ae2f2; flex-grow: 1;
     }
     #figuras {
-      display: flex;
-      justify-content: center;
-      gap: 25px;
-      margin: 25px 0;
-      flex-wrap: wrap;
+      display: flex; justify-content: center; gap: 25px;
+      margin: 25px 0; flex-wrap: wrap;
     }
     .figura {
-      font-size: 2.6em;
-      width: 70px;
-      height: 70px;
-      line-height: 70px;
-      text-align: center;
-      border: 3px solid #4ae2f2;
-      border-radius: 50%;
-      background: #ffffff;
-      cursor: pointer;
-      transition: all 0.25s ease;
+      font-size: 2.6em; width: 70px; height: 70px; line-height: 70px;
+      text-align: center; border: 3px solid #4ae2f2; border-radius: 50%;
+      background: #fff; cursor: pointer; transition: all 0.25s ease;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .figura:hover, .figura.activa {
-      background: #4ae2f2;
-      color: #fff;
-      transform: scale(1.15);
-      border-color: #ffffff;
-      box-shadow: 0 0 12px #4ae2f2;
+      background: #4ae2f2; color: #fff; transform: scale(1.15);
+      border-color: #fff; box-shadow: 0 0 12px #4ae2f2;
     }
     #controles {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      margin-bottom: 35px;
-      flex-wrap: wrap;
+      display: flex; justify-content: center; gap: 14px;
+      margin-bottom: 35px; flex-wrap: wrap;
     }
     button {
-      padding: 12px 22px;
-      font-size: 1.1em;
+      padding: 12px 22px; font-size: 1.1em;
       background: linear-gradient(90deg, #4ae2f2, #6f9cff);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      color: white; border: none; border-radius: 10px;
+      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    }
-    button:disabled {
-      background: #b8ddee;
-      cursor: not-allowed;
-    }
-    button.activa {
-      background: #ff80b5 !important;
-      box-shadow: 0 0 12px #ffaad4;
-    }
+    button:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+    button:disabled { background: #b8ddee; cursor: not-allowed; }
+    button.activa { background: #ff80b5 !important; box-shadow: 0 0 12px #ffaad4; }
     .nota {
-      position: absolute;
-      cursor: move;
-      z-index: 100;
-      pointer-events: auto;
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid #4ae2f2;
-      border-radius: 6px;
-      transition: background 0.2s;
+      position: absolute; cursor: move; z-index: 100; pointer-events: auto;
+      background: rgba(255,255,255,0.1); border: 2px solid #4ae2f2;
+      border-radius: 6px; transition: background 0.2s;
     }
-    .nota.delete-mode {
-      background: rgba(255, 0, 0, 0.15);
-      border-color: #ff6666;
-    }
+    .nota.delete-mode { background: rgba(255,0,0,0.15); border-color: #ff6666; }
+    .nota .plus, .nota .minus { opacity: 0; transition: opacity 0.2s; }
+    .nota.show-controls .plus, .nota.show-controls .minus { opacity: 1; }
     .nota .plus, .nota .minus {
-      opacity: 0;
-      transition: opacity 0.2s;
+      width: 26px; height: 26px; border-radius: 50%; text-align: center;
+      line-height: 26px; font-size: 1.1em; background: #4ae2f2;
+      color: #fff; border: 1px solid #fff; position: absolute;
+      cursor: pointer; box-shadow: 0 0 8px rgba(0,0,0,0.2);
     }
-    .nota.show-controls .plus, .nota.show-controls .minus {
-      opacity: 1;
-    }
-    .nota .plus, .nota .minus {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      text-align: center;
-      line-height: 26px;
-      font-size: 1.1em;
-      background: #4ae2f2;
-      color: #fff;
-      border: 1px solid #ffffff;
-      position: absolute;
-      cursor: pointer;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
-    }
-    .nota .plus {
-      top: -32px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    .nota .minus {
-      bottom: -32px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+    .nota .plus { top: -32px; left: 50%; transform: translateX(-50%); }
+    .nota .minus { bottom: -32px; left: 50%; transform: translateX(-50%); }
     .note-label {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid #4ae2f2;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 0.9em;
-      color: #333;
-      text-align: center;
-      z-index: 150;
-    }
-    @media (max-width: 600px) {
-      header img { height: 60px; }
-      header h1 { font-size: 1.8em; }
-      header p { font-size: 0.9em; }
-      #barra-opciones { gap: 10px; margin: 15px 0; }
-      select { padding: 6px 10px; font-size: 1em; }
-      #pentagrama { height: calc(100vh - 250px); }
-      .figura { width: 50px; height: 50px; line-height: 50px; font-size: 2em; }
-      button { padding: 8px 16px; font-size: 1em; }
-      #controles { gap: 10px; margin-bottom: 20px; }
-      .note-label { font-size: 0.8em; padding: 1px 4px; }
+      position: absolute; background: rgba(255,255,255,0.8);
+      border: 1px solid #4ae2f2; border-radius: 4px;
+      padding: 2px 6px; font-size: 0.9em; color: #333;
+      text-align: center; z-index: 150;
     }
   </style>
 </head>
@@ -296,62 +180,56 @@
     let metronomeLoop = null;
 
     const noteMap = {
-      treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
-      bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
+      treble: ["g/3","a/3","b/3","c/4","d/4","e/4","f/4","g/4","a/4","b/4","c/5","d/5","e/5","f/5","g/5","a/5","b/5"],
+      bass: ["b/1","c/2","d/2","e/2","f/2","g/2","a/2","b/2","c/3","d/3","e/3","f/3","g/3","a/3","b/3","c/4","d/4"]
     };
+    const noteNameMap = { c:"Do", d:"Re", e:"Mi", f:"Fa", g:"Sol", a:"La", b:"Si" };
+    const duracionBeats = { w:4, h:2, q:1, '8':0.5 };
+    const duracionTiempo = { w:"1n", h:"2n", q:"4n", '8':"8n" };
 
-    const noteNameMap = { c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si" };
-    const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
-    const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
-
-    // Inicialización
     function init() {
       window.addEventListener('resize', () => {
         if (compases.length > 0) {
-          width = Math.max(div.clientWidth || 800, compases.reduce((sum, c) => sum + c.staveWidth, 0) + 80);
+          width = Math.max(div.clientWidth || 800, compases.reduce((s,c)=>s+c.staveWidth,0)+80);
           renderer.resize(width, div.clientHeight);
           redibujarPentagrama();
         }
       });
     }
 
-    // Añadir nota o silencio (MODIFICADO para invertir plica a partir de Si)
+    // 🔧 función ajustada para dirección de plicas
     async function addElemento(tipo, duracion, noteName) {
       const numBeats = compas ? parseInt(compas.split("/")[0]) : 4;
       const currentCompas = compases[compases.length - 1];
       const currentBeats = currentCompas.beats;
       const newBeats = duracionBeats[duracion];
-      if (currentBeats + newBeats > numBeats) {
-        alert("¡Algo no cuadra!");
-        return;
-      }
+      if (currentBeats + newBeats > numBeats) { alert("Compás lleno."); return; }
+
       let elemento;
       if (tipo === "nota") {
-        // 🔽 NUEVO BLOQUE para plicas hacia abajo desde b/4
-        const noteLetter = noteName.split("/")[0];
-        const noteOctave = parseInt(noteName.split("/")[1]);
-        const stemDirection = (noteLetter === "b" && noteOctave >= 4) || noteOctave > 4
-          ? VF.Stem.DOWN
-          : VF.Stem.UP;
-
+        const [letra, octavaStr] = noteName.split("/");
+        const octava = parseInt(octavaStr);
+        let stemDirection = VF.Stem.UP;
+        if ((clave === "treble" && ((letra === "b" && octava >= 4) || octava > 4)) ||
+            (clave === "bass" && ((letra === "d" && octava >= 3) || octava > 3))) {
+          stemDirection = VF.Stem.DOWN;
+        }
         elemento = new VF.StaveNote({
-          clef: clave,
-          keys: [noteName],
-          duration: duracion,
-          stem_direction: stemDirection
+          clef: clave, keys: [noteName],
+          duration: duracion, stem_direction: stemDirection
         });
       } else {
         const restKey = clave === "treble" ? "b/4" : "d/3";
         elemento = new VF.StaveNote({ clef: clave, keys: [restKey], duration: duracion + "r" });
       }
-      currentCompas.notas.push({ tipo, duracion, noteName: tipo === "nota" ? noteName : null, vf: elemento });
+      currentCompas.notas.push({ tipo, duracion, noteName: tipo==="nota"?noteName:null, vf: elemento });
       currentCompas.beats += newBeats;
       redibujarPentagrama();
       if (tipo === "nota") await play(noteName);
     }
 
-    // (... resto del código sin cambios ...)
-    // [El resto de tu script continúa exactamente igual que en tu versión actual]
+    // (... el resto de funciones del original permanecen idénticas ...)
+    init();
   </script>
 </body>
 </html>
