@@ -83,7 +83,7 @@
     #pentagrama {
       margin: 0 auto;
       width: 95%;
-      flex: 1;
+      height: 50vh; /* Altura fija para evitar que crezca */
       background: #ffffff;
       border-radius: 15px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
@@ -212,7 +212,7 @@
       header p { font-size: 0.9em; }
       #barra-opciones { gap: 10px; margin: 10px 0; }
       select { padding: 6px 10px; font-size: 1em; }
-      #pentagrama { min-height: 150px; }
+      #pentagrama { min-height: 150px; height: 40vh; } /* Ajuste para móviles */
       .figura { width: 50px; height: 50px; line-height: 50px; font-size: 2em; }
       button { padding: 8px 16px; font-size: 1em; }
       #controles { gap: 10px; margin: 10px 0; }
@@ -405,12 +405,14 @@
       // Dibujar los pentagramas
       lines.forEach((line, lineIndex) => {
         let xOffset = 40; // Margen inicial para cada línea
-        line.forEach(compasIndex => {
+        line.forEach((compasIndex, staveIndex) => {
           const compasData = compases[compasIndex];
           const stave = new VF.Stave(xOffset, yOffset + lineIndex * lineSpacing, compasData.staveWidth, { spacing_between_lines_px: 14 });
-          // Añadir clave al inicio de cada línea
-          stave.addClef(clave);
-          // Añadir compás solo en la primera línea
+          // Añadir clave solo al primer compás de cada línea
+          if (staveIndex === 0) {
+            stave.addClef(clave);
+          }
+          // Añadir compás solo en el primer compás de la primera línea
           if (lineIndex === 0 && compasIndex === 0) {
             stave.addTimeSignature(compas);
           }
@@ -434,6 +436,15 @@
 
       width = Math.max(div.clientWidth || 800, Math.max(...lines.map(line => line.reduce((sum, idx) => sum + compases[idx].staveWidth, 40))));
       renderer.resize(width, totalHeight);
+
+      // Centrar la pantalla en la última línea
+      if (totalLines > 1) {
+        const lastLineY = yOffset + (totalLines - 1) * lineSpacing;
+        div.scrollTop = lastLineY - (div.clientHeight - staveHeight) / 2; // Centrar la última línea
+      } else {
+        div.scrollTop = 0; // Para una sola línea, permanecer en la parte superior
+      }
+
       updateDraggableNotes();
       const currentCompas = compases[compases.length - 1];
       document.getElementById("cerrar-compas").disabled = !compas || currentCompas.closed || currentCompas.beats !== parseInt(compas.split("/")[0]);
