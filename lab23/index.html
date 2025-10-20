@@ -92,8 +92,6 @@
       overflow-y: auto;
       border: 3px solid #4ae2f2;
       min-height: 200px;
-      display: flex;
-      align-items: center;
     }
     #figuras {
       display: flex;
@@ -279,7 +277,7 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     let width = 800;
     const minStaveWidth = 250;
-    const staveHeight = 100; // Altura estimada de cada pentagrama (ajustada para líneas adicionales)
+    const staveHeight = 100; // Altura estimada de cada pentagrama
     const lineSpacing = 120; // Espacio entre líneas de pentagramas
     renderer.resize(width, div.clientHeight);
     const context = renderer.getContext();
@@ -398,23 +396,23 @@
 
       // Calcular el alto total necesario para todas las líneas
       const totalLines = lines.length;
-      const totalHeight = Math.max(div.clientHeight, totalLines * lineSpacing);
+      const totalHeight = Math.max(div.clientHeight, totalLines * lineSpacing + 40); // Margen de 40px
       renderer.resize(width, totalHeight);
 
-      // Dibujar los pentagramas
-      let xOffset = 40;
-      let yOffset = (div.clientHeight - staveHeight) / 2; // Centrar verticalmente en el contenedor
-      if (totalLines > 1) {
-        yOffset = 20; // Margen superior para múltiples líneas
-      }
+      // Calcular yOffset para centrar una sola línea o usar margen fijo para múltiples líneas
+      let yOffset = totalLines === 1 ? (div.clientHeight - staveHeight) / 2 : 20;
 
+      // Dibujar los pentagramas
       lines.forEach((line, lineIndex) => {
-        xOffset = 40; // Reiniciar X para cada línea
+        let xOffset = 40; // Margen inicial para cada línea
         line.forEach(compasIndex => {
           const compasData = compases[compasIndex];
           const stave = new VF.Stave(xOffset, yOffset + lineIndex * lineSpacing, compasData.staveWidth, { spacing_between_lines_px: 14 });
-          if (compasIndex === 0 || lines[lineIndex - 1]?.includes(compasIndex - 1)) {
-            stave.addClef(clave).addTimeSignature(compas);
+          // Añadir clave al inicio de cada línea
+          stave.addClef(clave);
+          // Añadir compás solo en la primera línea
+          if (lineIndex === 0 && compasIndex === 0) {
+            stave.addTimeSignature(compas);
           }
           if (compasData.closed) {
             stave.addModifier(new VF.Barline().setType(VF.Barline.type.SINGLE));
