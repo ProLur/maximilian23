@@ -452,8 +452,8 @@
 
     async function addNota(tipo, dur, noteName) {
       const beats = +compas.split("/")[0];
-      let line = lines[currentLine], compas = line[line.length - 1];
-      if (compas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
+      let line = lines[currentLine], currentCompas = line[line.length - 1];
+      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
 
       let vf;
       if (tipo === "nota") {
@@ -466,8 +466,8 @@
         vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: dur + "r" });
       }
 
-      compas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
-      compas.beats += duracionBeats[dur];
+      currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
+      currentCompas.beats += duracionBeats[dur];
       redibujarPentagrama();
       if (tipo === "nota") {
         await Tone.start();
@@ -518,9 +518,9 @@
         if (deleteMode) {
           d.onclick = e => {
             e.stopPropagation();
-            const compas = lines[li][ci];
-            compas.beats -= duracionBeats[compas.notas[ni].duracion];
-            compas.notas.splice(ni, 1);
+            const currentCompas = lines[li][ci];
+            currentCompas.beats -= duracionBeats[currentCompas.notas[ni].duracion];
+            currentCompas.notas.splice(ni, 1);
             redibujarPentagrama();
           };
         } else {
