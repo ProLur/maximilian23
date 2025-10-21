@@ -189,7 +189,6 @@
       <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
       <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
       <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
-      <button id="papelera"><i class="fas fa-trash-alt"></i> Papelera</button>
       <button id="notas"><i class="fas fa-music"></i> Notas</button>
       <button id="play-stop"><i class="fas fa-play"></i> Play</button>
       <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
@@ -208,7 +207,7 @@
 
     let clave = "treble", compas = "", bpm = 0;
     let lines = [[]], currentLine = 0;
-    let figuraActiva = null, deleteMode = false, showNoteLabels = false, isPlaying = false, metronomeOn = false;
+    let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
     let metronomeLoop = null;
     let synth = null;
 
@@ -304,8 +303,8 @@
       document.querySelectorAll(".figura").forEach(f => {
         f.onclick = () => {
           document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-          ["papelera", "notas", "metronomo"].forEach(id => document.getElementById(id).classList.remove("activa"));
-          deleteMode = showNoteLabels = metronomeOn = false;
+          ["notas", "metronomo"].forEach(id => document.getElementById(id).classList.remove("activa"));
+          showNoteLabels = metronomeOn = false;
           figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
           f.classList.add("activa");
           if (metronomeLoop) metronomeLoop.stop();
@@ -314,7 +313,6 @@
     }
 
     function initControles() {
-      document.getElementById("papelera").onclick = () => toggleMode("papelera", () => { deleteMode = !deleteMode; });
       document.getElementById("notas").onclick = () => toggleMode("notas", () => { showNoteLabels = !showNoteLabels; });
       document.getElementById("metronomo").onclick = () => toggleMode("metronomo", toggleMetronome);
       document.getElementById("play-stop").onclick = playStop;
@@ -328,10 +326,10 @@
 
     function toggleMode(id, fn) {
       document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-      ["papelera", "notas", "metronomo"].forEach(i => document.getElementById(i).classList.remove("activa"));
+      ["notas", "metronomo"].forEach(i => document.getElementById(i).classList.remove("activa"));
       figuraActiva = null;
       fn();
-      document.getElementById(id).classList.toggle("activa", id === "papelera" ? deleteMode : id === "notas" ? showNoteLabels : metronomeOn);
+      document.getElementById(id).classList.toggle("activa", id === "notas" ? showNoteLabels : metronomeOn);
       updateDraggableNotes();
     }
 
@@ -439,7 +437,6 @@
     div.onclick = async e => {
       if (!compas) return alert("Por favor, selecciona un compás antes de añadir notas.");
       if (!figuraActiva) return alert("Por favor, selecciona una figura musical.");
-      if (deleteMode) return;
 
       const rect = div.getBoundingClientRect();
       const clickX = e.clientX - rect.left + div.scrollLeft;
@@ -519,7 +516,7 @@
         if (!g) return;
         const bbox = g.getBBox();
         const d = document.createElement("div");
-        d.className = `nota ${deleteMode ? 'delete-mode' : ''}`;
+        d.className = "nota";
         d.style.left = `${bbox.x}px`;
         d.style.top = `${bbox.y}px`;
         d.style.width = `${bbox.width}px`;
@@ -528,82 +525,70 @@
         d.dataset.ci = ci;
         d.dataset.ni = ni;
 
-        if (!deleteMode) {
-          const plus = document.createElement("div");
-          plus.textContent = "+";
-          plus.className = "plus";
-          const minus = document.createElement("div");
-          minus.textContent = "−";
-          minus.className = "minus";
-          let t;
-          const showControls = () => {
-            clearTimeout(t);
-            d.classList.add("show-controls");
-            t = setTimeout(() => d.classList.remove("show-controls"), 1000);
-          };
-          const hideControls = () => {
-            clearTimeout(t);
-            d.classList.remove("show-controls");
-          };
+        const plus = document.createElement("div");
+        plus.textContent = "+";
+        plus.className = "plus";
+        const minus = document.createElement("div");
+        minus.textContent = "−";
+        minus.className = "minus";
+        let t;
+        const showControls = () => {
+          clearTimeout(t);
+          d.classList.add("show-controls");
+          t = setTimeout(() => d.classList.remove("show-controls"), 1000);
+        };
+        const hideControls = () => {
+          clearTimeout(t);
+          d.classList.remove("show-controls");
+        };
 
-          plus.onclick = e => {
-            e.stopPropagation();
-            showControls();
-            changePitch(d, 1);
-          };
-          minus.onclick = e => {
-            e.stopPropagation();
-            showControls();
-            changePitch(d, -1);
-          };
-          d.onmouseover = showControls;
-          d.onmouseout = hideControls;
-          d.onclick = e => {
-            e.stopPropagation();
-            showControls();
-          };
-          d.appendChild(plus);
-          d.appendChild(minus);
-        }
+        plus.onclick = e => {
+          e.stopPropagation();
+          showControls();
+          changePitch(d, 1);
+        };
+        minus.onclick = e => {
+          e.stopPropagation();
+          showControls();
+          changePitch(d, -1);
+        };
+        d.onmouseover = showControls;
+        d.onmouseout = hideControls;
+        d.onclick = e => {
+          e.stopPropagation();
+          showControls();
+        };
+        d.appendChild(plus);
+        d.appendChild(minus);
 
         div.appendChild(d);
 
-        if (deleteMode) {
-          d.onclick = e => {
-            e.stopPropagation();
-            const currentCompas = lines[li][ci];
-            currentCompas.beats -= duracionBeats[currentCompas.notas[ni].duracion];
-            currentCompas.notas.splice(ni, 1);
-            redibujarPentagrama();
-          };
-        } else {
-          interact(d).draggable({
-            listeners: {
-              start() { d.setAttribute("dy", 0); },
-              move(e) {
-                const dy = +d.getAttribute("dy") + e.dy;
-                d.style.transform = `translateY(${dy}px)`;
-                d.setAttribute("dy", dy);
-              },
-              end(e) {
-                const y = e.clientY - div.getBoundingClientRect().top + div.scrollTop;
-                const newName = getNoteFromY(y);
-                if (!newName) return;
-                const nota = lines[li][ci].notas[ni];
-                nota.noteName = newName;
-                const list = noteMap[clave];
-                const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
-                const idx = list.indexOf(newName);
-                nota.vf = new VF.StaveNote({ clef: clave, keys: [newName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
-                d.remove();
-                redibujarPentagrama();
-                if (synth) {
-                  synth.triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], "8n");
-                }
+        interact(d).draggable({
+          listeners: {
+            start() { d.setAttribute("dy", 0); },
+            move(e) {
+              const dy = +d.getAttribute("dy") + e.dy;
+              d.style.transform = `translateY(${dy}px)`;
+              d.setAttribute("dy", dy);
+            },
+            end(e) {
+              const y = e.clientY - div.getBoundingClientRect().top + div.scrollTop;
+              const newName = getNoteFromY(y);
+              if (!newName) return;
+              const nota = lines[li][ci].notas[ni];
+              nota.noteName = newName;
+              const list = noteMap[clave];
+              const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+              const idx = list.indexOf(newName);
+              nota.vf = new VF.StaveNote({ clef: clave, keys: [newName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
+              d.remove();
+              redibujarPentagrama();
+              if (synth) {
+                synth.triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], "8n");
               }
             }
-          });
-        }
+          }
+        });
         gi++;
       })));
     }
