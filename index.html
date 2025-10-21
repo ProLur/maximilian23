@@ -3,657 +3,379 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laboratorio Musical de Maximilian 23</title>
-  <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
-  <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Maximilian 23</title>
+
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <meta name="description" content="Maximilian 23 es el asistente de inteligencia artificial del CEIP Juan XXIII de Zafra.">
+  <meta name="theme-color" content="#00ffcc">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: linear-gradient(180deg, #aee1f9 0%, #c7b5ff 100%);
-      font-family: "Comic Sans MS", cursive;
-      color: #222;
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      margin: 0;
+      padding: 0;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
-    }
-    header {
-      background: linear-gradient(90deg, #4ae2f2, #6f9cff);
-      text-align: center;
-      padding: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      border-radius: 0 0 15px 15px;
-    }
-    header img { height: 70px; vertical-align: middle; filter: drop-shadow(0 0 6px #fff); }
-    header h1 { display: inline-block; margin: 0 10px; font-size: 2em; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
-    header p { color: #e9f8ff; font-size: 1em; }
-
-    #titulo-partitura {
-      text-align: center;
-      margin: 15px 0;
-    }
-    #titulo-editable {
-      font: inherit;
-      font-size: 1.6em;
-      font-weight: bold;
-      text-align: center;
-      border: 2px solid #4ae2f2;
-      border-radius: 10px;
-      padding: 8px 15px;
-      width: 80%;
-      max-width: 600px;
-      background: #fff;
-    }
-
-    #barra-opciones {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin: 15px 0;
-    }
-    select {
-      padding: 8px 12px;
-      font-size: 1em;
-      border: 2px solid #4ae2f2;
-      border-radius: 10px;
-      background: #fff;
-    }
-
-    #main-content {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 0 10px;
-    }
-
-    #pentagrama-container {
-      flex-grow: 1;
-      background: #fff;
-      border: 3px solid #4ae2f2;
-      border-radius: 15px;
       overflow: hidden;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      margin-bottom: 15px;
     }
-    #pentagrama {
-      width: 100%;
+
+    header {
+      background: rgba(22,27,34,0.95);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #00ffcc;
+      font-family: "Courier New", monospace;
+      position: relative;
+    }
+
+    header img { height: 40px; width: auto; }
+
+    #policyIcon {
+      display: none;
+      position: absolute;
+      right: 12px;
+      font-size: 22px;
+      color: #00ffcc;
+      cursor: pointer;
+      transition: transform .3s ease;
+    }
+    #policyIcon:hover { transform: rotate(30deg); }
+    @media (max-width:600px) { #policyIcon { display: block; } }
+
+    .container { flex: 1; display: flex; overflow: hidden; }
+
+    .left-panel {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,17,23,0.9);
+      border-right: 2px solid #00ffcc;
+    }
+
+    .left-panel img {
+      max-width: 220px;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid #00ffcc;
+      box-shadow: 0 0 15px #00ffcc88;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .left-panel img:hover { transform: scale(1.05); }
+
+    .chat-panel {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      background: rgba(13,17,23,0.9);
       height: 100%;
+    }
+
+    @media (min-width:768px) {
+      .left-panel { display: flex; }
+    }
+
+    #chat {
+      flex: 1;
       overflow-y: auto;
-      overflow-x: hidden;
+      padding: 15px;
       scroll-behavior: smooth;
     }
 
-    #figuras {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin: 15px 0;
-    }
-    .figura {
-      width: 60px; height: 60px;
-      background: #fff;
-      border: 3px solid #4ae2f2;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.25s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8em;
-      color: #333;
-    }
-    .figura:hover, .figura.activa {
-      background: #4ae2f2;
-      color: white;
-      transform: scale(1.15);
-      box-shadow: 0 0 15px #4ae2f2;
-    }
-
-    #controles {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 15px 0;
-    }
-    button {
-      padding: 10px 18px;
-      font-size: 1em;
-      background: linear-gradient(90deg, #4ae2f2, #6f9cff);
-      color: white;
-      border: none;
+    .user, .bot {
+      padding: 12px;
+      margin: 10px 12px;
       border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      transition: 0.2s;
+      max-width: 80%;
+      font-family: "Courier New", monospace;
+      white-space: pre-wrap;
+      font-size: 17px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .user {
+      background: #243b4a;
+      color: #00ffcc;
+      margin-left: auto;
+      border: 1px solid #00ffcc;
+    }
+
+    .bot {
+      background: #1e2d3d;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+    }
+
+    /* Animación de los tres puntos */
+    .typing {
+      display: inline-block;
+    }
+
+    .typing span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin: 0 2px;
+      background: #00ffcc;
+      border-radius: 50%;
+      animation: blink 1.4s infinite both;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0% { opacity: .2; }
+      20% { opacity: 1; }
+      100% { opacity: .2; }
+    }
+
+    footer {
       display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    button i { font-size: 1.1em; }
-    button:hover { transform: scale(1.1); }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    button.activa { background: #ff80b5 !important; }
-
-    .nota { position: absolute; cursor: move; z-index: 100; pointer-events: auto; }
-    .nota .plus, .nota .minus {
-      width: 24px; height: 24px; border-radius: 50%; background: #4ae2f2; color: white;
-      position: absolute; text-align: center; line-height: 24px; font-size: 1em;
-      cursor: pointer; opacity: 0; transition: opacity 0.2s;
-    }
-    .nota.show-controls .plus, .nota.show-controls .minus { opacity: 1; }
-    .nota .plus { top: -30px; left: 50%; transform: translateX(-50%); }
-    .nota .minus { bottom: -30px; left: 50%; transform: translateX(-50%); }
-
-    .note-label {
-      position: absolute; background: rgba(255,255,255,0.9); border: 1px solid #4ae2f2;
-      border-radius: 4px; padding: 2px 6px; font-size: 0.9em; color: #333;
-      z-index: 150; pointer-events: none;
+      padding: 8px;
+      background: rgba(22,27,34,0.95);
+      border-top: 2px solid #00ffcc;
     }
 
-    @media (max-width: 600px) {
-      header h1 { font-size: 1.6em; }
-      #titulo-editable { font-size: 1.3em; }
-      .figura { width: 50px; height: 50px; font-size: 1.6em; }
-      button { padding: 8px 14px; font-size: 0.9em; }
+    input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      outline: none;
+      background: #fff;
+      color: #000;
+    }
+
+    button {
+      background: #00ffcc;
+      border: none;
+      padding: 10px 14px;
+      margin-left: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    #policyButton {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0,255,204,.08);
+      border: 1px solid #00ffcc88;
+      color: #00ffcc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      transition: all .3s ease;
+      backdrop-filter: blur(4px);
+      z-index: 900;
+      cursor: pointer;
+    }
+
+    #policyButton:hover {
+      background: rgba(0,255,204,.2);
+      border-color: #00ffcc;
+      box-shadow: 0 0 6px #00ffcc88;
+    }
+
+    @media (max-width:600px) { #policyButton { display: none; } }
+
+    /* 🧾 Cortina de políticas */
+    #policyBanner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(13,17,23,0.97);
+      color: #00ffcc;
+      text-align: center;
+      padding: 18px 10px;
+      border-top: 2px solid #00ffcc;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      transform: translateY(100%);
+      transition: transform 0.6s ease;
+      z-index: 999;
+    }
+
+    #policyBanner.show {
+      transform: translateY(0);
+    }
+
+    /* ✅ Color del enlace corregido */
+    #policyBanner a {
+      color: #00ffcc;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+    #policyBanner a:hover {
+      color: #33ffe6;
+    }
+
+    #acceptPolicies {
+      background: #00ffcc;
+      color: #000;
+      border: none;
+      padding: 6px 12px;
+      margin-left: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
     }
   </style>
 </head>
+
 <body>
   <header>
-    <img src="https://mmfrutos.com/max23/Cabeza.png" alt="Maximilian 23">
-    <h1>Laboratorio Musical de Maximilian 23</h1>
-    <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
+    <img src="Cabeza.png" alt="Maximilian">
+    Maximilian 23
+    <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
   </header>
 
-  <div id="titulo-partitura">
-    <input type="text" id="titulo-editable" value="Mi Partitura">
+  <div class="container">
+    <div class="left-panel">
+      <img id="maxImage" src="max.png" alt="Maximilian grande">
+    </div>
+
+    <div class="chat-panel">
+      <div id="chat"></div>
+      <footer>
+        <input type="text" id="message" placeholder="Escribe tu mensaje..."
+          onkeydown="if(event.key==='Enter'&&!this.disabled){sendMessage()}">
+        <button onclick="sendMessage()" id="sendButton">Enviar</button>
+      </footer>
+    </div>
   </div>
 
-  <div id="barra-opciones">
-    <label>Clave:</label>
-    <select id="clave"><option value="treble" selected>Sol</option><option value="bass">Fa</option></select>
-    <label>Compás:</label>
-    <select id="compas"><option value="" selected>---</option><option value="4/4">4/4</option><option value="3/4">3/4</option><option value="2/4">2/4</option></select>
-    <label>Velocidad:</label>
-    <select id="velocidad"><option value="" selected>---</option><option value="60">60 BPM</option><option value="90">90 BPM</option><option value="120">120 BPM</option></select>
-  </div>
+  <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
 
-  <div id="main-content">
-    <div id="pentagrama-container">
-      <div id="pentagrama"></div>
-    </div>
-
-    <div id="figuras">
-      <!-- Notas -->
-      <div class="figura" data-tipo="nota" data-duracion="w">𝅝</div> <!-- Redonda -->
-      <div class="figura" data-tipo="nota" data-duracion="h">𝅗𝅥</div> <!-- Blanca -->
-      <div class="figura" data-tipo="nota" data-duracion="q">𝅘𝅥</div> <!-- Negra -->
-      <div class="figura" data-tipo="nota" data-duracion="8">𝅘𝅥𝅮</div> <!-- Corchea -->
-      <!-- Silencios -->
-      <div class="figura" data-tipo="silencio" data-duracion="w">𝄻</div> <!-- Silencio de redonda -->
-      <div class="figura" data-tipo="silencio" data-duracion="h">𝄼</div> <!-- Silencio de blanca -->
-      <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div> <!-- Silencio de negra -->
-      <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div> <!-- Silencio de corchea -->
-    </div>
-
-    <div id="controles">
-      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
-      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
-      <input type="file" id="file-input" accept=".json" style="display:none">
-      <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
-      <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
-      <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
-      <button id="papelera"><i class="fas fa-trash-alt"></i> Papelera</button>
-      <button id="notas"><i class="fas fa-music"></i> Notas</button>
-      <button id="play-stop" disabled><i class="fas fa-play"></i> Play</button>
-      <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
-    </div>
+  <!-- 🧾 Banner de políticas -->
+  <div id="policyBanner">
+    Este sitio utiliza cookies y almacena datos de sesión para ofrecer un mejor servicio.
+    Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
+    <button id="acceptPolicies">Aceptar</button>
   </div>
 
   <script>
-    const VF = Vex.Flow;
-    const div = document.getElementById("pentagrama");
-    const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-    const container = document.getElementById("pentagrama-container");
-    let width = 800;
-    const minStaveWidth = 250;
-    const lineHeight = 150;
-    renderer.resize(width, 600);
-    const context = renderer.getContext();
+    const API_URL = "https://max23.onrender.com/chat";
 
-    let clave = "treble", compas = "", bpm = 0;
-    let lines = [[]], currentLine = 0;
-    let figuraActiva = null, deleteMode = false, showNoteLabels = false, isPlaying = false, metronomeOn = false;
-    let metronomeLoop = null;
-
-    const noteMap = {
-      treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
-      bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
-    };
-    const noteNameMap = { c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si" };
-    const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
-    const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
-
-    function init() {
-      window.addEventListener('resize', () => {
-        width = container.clientWidth;
-        renderer.resize(width, container.clientHeight);
-        redibujarPentagrama();
-      });
-      document.getElementById("clave").onchange = e => { clave = e.target.value; resetPartitura(); };
-      document.getElementById("compas").onchange = e => { compas = e.target.value; resetPartitura(); };
-      document.getElementById("velocidad").onchange = e => { bpm = +e.target.value; document.getElementById("play-stop").disabled = !bpm; };
-      initFiguras();
-      initControles();
-      resetPartitura();
+    function scrollBottom() {
+      const chat = document.getElementById("chat");
+      chat.scrollTop = chat.scrollHeight;
     }
 
-    function resetPartitura() {
-      lines = [[]];
-      currentLine = 0;
-      if (compas) lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
-      redibujarPentagrama();
+    function linkify(t) {
+      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
+        u => `<a href="${u}" target="_blank">${u}</a>`);
     }
 
-    function redibujarPentagrama() {
-      context.clear();
-      document.querySelectorAll(".note-label, .nota").forEach(el => el.remove());
-      if (!compas) return;
-
-      let y = 80;
-      lines.forEach((line, li) => {
-        let x = 40;
-        line.forEach((c, ci) => {
-          const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
-          voice.setStrict(false);
-          if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
-
-          const formatter = new VF.Formatter();
-          if (c.notas.length) formatter.joinVoices([voice]);
-
-          const extra = c.notas.filter(n => n.duracion === '8').length * 30 + (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 15;
-          const w = Math.max(minStaveWidth, c.notas.length ? formatter.preCalculateMinTotalWidth([voice]) + 80 + extra : minStaveWidth);
-          c.staveWidth = w;
-
-          const stave = new VF.Stave(x, y, w, { spacing_between_lines_px: 18 });
-          if (li === 0 && ci === 0) stave.addClef(clave).addTimeSignature(compas);
-          if (c.closed) stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
-          stave.setContext(context).draw();
-          c.stave = stave;
-
-          if (c.notas.length) {
-            formatter.format([voice], w - 80);
-            voice.draw(context, stave);
-          }
-          x += w;
-        });
-        y += lineHeight;
-      });
-
-      width = Math.max(container.clientWidth, lines.reduce((m, l) => Math.max(m, l.reduce((s, c) => s + c.staveWidth, 0) + 80), 0));
-      renderer.resize(width, y + 50);
-      updateDraggableNotes();
-
-      const curr = lines[currentLine][lines[currentLine].length - 1];
-      document.getElementById("cerrar-compas").disabled = !curr || curr.closed || curr.beats !== +compas.split("/")[0];
-
-      if (curr?.stave) {
-        setTimeout(() => {
-          div.scrollTop = curr.stave.getYForLine(0) - div.clientHeight / 3;
-        }, 50);
-      }
-    }
-
-    function initFiguras() {
-      document.querySelectorAll(".figura").forEach(f => {
-        f.onclick = () => {
-          document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-          ["papelera", "notas", "metronomo"].forEach(id => document.getElementById(id).classList.remove("activa"));
-          deleteMode = showNoteLabels = metronomeOn = false;
-          figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
-          f.classList.add("activa");
-        };
-      });
-    }
-
-    function initControles() {
-      document.getElementById("papelera").onclick = () => toggleMode("papelera", () => { deleteMode = !deleteMode; });
-      document.getElementById("notas").onclick = () => toggleMode("notas", () => { showNoteLabels = !showNoteLabels; });
-      document.getElementById("metronomo").onclick = () => toggleMode("metronomo", () => { metronomeOn = !metronomeOn; });
-      document.getElementById("play-stop").onclick = playStop;
-      document.getElementById("cerrar-compas").onclick = cerrarCompas;
-      document.getElementById("borrar-ultimo").onclick = borrarUltimo;
-      document.getElementById("limpiar").onclick = resetPartitura;
-      document.getElementById("guardar").onclick = guardar;
-      document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
-      document.getElementById("file-input").onchange = abrir;
-    }
-
-    function toggleMode(id, fn) {
-      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-      ["papelera", "notas", "metronomo"].forEach(i => document.getElementById(i).classList.remove("activa"));
-      figuraActiva = null;
-      fn();
-      document.getElementById(id).classList.toggle("activa", id === "papelera" ? deleteMode : id === "notas" ? showNoteLabels : metronomeOn);
-      updateDraggableNotes();
-    }
-
-    async function playStop() {
-      await Tone.start();
-      if (isPlaying) { stopPlayback(); return; }
-      if (!bpm || !compas) return alert("Configura compás y velocidad");
-
-      Tone.Transport.bpm.value = bpm;
-      const synth = new Tone.Synth().toDestination();
-      let time = 0, events = [], gi = 0;
-      lines.forEach(l => l.forEach(c => c.notas.forEach(n => {
-        if (n.tipo === "nota") events.push({ time, note: n.noteName, dur: duracionTiempo[n.duracion], gi });
-        time += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
-        gi++;
-      })));
-
-      if (!events.length && !metronomeOn) return alert("Sin notas para reproducir");
-
-      Tone.Transport.cancel();
-      let offset = 0;
-      if (metronomeOn) {
-        const beat = Tone.Time("4n").toSeconds();
-        const beats = +compas.split("/")[0];
-        for (let i = 0; i < beats; i++) Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
-        offset = beats * beat;
-        metronomeLoop = new Tone.Loop(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), "4n").start(offset);
-      }
-
-      const gs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
-      events.forEach(e => {
-        const s = e.time + offset, end = s + Tone.Time(e.dur).toSeconds();
-        Tone.Transport.schedule(t => synth.triggerAttackRelease(e.note.split("/")[0].toUpperCase() + e.note.split("/")[1], e.dur, t), s);
-        Tone.Transport.schedule(t => {
-          const g = gs[e.gi];
-          if (g) {
-            g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-              el.setAttribute('stroke', 'red');
-              if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'red');
-            });
-            div.scrollTop = g.getBBox().y - div.clientHeight / 3;
-          }
-        }, s);
-        Tone.Transport.schedule(t => {
-          const g = gs[e.gi];
-          if (g) g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-            el.setAttribute('stroke', 'black');
-            if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
-          });
-        }, end);
-        if (showNoteLabels && gs[e.gi]) {
-          const bbox = gs[e.gi].getBBox();
-          Tone.Transport.schedule(t => {
-            document.querySelectorAll(".note-label").forEach(l => l.remove());
-            const lbl = document.createElement("div");
-            lbl.className = "note-label";
-            lbl.textContent = noteNameMap[e.note.split("/")[0]] + e.note.split("/")[1];
-            lbl.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
-            lbl.style.top = `${bbox.y + bbox.height + 10}px`;
-            div.appendChild(lbl);
-          }, s);
-          Tone.Transport.schedule(t => document.querySelectorAll(".note-label").forEach(l => l.remove()), end);
-        }
-      });
-
-      Tone.Transport.schedule(() => stopPlayback(), time + offset);
-      Tone.Transport.start();
-      document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
-      isPlaying = true;
-    }
-
-    function stopPlayback() {
-      Tone.Transport.cancel();
-      Tone.Transport.stop();
-      if (metronomeLoop) metronomeLoop.stop();
-      document.querySelectorAll(".note-label").forEach(l => l.remove());
-      context.svg.querySelectorAll('g.vf-stavenote').forEach(g => g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-        el.setAttribute('stroke', 'black');
-        if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
-      }));
-      document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
-      isPlaying = false;
-    }
-
-    div.onclick = async e => {
-      if (!compas) return alert("Por favor, selecciona un compás antes de añadir notas.");
-      if (!figuraActiva) return alert("Por favor, selecciona una figura musical.");
-      if (deleteMode) return;
-      if (!lines[currentLine].length) {
-        lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
-      }
-      const curr = lines[currentLine][lines[currentLine].length - 1];
-      if (curr.closed) return alert("El compás actual está cerrado. Cierra el compás o crea uno nuevo.");
-      const rect = div.getBoundingClientRect();
-      const y = e.clientY - rect.top + div.scrollTop;
-      const noteName = getNoteFromY(y);
-      if (!noteName) return alert("No se pudo determinar la posición de la nota. Intenta de nuevo.");
-      await addNota(figuraActiva.tipo, figuraActiva.duracion, noteName);
-    };
-
-    function getNoteFromY(y) {
-      const lineIndex = Math.floor((y - 80) / lineHeight);
-      if (lineIndex < 0 || lineIndex > currentLine) return null;
-      const lineY = lineIndex * lineHeight + 80;
-      const relY = y - lineY;
-      const step = 72 / 8; // Dividimos el espacio del pentagrama en pasos para las notas
-      const idx = Math.round((72 - relY) / step);
-      return noteMap[clave][Math.max(0, Math.min(noteMap[clave].length - 1, idx))];
-    }
-
-    async function addNota(tipo, dur, noteName) {
-      const beats = +compas.split("/")[0];
-      let line = lines[currentLine], currentCompas = line[line.length - 1];
-      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
-
-      let vf;
-      if (tipo === "nota") {
-        const list = noteMap[clave];
-        const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
-        const idx = list.indexOf(noteName);
-        vf = new VF.StaveNote({ clef: clave, keys: [noteName], duration: dur, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
-      } else {
-        const rest = clave === "treble" ? "b/4" : "d/3";
-        vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: dur + "r" });
-      }
-
-      currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
-      currentCompas.beats += duracionBeats[dur];
-      redibujarPentagrama();
-      if (tipo === "nota") {
-        await Tone.start();
-        new Tone.Synth().toDestination().triggerAttackRelease(noteName.split("/")[0].toUpperCase() + noteName.split("/")[1], "8n");
-      }
-    }
-
-    function updateDraggableNotes() {
-      document.querySelectorAll(".nota").forEach(n => n.remove());
-      let gi = 0;
-      lines.forEach((line, li) => line.forEach((c, ci) => c.notas.forEach((n, ni) => {
-        if (n.tipo === "silencio") { gi++; return; }
-        const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
-        if (!g) return;
-        const bbox = g.getBBox();
-        const d = document.createElement("div");
-        d.className = `nota ${deleteMode ? 'delete-mode' : ''}`;
-        d.style.left = `${bbox.x}px`;
-        d.style.top = `${bbox.y}px`;
-        d.style.width = `${bbox.width}px`;
-        d.style.height = `${bbox.height}px`;
-        d.dataset.li = li;
-        d.dataset.ci = ci;
-        d.dataset.ni = ni;
-
-        if (!deleteMode) {
-          const plus = document.createElement("div");
-          plus.textContent = "+";
-          plus.className = "plus";
-          const minus = document.createElement("div");
-          minus.textContent = "−";
-          minus.className = "minus";
-          let t;
-          const showControls = () => {
-            clearTimeout(t);
-            d.classList.add("show-controls");
-            t = setTimeout(() => d.classList.remove("show-controls"), 2000);
-          };
-          plus.onclick = e => { e.stopPropagation(); showControls(); changePitch(d, 1); };
-          minus.onclick = e => { e.stopPropagation(); showControls(); changePitch(d, -1); };
-          d.onmouseover = showControls;
-          d.appendChild(plus);
-          d.appendChild(minus);
-        }
-
-        div.appendChild(d);
-
-        if (deleteMode) {
-          d.onclick = e => {
-            e.stopPropagation();
-            const currentCompas = lines[li][ci];
-            currentCompas.beats -= duracionBeats[currentCompas.notas[ni].duracion];
-            currentCompas.notas.splice(ni, 1);
-            redibujarPentagrama();
-          };
+    function typeWriterEffect(el, text, delay = 30, done = null) {
+      let i = 0; el.innerHTML = "";
+      const chat = document.getElementById("chat");
+      function step() {
+        if (i < text.length) {
+          el.innerHTML = text.substring(0, ++i);
+          if (i % 3 === 0) chat.scrollTop = chat.scrollHeight;
+          setTimeout(step, delay);
         } else {
-          interact(d).draggable({
-            listeners: {
-              start() { d.setAttribute("dy", 0); },
-              move(e) {
-                const dy = +d.getAttribute("dy") + e.dy;
-                d.style.transform = `translateY(${dy}px)`;
-                d.setAttribute("dy", dy);
-              },
-              end(e) {
-                const y = e.clientY - div.getBoundingClientRect().top + div.scrollTop;
-                const newName = getNoteFromY(y);
-                if (!newName) return;
-                const nota = lines[li][ci].notas[ni];
-                nota.noteName = newName;
-                const list = noteMap[clave];
-                const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
-                const idx = list.indexOf(newName);
-                nota.vf = new VF.StaveNote({ clef: clave, keys: [newName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
-                d.remove();
-                redibujarPentagrama();
-                Tone.start();
-                new Tone.Synth().toDestination().triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], "8n");
-              }
-            }
-          });
+          chat.scrollTop = chat.scrollHeight;
+          if (done) done();
         }
-        gi++;
-      })));
-    }
-
-    async function changePitch(div, dir) {
-      const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni;
-      const nota = lines[li][ci].notas[ni];
-      const list = noteMap[clave];
-      const idx = list.indexOf(nota.noteName) + dir;
-      if (idx < 0 || idx >= list.length) return;
-      nota.noteName = list[idx];
-      const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
-      nota.vf = new VF.StaveNote({ clef: clave, keys: [nota.noteName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
-      redibujarPentagrama();
-      await Tone.start();
-      new Tone.Synth().toDestination().triggerAttackRelease(nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], "8n");
-    }
-
-    function cerrarCompas() {
-      const curr = lines[currentLine][lines[currentLine].length - 1];
-      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
-      curr.closed = true;
-      const nuevo = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth };
-      lines[currentLine].push(nuevo);
-      const totalW = lines[currentLine].reduce((s, c) => s + c.staveWidth, 0) + 80;
-      if (totalW > width) {
-        lines[currentLine].pop();
-        lines.push([nuevo]);
-        currentLine++;
       }
-      redibujarPentagrama();
+      step();
     }
 
-    function borrarUltimo() {
-      for (let li = lines.length - 1; li >= 0; li--) {
-        for (let ci = lines[li].length - 1; ci >= 0; ci--) {
-          const c = lines[li][ci];
-          if (c.notas.length) {
-            c.beats -= duracionBeats[c.notas[c.notas.length - 1].duracion];
-            c.notas.pop();
-            c.closed = false;
-            if (!c.notas.length && lines[li].length > 1) lines[li].splice(ci, 1);
-            redibujarPentagrama();
-            return;
-          }
-        }
+    async function sendMessage() {
+      const i = document.getElementById("message");
+      const b = document.getElementById("sendButton");
+      const chat = document.getElementById("chat");
+      const msg = i.value.trim(); if (!msg) return;
+
+      i.disabled = b.disabled = true;
+      const user = document.createElement("div");
+      user.className = "user";
+      user.textContent = msg;
+      chat.appendChild(user);
+
+      const bot = document.createElement("div");
+      bot.className = "bot";
+      bot.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+      chat.appendChild(bot);
+      scrollBottom();
+
+      i.value = "";
+
+      try {
+        const r = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await r.json();
+        const reply = linkify(data.reply);
+        bot.innerHTML = "";
+        typeWriterEffect(bot, reply, 30, () => {
+          i.disabled = b.disabled = false;
+          i.focus();
+        });
+      } catch {
+        bot.textContent = "⚠️ Error de conexión.";
+        i.disabled = b.disabled = false;
+        scrollBottom();
       }
     }
 
-    function guardar() {
-      const data = {
-        titulo: document.getElementById("titulo-editable").value,
-        clave, compas, bpm,
-        lines: lines.map(l => l.map(c => ({
-          notas: c.notas.map(n => ({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName })),
-          beats: c.beats,
-          closed: c.closed
-        })))
-      };
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-      a.download = `${data.titulo || "partitura"}.json`;
-      a.click();
-    }
+    // 🟢 Mensaje de bienvenida
+    window.addEventListener("DOMContentLoaded", () => {
+      const chat = document.getElementById("chat");
+      const b = document.createElement("div");
+      b.className = "bot";
+      chat.appendChild(b);
+      typeWriterEffect(b,
+        "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. Recuerda que la primera consulta puede tomar algo más de tiempo. ¿Qué quieres saber?");
+      scrollBottom();
 
-    function abrir(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const r = new FileReader();
-      r.onload = ev => {
-        try {
-          const d = JSON.parse(ev.target.result);
-          document.getElementById("titulo-editable").value = d.titulo || "Mi Partitura";
-          document.getElementById("clave").value = d.clave;
-          clave = d.clave;
-          document.getElementById("compas").value = d.compas;
-          compas = d.compas;
-          document.getElementById("velocidad").value = d.bpm;
-          bpm = d.bpm;
-          lines = d.lines.map(l => l.map(c => {
-            const comp = { notas: [], beats: c.beats, closed: c.closed, staveWidth: minStaveWidth };
-            c.notas.forEach(n => {
-              let vf;
-              if (n.tipo === "nota") {
-                const list = noteMap[clave];
-                const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
-                const idx = list.indexOf(n.noteName);
-                vf = new VF.StaveNote({ clef: clave, keys: [n.noteName], duration: n.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
-              } else {
-                const rest = clave === "treble" ? "b/4" : "d/3";
-                vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: n.duracion + "r" });
-              }
-              comp.notas.push({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName, vf });
-            });
-            return comp;
-          }));
-          currentLine = lines.length - 1;
-          redibujarPentagrama();
-        } catch { alert("Archivo inválido"); }
-      };
-      r.readAsText(file);
-    }
+      // 🧾 Mostrar cortina de políticas si no se ha aceptado
+      const accepted = localStorage.getItem("policiesAccepted");
+      if (!accepted) {
+        document.getElementById("policyBanner").classList.add("show");
+      }
+    });
 
-    init();
+    // ⚙️ Políticas
+    const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
+    opens.forEach(o => o.addEventListener("click", () => {
+      window.open("https://maximilian23.com/politica.html", "_blank");
+    }));
+
+    // 🎞️ Animación muñeco
+    const maxImage = document.getElementById("maxImage");
+    maxImage.addEventListener("click", () => {
+      maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+      maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
+    });
+
+    // 🧾 Botón de aceptar políticas
+    document.getElementById("acceptPolicies").addEventListener("click", () => {
+      localStorage.setItem("policiesAccepted", "true");
+      document.getElementById("policyBanner").classList.remove("show");
+    });
   </script>
 </body>
 </html>
