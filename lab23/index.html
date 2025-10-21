@@ -26,6 +26,7 @@
       flex-direction: column;
       padding: 15px;
       overflow: hidden;
+      position: relative;
     }
     header {
       background: linear-gradient(90deg, #4ae2f2, #6f9cff);
@@ -34,6 +35,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.25);
       border-radius: 15px;
       margin-bottom: 10px;
+      position: relative;
     }
     header img {
       height: 70px;
@@ -213,6 +215,21 @@
     }
     #abrir-input { display: none; }
 
+    /* CRÉDITO EN ESQUINA SUPERIOR DERECHA */
+    #credito {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 0.8em;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+      font-weight: bold;
+      z-index: 1000;
+      background: rgba(0,0,0,0.2);
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
     @media (max-width: 600px) {
       header img { height: 50px; }
       header h1 { font-size: 1.5em; }
@@ -223,6 +240,7 @@
       .figura { width: 48px; height: 48px; line-height: 48px; font-size: 1.8em; }
       button { padding: 8px 14px; font-size: 0.9em; }
       #controles { gap: 8px; }
+      #credito { font-size: 0.7em; top: 5px; right: 10px; }
     }
   </style>
 </head>
@@ -233,6 +251,7 @@
       <h1>Laboratorio Musical de Maximilian 23</h1>
       <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
       <input type="text" id="titulo" value="Mi Partitura" placeholder="Título de la partitura">
+      <div id="credito">Creado por Manuel M. Frutos</div>
     </header>
 
     <div id="barra-opciones">
@@ -247,14 +266,14 @@
     <div id="pentagrama"></div>
 
     <div id="figuras">
-      <div class="figura" data-tipo="nota" data-duracion="w" style="color:#ff80b5;">𝅝</div>
-      <div class="figura" data-tipo="nota" data-duracion="h" style="color:#ffd966;">𝅗𝅥</div>
-      <div class="figura" data-tipo="nota" data-duracion="q" style="color:#7bdeff;">♩</div>
-      <div class="figura" data-tipo="nota" data-duracion="8" style="color:#9cffb0;">♪</div>
-      <div class="figura" data-tipo="silencio" data-duracion="w" style="color:#ff80b5;">𝄻</div>
-      <div class="figura" data-tipo="silencio" data-duracion="h" style="color:#ffd966;">𝄼</div>
-      <div class="figura" data-tipo="silencio" data-duracion="q" style="color:#7bdeff;">𝄽</div>
-      <div class="figura" data-tipo="silencio" data-duracion="8" style="color:#9cffb0;">𝄾</div>
+      <div class="figura" data-tipo="nota" data-duracion="w" style="color:#ff80b5;">w</div>
+      <div class="figura" data-tipo="nota" data-duracion="h" style="color:#ffd966;">h</div>
+      <div class="figura" data-tipo="nota" data-duracion="q" style="color:#7bdeff;">q</div>
+      <div class="figura" data-tipo="nota" data-duracion="8" style="color:#9cffb0;">8</div>
+      <div class="figura" data-tipo="silencio" data-duracion="w" style="color:#ff80b5;">w</div>
+      <div class="figura" data-tipo="silencio" data-duracion="h" style="color:#ffd966;">h</div>
+      <div class="figura" data-tipo="silencio" data-duracion="q" style="color:#7bdeff;">q</div>
+      <div class="figura" data-tipo="silencio" data-duracion="8" style="color:#9cffb0;">8</div>
     </div>
 
     <div id="controles">
@@ -313,8 +332,26 @@
       });
     }
 
-    // --- [Resto del código igual hasta play-stop] ---
+    // --- INDEPENDENCIA DE BOTONES ---
+    document.getElementById("notas").addEventListener("click", () => {
+      showNoteLabels = !showNoteLabels;
+      document.getElementById("notas").classList.toggle("activa", showNoteLabels);
+      updateDraggableNotes();
+    });
 
+    document.getElementById("metronomo").addEventListener("click", () => {
+      metronomeOn = !metronomeOn;
+      document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
+      if (!metronomeOn && metronomeLoop) metronomeLoop.stop();
+    });
+
+    document.getElementById("papelera").addEventListener("click", () => {
+      deleteMode = !deleteMode;
+      document.getElementById("papelera").classList.toggle("activa", deleteMode);
+      updateDraggableNotes();
+    });
+
+    // --- PLAY: SCROLL AL INICIO + AUTO-SCROLL ---
     document.getElementById("play-stop").addEventListener("click", async () => {
       try { await Tone.start(); } catch (err) {
         alert("Interactúa con la página para activar el audio.");
@@ -332,12 +369,15 @@
             if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
           });
         });
-        document.getElementById("play-stop").textContent = "Play";
+        document.getElementById("play-stop").textContent = "▶️ Play";
         isPlaying = false;
         return;
       }
 
       if (!velocidad || !clave || !compas) { alert("Faltan configuraciones."); return; }
+
+      // SCROLL AL INICIO
+      div.scrollTop = 0;
 
       Tone.Transport.bpm.value = parseInt(velocidad);
       const synth = new Tone.Synth().toDestination();
@@ -373,13 +413,12 @@
         const start = event.time + metronomeOffset;
         const end = start + Tone.Time(event.duration).toSeconds();
 
-        // Reproducir nota
         Tone.Transport.schedule(t => {
           const toneNote = event.note.split("/")[0].toUpperCase() + event.note.split("/")[1];
           synth.triggerAttackRelease(toneNote, event.duration, t);
         }, start);
 
-        // Resaltar nota en rojo
+        // RESALTAR Y CENTRAR NOTA
         Tone.Transport.schedule(t => {
           const g = noteGs[event.globalIndex];
           if (g) {
@@ -388,7 +427,6 @@
               if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'red');
             });
 
-            // AUTO-SCROLL CENTRADO
             const bbox = g.getBBox();
             const noteCenterY = bbox.y + bbox.height / 2;
             const containerHeight = div.clientHeight;
@@ -397,7 +435,7 @@
           }
         }, start);
 
-        // Quitar resaltado
+        // QUITAR RESALTADO
         Tone.Transport.schedule(t => {
           const g = noteGs[event.globalIndex];
           if (g) {
@@ -408,7 +446,7 @@
           }
         }, end);
 
-        // Etiqueta opcional
+        // ETIQUETA DE NOTA
         if (showNoteLabels && noteGs[event.globalIndex]) {
           const bbox = noteGs[event.globalIndex].getBBox();
           Tone.Transport.schedule(t => {
@@ -424,6 +462,7 @@
         }
       });
 
+      // FINALIZAR
       Tone.Transport.schedule(t => {
         document.querySelectorAll(".note-label").forEach(l => l.remove());
         context.svg.querySelectorAll('g.vf-stavenote').forEach(g => {
@@ -432,19 +471,19 @@
             if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
           });
         });
-        document.getElementById("play-stop").textContent = "Play";
+        document.getElementById("play-stop").textContent = "▶️ Play";
         isPlaying = false;
         if (metronomeLoop) metronomeLoop.stop();
         Tone.Transport.stop();
       }, time + metronomeOffset);
 
       Tone.Transport.start();
-      document.getElementById("play-stop").textContent = "Stop";
+      document.getElementById("play-stop").textContent = "⏹️ Stop";
       isPlaying = true;
     });
 
-    // --- [Resto del código: redibujarPentagrama, addElemento, etc.] ---
-    // (Mantener todo igual, solo se mejoró el scroll y el layout)
+    // --- RESTO DEL CÓDIGO (redibujarPentagrama, etc.) ---
+    // (Mantener todo igual que en la versión anterior)
 
     function redibujarPentagrama() {
       if (!clave || !compas) return;
@@ -474,7 +513,6 @@
       const totalHeight = totalLines * lineSpacing + 80;
       renderer.resize(width, totalHeight);
 
-      // Título
       if (titulo) {
         new VF.TextNote({ text: titulo, font: { family: "Comic Sans MS", size: 16, weight: "bold" }, justification: VF.TextNote.Justification.CENTER })
           .setContext(context).setXShift(maxWidthPerLine / 2 - 40).setLine(-2).draw();
@@ -512,7 +550,7 @@
       document.getElementById("cerrar-compas").disabled = !current || current.closed || current.beats !== parseInt(compas.split("/")[0]);
     }
 
-    // --- [Resto de funciones: addElemento, updateDraggableNotes, etc.] ---
+    // --- FUNCIONES RESTANTES (addElemento, etc.) ---
     // (Mantener igual al código original)
 
     init();
