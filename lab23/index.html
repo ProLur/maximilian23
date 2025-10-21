@@ -525,7 +525,7 @@
     function addNota(tipo, dur, noteName, compasIndex) {
       const beats = +compas.split("/")[0];
       let currentCompas = lines[currentLine][compasIndex];
-      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
+      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("¡Algo no cuadra!");
 
       let vf;
       if (tipo === "nota") {
