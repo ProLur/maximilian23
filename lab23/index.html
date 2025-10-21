@@ -85,8 +85,8 @@
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       margin: 10px auto;
-      width: 95%; /* Más ancho horizontalmente */
-      max-width: 1400px; /* Aumentado para pantallas grandes */
+      width: 95%;
+      max-width: 1400px;
       min-width: 600px;
       min-height: 400px;
     }
@@ -99,12 +99,22 @@
       position: relative;
       z-index: 1;
     }
-    #figuras, #controles {
+    #figuras {
+      display: flex;
+      justify-content: center;
+      gap: 10px; /* Reducido para asegurar que quepan en una línea */
+      flex-wrap: nowrap; /* Forzar una sola línea */
+      margin: 15px 0;
+      width: 100%;
+      max-width: 600px;
+      overflow-x: auto; /* Permitir desplazamiento horizontal en móviles */
+    }
+    #controles-modo, #controles-otros {
       display: flex;
       justify-content: center;
       gap: 20px;
       flex-wrap: wrap;
-      margin: 15px 0;
+      margin: 10px 0;
       width: 100%;
       max-width: 600px;
     }
@@ -189,6 +199,7 @@
       .figura { width: 50px; height: 50px; font-size: 1.6em; }
       button { padding: 8px 14px; font-size: 0.9em; }
       #pentagrama-container { min-height: 300px; min-width: 300px; }
+      #figuras { gap: 8px; }
     }
   </style>
 </head>
@@ -230,16 +241,18 @@
       <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div>
       <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div>
     </div>
-    <div id="controles">
+    <div id="controles-modo">
+      <button id="notas"><i class="fas fa-music"></i> Notas</button>
+      <button id="play-stop"><i class="fas fa-play"></i> Play</button>
+      <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
+    </div>
+    <div id="controles-otros">
       <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
       <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
       <input type="file" id="file-input" accept=".json" style="display:none">
       <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
       <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
       <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
-      <button id="notas"><i class="fas fa-music"></i> Notas</button>
-      <button id="play-stop"><i class="fas fa-play"></i> Play</button>
-      <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
     </div>
   </div>
   <script>
@@ -401,7 +414,7 @@
         let offset = 0;
         if (metronomeOn) {
           const beat = Tone.Time("4n").toSeconds();
-          const beats = +compas.split("/")[0]; // 2 para 2/4, 3 para 3/4, 4 para 4/4
+          const beats = +compas.split("/")[0];
           for (let i = 0; i < beats; i++) {
             Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
           }
@@ -525,7 +538,7 @@
     function addNota(tipo, dur, noteName, compasIndex) {
       const beats = +compas.split("/")[0];
       let currentCompas = lines[currentLine][compasIndex];
-      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("¡Algo no cuadra!");
+      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
 
       let vf;
       if (tipo === "nota") {
