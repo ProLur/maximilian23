@@ -243,18 +243,25 @@
 
     // 🧩 LINKIFY MEJORADO
     function linkify(text) {
-      if (!text) return "";
-      if (text.includes("<a ")) return text;
+    function linkify(text) {
+  if (!text) return "";
+  if (text.includes("<a ")) return text;
 
-      // Detecta https://, http:// y www.
-      const urlRegex = /\b((https?:\/\/|www\.)[^\s<>"']+[^\s<>"'.,!?;:])/gi;
+  // Detecta enlaces con http(s) o www, y limpia signos finales
+  const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
 
-      return text.replace(urlRegex, match => {
-        // Quita signos de puntuación al final si los hubiera
-        const clean = match.replace(/[.,!?;:]+$/, "");
-        const href = clean.startsWith("http") ? clean : "https://" + clean;
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
-      });
+  return text.replace(urlRegex, (match) => {
+    // 1️⃣ Limpia caracteres finales no deseados
+    let clean = match.trim().replace(/[.,!?;:]+$/, "");
+
+    // 2️⃣ Añade https:// si solo empieza por www
+    if (!/^https?:\/\//i.test(clean)) {
+      clean = "https://" + clean;
+    }
+
+    // 3️⃣ Devuelve enlace clicable
+    return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
+  });
     }
 
     function typeWriterEffect(el, text, delay = 30, done = null) {
