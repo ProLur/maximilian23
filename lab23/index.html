@@ -17,7 +17,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center; /* Centrar contenido */
+      align-items: center;
       padding: 10px;
     }
     header {
@@ -98,7 +98,7 @@
       position: relative;
       z-index: 1;
     }
-    #figuras {
+    #figuras, #controles {
       display: flex;
       justify-content: center;
       gap: 20px;
@@ -126,15 +126,6 @@
       color: white;
       transform: scale(1.15);
       box-shadow: 0 0 15px #4ae2f2;
-    }
-    #controles {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 15px 0;
-      width: 100%;
-      max-width: 600px;
     }
     button {
       padding: 10px 18px;
@@ -216,7 +207,13 @@
     <label>Compás:</label>
     <select id="compas"><option value="" selected>---</option><option value="4/4">4/4</option><option value="3/4">3/4</option><option value="2/4">2/4</option></select>
     <label>Velocidad:</label>
-    <select id="velocidad"><option value="" selected>---</option><option value="60">60 BPM</option><option value="90">90 BPM</option><option value="120">120 BPM</option></select>
+    <select id="velocidad">
+      <option value="" selected>---</option>
+      <option value="60">Lento (60 BPM)</option>
+      <option value="90">Moderado (90 BPM)</option>
+      <option value="120">Allegro (120 BPM)</option>
+      <option value="160">Presto (160 BPM)</option>
+    </select>
   </div>
   <div id="main-content">
     <div id="pentagrama-container">
@@ -260,7 +257,7 @@
     let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
     let metronomeLoop = null;
     let synth = null;
-    let activeNoteId = null; // Para preservar el estado show-controls
+    let activeNoteId = null;
 
     const noteMap = {
       treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
@@ -280,7 +277,7 @@
       document.getElementById("compas").onchange = e => { 
         compas = e.target.value; 
         resetPartitura(); 
-        document.getElementById("play-stop").disabled = false;
+        document.getElementById("play-stop").disabled = !compas;
       };
       document.getElementById("velocidad").onchange = e => { 
         bpm = +e.target.value; 
@@ -359,6 +356,7 @@
           figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
           f.classList.add("activa");
           if (metronomeLoop) metronomeLoop.stop();
+          if (!isPlaying) Tone.Transport.stop();
         };
       });
     }
@@ -406,8 +404,9 @@
         return;
       }
       if (!compas) return alert("Configura un compás");
+      if (!bpm) return alert("Selecciona una velocidad");
 
-      Tone.Transport.bpm.value = bpm || 120;
+      Tone.Transport.bpm.value = bpm;
       let time = 0, events = [], gi = 0;
       lines.forEach(l => l.forEach(c => c.notas.forEach(n => {
         if (n.tipo === "nota") events.push({ time, note: n.noteName, dur: duracionTiempo[n.duracion], gi });
@@ -419,9 +418,9 @@
 
       Tone.Transport.cancel();
       let offset = 0;
-      if (metronomeOn && !metronomeLoop) {
+      if (metronomeOn) {
         const beat = Tone.Time("4n").toSeconds();
-        const beats = +compas.split("/")[0];
+        const beats = +compas.split("/")[0]; // 2 para 2/4, 3 para 3/4, 4 para 4/4
         for (let i = 0; i < beats; i++) {
           Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
         }
@@ -466,7 +465,7 @@
         }
       });
 
-      Tone.Transport.schedule(() => playStop(), time + offset);
+      Tone.Transport.schedule(() => stopPlayback(), time + offset);
       Tone.Transport.start();
       document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
       isPlaying = true;
@@ -495,8 +494,6 @@
 
       let targetLine = 0, targetCompas = 0;
       let minDistance = Infinity;
-      let currentX = 40;
-
       lines.forEach((line, li) => {
         let x = 40;
         line.forEach((c, ci) => {
@@ -529,10 +526,10 @@
       if (lineIndex < 0 || lineIndex >= lines.length) return null;
       const lineY = lineIndex * lineHeight + 80;
       const relY = y - lineY;
-      const noteHeight = 72; // Altura del pentagrama en píxeles
+      const noteHeight = 72;
       const numNotes = noteMap[clave].length;
-      const step = noteHeight / (numNotes - 1); // Dividir el pentagrama en pasos
-      const idx = Math.round((noteHeight - relY) / step); // Nota más cercana
+      const step = noteHeight / (numNotes - 1);
+      const idx = Math.round((noteHeight - relY) / step);
       return noteMap[clave][Math.max(0, Math.min(numNotes - 1, idx))];
     }
 
@@ -578,7 +575,7 @@
         d.dataset.li = li;
         d.dataset.ci = ci;
         d.dataset.ni = ni;
-        d.dataset.id = `${li}-${ci}-${ni}`; // ID único para la nota
+        d.dataset.id = `${li}-${ci}-${ni}`;
 
         const plus = document.createElement("div");
         plus.textContent = "+";
@@ -644,7 +641,7 @@
               const idx = list.indexOf(newName);
               nota.vf = new VF.StaveNote({ clef: clave, keys: [newName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
               d.remove();
-              activeNoteId = `${li}-${ci}-${ni}`; // Preservar ID para mantener botones visibles
+              activeNoteId = `${li}-${ci}-${ni}`;
               redibujarPentagrama();
               if (synth) {
                 synth.triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], "8n");
@@ -665,7 +662,7 @@
       nota.noteName = list[idx];
       const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
       nota.vf = new VF.StaveNote({ clef: clave, keys: [nota.noteName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
-      activeNoteId = `${li}-${ci}-${ni}`; // Preservar ID para mantener botones visibles
+      activeNoteId = `${li}-${ci}-${ni}`;
       redibujarPentagrama();
       if (synth) {
         await Tone.start();
@@ -697,7 +694,7 @@
             c.notas.pop();
             c.closed = false;
             if (!c.notas.length && lines[li].length > 1) lines[li].splice(ci, 1);
-            activeNoteId = null; // Resetear ID activo al borrar
+            activeNoteId = null;
             redibujarPentagrama();
             return;
           }
@@ -753,7 +750,7 @@
             return comp;
           }));
           currentLine = lines.length - 1;
-          activeNoteId = null; // Resetear ID activo al abrir
+          activeNoteId = null;
           redibujarPentagrama();
         } catch { alert("Archivo inválido"); }
       };
