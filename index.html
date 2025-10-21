@@ -111,9 +111,9 @@
       background: #00ffcc; border-radius: 50%;
       animation: blink 1.4s infinite both;
     }
-    .typing span:nth-child(2){animation-delay:.2s;}
-    .typing span:nth-child(3){animation-delay:.4s;}
-    @keyframes blink{0%{opacity:.2;}20%{opacity:1;}100%{opacity:.2;}}
+    .typing span:nth-child(2) { animation-delay: .2s; }
+    .typing span:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
     footer {
       display: flex;
       padding: 8px;
@@ -243,16 +243,27 @@
 
     // 🧩 LINKIFY MEJORADO
     function linkify(text) {
-      if (!text) return "";
+      if (!text || typeof text !== 'string') return "";
       if (text.includes("<a ")) return text;
 
-      // Detecta https://, http:// y www.
-      const urlRegex = /\b((https?:\/\/|www\.)[^\s<>"']+[^\s<>"'.,!?;:])/gi;
+      // Expresión regular mejorada para detectar URLs, emails y más
+      const urlRegex = /(\b(https?:\/\/|ftp:\/\/|www\d{0,3}\.|[a-zA-Z0-9.-]+\.[a-z]{2,})([^\s<>"']+))|(\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
 
       return text.replace(urlRegex, match => {
-        // Quita signos de puntuación al final si los hubiera
-        const clean = match.replace(/[.,!?;:]+$/, "");
-        const href = clean.startsWith("http") ? clean : "https://" + clean;
+        let clean = match.trim();
+        let href = clean;
+
+        // Diferenciar entre emails y URLs
+        if (clean.includes('@')) {
+          href = `mailto:${clean}`; // Convierte a enlace de correo
+        } else if (!clean.match(/^https?:\/\//)) {
+          href = clean.startsWith('www') ? `https://${clean}` : clean; // Añade https si es necesario
+        }
+
+        // Eliminar puntuación final que no pertenezca a la URL
+        clean = clean.replace(/[.,!?;:]+$/, '');
+
+        // Retornar el enlace con atributos de seguridad
         return `<a href="${href}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
       });
     }
@@ -319,8 +330,9 @@
       const b = document.createElement("div");
       b.className = "bot";
       chat.appendChild(b);
-      typeWriterEffect(b, "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
-      scrollBottom();
+      typeWriterEffect(b, "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. Consulta el calendario escolar en https://www.educarex.es/alendario-escolar.html. ¿Qué quieres saber?", 30, () => {
+        scrollBottom();
+      });
 
       const accepted = localStorage.getItem("policiesAccepted");
       if (!accepted) {
@@ -345,4 +357,4 @@
     });
   </script>
 </body>
-    </html>
+  </html>
