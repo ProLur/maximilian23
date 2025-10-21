@@ -7,390 +7,651 @@
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; }
     body {
       background: linear-gradient(180deg, #aee1f9 0%, #c7b5ff 100%);
-      font-family: "Comic Sans MS", "Comic Neue", cursive;
+      font-family: "Comic Sans MS", cursive;
       color: #222;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
-    main { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow: hidden; position: relative; }
     header {
       background: linear-gradient(90deg, #4ae2f2, #6f9cff);
-      text-align: center; padding: 15px 0 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      border-radius: 15px; margin-bottom: 10px; position: relative;
+      text-align: center;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      border-radius: 0 0 15px 15px;
     }
-    header img { height: 70px; vertical-align: middle; filter: drop-shadow(0 0 6px rgba(255,255,255,0.8)); }
-    header h1 { display: inline-block; margin: 0 0 8px 10px; font-size: 2em; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); vertical-align: middle; }
-    header p { margin: 0; color: #e9f8ff; font-size: 1em; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
-    #titulo { margin: 8px auto; width: 80%; max-width: 500px; padding: 6px 10px; font-size: 1.1em; border-radius: 10px; border: 2px solid #4ae2f2; background: #fff; color: #333; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-    #barra-opciones { display: flex; gap: 15px; justify-content: center; margin: 10px 0; flex-wrap: wrap; }
-    #barra-opciones label { font-weight: bold; color: #333; }
-    select { border-radius: 10px; border: 2px solid #4ae2f2; padding: 6px 10px; font-size: 1em; background: #fff; color: #333; }
-    #pentagrama { flex: 1; margin: 10px auto; width: 95%; background: #fff; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); position: relative; overflow-y: auto; overflow-x: hidden; border: 3px solid #4ae2f2; min-height: 180px; scroll-behavior: smooth; }
-    #pentagrama svg { pointer-events: none; }
-    #figuras { display: flex; justify-content: center; gap: 20px; margin: 10px 0; flex-wrap: wrap; }
-    .figura { font-size: 2.4em; width: 60px; height: 60px; line-height: 60px; text-align: center; border: 3px solid #4ae2f2; border-radius: 50%; background: #fff; cursor: pointer; transition: all .25s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .figura:hover, .figura.activa { background: #4ae2f2; color: #fff; transform: scale(1.15); border-color: #fff; box-shadow: 0 0 12px #4ae2f2; }
-    #controles { display: flex; justify-content: center; gap: 12px; margin: 10px 0; flex-wrap: wrap; }
-    button { padding: 10px 18px; font-size: 1em; background: linear-gradient(90deg, #4ae2f2, #6f9cff); color: #fff; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.25); }
-    button:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
-    button:disabled { background: #b8ddee; cursor: not-allowed; }
-    button.activa { background: #ff80b5 !important; box-shadow: 0 0 12px #ffaad4; }
-    .nota { position: absolute; cursor: move; z-index: 100; pointer-events: auto; background: rgba(255,255,255,0.1); border: 2px solid #4ae2f2; border-radius: 6px; }
-    .nota .plus, .nota .minus { opacity: 0; transition: opacity .2s; }
+    header img { height: 70px; vertical-align: middle; filter: drop-shadow(0 0 6px #fff); }
+    header h1 { display: inline-block; margin: 0 10px; font-size: 2em; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
+    header p { color: #e9f8ff; font-size: 1em; }
+
+    #titulo-partitura {
+      text-align: center;
+      margin: 15px 0;
+    }
+    #titulo-editable {
+      font: inherit;
+      font-size: 1.6em;
+      font-weight: bold;
+      text-align: center;
+      border: 2px solid #4ae2f2;
+      border-radius: 10px;
+      padding: 8px 15px;
+      width: 80%;
+      max-width: 600px;
+      background: #fff;
+    }
+
+    #barra-opciones {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    select {
+      padding: 8px 12px;
+      font-size: 1em;
+      border: 2px solid #4ae2f2;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    #main-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 10px;
+    }
+
+    #pentagrama-container {
+      flex-grow: 1;
+      background: #fff;
+      border: 3px solid #4ae2f2;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      margin-bottom: 15px;
+    }
+    #pentagrama {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    #figuras {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .figura {
+      width: 60px; height: 60px;
+      background: #fff;
+      border: 3px solid #4ae2f2;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8em;
+      color: #333;
+    }
+    .figura:hover, .figura.activa {
+      background: #4ae2f2;
+      color: white;
+      transform: scale(1.15);
+      box-shadow: 0 0 15px #4ae2f2;
+    }
+
+    #controles {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    button {
+      padding: 10px 18px;
+      font-size: 1em;
+      background: linear-gradient(90deg, #4ae2f2, #6f9cff);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button i { font-size: 1.1em; }
+    button:hover { transform: scale(1.1); }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    button.activa { background: #ff80b5 !important; }
+
+    .nota { position: absolute; cursor: move; z-index: 100; pointer-events: auto; }
+    .nota .plus, .nota .minus {
+      width: 24px; height: 24px; border-radius: 50%; background: #4ae2f2; color: white;
+      position: absolute; text-align: center; line-height: 24px; font-size: 1em;
+      cursor: pointer; opacity: 0; transition: opacity 0.2s;
+    }
     .nota.show-controls .plus, .nota.show-controls .minus { opacity: 1; }
-    .nota .plus, .nota .minus { width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 1em; background: #4ae2f2; color: #fff; border: 1px solid #fff; position: absolute; cursor: pointer; box-shadow: 0 0 8px rgba(0,0,0,0.2); }
     .nota .plus { top: -30px; left: 50%; transform: translateX(-50%); }
     .nota .minus { bottom: -30px; left: 50%; transform: translateX(-50%); }
-    .note-label { position: absolute; background: rgba(255,255,255,0.9); border: 1px solid #4ae2f2; border-radius: 4px; padding: 2px 6px; font-size: .85em; color: #333; text-align: center; z-index: 150; pointer-events: none; }
-    #abrir-input { display: none; }
-    #credito { position: absolute; top: 10px; right: 15px; font-size: .8em; color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); font-weight: bold; z-index: 1000; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 8px; }
-    @media (max-width:600px){
-      header img{height:50px} header h1{font-size:1.5em} #titulo{font-size:.95em;padding:5px 8px}
-      #barra-opciones{gap:8px} select{padding:5px 8px;font-size:.9em} #pentagrama{min-height:140px}
-      .figura{width:48px;height:48px;line-height:48px;font-size:1.8em} button{padding:8px 14px;font-size:.9em}
-      #controles{gap:8px} #credito{font-size:.7em;top:5px;right:10px}
+
+    .note-label {
+      position: absolute; background: rgba(255,255,255,0.9); border: 1px solid #4ae2f2;
+      border-radius: 4px; padding: 2px 6px; font-size: 0.9em; color: #333;
+      z-index: 150; pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.6em; }
+      #titulo-editable { font-size: 1.3em; }
+      .figura { width: 50px; height: 50px; font-size: 1.6em; }
+      button { padding: 8px 14px; font-size: 0.9em; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <header>
-      <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
-      <h1>Laboratorio Musical de Maximilian 23</h1>
-      <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
-      <input type="text" id="titulo" value="Mi Partitura" placeholder="Título de la partitura">
-      <div id="credito">Creado por Manuel M. Frutos</div>
-    </header>
+  <header>
+    <img src="https://mmfrutos.com/max23/Cabeza.png" alt="Maximilian 23">
+    <h1>Laboratorio Musical de Maximilian 23</h1>
+    <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
+  </header>
 
-    <div id="barra-opciones">
-      <label for="clave">Clave:</label>
-      <select id="clave"><option value="" selected>---</option><option value="treble">Sol</option><option value="bass">Fa</option></select>
-      <label for="compas">Compás:</label>
-      <select id="compas"><option value="" selected>---</option><option value="2/4">2/4</option><option value="3/4">3/4</option><option value="4/4">4/4</option></select>
-      <label for="velocidad">Velocidad:</label>
-      <select id="velocidad"><option value="" selected>---</option><option value="60">Lento (60 BPM)</option><option value="90">Moderado (90 BPM)</option><option value="120">Allegro (120 BPM)</option><option value="150">Presto (150 BPM)</option></select>
+  <div id="titulo-partitura">
+    <input type="text" id="titulo-editable" value="Mi Partitura">
+  </div>
+
+  <div id="barra-opciones">
+    <label>Clave:</label>
+    <select id="clave"><option value="treble" selected>Sol</option><option value="bass">Fa</option></select>
+    <label>Compás:</label>
+    <select id="compas"><option value="" selected>---</option><option value="4/4">4/4</option><option value="3/4">3/4</option><option value="2/4">2/4</option></select>
+    <label>Velocidad:</label>
+    <select id="velocidad"><option value="" selected>---</option><option value="60">60 BPM</option><option value="90">90 BPM</option><option value="120">120 BPM</option></select>
+  </div>
+
+  <div id="main-content">
+    <div id="pentagrama-container">
+      <div id="pentagrama"></div>
     </div>
 
-    <div id="pentagrama"></div>
-
     <div id="figuras">
-      <div class="figura" data-tipo="nota" data-duracion="w" style="color:#ff80b5;">w</div>
-      <div class="figura" data-tipo="nota" data-duracion="h" style="color:#ffd966;">h</div>
-      <div class="figura" data-tipo="nota" data-duracion="q" style="color:#7bdeff;">q</div>
-      <div class="figura" data-tipo="nota" data-duracion="8" style="color:#9cffb0;">8</div>
-      <div class="figura" data-tipo="silencio" data-duracion="w" style="color:#ff80b5;">w</div>
-      <div class="figura" data-tipo="silencio" data-duracion="h" style="color:#ffd966;">h</div>
-      <div class="figura" data-tipo="silencio" data-duracion="q" style="color:#7bdeff;">q</div>
-      <div class="figura" data-tipo="silencio" data-duracion="8" style="color:#9cffb0;">8</div>
+      <!-- Notas -->
+      <div class="figura" data-tipo="nota" data-duracion="w">𝅝</div> <!-- Redonda -->
+      <div class="figura" data-tipo="nota" data-duracion="h">𝅗𝅥</div> <!-- Blanca -->
+      <div class="figura" data-tipo="nota" data-duracion="q">𝅘𝅥</div> <!-- Negra -->
+      <div class="figura" data-tipo="nota" data-duracion="8">𝅘𝅥𝅮</div> <!-- Corchea -->
+      <!-- Silencios -->
+      <div class="figura" data-tipo="silencio" data-duracion="w">𝄻</div> <!-- Silencio de redonda -->
+      <div class="figura" data-tipo="silencio" data-duracion="h">𝄼</div> <!-- Silencio de blanca -->
+      <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div> <!-- Silencio de negra -->
+      <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div> <!-- Silencio de corchea -->
     </div>
 
     <div id="controles">
-      <button id="cerrar-compas" disabled>Cerrar Compás</button>
-      <button id="borrar-ultimo">Borrar Último</button>
-      <button id="limpiar">Limpiar</button>
-      <button id="papelera">Papelera</button>
-      <button id="notas">Notas</button>
-      <button id="play-stop" disabled>Play</button>
-      <button id="metronomo">Metrónomo</button>
-      <button id="guardar">Guardar</button>
-      <button id="abrir">Abrir</button>
-      <input type="file" id="abrir-input" accept=".json">
+      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
+      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
+      <input type="file" id="file-input" accept=".json" style="display:none">
+      <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
+      <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
+      <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
+      <button id="papelera"><i class="fas fa-trash-alt"></i> Papelera</button>
+      <button id="notas"><i class="fas fa-music"></i> Notas</button>
+      <button id="play-stop" disabled><i class="fas fa-play"></i> Play</button>
+      <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
     </div>
-  </main>
+  </div>
 
   <script>
     const VF = Vex.Flow;
     const div = document.getElementById("pentagrama");
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-    let width = 800, minStaveWidth = 250, staveHeight = 100, lineSpacing = 130;
-    renderer.resize(width, 400);
+    const container = document.getElementById("pentagrama-container");
+    let width = 800;
+    const minStaveWidth = 250;
+    const lineHeight = 150;
+    renderer.resize(width, 600);
     const context = renderer.getContext();
 
-    let clave = "", compas = "", velocidad = "", titulo = "Mi Partitura";
-    let compases = [];
+    let clave = "treble", compas = "", bpm = 0;
+    let lines = [[]], currentLine = 0;
     let figuraActiva = null, deleteMode = false, showNoteLabels = false, isPlaying = false, metronomeOn = false;
     let metronomeLoop = null;
 
     const noteMap = {
-      treble: ["g/3","a/3","b/3","c/4","d/4","e/4","f/4","g/4","a/4","b/4","c/5","d/5","e/5","f/5","g/5","a/5","b/5"],
-      bass: ["b/1","c/2","d/2","e/2","f/2","g/2","a/2","b/2","c/3","d/3","e/3","f/3","g/3","a/3","b/3","c/4","d/4"]
+      treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
+      bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
     };
-    const noteNameMap = {c:"Do",d:"Re",e:"Mi",f:"Fa",g:"Sol",a:"La",b:"Si"};
-    const duracionBeats = {w:4,h:2,q:1,'8':0.5};
-    const duracionTiempo = {w:"1n",h:"2n",q:"4n",'8':"8n"};
+    const noteNameMap = { c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si" };
+    const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
+    const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
 
-    function resizePentagrama(){
-      const h = div.clientHeight;
-      renderer.resize(div.clientWidth*1.2, h);
-      width = div.clientWidth*1.2;
-    }
-
-    function init(){
-      resizePentagrama();
-      window.addEventListener('resize',()=>{resizePentagrama(); if(compases.length&&clave&&compas) redibujarPentagrama();});
-      document.getElementById("titulo").addEventListener("input",e=>{titulo=e.target.value||"Mi Partitura"; redibujarPentagrama();});
-    }
-
-    // --- BOTONES INDEPENDIENTES ---
-    document.getElementById("notas").addEventListener("click",()=>{showNoteLabels=!showNoteLabels;document.getElementById("notas").classList.toggle("activa",showNoteLabels);updateDraggableNotes();});
-    document.getElementById("metronomo").addEventListener("click",()=>{metronomeOn=!metronomeOn;document.getElementById("metronomo").classList.toggle("activa",metronomeOn);if(!metronomeOn&&metronomeLoop)metronomeLoop.stop();});
-    document.getElementById("papelera").addEventListener("click",()=>{deleteMode=!deleteMode;document.getElementById("papelera").classList.toggle("activa",deleteMode);updateDraggableNotes();});
-
-    // --- PLAY / STOP ---
-    document.getElementById("play-stop").addEventListener("click",async()=>{
-      try{await Tone.start();}catch{alert("Interactúa con la página para activar audio.");return;}
-      if(isPlaying){
-        Tone.Transport.cancel();Tone.Transport.stop();if(metronomeLoop)metronomeLoop.stop();
-        document.querySelectorAll(".note-label").forEach(l=>l.remove());
-        context.svg.querySelectorAll('g.vf-stavenote').forEach(g=>g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el=>{el.setAttribute('stroke','black');if(el.getAttribute('fill')!=='none')el.setAttribute('fill','black');}));
-        document.getElementById("play-stop").textContent="Play";isPlaying=false;return;
-      }
-      if(!velocidad||!clave||!compas){alert("Faltan configuraciones.");return;}
-      div.scrollTop=0;
-      Tone.Transport.bpm.value=parseInt(velocidad);
-      const synth=new Tone.Synth().toDestination();
-      let time=0,events=[],globalIndex=0;
-      compases.forEach(c=>{c.notas.forEach(n=>{if(n.tipo==="nota"){events.push({time,note:n.noteName,duration:duracionTiempo[n.duracion],globalIndex});}time+=Tone.Time(duracionTiempo[n.duracion]).toSeconds();globalIndex++;});});
-      if(events.length===0&&!metronomeOn){alert("Sin notas.");return;}
-      Tone.Transport.cancel();
-      let metronomeOffset=0;
-      if(metronomeOn){
-        const beat=Tone.Time("4n").toSeconds();
-        const beats=parseInt(compas.split("/")[0]);
-        for(let i=0;i<beats;i++)Tone.Transport.schedule(t=>new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2","8n",t),i*beat);
-        metronomeOffset=beats*beat;
-        metronomeLoop=new Tone.Loop(t=>new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2","8n",t),"4n").start(metronomeOffset);
-      }
-      const noteGs=Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
-      events.forEach(e=>{
-        const start=e.time+metronomeOffset,end=start+Tone.Time(e.duration).toSeconds();
-        Tone.Transport.schedule(t=>{synth.triggerAttackRelease(e.note.split("/")[0].toUpperCase()+e.note.split("/")[1],e.duration,t);},start);
-        Tone.Transport.schedule(t=>{
-          const g=noteGs[e.globalIndex];
-          if(g){
-            g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el=>{el.setAttribute('stroke','red');if(el.getAttribute('fill')!=='none')el.setAttribute('fill','red');});
-            const bbox=g.getBBox(),noteY=bbox.y+bbox.height/2,contH=div.clientHeight;
-            div.scrollTop=noteY-contH/2;
-          }
-        },start);
-        Tone.Transport.schedule(t=>{const g=noteGs[e.globalIndex];if(g)g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el=>{el.setAttribute('stroke','black');if(el.getAttribute('fill')!=='none')el.setAttribute('fill','black');});},end);
-        if(showNoteLabels&&noteGs[e.globalIndex]){
-          const bbox=noteGs[e.globalIndex].getBBox();
-          Tone.Transport.schedule(t=>{
-            document.querySelectorAll(".note-label").forEach(l=>l.remove());
-            const lbl=document.createElement("div");lbl.className="note-label";lbl.textContent=noteNameMap[e.note.split("/")[0]]+e.note.split("/")[1];
-            lbl.style.left=`${bbox.x+bbox.width/2-20}px`;lbl.style.top=`${bbox.y+bbox.height+10}px`;div.appendChild(lbl);
-          },start);
-          Tone.Transport.schedule(t=>document.querySelectorAll(".note-label").forEach(l=>l.remove()),end);
-        }
-      });
-      Tone.Transport.schedule(t=>{
-        document.querySelectorAll(".note-label").forEach(l=>l.remove());
-        context.svg.querySelectorAll('g.vf-stavenote').forEach(g=>g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el=>{el.setAttribute('stroke','black');if(el.getAttribute('fill')!=='none')el.setAttribute('fill','black');}));
-        document.getElementById("play-stop").textContent="Play";isPlaying=false;if(metronomeLoop)metronomeLoop.stop();Tone.Transport.stop();
-      },time+metronomeOffset);
-      Tone.Transport.start();document.getElementById("play-stop").textContent="Stop";isPlaying=true;
-    });
-
-    // --- REDIBUJAR PENTAGRAMA ---
-    function redibujarPentagrama(){
-      if(!clave||!compas)return;
-      context.clear();document.querySelectorAll(".nota,.note-label").forEach(el=>el.remove());
-      const maxW=div.clientWidth;
-      let lines=[[]],curW=40,curLine=0;
-      compases.forEach((c,i)=>{
-        const voice=new VF.Voice({num_beats:parseInt(compas.split("/")[0]),beat_value:4});voice.setStrict(false);
-        if(c.notas.length)voice.addTickables(c.notas.map(n=>n.vf));
-        const fmt=new VF.Formatter();if(c.notas.length)fmt.joinVoices([voice]);
-        const w=c.notas.length?fmt.preCalculateMinTotalWidth([voice])+100:minStaveWidth;
-        c.staveWidth=Math.max(minStaveWidth,w);
-        if(curW+c.staveWidth>maxW){curLine++;lines.push([]);curW=40;}
-        lines[curLine].push(i);curW+=c.staveWidth;
-      });
-      const totalH=lines.length*lineSpacing+80;
-      renderer.resize(width,totalH);
-      if(titulo)new VF.TextNote({text:titulo,font:{family:"Comic Sans MS",size:16,weight:"bold"},justification:VF.TextNote.Justification.CENTER})
-        .setContext(context).setXShift(maxW/2-40).setLine(-2).draw();
-      let y=lines.length===1?(div.clientHeight-staveHeight)/2:50;
-      lines.forEach((line,lineIdx)=>{
-        let x=40;
-        line.forEach((idx,sIdx)=>{
-          const c=compases[idx];
-          const stave=new VF.Stave(x,y+lineIdx*lineSpacing,c.staveWidth,{spacing_between_lines_px:14});
-          if(sIdx===0)stave.addClef(clave);
-          if(lineIdx===0&&idx===0)stave.addTimeSignature(compas);
-          if(c.closed)stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
-          stave.setContext(context).draw();c.stave=stave;
-          if(c.notas.length){
-            const voice=new VF.Voice({num_beats:parseInt(compas.split("/")[0]),beat_value:4});voice.setStrict(false);
-            voice.addTickables(c.notas.map(n=>n.vf));
-            new VF.Formatter().joinVoices([voice]).format([voice],c.staveWidth-80);
-            voice.draw(context,stave);
-          }
-          x+=c.staveWidth;
-        });
-      });
-      width=Math.max(div.clientWidth*1.2,x+40);
-      renderer.resize(width,totalH);
-      updateDraggableNotes();
-      const last=compases[compases.length-1];
-      document.getElementById("cerrar-compas").disabled=!last||last.closed||last.beats!==parseInt(compas.split("/")[0]);
-    }
-
-    // --- AÑADIR ELEMENTO (nota/silencio) ---
-    function addElemento(tipo,duracion){
-      if(!clave||!compas)return;
-      const last=compases[compases.length-1];
-      const beats=duracionBeats[duracion];
-      if(last && !last.closed && last.beats+beats>parseInt(compas.split("/")[0])){alert("Compás lleno");return;}
-      const newCompas=!last||last.closed;
-      if(newCompas){
-        compases.push({notas:[],beats:0,closed:false,stave:null,staveWidth:minStaveWidth});
-      }
-      const cur=compases[compases.length-1];
-      cur.beats+=beats;
-      let vf;
-      if(tipo==="silencio")vf=new VF.StaveNote({keys:["b/4"],duration:duracion+"r"});
-      else{
-        const noteDiv=document.createElement("div");noteDiv.className="nota";
-        noteDiv.innerHTML=`<div class="plus">+</div><div class="minus">-</div>`;
-        div.appendChild(noteDiv);
-        interact(noteDiv).draggable({
-          listeners:{move(e){
-            let rect=noteDiv.getBoundingClientRect();
-            noteDiv.style.left=(rect.left+e.dx)+"px";
-            noteDiv.style.top=(rect.top+e.dy)+"px";
-          }},
-          onend:()=>placeNote(noteDiv,cur,duracion)
-        });
-        return;
-      }
-      cur.notas.push({tipo,vf,duracion,noteName:null});
-      redibujarPentagrama();
-    }
-
-    // --- COLOCAR NOTA ---
-    function placeNote(el,compas,dur){
-      const rect=el.getBoundingClientRect();
-      const svgRect=div.querySelector("svg").getBoundingClientRect();
-      const x=rect.left-svgRect.left+rect.width/2;
-      const y=rect.top-svgRect.top+rect.height/2;
-      const stave=compas.stave;
-      if(!stave||x<stave.getX()||x>stave.getX()+stave.getWidth()||y<stave.getY()||y>stave.getY()+100){el.remove();return;}
-      const line=Math.round((y-stave.getY())/10);
-      const noteIdx=Math.min(Math.max(0,17-line),16);
-      const note=noteMap[clave][noteIdx];
-      const vf=new VF.StaveNote({keys:[note],duration:dur});
-      compas.notas.push({tipo:"nota",vf,duracion,noteName:note});
-      el.remove();
-      redibujarPentagrama();
-    }
-
-    // --- ACTUALIZAR DRAGGABLE NOTES (controles +/– y borrado) ---
-    function updateDraggableNotes(){
-      document.querySelectorAll(".nota").forEach(n=>{
-        n.classList.toggle("show-controls",showNoteLabels);
-        if(deleteMode)n.style.cursor="pointer";
-        else n.style.cursor="move";
-      });
-    }
-
-    // --- CERRAR COMPÁS ---
-    document.getElementById("cerrar-compas").addEventListener("click",()=>{
-      const last=compases[compases.length-1];
-      if(last && !last.closed && last.beats===parseInt(compas.split("/")[0])){
-        last.closed=true;redibujarPentagrama();
-      }
-    });
-
-    // --- BORRAR ÚLTIMO ---
-    document.getElementById("borrar-ultimo").addEventListener("click",()=>{
-      for(let i=compases.length-1;i>=0;i--){
-        const c=compases[i];
-        if(c.notas.length){
-          const beats=duracionBeats[c.notas[c.notas.length-1].duracion];
-          c.beats-=beats;c.notas.pop();
-          if(c.notas.length===0 && i>0)compases.splice(i,1);
-          redibujarPentagrama();return;
-        }
-      }
-    });
-
-    // --- LIMPIAR ---
-    document.getElementById("limpiar").addEventListener("click",()=>{compases=[];redibujarPentagrama();});
-
-    // --- GUARDAR / ABRIR ---
-    document.getElementById("guardar").addEventListener("click",()=>{
-      const data={clave,compas,velocidad,titulo,compases:compases.map(c=>({notas:c.notas.map(n=>({tipo:n.tipo,duracion:n.duracion,noteName:n.noteName})),closed:c.closed}))};
-      const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");a.href=url;a.download=titulo+".json";a.click();
-    });
-    document.getElementById("abrir").addEventListener("click",()=>document.getElementById("abrir-input").click());
-    document.getElementById("abrir-input").addEventListener("change",e=>{
-      const file=e.target.files[0];
-      if(!file)return;
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        try{
-          const data=JSON.parse(ev.target.result);
-          clave=data.clave||"";compas=data.compas||"";velocidad=data.velocidad||"";titulo=data.titulo||"Mi Partitura";
-          document.getElementById("clave").value=clave;
-          document.getElementById("compas規制").value=compas;
-          document.getElementById("velocidad").value=velocidad;
-          document.getElementById("titulo").value=titulo;
-          compases=data.compases.map(c=>({notas:c.notas.map(n=>({tipo:n.tipo,vf:null,duracion:n.duracion,noteName:n.noteName})),beats:0,closed:c.closed,stave:null,staveWidth:minStaveWidth}));
-          compases.forEach(c=>c.notas.forEach(n=>{c.beats+=duracionBeats[n.duracion];if(n.tipo==="nota")n.vf=new VF.StaveNote({keys:[n.noteName],duration:n.duracion});else n.vf=new VF.StaveNote({keys:["b/4"],duration:n.duracion+"r"});}));
-          redibujarPentagrama();
-        }catch{alert("Archivo inválido");}
-      };
-      reader.readAsText(file);
-    });
-
-    // --- SELECCIÓN DE FIGURAS ---
-    document.querySelectorAll(".figura").forEach(f=>{
-      f.addEventListener("click",()=>{document.querySelectorAll(".figura").forEach(g=>g.classList.remove("activa"));f.classList.add("activa");figuraActiva={tipo:f.dataset.tipo,duracion:f.dataset.duracion};});
-    });
-
-    // --- CLIC EN PENTAGRAMA (añadir silencio o nota) ---
-    div.addEventListener("click",e=>{
-      if(!figuraActiva||deleteMode)return;
-      const target=e.target;
-      if(target.closest(".nota"))return;
-      const svg=target.closest("svg");
-      if(!svg)return;
-      const rect=svg.getBoundingClientRect();
-      const x=e.clientX-rect.left,y=e.clientY-rect.top;
-      const stave=context.svg.querySelectorAll(".vf-stave").forEach(s=>{const b=s.getBBox();if(x>=b.x&&x<=b.x+b.width&&y>=b.y&&y<=b.y+b.height){
-        const compasIdx=Array.from(context.svg.querySelectorAll(".vf-stave")).indexOf(s);
-        const compas=compases[compasIdx];
-        if(compas && !compas.closed)addElemento(figuraActiva.tipo,figuraActiva.duracion);
-      }});
-    });
-
-    // --- BORRADO EN MODO PAPELERA ---
-    div.addEventListener("click",e=>{
-      if(!deleteMode)return;
-      const nota=e.target.closest(".nota");
-      if(nota){
-        nota.remove();
-        const idx=parseInt(nota.dataset.idx),compIdx=parseInt(nota.dataset.compas);
-        const c=compases[compIdx];
-        const beats=duracionBeats[c.notas[idx].duracion];
-        c.beats-=beats;c.notas.splice(idx,1);
+    function init() {
+      window.addEventListener('resize', () => {
+        width = container.clientWidth;
+        renderer.resize(width, container.clientHeight);
         redibujarPentagrama();
-      }
-    });
+      });
+      document.getElementById("clave").onchange = e => { clave = e.target.value; resetPartitura(); };
+      document.getElementById("compas").onchange = e => { compas = e.target.value; resetPartitura(); };
+      document.getElementById("velocidad").onchange = e => { bpm = +e.target.value; document.getElementById("play-stop").disabled = !bpm; };
+      initFiguras();
+      initControles();
+      resetPartitura();
+    }
 
-    // --- SELECTORES ---
-    document.getElementById("clave").addEventListener("change",e=>{clave=e.target.value;redibujarPentagrama();});
-    document.getElementById("compas").addEventListener("change",e=>{compas=e.target.value;redibujarPentagrama();});
-    document.getElementById("velocidad").addEventListener("change",e=>{velocidad=e.target.value;});
+    function resetPartitura() {
+      lines = [[]];
+      currentLine = 0;
+      if (compas) lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+      redibujarPentagrama();
+    }
+
+    function redibujarPentagrama() {
+      context.clear();
+      document.querySelectorAll(".note-label, .nota").forEach(el => el.remove());
+      if (!compas) return;
+
+      let y = 80;
+      lines.forEach((line, li) => {
+        let x = 40;
+        line.forEach((c, ci) => {
+          const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
+          voice.setStrict(false);
+          if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
+
+          const formatter = new VF.Formatter();
+          if (c.notas.length) formatter.joinVoices([voice]);
+
+          const extra = c.notas.filter(n => n.duracion === '8').length * 30 + (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 15;
+          const w = Math.max(minStaveWidth, c.notas.length ? formatter.preCalculateMinTotalWidth([voice]) + 80 + extra : minStaveWidth);
+          c.staveWidth = w;
+
+          const stave = new VF.Stave(x, y, w, { spacing_between_lines_px: 18 });
+          if (li === 0 && ci === 0) stave.addClef(clave).addTimeSignature(compas);
+          if (c.closed) stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
+          stave.setContext(context).draw();
+          c.stave = stave;
+
+          if (c.notas.length) {
+            formatter.format([voice], w - 80);
+            voice.draw(context, stave);
+          }
+          x += w;
+        });
+        y += lineHeight;
+      });
+
+      width = Math.max(container.clientWidth, lines.reduce((m, l) => Math.max(m, l.reduce((s, c) => s + c.staveWidth, 0) + 80), 0));
+      renderer.resize(width, y + 50);
+      updateDraggableNotes();
+
+      const curr = lines[currentLine][lines[currentLine].length - 1];
+      document.getElementById("cerrar-compas").disabled = !curr || curr.closed || curr.beats !== +compas.split("/")[0];
+
+      if (curr?.stave) {
+        setTimeout(() => {
+          div.scrollTop = curr.stave.getYForLine(0) - div.clientHeight / 3;
+        }, 50);
+      }
+    }
+
+    function initFiguras() {
+      document.querySelectorAll(".figura").forEach(f => {
+        f.onclick = () => {
+          document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+          ["papelera", "notas", "metronomo"].forEach(id => document.getElementById(id).classList.remove("activa"));
+          deleteMode = showNoteLabels = metronomeOn = false;
+          figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
+          f.classList.add("activa");
+        };
+      });
+    }
+
+    function initControles() {
+      document.getElementById("papelera").onclick = () => toggleMode("papelera", () => { deleteMode = !deleteMode; });
+      document.getElementById("notas").onclick = () => toggleMode("notas", () => { showNoteLabels = !showNoteLabels; });
+      document.getElementById("metronomo").onclick = () => toggleMode("metronomo", () => { metronomeOn = !metronomeOn; });
+      document.getElementById("play-stop").onclick = playStop;
+      document.getElementById("cerrar-compas").onclick = cerrarCompas;
+      document.getElementById("borrar-ultimo").onclick = borrarUltimo;
+      document.getElementById("limpiar").onclick = resetPartitura;
+      document.getElementById("guardar").onclick = guardar;
+      document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
+      document.getElementById("file-input").onchange = abrir;
+    }
+
+    function toggleMode(id, fn) {
+      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+      ["papelera", "notas", "metronomo"].forEach(i => document.getElementById(i).classList.remove("activa"));
+      figuraActiva = null;
+      fn();
+      document.getElementById(id).classList.toggle("activa", id === "papelera" ? deleteMode : id === "notas" ? showNoteLabels : metronomeOn);
+      updateDraggableNotes();
+    }
+
+    async function playStop() {
+      await Tone.start();
+      if (isPlaying) { stopPlayback(); return; }
+      if (!bpm || !compas) return alert("Configura compás y velocidad");
+
+      Tone.Transport.bpm.value = bpm;
+      const synth = new Tone.Synth().toDestination();
+      let time = 0, events = [], gi = 0;
+      lines.forEach(l => l.forEach(c => c.notas.forEach(n => {
+        if (n.tipo === "nota") events.push({ time, note: n.noteName, dur: duracionTiempo[n.duracion], gi });
+        time += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
+        gi++;
+      })));
+
+      if (!events.length && !metronomeOn) return alert("Sin notas para reproducir");
+
+      Tone.Transport.cancel();
+      let offset = 0;
+      if (metronomeOn) {
+        const beat = Tone.Time("4n").toSeconds();
+        const beats = +compas.split("/")[0];
+        for (let i = 0; i < beats; i++) Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
+        offset = beats * beat;
+        metronomeLoop = new Tone.Loop(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), "4n").start(offset);
+      }
+
+      const gs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
+      events.forEach(e => {
+        const s = e.time + offset, end = s + Tone.Time(e.dur).toSeconds();
+        Tone.Transport.schedule(t => synth.triggerAttackRelease(e.note.split("/")[0].toUpperCase() + e.note.split("/")[1], e.dur, t), s);
+        Tone.Transport.schedule(t => {
+          const g = gs[e.gi];
+          if (g) {
+            g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
+              el.setAttribute('stroke', 'red');
+              if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'red');
+            });
+            div.scrollTop = g.getBBox().y - div.clientHeight / 3;
+          }
+        }, s);
+        Tone.Transport.schedule(t => {
+          const g = gs[e.gi];
+          if (g) g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
+            el.setAttribute('stroke', 'black');
+            if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
+          });
+        }, end);
+        if (showNoteLabels && gs[e.gi]) {
+          const bbox = gs[e.gi].getBBox();
+          Tone.Transport.schedule(t => {
+            document.querySelectorAll(".note-label").forEach(l => l.remove());
+            const lbl = document.createElement("div");
+            lbl.className = "note-label";
+            lbl.textContent = noteNameMap[e.note.split("/")[0]] + e.note.split("/")[1];
+            lbl.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
+            lbl.style.top = `${bbox.y + bbox.height + 10}px`;
+            div.appendChild(lbl);
+          }, s);
+          Tone.Transport.schedule(t => document.querySelectorAll(".note-label").forEach(l => l.remove()), end);
+        }
+      });
+
+      Tone.Transport.schedule(() => stopPlayback(), time + offset);
+      Tone.Transport.start();
+      document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
+      isPlaying = true;
+    }
+
+    function stopPlayback() {
+      Tone.Transport.cancel();
+      Tone.Transport.stop();
+      if (metronomeLoop) metronomeLoop.stop();
+      document.querySelectorAll(".note-label").forEach(l => l.remove());
+      context.svg.querySelectorAll('g.vf-stavenote').forEach(g => g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
+        el.setAttribute('stroke', 'black');
+        if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
+      }));
+      document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
+      isPlaying = false;
+    }
+
+    div.onclick = async e => {
+      if (!compas) return alert("Por favor, selecciona un compás antes de añadir notas.");
+      if (!figuraActiva) return alert("Por favor, selecciona una figura musical.");
+      if (deleteMode) return;
+      if (!lines[currentLine].length) {
+        lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+      }
+      const curr = lines[currentLine][lines[currentLine].length - 1];
+      if (curr.closed) return alert("El compás actual está cerrado. Cierra el compás o crea uno nuevo.");
+      const rect = div.getBoundingClientRect();
+      const y = e.clientY - rect.top + div.scrollTop;
+      const noteName = getNoteFromY(y);
+      if (!noteName) return alert("No se pudo determinar la posición de la nota. Intenta de nuevo.");
+      await addNota(figuraActiva.tipo, figuraActiva.duracion, noteName);
+    };
+
+    function getNoteFromY(y) {
+      const lineIndex = Math.floor((y - 80) / lineHeight);
+      if (lineIndex < 0 || lineIndex > currentLine) return null;
+      const lineY = lineIndex * lineHeight + 80;
+      const relY = y - lineY;
+      const step = 72 / 8; // Dividimos el espacio del pentagrama en pasos para las notas
+      const idx = Math.round((72 - relY) / step);
+      return noteMap[clave][Math.max(0, Math.min(noteMap[clave].length - 1, idx))];
+    }
+
+    async function addNota(tipo, dur, noteName) {
+      const beats = +compas.split("/")[0];
+      let line = lines[currentLine], currentCompas = line[line.length - 1];
+      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
+
+      let vf;
+      if (tipo === "nota") {
+        const list = noteMap[clave];
+        const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+        const idx = list.indexOf(noteName);
+        vf = new VF.StaveNote({ clef: clave, keys: [noteName], duration: dur, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
+      } else {
+        const rest = clave === "treble" ? "b/4" : "d/3";
+        vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: dur + "r" });
+      }
+
+      currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
+      currentCompas.beats += duracionBeats[dur];
+      redibujarPentagrama();
+      if (tipo === "nota") {
+        await Tone.start();
+        new Tone.Synth().toDestination().triggerAttackRelease(noteName.split("/")[0].toUpperCase() + noteName.split("/")[1], "8n");
+      }
+    }
+
+    function updateDraggableNotes() {
+      document.querySelectorAll(".nota").forEach(n => n.remove());
+      let gi = 0;
+      lines.forEach((line, li) => line.forEach((c, ci) => c.notas.forEach((n, ni) => {
+        if (n.tipo === "silencio") { gi++; return; }
+        const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
+        if (!g) return;
+        const bbox = g.getBBox();
+        const d = document.createElement("div");
+        d.className = `nota ${deleteMode ? 'delete-mode' : ''}`;
+        d.style.left = `${bbox.x}px`;
+        d.style.top = `${bbox.y}px`;
+        d.style.width = `${bbox.width}px`;
+        d.style.height = `${bbox.height}px`;
+        d.dataset.li = li;
+        d.dataset.ci = ci;
+        d.dataset.ni = ni;
+
+        if (!deleteMode) {
+          const plus = document.createElement("div");
+          plus.textContent = "+";
+          plus.className = "plus";
+          const minus = document.createElement("div");
+          minus.textContent = "−";
+          minus.className = "minus";
+          let t;
+          const showControls = () => {
+            clearTimeout(t);
+            d.classList.add("show-controls");
+            t = setTimeout(() => d.classList.remove("show-controls"), 2000);
+          };
+          plus.onclick = e => { e.stopPropagation(); showControls(); changePitch(d, 1); };
+          minus.onclick = e => { e.stopPropagation(); showControls(); changePitch(d, -1); };
+          d.onmouseover = showControls;
+          d.appendChild(plus);
+          d.appendChild(minus);
+        }
+
+        div.appendChild(d);
+
+        if (deleteMode) {
+          d.onclick = e => {
+            e.stopPropagation();
+            const currentCompas = lines[li][ci];
+            currentCompas.beats -= duracionBeats[currentCompas.notas[ni].duracion];
+            currentCompas.notas.splice(ni, 1);
+            redibujarPentagrama();
+          };
+        } else {
+          interact(d).draggable({
+            listeners: {
+              start() { d.setAttribute("dy", 0); },
+              move(e) {
+                const dy = +d.getAttribute("dy") + e.dy;
+                d.style.transform = `translateY(${dy}px)`;
+                d.setAttribute("dy", dy);
+              },
+              end(e) {
+                const y = e.clientY - div.getBoundingClientRect().top + div.scrollTop;
+                const newName = getNoteFromY(y);
+                if (!newName) return;
+                const nota = lines[li][ci].notas[ni];
+                nota.noteName = newName;
+                const list = noteMap[clave];
+                const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+                const idx = list.indexOf(newName);
+                nota.vf = new VF.StaveNote({ clef: clave, keys: [newName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
+                d.remove();
+                redibujarPentagrama();
+                Tone.start();
+                new Tone.Synth().toDestination().triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], "8n");
+              }
+            }
+          });
+        }
+        gi++;
+      })));
+    }
+
+    async function changePitch(div, dir) {
+      const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni;
+      const nota = lines[li][ci].notas[ni];
+      const list = noteMap[clave];
+      const idx = list.indexOf(nota.noteName) + dir;
+      if (idx < 0 || idx >= list.length) return;
+      nota.noteName = list[idx];
+      const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+      nota.vf = new VF.StaveNote({ clef: clave, keys: [nota.noteName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
+      redibujarPentagrama();
+      await Tone.start();
+      new Tone.Synth().toDestination().triggerAttackRelease(nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], "8n");
+    }
+
+    function cerrarCompas() {
+      const curr = lines[currentLine][lines[currentLine].length - 1];
+      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
+      curr.closed = true;
+      const nuevo = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth };
+      lines[currentLine].push(nuevo);
+      const totalW = lines[currentLine].reduce((s, c) => s + c.staveWidth, 0) + 80;
+      if (totalW > width) {
+        lines[currentLine].pop();
+        lines.push([nuevo]);
+        currentLine++;
+      }
+      redibujarPentagrama();
+    }
+
+    function borrarUltimo() {
+      for (let li = lines.length - 1; li >= 0; li--) {
+        for (let ci = lines[li].length - 1; ci >= 0; ci--) {
+          const c = lines[li][ci];
+          if (c.notas.length) {
+            c.beats -= duracionBeats[c.notas[c.notas.length - 1].duracion];
+            c.notas.pop();
+            c.closed = false;
+            if (!c.notas.length && lines[li].length > 1) lines[li].splice(ci, 1);
+            redibujarPentagrama();
+            return;
+          }
+        }
+      }
+    }
+
+    function guardar() {
+      const data = {
+        titulo: document.getElementById("titulo-editable").value,
+        clave, compas, bpm,
+        lines: lines.map(l => l.map(c => ({
+          notas: c.notas.map(n => ({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName })),
+          beats: c.beats,
+          closed: c.closed
+        })))
+      };
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      a.download = `${data.titulo || "partitura"}.json`;
+      a.click();
+    }
+
+    function abrir(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const r = new FileReader();
+      r.onload = ev => {
+        try {
+          const d = JSON.parse(ev.target.result);
+          document.getElementById("titulo-editable").value = d.titulo || "Mi Partitura";
+          document.getElementById("clave").value = d.clave;
+          clave = d.clave;
+          document.getElementById("compas").value = d.compas;
+          compas = d.compas;
+          document.getElementById("velocidad").value = d.bpm;
+          bpm = d.bpm;
+          lines = d.lines.map(l => l.map(c => {
+            const comp = { notas: [], beats: c.beats, closed: c.closed, staveWidth: minStaveWidth };
+            c.notas.forEach(n => {
+              let vf;
+              if (n.tipo === "nota") {
+                const list = noteMap[clave];
+                const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+                const idx = list.indexOf(n.noteName);
+                vf = new VF.StaveNote({ clef: clave, keys: [n.noteName], duration: n.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
+              } else {
+                const rest = clave === "treble" ? "b/4" : "d/3";
+                vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: n.duracion + "r" });
+              }
+              comp.notas.push({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName, vf });
+            });
+            return comp;
+          }));
+          currentLine = lines.length - 1;
+          redibujarPentagrama();
+        } catch { alert("Archivo inválido"); }
+      };
+      r.readAsText(file);
+    }
 
     init();
   </script>
