@@ -85,9 +85,12 @@
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       margin-bottom: 15px;
-      width: 100%;
-      max-width: 800px;
+      width: 90%; /* Más ancho, ocupando el 90% de la pantalla */
+      max-width: 1200px; /* Límite máximo para pantallas grandes */
+      min-width: 600px; /* Mínimo para pantallas pequeñas */
       min-height: 400px;
+      margin-left: auto;
+      margin-right: auto;
     }
     #pentagrama {
       width: 100%;
@@ -187,7 +190,7 @@
       #titulo-editable { font-size: 1.3em; }
       .figura { width: 50px; height: 50px; font-size: 1.6em; }
       button { padding: 8px 14px; font-size: 0.9em; }
-      #pentagrama-container { min-height: 300px; }
+      #pentagrama-container { min-height: 300px; min-width: 300px; }
     }
   </style>
 </head>
@@ -384,17 +387,11 @@
 
     function toggleMetronome() {
       metronomeOn = !metronomeOn;
-      if (metronomeOn && compas && bpm) {
-        Tone.Transport.bpm.value = bpm;
-        const beat = Tone.Time("4n").toSeconds();
-        metronomeLoop = new Tone.Loop(t => {
-          new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t);
-        }, "4n").start(0);
-        if (!isPlaying) Tone.Transport.start();
-      } else {
-        if (metronomeLoop) metronomeLoop.stop();
+      if (!metronomeOn && metronomeLoop) {
+        metronomeLoop.stop();
         if (!isPlaying) Tone.Transport.stop();
       }
+      document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
     }
 
     async function playStop() {
@@ -414,18 +411,23 @@
         gi++;
       })));
 
-      if (!events.length && !metronomeOn) return alert("Sin notas para reproducir");
-
       Tone.Transport.cancel();
       let offset = 0;
       if (metronomeOn) {
         const beat = Tone.Time("4n").toSeconds();
         const beats = +compas.split("/")[0]; // 2 para 2/4, 3 para 3/4, 4 para 4/4
+        // Pulsos iniciales
         for (let i = 0; i < beats; i++) {
           Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
         }
         offset = beats * beat;
+        // Metrónomo continuo durante la reproducción
+        metronomeLoop = new Tone.Loop(t => {
+          new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t);
+        }, "4n").start(offset);
       }
+
+      if (!events.length && !metronomeOn) return alert("Sin notas para reproducir");
 
       const gs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
       events.forEach(e => {
