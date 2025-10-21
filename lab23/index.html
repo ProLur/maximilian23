@@ -17,6 +17,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      align-items: center; /* Centrar contenido */
+      padding: 10px;
     }
     header {
       background: linear-gradient(90deg, #4ae2f2, #6f9cff);
@@ -24,11 +26,22 @@
       padding: 15px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.25);
       border-radius: 0 0 15px 15px;
+      width: 100%;
+      max-width: 1200px;
+      position: relative;
     }
-    header img { height: 70px; vertical-align: middle; filter: drop-shadow(0 0 6px #fff); }
-    header h1 { display: inline-block; margin: 0 10px; font-size: 2em; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
-    header p { color: #e9f8ff; font-size: 1em; }
-    #titulo-partitura { text-align: center; margin: 15px 0; }
+    header img { height: 60px; vertical-align: middle; filter: drop-shadow(0 0 6px #fff); margin-right: 10px; }
+    header h1 { display: inline-block; margin: 0; font-size: 2em; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
+    header p { color: #e9f8ff; font-size: 1em; margin-top: 5px; }
+    #creado-por {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: #fff;
+      font-size: 0.9em;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    #titulo-partitura { text-align: center; margin: 15px 0; width: 100%; max-width: 600px; }
     #titulo-editable {
       font: inherit;
       font-size: 1.6em;
@@ -37,8 +50,7 @@
       border: 2px solid #4ae2f2;
       border-radius: 10px;
       padding: 8px 15px;
-      width: 80%;
-      max-width: 600px;
+      width: 100%;
       background: #fff;
     }
     #barra-opciones {
@@ -47,6 +59,8 @@
       gap: 15px;
       flex-wrap: wrap;
       margin: 15px 0;
+      width: 100%;
+      max-width: 600px;
     }
     select {
       padding: 8px 12px;
@@ -59,7 +73,9 @@
       flex-grow: 1;
       display: flex;
       flex-direction: column;
-      padding: 0 10px;
+      align-items: center;
+      width: 100%;
+      max-width: 1200px;
     }
     #pentagrama-container {
       flex-grow: 1;
@@ -69,6 +85,9 @@
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       margin-bottom: 15px;
+      width: 100%;
+      max-width: 800px;
+      min-height: 400px;
     }
     #pentagrama {
       width: 100%;
@@ -77,7 +96,7 @@
       overflow-x: hidden;
       scroll-behavior: smooth;
       position: relative;
-      z-index: 1; /* SVG en capa inferior */
+      z-index: 1;
     }
     #figuras {
       display: flex;
@@ -85,6 +104,8 @@
       gap: 20px;
       flex-wrap: wrap;
       margin: 15px 0;
+      width: 100%;
+      max-width: 600px;
     }
     .figura {
       width: 60px; height: 60px;
@@ -112,6 +133,8 @@
       gap: 12px;
       flex-wrap: wrap;
       margin: 15px 0;
+      width: 100%;
+      max-width: 600px;
     }
     button {
       padding: 10px 18px;
@@ -134,7 +157,7 @@
     .nota {
       position: absolute;
       cursor: move;
-      z-index: 100; /* Capa superior para notas */
+      z-index: 100;
       pointer-events: auto;
     }
     .nota .plus, .nota .minus {
@@ -150,7 +173,7 @@
       cursor: pointer;
       opacity: 0;
       transition: opacity 0.2s;
-      z-index: 101; /* Botones por encima de todo */
+      z-index: 101;
     }
     .nota.show-controls .plus, .nota.show-controls .minus { opacity: 1; }
     .nota .plus { top: -30px; left: 50%; transform: translateX(-50%); }
@@ -168,17 +191,21 @@
     }
     @media (max-width: 600px) {
       header h1 { font-size: 1.6em; }
+      header img { height: 50px; }
+      #creado-por { font-size: 0.8em; right: 10px; }
       #titulo-editable { font-size: 1.3em; }
       .figura { width: 50px; height: 50px; font-size: 1.6em; }
       button { padding: 8px 14px; font-size: 0.9em; }
+      #pentagrama-container { min-height: 300px; }
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="https://mmfrutos.com/max23/Cabeza.png" alt="Maximilian 23">
+    <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
     <h1>Laboratorio Musical de Maximilian 23</h1>
     <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
+    <div id="creado-por">Creado por Manuel</div>
   </header>
   <div id="titulo-partitura">
     <input type="text" id="titulo-editable" value="Mi Partitura">
@@ -222,7 +249,7 @@
     const div = document.getElementById("pentagrama");
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     const container = document.getElementById("pentagrama-container");
-    let width = 800;
+    let width = container.clientWidth || 800;
     const minStaveWidth = 250;
     const lineHeight = 150;
     renderer.resize(width, 600);
@@ -233,6 +260,7 @@
     let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
     let metronomeLoop = null;
     let synth = null;
+    let activeNoteId = null; // Para preservar el estado show-controls
 
     const noteMap = {
       treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
@@ -501,9 +529,11 @@
       if (lineIndex < 0 || lineIndex >= lines.length) return null;
       const lineY = lineIndex * lineHeight + 80;
       const relY = y - lineY;
-      const step = 72 / 8;
-      const idx = Math.round((72 - relY) / step);
-      return noteMap[clave][Math.max(0, Math.min(noteMap[clave].length - 1, idx))];
+      const noteHeight = 72; // Altura del pentagrama en píxeles
+      const numNotes = noteMap[clave].length;
+      const step = noteHeight / (numNotes - 1); // Dividir el pentagrama en pasos
+      const idx = Math.round((noteHeight - relY) / step); // Nota más cercana
+      return noteMap[clave][Math.max(0, Math.min(numNotes - 1, idx))];
     }
 
     async function addNota(tipo, dur, noteName, compasIndex) {
@@ -531,6 +561,7 @@
     }
 
     function updateDraggableNotes() {
+      const wasActive = activeNoteId ? document.querySelector(`.nota[data-id="${activeNoteId}"]`)?.classList.contains("show-controls") : false;
       document.querySelectorAll(".nota").forEach(n => n.remove());
       let gi = 0;
       lines.forEach((line, li) => line.forEach((c, ci) => c.notas.forEach((n, ni) => {
@@ -547,6 +578,7 @@
         d.dataset.li = li;
         d.dataset.ci = ci;
         d.dataset.ni = ni;
+        d.dataset.id = `${li}-${ci}-${ni}`; // ID único para la nota
 
         const plus = document.createElement("div");
         plus.textContent = "+";
@@ -558,11 +590,14 @@
         const showControls = () => {
           clearTimeout(t);
           d.classList.add("show-controls");
-          t = setTimeout(() => d.classList.remove("show-controls"), 1000);
+          activeNoteId = d.dataset.id;
         };
         const hideControls = () => {
           clearTimeout(t);
-          d.classList.remove("show-controls");
+          t = setTimeout(() => {
+            d.classList.remove("show-controls");
+            if (activeNoteId === d.dataset.id) activeNoteId = null;
+          }, 1000);
         };
 
         plus.onclick = e => {
@@ -586,6 +621,10 @@
 
         div.appendChild(d);
 
+        if (wasActive && d.dataset.id === activeNoteId) {
+          d.classList.add("show-controls");
+        }
+
         interact(d).draggable({
           listeners: {
             start() { d.setAttribute("dy", 0); },
@@ -605,6 +644,7 @@
               const idx = list.indexOf(newName);
               nota.vf = new VF.StaveNote({ clef: clave, keys: [newName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
               d.remove();
+              activeNoteId = `${li}-${ci}-${ni}`; // Preservar ID para mantener botones visibles
               redibujarPentagrama();
               if (synth) {
                 synth.triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], "8n");
@@ -625,6 +665,7 @@
       nota.noteName = list[idx];
       const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
       nota.vf = new VF.StaveNote({ clef: clave, keys: [nota.noteName], duration: nota.duracion, stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP });
+      activeNoteId = `${li}-${ci}-${ni}`; // Preservar ID para mantener botones visibles
       redibujarPentagrama();
       if (synth) {
         await Tone.start();
@@ -656,6 +697,7 @@
             c.notas.pop();
             c.closed = false;
             if (!c.notas.length && lines[li].length > 1) lines[li].splice(ci, 1);
+            activeNoteId = null; // Resetear ID activo al borrar
             redibujarPentagrama();
             return;
           }
@@ -711,6 +753,7 @@
             return comp;
           }));
           currentLine = lines.length - 1;
+          activeNoteId = null; // Resetear ID activo al abrir
           redibujarPentagrama();
         } catch { alert("Archivo inválido"); }
       };
