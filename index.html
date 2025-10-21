@@ -241,17 +241,20 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    // 🧩 LINKIFY CORREGIDO (ya no añade punto final)
-    function linkify(t) {
-      if (!t) return "";
-      if (t.includes("<a ")) return t;
-      return t.replace(
-        /(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])(?![a-zA-Z0-9])/g,
-        u => {
-          const clean = u.replace(/[.,!?;:]+$/, "");
-          return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
-        }
-      );
+    // 🧩 LINKIFY MEJORADO
+    function linkify(text) {
+      if (!text) return "";
+      if (text.includes("<a ")) return text;
+
+      // Detecta https://, http:// y www.
+      const urlRegex = /\b((https?:\/\/|www\.)[^\s<>"']+[^\s<>"'.,!?;:])/gi;
+
+      return text.replace(urlRegex, match => {
+        // Quita signos de puntuación al final si los hubiera
+        const clean = match.replace(/[.,!?;:]+$/, "");
+        const href = clean.startsWith("http") ? clean : "https://" + clean;
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
+      });
     }
 
     function typeWriterEffect(el, text, delay = 30, done = null) {
@@ -342,4 +345,4 @@
     });
   </script>
 </body>
-</html>
+    </html>
