@@ -85,9 +85,9 @@
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       margin-bottom: 15px;
-      width: 90%; /* Más ancho, ocupando el 90% de la pantalla */
-      max-width: 1200px; /* Límite máximo para pantallas grandes */
-      min-width: 600px; /* Mínimo para pantallas pequeñas */
+      width: 90%;
+      max-width: 1200px;
+      min-width: 600px;
       min-height: 400px;
       margin-left: auto;
       margin-right: auto;
@@ -416,12 +416,10 @@
       if (metronomeOn) {
         const beat = Tone.Time("4n").toSeconds();
         const beats = +compas.split("/")[0]; // 2 para 2/4, 3 para 3/4, 4 para 4/4
-        // Pulsos iniciales
         for (let i = 0; i < beats; i++) {
           Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
         }
         offset = beats * beat;
-        // Metrónomo continuo durante la reproducción
         metronomeLoop = new Tone.Loop(t => {
           new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t);
         }, "4n").start(offset);
@@ -536,6 +534,7 @@
     }
 
     async function addNota(tipo, dur, noteName, compasIndex) {
+      await Tone.start(); // Asegura que el contexto de audio esté activo
       const beats = +compas.split("/")[0];
       let currentCompas = lines[currentLine][compasIndex];
       if (currentCompas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
@@ -555,7 +554,7 @@
       currentCompas.beats += duracionBeats[dur];
       redibujarPentagrama();
       if (tipo === "nota" && synth) {
-        synth.triggerAttackRelease(noteName.split("/")[0].toUpperCase() + noteName.split("/")[1], "8n");
+        synth.triggerAttackRelease(noteName.split("/")[0].toUpperCase() + noteName.split("/")[1], duracionTiempo[dur]);
       }
     }
 
@@ -646,7 +645,9 @@
               activeNoteId = `${li}-${ci}-${ni}`;
               redibujarPentagrama();
               if (synth) {
-                synth.triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], "8n");
+                Tone.start().then(() => {
+                  synth.triggerAttackRelease(newName.split("/")[0].toUpperCase() + newName.split("/")[1], duracionTiempo[nota.duracion]);
+                });
               }
             }
           }
@@ -656,6 +657,7 @@
     }
 
     async function changePitch(div, dir) {
+      await Tone.start(); // Asegura que el contexto de audio esté activo
       const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni;
       const nota = lines[li][ci].notas[ni];
       const list = noteMap[clave];
@@ -667,8 +669,7 @@
       activeNoteId = `${li}-${ci}-${ni}`;
       redibujarPentagrama();
       if (synth) {
-        await Tone.start();
-        synth.triggerAttackRelease(nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], "8n");
+        synth.triggerAttackRelease(nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], duracionTiempo[nota.duracion]);
       }
     }
 
