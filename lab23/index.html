@@ -435,22 +435,25 @@
       if (curr.closed) return alert("El compás actual está cerrado. Cierra el compás o crea uno nuevo.");
       const rect = div.getBoundingClientRect();
       const y = e.clientY - rect.top + div.scrollTop;
-      await addNota(figuraActiva.tipo, figuraActiva.duracion, getNoteFromY(y));
+      const noteName = getNoteFromY(y);
+      if (!noteName) return alert("No se pudo determinar la posición de la nota. Intenta de nuevo.");
+      await addNota(figuraActiva.tipo, figuraActiva.duracion, noteName);
     };
 
     function getNoteFromY(y) {
       const lineIndex = Math.floor((y - 80) / lineHeight);
+      if (lineIndex < 0 || lineIndex > currentLine) return null;
       const lineY = lineIndex * lineHeight + 80;
       const relY = y - lineY;
-      const step = 72 / 8;
+      const step = 72 / 8; // Dividimos el espacio del pentagrama en pasos para las notas
       const idx = Math.round((72 - relY) / step);
       return noteMap[clave][Math.max(0, Math.min(noteMap[clave].length - 1, idx))];
     }
 
     async function addNota(tipo, dur, noteName) {
       const beats = +compas.split("/")[0];
-      let line = lines[currentLine], compas = line[line.length - 1];
-      if (compas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
+      let line = lines[currentLine], currentCompas = line[line.length - 1];
+      if (currentCompas.beats + duracionBeats[dur] > beats) return alert("Compás lleno");
 
       let vf;
       if (tipo === "nota") {
@@ -463,8 +466,8 @@
         vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: dur + "r" });
       }
 
-      compas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
-      compas.beats += duracionBeats[dur];
+      currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
+      currentCompas.beats += duracionBeats[dur];
       redibujarPentagrama();
       if (tipo === "nota") {
         await Tone.start();
@@ -495,17 +498,17 @@
           plus.textContent = "+";
           plus.className = "plus";
           const minus = document.createElement("div");
-          minus.textContent = "-";
+          minus.textContent = "−";
           minus.className = "minus";
           let t;
-          const show = () => {
+          const showControls = () => {
             clearTimeout(t);
             d.classList.add("show-controls");
             t = setTimeout(() => d.classList.remove("show-controls"), 2000);
           };
-          plus.onclick = e => { e.stopPropagation(); show(); changePitch(d, 1); };
-          minus.onclick = e => { e.stopPropagation(); show(); changePitch(d, -1); };
-          d.onmouseover = show;
+          plus.onclick = e => { e.stopPropagation(); showControls(); changePitch(d, 1); };
+          minus.onclick = e => { e.stopPropagation(); showControls(); changePitch(d, -1); };
+          d.onmouseover = showControls;
           d.appendChild(plus);
           d.appendChild(minus);
         }
@@ -513,10 +516,11 @@
         div.appendChild(d);
 
         if (deleteMode) {
-          d.onclick = () => {
-            const compas = lines[li][ci];
-            compas.beats -= duracionBeats[compas.notas[ni].duracion];
-            compas.notas.splice(ni, 1);
+          d.onclick = e => {
+            e.stopPropagation();
+            const currentCompas = lines[li][ci];
+            currentCompas.beats -= duracionBeats[currentCompas.notas[ni].duracion];
+            currentCompas.notas.splice(ni, 1);
             redibujarPentagrama();
           };
         } else {
@@ -531,6 +535,7 @@
               end(e) {
                 const y = e.clientY - div.getBoundingClientRect().top + div.scrollTop;
                 const newName = getNoteFromY(y);
+                if (!newName) return;
                 const nota = lines[li][ci].notas[ni];
                 nota.noteName = newName;
                 const list = noteMap[clave];
