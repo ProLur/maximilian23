@@ -85,7 +85,7 @@
       margin: 5px auto;
       width: 95%;
       max-width: 1400px;
-      min-width: 600px;
+      min-width: 300px;
       min-height: 280px !important;
       height: auto !important;
       max-height: none !important;
@@ -230,13 +230,15 @@
       transition: opacity 0.2s, transform 0.1s;
       z-index: 101;
       border: 2px solid #fff;
+      left: 50%;
+      transform: translateX(-50%);
     }
     .nota .plus:hover, .nota .minus:hover {
       background: #ff80b5;
-      transform: scale(1.2);
+      transform: translateX(-50%) scale(1.2);
     }
-    .nota .plus { top: -28px; left: 50%; transform: translateX(-50%); }
-    .nota .minus { bottom: -28px; left: 50%; transform: translateX(-50%); }
+    .nota .plus { top: -28px; }
+    .nota .minus { bottom: -28px; }
     @media (max-width: 600px) {
       header { padding: 8px; }
       header h1 { font-size: 1.4em; }
@@ -266,7 +268,12 @@
         padding: 6px 12px;
         top: 45px;
       }
-      .nota .plus, .nota .minus { width: 20px; height: 20px; line-height: 18px; font-size: 0.8em; }
+      .nota .plus, .nota .minus { 
+        width: 20px; 
+        height: 20px; 
+        line-height: 18px; 
+        font-size: 0.8em; 
+      }
     }
   </style>
 </head>
@@ -333,11 +340,11 @@
     const notaDisplay = document.getElementById("nota-display");
     
     // CONFIGURACIÓN PROFESIONAL
-    const MAX_LINE_WIDTH = 1200;
-    const MAX_COMPASSES_PER_LINE = 5;
+    let MAX_LINE_WIDTH = Math.max(600, container.clientWidth - 40);
     const FIRST_STAVE_WIDTH = 300;
-    const minStaveWidth = 180;
-    const lineHeight = 100; // Reduced line height to decrease spacing between staves
+    const minStaveWidth = 120;
+    const lineHeight = 100;
+    const noteWidthFactors = { w: 30, h: 40, q: 50, '8': 60 }; // Width factors for different note durations
     
     let width = Math.max(600, container.clientWidth);
     let currentHeight = 280;
@@ -376,6 +383,7 @@
     function init() {
       window.addEventListener('resize', () => {
         width = Math.max(600, container.clientWidth);
+        MAX_LINE_WIDTH = width - 40;
         redibujarPentagrama();
       });
 
@@ -420,12 +428,15 @@
       
       context.clear();
       let y = 40;
-      
+      let tempLines = [];
+      let currentTempLine = [];
+      let currentLineWidth = 0;
+      const maxCompassesPerLine = Math.floor(MAX_LINE_WIDTH / minStaveWidth) || 5;
+
       if (compas) {
-        lines.forEach((line, li) => {
-          let x = 40;
-          
-          line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
+        let lineIndex = 0;
+        lines.forEach((line) => {
+          line.forEach((c, ci) => {
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
             if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
@@ -433,21 +444,50 @@
             const formatter = new VF.Formatter();
             if (c.notas.length) formatter.joinVoices([voice]);
             
-            let w = (ci === 0 && li === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
+            let w = (ci === 0 && lineIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
             
             if (c.notas.length) {
-              let extra = c.notas.filter(n => n.duracion === '8').length * 20;
-              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + 50 + extra);
+              let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
+              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 30);
             }
             
-            const espacioRestante = MAX_LINE_WIDTH - x;
-            if (w > espacioRestante) {
-              w = Math.max(100, espacioRestante - 20);
+            if (currentLineWidth + w > MAX_LINE_WIDTH) {
+              tempLines.push(currentTempLine);
+              currentTempLine = [];
+              currentLineWidth = 0;
+              lineIndex++;
             }
             
-            c.staveWidth = w;
+            currentTempLine.push({ ...c, staveWidth: w });
+            currentLineWidth += w;
+          });
+          
+          if (currentTempLine.length > 0) {
+            tempLines.push(currentTempLine);
+            currentTempLine = [];
+            currentLineWidth = 0;
+            lineIndex++;
+          }
+        });
+        
+        if (currentTempLine.length > 0) {
+          tempLines.push(currentTempLine);
+        }
+        
+        lines = tempLines.map(line => line.slice(0, maxCompassesPerLine));
+        
+        lines.forEach((line, li) => {
+          let x = 40;
+          
+          line.forEach((c, ci) => {
+            const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
+            voice.setStrict(false);
+            if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
             
-            const stave = new VF.Stave(x, y, w);
+            const formatter = new VF.Formatter();
+            if (c.notas.length) formatter.joinVoices([voice]);
+            
+            const stave = new VF.Stave(x, y, c.staveWidth);
             
             if (li === 0 && ci === 0) {
               stave.addClef(clave).addTimeSignature(compas);
@@ -459,11 +499,11 @@
             c.stave = stave;
             
             if (c.notas.length) {
-              formatter.format([voice], w - 50);
+              formatter.format([voice], c.staveWidth - 50);
               voice.draw(context, stave);
             }
             
-            x += w;
+            x += c.staveWidth;
           });
           
           y += lineHeight;
@@ -539,7 +579,7 @@
         let gi = 0;
         
         lines.forEach(line => {
-          line.slice(0, MAX_COMPASSES_PER_LINE).forEach(c => {
+          line.forEach(c => {
             c.notas.forEach(n => {
               if (n.tipo === "nota") {
                 events.push({
@@ -571,7 +611,7 @@
         }
         
         const allNotes = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
-        let noteDisplayY = 50; // Initial Y position for note display
+        let noteDisplayY = 50;
         
         events.forEach(event => {
           const startTime = event.time + introTime;
@@ -602,9 +642,9 @@
               notaDisplay.classList.add("show");
               setTimeout(() => {
                 notaDisplay.classList.remove("show");
-                noteDisplayY += 30; // Move down for next note
+                noteDisplayY += 30;
                 if (noteDisplayY > currentHeight - 50) {
-                  noteDisplayY = 50; // Reset to top if too far down
+                  noteDisplayY = 50;
                 }
               }, duration * 1000 * 0.8);
             }, startTime);
@@ -623,7 +663,7 @@
         
         Tone.Transport.schedule(() => {
           stopPlayback();
-          noteDisplayY = 50; // Reset Y position after playback
+          noteDisplayY = 50;
         }, totalTime + introTime);
         
         Tone.Transport.start();
@@ -659,7 +699,7 @@
       
       let gi = 0;
       lines.forEach((line, li) => {
-        line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
+        line.forEach((c, ci) => {
           c.notas.forEach((n, ni) => {
             if (n.tipo === "silencio") { 
               gi++; 
@@ -738,7 +778,7 @@
       
       curr.closed = true;
       
-      if (lines[currentLine].length >= MAX_COMPASSES_PER_LINE) {
+      if (lines[currentLine].length >= Math.floor(MAX_LINE_WIDTH / minStaveWidth)) {
         lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
         currentLine = lines.length - 1;
       } else {
@@ -761,7 +801,7 @@
       
       lines.forEach((line, li) => {
         let x = 40;
-        line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
+        line.forEach((c, ci) => {
           const distance = Math.abs(clickX - (x + c.staveWidth / 2));
           if (distance < minDistance && !c.closed) {
             minDistance = distance;
@@ -773,7 +813,7 @@
       });
       
       if (lines[targetLine].length <= targetCompas || lines[targetLine][targetCompas].closed) {
-        if (lines[targetLine].length >= MAX_COMPASSES_PER_LINE) {
+        if (lines[targetLine].length >= Math.floor(MAX_LINE_WIDTH / minStaveWidth)) {
           lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
           targetLine = lines.length - 1;
           targetCompas = 0;
@@ -860,7 +900,7 @@
       const data = {
         titulo: document.getElementById("titulo-editable").value,
         clave, compas, bpm,
-        lines: lines.map(l => l.slice(0, MAX_COMPASSES_PER_LINE).map(c => ({
+        lines: lines.map(l => l.map(c => ({
           notas: c.notas.map(n => ({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName })),
           beats: c.beats,
           closed: c.closed
