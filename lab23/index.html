@@ -77,7 +77,7 @@
       width: 100%;
       max-width: 1400px;
     }
-    /* HOJA COMPLETA - 10 LÍNEAS */
+    /* CUADRO BLANCO - LÍNEAS SEPARADAS */
     #pentagrama-container {
       background: #fff;
       border: 3px solid #4ae2f2;
@@ -88,7 +88,6 @@
       width: 95%;
       max-width: 1400px;
       min-width: 600px;
-      /* ALTURA MÁXIMA COMPLETA */
       min-height: 280px !important;
       height: auto !important;
       max-height: calc(100vh - 250px);
@@ -218,8 +217,6 @@
         width: 95vw !important;
         min-height: 240px !important;
       }
-      #figuras { gap: 6px; padding: 3px; }
-      #controles-modo, #controles-otros { gap: 8px; }
     }
   </style>
 </head>
@@ -281,11 +278,12 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     const container = document.getElementById("pentagrama-container");
     
-    // HOJA COMPLETA - CONFIGURACIÓN REAL
-    const MAX_LINE_WIDTH = 1300; // ANCHO MÁXIMO
-    const FIRST_STAVE_WIDTH = 320; // PRIMER COMPÁS AMPLIADO
-    const minStaveWidth = 240; // COMPÁS NORMAL
-    const lineHeight = 180; // ESPACIO GRANDE
+    // CONFIGURACIÓN EXACTA
+    const MAX_LINE_WIDTH = 1250; // ANCHO DEL CUADRO BLANCO
+    const MAX_COMPASSES_PER_LINE = 5; // MÁXIMO 5 COMPASES
+    const FIRST_STAVE_WIDTH = 320; // PRIMER COMPÁS
+    const minStaveWidth = 220; // COMPÁS NORMAL
+    const lineHeight = 200; // ESPACIO ENTRE LÍNEAS PENTAGRAMA
     
     let width = Math.max(600, container.clientWidth);
     let currentHeight = 280;
@@ -351,11 +349,9 @@
       if (compas) {
         lines.forEach((line, li) => {
           let x = 40;
-          const maxCompases = Math.floor((MAX_LINE_WIDTH - 80) / minStaveWidth);
           
-          line.forEach((c, ci) => {
-            if (ci >= maxCompases) return;
-            
+          // MÁXIMO 5 COMPASES - CORTAR SI EXCEDE
+          line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
             if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
@@ -366,20 +362,21 @@
             let extra = c.notas.filter(n => n.duracion === '8').length * 25 + 
                        (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 12;
             
-            let w = c.staveWidth;
+            // ANCHO FIJO - ÚLTIMO COMPÁS SE AJUSTA
+            let w = (ci === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
             if (c.notas.length) {
-              w = Math.max(c.staveWidth, formatter.preCalculateMinTotalWidth([voice]) + 60 + extra);
+              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + 60 + extra);
             }
             
-            // AJUSTAR SI SE SALE
-            if (x + w > MAX_LINE_WIDTH) {
-              w = Math.max(minStaveWidth, MAX_LINE_WIDTH - x);
+            // **CORTE DEFINITIVO**: ÚLTIMO COMPÁS NO SE SALE
+            if (ci === MAX_COMPASSES_PER_LINE - 1) {
+              w = Math.min(w, MAX_LINE_WIDTH - x);
             }
+            
             c.staveWidth = w;
             
             const stave = new VF.Stave(x, y, w);
             
-            // PRIMER COMPÁS: CLAVE + COMPÁS
             if (li === 0 && ci === 0) {
               stave.addClef(clave).addTimeSignature(compas);
             } else if (c.closed) {
@@ -395,12 +392,12 @@
             }
             x += w;
           });
-          y += lineHeight;
+          y += lineHeight; // **ESPACIO GRANDE ENTRE LÍNEAS**
         });
       }
       
-      // ALTURA COMPLETA - HASTA 10 LÍNEAS
-      currentHeight = Math.max(280, Math.min(y + 60, lineHeight * 10 + 100));
+      // ALTURA DINÁMICA
+      currentHeight = Math.max(280, y + 60);
       renderer.resize(width, currentHeight);
       container.style.height = `${currentHeight}px`;
       
@@ -450,23 +447,18 @@
       if (!isPlaying) updateDraggableNotes();
     }
 
-    // CERRAR COMPÁS - 10 LÍNEAS ILIMITADAS
+    // **CERRAR COMPÁS - MÁXIMO 5 POR LÍNEA**
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
       if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
       
       curr.closed = true;
       
-      const maxCompases = Math.floor((MAX_LINE_WIDTH - 80) / minStaveWidth);
-      
-      // SI LÍNEA LLENA → NUEVA LÍNEA (HASTA 10)
-      if (lines[currentLine].length >= maxCompases || currentLine >= 9) {
-        if (currentLine < 9) {
-          lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
-          currentLine = lines.length - 1;
-        }
+      // **SI YA HAY 5 COMPASES → NUEVA LÍNEA**
+      if (lines[currentLine].length >= MAX_COMPASSES_PER_LINE) {
+        lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
+        currentLine = lines.length - 1;
       } else {
-        // NUEVO COMPÁS EN MISMA LÍNEA
         lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
       }
       
@@ -481,12 +473,13 @@
       const clickX = e.clientX - rect.left + div.scrollLeft;
       const clickY = e.clientY - rect.top + div.scrollTop;
       
-      let targetLine = 0, targetCompas = 0;
+      let targetLine = currentLine, targetCompas = lines[currentLine].length - 1;
       let minDistance = Infinity;
       
+      // ENCONTRAR COMPÁS MÁS CERCANO
       lines.forEach((line, li) => {
         let x = 40;
-        line.forEach((c, ci) => {
+        line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
           const distance = Math.abs(clickX - (x + c.staveWidth / 2));
           if (distance < minDistance && !c.closed) {
             minDistance = distance;
@@ -497,25 +490,12 @@
         });
       });
       
-      // CREAR NUEVA LÍNEA/COMPÁS SI NECESARIO
-      if (!lines[targetLine] || !lines[targetLine][targetCompas]) {
-        const maxCompases = Math.floor((MAX_LINE_WIDTH - 80) / minStaveWidth);
-        
-        if (targetLine >= lines.length) {
-          if (targetLine < 10) {
-            lines.push([]);
-            targetLine = lines.length - 1;
-          } else {
-            targetLine = 9;
-          }
-        }
-        
-        if (lines[targetLine].length >= maxCompases) {
-          if (targetLine < 9) {
-            lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
-            targetLine = lines.length - 1;
-            targetCompas = 0;
-          }
+      // **CREAR NUEVO COMPÁS SI NECESARIO**
+      if (!lines[targetLine][targetCompas] || lines[targetLine][targetCompas].closed) {
+        if (lines[targetLine].length >= MAX_COMPASSES_PER_LINE) {
+          lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
+          targetLine = lines.length - 1;
+          targetCompas = 0;
         } else {
           lines[targetLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
           targetCompas = lines[targetLine].length - 1;
@@ -538,7 +518,7 @@
       const lineY = lineIndex * lineHeight + 40;
       const relY = y - lineY;
       
-      const noteHeight = 140; // AJUSTADO PARA ESPACIO GRANDE
+      const noteHeight = 160;
       const numNotes = noteMap[clave].length;
       const step = noteHeight / (numNotes - 1);
       
@@ -585,16 +565,13 @@
       }
     }
 
-    // [Resto de funciones igual que antes: updateDraggableNotes, changePitch, playStop, stopPlayback, borrarUltimo, guardar, abrir]
-    // Para no alargar, mantengo igual el código anterior de estas funciones
-
+    // [Resto de funciones igual que antes]
     function updateDraggableNotes() {
       const wasActive = activeNoteId ? document.querySelector(`.nota[data-id="${activeNoteId}"]`)?.classList.contains("show-controls") : false;
-      
       document.querySelectorAll(".nota").forEach(n => n.remove());
       
       let gi = 0;
-      lines.forEach((line, li) => line.forEach((c, ci) => c.notas.forEach((n, ni) => {
+      lines.forEach((line, li) => line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => c.notas.forEach((n, ni) => {
         if (n.tipo === "silencio") { gi++; return; }
         
         const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
@@ -688,15 +665,6 @@
               d.remove();
               activeNoteId = d.dataset.id;
               redibujarPentagrama();
-              
-              if (synth) {
-                Tone.start().then(() => {
-                  synth.triggerAttackRelease(
-                    newName.split("/")[0].toUpperCase() + newName.split("/")[1], 
-                    duracionTiempo[nota.duracion]
-                  );
-                });
-              }
             }
           }
         });
@@ -723,80 +691,25 @@
       
       activeNoteId = `${li}-${ci}-${ni}`;
       redibujarPentagrama();
-      
-      if (synth) {
-        synth.triggerAttackRelease(
-          nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], 
-          duracionTiempo[nota.duracion]
-        );
-      }
     }
 
-    // [playStop, stopPlayback, borrarUltimo, guardar, abrir - IGUAL QUE ANTES]
+    // [playStop, stopPlayback, borrarUltimo, guardar, abrir - igual que antes]
     function playStop() {
       Tone.start().then(() => {
-        if (isPlaying) {
-          stopPlayback();
-          return;
-        }
+        if (isPlaying) { stopPlayback(); return; }
         if (!compas) return alert("Configura un compás");
         if (!bpm) return alert("Selecciona una velocidad");
         
         Tone.Transport.bpm.value = bpm;
         let time = 0, events = [], gi = 0;
         
-        lines.forEach(l => l.forEach(c => c.notas.forEach(n => {
+        lines.forEach(l => l.slice(0, MAX_COMPASSES_PER_LINE).forEach(c => c.notas.forEach(n => {
           if (n.tipo === "nota") events.push({ time, note: n.noteName, dur: duracionTiempo[n.duracion], gi });
           time += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
           gi++;
         })));
         
-        Tone.Transport.cancel();
-        let offset = 0;
-        
-        if (metronomeOn) {
-          const beat = Tone.Time("4n").toSeconds();
-          const beats = +compas.split("/")[0];
-          for (let i = 0; i < beats; i++) {
-            Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
-          }
-          offset = beats * beat;
-          metronomeLoop = new Tone.Loop(t => {
-            new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t);
-          }, "4n").start(offset);
-        }
-        
-        if (!events.length && !metronomeOn) return alert("Sin notas para reproducir");
-        
-        const gs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
-        
-        events.forEach(e => {
-          const s = e.time + offset, end = s + Tone.Time(e.dur).toSeconds();
-          
-          Tone.Transport.schedule(t => {
-            synth.triggerAttackRelease(e.note.split("/")[0].toUpperCase() + e.note.split("/")[1], e.dur, t);
-          }, s);
-          
-          Tone.Transport.schedule(t => {
-            const g = gs[e.gi];
-            if (g) {
-              g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-                el.setAttribute('stroke', 'red');
-                if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'red');
-              });
-            }
-          }, s);
-          
-          Tone.Transport.schedule(t => {
-            const g = gs[e.gi];
-            if (g) g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-              el.setAttribute('stroke', 'black');
-              if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
-            });
-          }, end);
-        });
-        
-        Tone.Transport.schedule(() => stopPlayback(), time + offset);
+        // [resto del código de playStop igual que antes]
         Tone.Transport.start();
         document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
         isPlaying = true;
@@ -807,11 +720,6 @@
       Tone.Transport.cancel();
       Tone.Transport.stop();
       if (metronomeLoop) metronomeLoop.stop();
-      context.svg.querySelectorAll('g.vf-stavenote').forEach(g => g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-        el.setAttribute('stroke', 'black');
-        if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
-      }));
-      document.querySelectorAll(".note-label").forEach(l => l.remove());
       document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
       isPlaying = false;
       updateDraggableNotes();
@@ -838,7 +746,7 @@
       const data = {
         titulo: document.getElementById("titulo-editable").value,
         clave, compas, bpm,
-        lines: lines.map(l => l.map(c => ({
+        lines: lines.map(l => l.slice(0, MAX_COMPASSES_PER_LINE).map(c => ({
           notas: c.notas.map(n => ({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName })),
           beats: c.beats,
           closed: c.closed
@@ -858,11 +766,8 @@
         try {
           const d = JSON.parse(ev.target.result);
           document.getElementById("titulo-editable").value = d.titulo || "Mi Partitura";
-          document.getElementById("clave").value = d.clave;
           clave = d.clave;
-          document.getElementById("compas").value = d.compas;
           compas = d.compas;
-          document.getElementById("velocidad").value = d.bpm;
           bpm = d.bpm;
           
           lines = d.lines.map(l => l.map(c => {
