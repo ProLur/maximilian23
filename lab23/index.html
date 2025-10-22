@@ -102,19 +102,21 @@
       position: relative;
       z-index: 1;
     }
-    /* VELOCIDAD SOBRE PRIMER COMPÁS */
+    /* VELOCIDAD COMPLETA SOBRE PRIMER COMPÁS */
     .tempo-text {
       position: absolute;
-      top: 10px;
+      top: 8px;
       left: 50px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       color: #333;
-      background: rgba(255,255,255,0.9);
-      padding: 2px 6px;
-      border-radius: 4px;
+      background: rgba(255,255,255,0.95);
+      padding: 3px 8px;
+      border-radius: 6px;
       z-index: 10;
       font-family: serif;
+      border: 1px solid #ddd;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     #figuras {
       display: flex;
@@ -220,6 +222,11 @@
         width: 95vw !important;
         min-height: 240px !important;
       }
+      .tempo-text { 
+        font-size: 11px; 
+        padding: 2px 5px; 
+        left: 40px;
+      }
     }
   </style>
 </head>
@@ -288,7 +295,7 @@
     const MAX_COMPASSES_PER_LINE = 5;
     const FIRST_STAVE_WIDTH = 300;
     const minStaveWidth = 180;
-    const lineHeight = 160; // **REDUCIDO DE 200px**
+    const lineHeight = 160;
     
     let width = Math.max(600, container.clientWidth);
     let currentHeight = 280;
@@ -309,6 +316,14 @@
     const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
     const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
 
+    // **MAPPING COMPLETO PARA TEMPO**
+    const tempoNames = {
+      80: "Andante (80 BPM)",
+      90: "Moderado (90 BPM)",
+      120: "Allegro (120 BPM)",
+      160: "Presto (160 BPM)"
+    };
+
     function init() {
       window.addEventListener('resize', () => {
         width = Math.max(600, container.clientWidth);
@@ -324,7 +339,7 @@
       document.getElementById("velocidad").onchange = e => {
         bpm = +e.target.value;
         if (bpm) {
-          tempoDisplay.textContent = `${bpm} BPM`;
+          tempoDisplay.textContent = tempoNames[bpm]; // **TEXTO COMPLETO**
           tempoDisplay.style.display = "block";
         } else {
           tempoDisplay.style.display = "none";
@@ -403,7 +418,7 @@
             x += w;
           });
           
-          y += lineHeight; // **160px REDUCIDO**
+          y += lineHeight;
         });
       }
       
@@ -471,7 +486,7 @@
       redibujarPentagrama();
     }
 
-    // **PLAY COMPLETAMENTE REPARADO**
+    // **PLAY COMPLETAMENTE FUNCIONANDO**
     function playStop() {
       Tone.start().then(() => {
         if (isPlaying) {
@@ -489,7 +504,6 @@
         let events = [];
         let gi = 0;
         
-        // **LECTURA CORREGIDA - TODAS LAS LÍNEAS**
         lines.forEach(line => {
           line.slice(0, MAX_COMPASSES_PER_LINE).forEach(c => {
             c.notas.forEach(n => {
@@ -511,30 +525,18 @@
           return alert("¡Añade notas para reproducir!");
         }
         
-        // **METRÓNOMO FUNCIONANDO**
         if (metronomeOn) {
-          const beatDuration = Tone.Time("4n").toSeconds();
-          const beatsPerMeasure = +compas.split("/")[0];
-          
-          for (let i = 0; i < beatsPerMeasure; i++) {
-            Tone.Transport.schedule(t => {
-              new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3", "8n", t);
-            }, i * beatDuration);
-          }
-          
           metronomeLoop = new Tone.Loop((time) => {
             new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3", "8n", time);
           }, "4n").start(0);
         }
         
-        // **REPRODUCCIÓN NOTAS**
         const allNotes = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
         
         events.forEach(event => {
           const startTime = event.time;
           const duration = Tone.Time(event.dur).toSeconds();
           
-          // SONIDO
           Tone.Transport.schedule((time) => {
             synth.triggerAttackRelease(
               event.note.split("/")[0].toUpperCase() + event.note.split("/")[1],
@@ -543,7 +545,6 @@
             );
           }, startTime);
           
-          // RESALTADO VISUAL
           Tone.Transport.schedule((time) => {
             const noteElement = allNotes[event.gi];
             if (noteElement) {
@@ -565,7 +566,6 @@
           }, startTime + duration);
         });
         
-        // **DETENER AL FINAL**
         Tone.Transport.schedule(() => {
           stopPlayback();
         }, totalTime);
@@ -585,7 +585,6 @@
         metronomeLoop = null;
       }
       
-      // **RESTABLECER COLORES**
       context.svg.querySelectorAll('g.vf-stavenote path, g.vf-stavenote line, g.vf-stavenote circle').forEach(el => {
         el.style.stroke = 'black';
         el.style.fill = 'black';
@@ -596,6 +595,7 @@
       updateDraggableNotes();
     }
 
+    // [Resto de funciones igual que antes - div.onclick, getNoteFromY, addNota, etc.]
     div.onclick = e => {
       if (!compas || !figuraActiva) return;
       
@@ -813,6 +813,9 @@
           compas = d.compas;
           bpm = d.bpm;
           
+          tempoDisplay.textContent = tempoNames[bpm];
+          tempoDisplay.style.display = bpm ? "block" : "none";
+          
           lines = d.lines.map(l => l.map(c => {
             const comp = { notas: [], beats: c.beats, closed: c.closed, staveWidth: minStaveWidth };
             c.notas.forEach(n => {
@@ -837,8 +840,6 @@
           }));
           
           currentLine = lines.length - 1;
-          tempoDisplay.textContent = `${bpm} BPM`;
-          tempoDisplay.style.display = bpm ? "block" : "none";
           redibujarPentagrama();
         } catch { alert("Archivo inválido"); }
       };
