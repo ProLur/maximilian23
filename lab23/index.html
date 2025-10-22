@@ -205,7 +205,6 @@
     button:hover { transform: scale(1.1); }
     button:disabled { background: #ccc; cursor: not-allowed; }
     button.activa { background: #ff80b5 !important; }
-    /* **CONTROLES + Y - RESTAURADOS** */
     .nota {
       position: absolute;
       cursor: move;
@@ -338,7 +337,7 @@
     const MAX_COMPASSES_PER_LINE = 5;
     const FIRST_STAVE_WIDTH = 300;
     const minStaveWidth = 180;
-    const lineHeight = 160;
+    const lineHeight = 100; // Reduced line height to decrease spacing between staves
     
     let width = Math.max(600, container.clientWidth);
     let currentHeight = 280;
@@ -519,7 +518,6 @@
       document.getElementById("file-input").onchange = abrir;
     }
 
-    // **PLAY COMPLETO CON TODO**
     function playStop() {
       Tone.start().then(() => {
         if (isPlaying) {
@@ -530,7 +528,6 @@
         if (!compas) return alert("¡Selecciona un compás!");
         if (!bpm) return alert("¡Selecciona una velocidad!");
         
-        // **DESSELECCIONAR FIGURAS**
         document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
         figuraActiva = null;
         
@@ -563,6 +560,10 @@
           return alert("¡Añade notas para reproducir!");
         }
         
+        const numBeats = +compas.split("/")[0];
+        const beatDuration = Tone.Time("4n").toSeconds();
+        const introTime = numBeats * beatDuration;
+
         if (metronomeOn) {
           metronomeLoop = new Tone.Loop((time) => {
             new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3", "8n", time);
@@ -570,9 +571,10 @@
         }
         
         const allNotes = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
+        let noteDisplayY = 50; // Initial Y position for note display
         
         events.forEach(event => {
-          const startTime = event.time;
+          const startTime = event.time + introTime;
           const duration = Tone.Time(event.dur).toSeconds();
           
           Tone.Transport.schedule((time) => {
@@ -596,9 +598,14 @@
           if (showNoteLabels) {
             Tone.Transport.schedule((time) => {
               notaDisplay.textContent = event.noteName;
+              notaDisplay.style.top = `${noteDisplayY}px`;
               notaDisplay.classList.add("show");
               setTimeout(() => {
                 notaDisplay.classList.remove("show");
+                noteDisplayY += 30; // Move down for next note
+                if (noteDisplayY > currentHeight - 50) {
+                  noteDisplayY = 50; // Reset to top if too far down
+                }
               }, duration * 1000 * 0.8);
             }, startTime);
           }
@@ -616,7 +623,8 @@
         
         Tone.Transport.schedule(() => {
           stopPlayback();
-        }, totalTime);
+          noteDisplayY = 50; // Reset Y position after playback
+        }, totalTime + introTime);
         
         Tone.Transport.start();
         document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
@@ -646,7 +654,6 @@
       updateDraggableNotes();
     }
 
-    // **+ Y - FUNCIONANDO PERFECTO**
     function updateDraggableNotes() {
       document.querySelectorAll(".nota").forEach(n => n.remove());
       
@@ -673,7 +680,6 @@
             d.dataset.ci = ci;
             d.dataset.ni = ni;
             
-            // **BOTONES + Y -**
             const plus = document.createElement("div");
             plus.textContent = "+";
             plus.className = "plus";
@@ -726,7 +732,6 @@
       }
     }
 
-    // **RESTO DE FUNCIONES**
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
       if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
