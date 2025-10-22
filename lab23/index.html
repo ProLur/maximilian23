@@ -80,22 +80,21 @@
       background: #fff;
       border: 3px solid #4ae2f2;
       border-radius: 15px;
-      overflow: hidden;
+      overflow: auto;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       margin: 5px auto;
       width: 95%;
       max-width: 1400px;
-      min-width: 300px;
-      min-height: 280px !important;
+      min-width: 280px;
+      min-height: 240px !important;
       height: auto !important;
       max-height: none !important;
       position: relative;
     }
     #pentagrama {
       width: 100%;
-      min-height: 280px;
-      overflow-y: auto;
-      overflow-x: hidden;
+      min-height: 240px;
+      overflow: auto;
       scroll-behavior: smooth;
       position: relative;
       z-index: 1;
@@ -251,12 +250,18 @@
       #pentagrama-container { 
         min-width: 95vw !important; 
         width: 95vw !important;
-        min-height: 240px !important;
+        min-height: 200px !important;
+        padding: 5px;
+      }
+      #pentagrama {
+        min-height: 200px !important;
+        overflow-x: auto;
+        overflow-y: auto;
       }
       .tempo-text { 
         font-size: 11px; 
         padding: 2px 5px; 
-        left: 40px;
+        left: 10px;
       }
       .note-label {
         font-size: 12px;
@@ -332,14 +337,14 @@
     const tempoDisplay = document.getElementById("tempo-display");
     
     // CONFIGURACIÓN PROFESIONAL
-    let MAX_LINE_WIDTH = Math.max(600, container.clientWidth - 40);
-    const FIRST_STAVE_WIDTH = 300;
-    const minStaveWidth = 120;
+    let MAX_LINE_WIDTH = Math.max(280, container.clientWidth - 40);
+    const FIRST_STAVE_WIDTH = 250;
+    const minStaveWidth = 100;
     const lineHeight = 100;
-    const noteWidthFactors = { w: 30, h: 40, q: 50, '8': 60 };
+    const noteWidthFactors = { w: 40, h: 45, q: 50, '8': 60 };
     
-    let width = Math.max(600, container.clientWidth);
-    let currentHeight = 280;
+    let width = Math.max(280, container.clientWidth);
+    let currentHeight = 240;
     renderer.resize(width, currentHeight);
     const context = renderer.getContext();
     
@@ -374,8 +379,9 @@
 
     function init() {
       window.addEventListener('resize', () => {
-        width = Math.max(600, container.clientWidth);
+        width = Math.max(280, container.clientWidth);
         MAX_LINE_WIDTH = width - 40;
+        renderer.resize(width, currentHeight);
         redibujarPentagrama();
       });
 
@@ -423,7 +429,7 @@
       let tempLines = [];
       let currentTempLine = [];
       let currentLineWidth = 0;
-      const maxCompassesPerLine = Math.floor(MAX_LINE_WIDTH / minStaveWidth) || 5;
+      const maxCompassesPerLine = Math.max(1, Math.floor(MAX_LINE_WIDTH / minStaveWidth));
 
       if (compas) {
         let lineIndex = 0;
@@ -469,7 +475,7 @@
         lines = tempLines.map(line => line.slice(0, maxCompassesPerLine));
         
         lines.forEach((line, li) => {
-          let x = 40;
+          let x = 10;
           
           line.forEach((c, ci) => {
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
@@ -491,7 +497,7 @@
             c.stave = stave;
             
             if (c.notas.length) {
-              formatter.format([voice], c.staveWidth - 50);
+              formatter.format([voice], c.staveWidth - 30);
               voice.draw(context, stave);
             }
             
@@ -502,7 +508,7 @@
         });
       }
       
-      currentHeight = Math.max(280, y + 60);
+      currentHeight = Math.max(240, y + 60);
       renderer.resize(width, currentHeight);
       container.style.height = `${currentHeight}px`;
       
@@ -794,7 +800,7 @@
       let minDistance = Infinity;
       
       lines.forEach((line, li) => {
-        let x = 40;
+        let x = 10;
         line.forEach((c, ci) => {
           const distance = Math.abs(clickX - (x + c.staveWidth / 2));
           if (distance < minDistance && !c.closed) {
