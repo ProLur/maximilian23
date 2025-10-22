@@ -77,7 +77,7 @@
       width: 100%;
       max-width: 1400px;
     }
-    /* CUADRO AUTO-EXPANSIBLE - 10 LÍNEAS */
+    /* CUADRO PROFESIONAL */
     #pentagrama-container {
       background: #fff;
       border: 3px solid #4ae2f2;
@@ -88,7 +88,6 @@
       width: 95%;
       max-width: 1400px;
       min-width: 600px;
-      /* SE AGRANDA AUTOMÁTICAMENTE */
       min-height: 280px !important;
       height: auto !important;
       max-height: none !important;
@@ -102,6 +101,20 @@
       scroll-behavior: smooth;
       position: relative;
       z-index: 1;
+    }
+    /* VELOCIDAD SOBRE PRIMER COMPÁS */
+    .tempo-text {
+      position: absolute;
+      top: 10px;
+      left: 50px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      background: rgba(255,255,255,0.9);
+      padding: 2px 6px;
+      border-radius: 4px;
+      z-index: 10;
+      font-family: serif;
     }
     #figuras {
       display: flex;
@@ -188,17 +201,6 @@
     .nota.show-controls .plus, .nota.show-controls .minus { opacity: 1; }
     .nota .plus { top: -28px; left: 50%; transform: translateX(-50%); }
     .nota .minus { bottom: -28px; left: 50%; transform: translateX(-50%); }
-    .note-label {
-      position: absolute;
-      background: rgba(255,255,255,0.9);
-      border: 1px solid #4ae2f2;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 0.8em;
-      color: #333;
-      z-index: 150;
-      pointer-events: none;
-    }
     @media (max-width: 600px) {
       header { padding: 8px; }
       header h1 { font-size: 1.4em; }
@@ -239,7 +241,7 @@
     <label>Velocidad:</label>
     <select id="velocidad">
       <option value="" selected>---</option>
-      <option value="60">Lento (60 BPM)</option>
+      <option value="80">Andante (80 BPM)</option>
       <option value="90">Moderado (90 BPM)</option>
       <option value="120">Allegro (120 BPM)</option>
       <option value="160">Presto (160 BPM)</option>
@@ -247,6 +249,7 @@
   </div>
   <div id="main-content">
     <div id="pentagrama-container">
+      <div id="tempo-display" class="tempo-text" style="display:none;"></div>
       <div id="pentagrama"></div>
     </div>
     <div id="figuras">
@@ -278,13 +281,14 @@
     const div = document.getElementById("pentagrama");
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     const container = document.getElementById("pentagrama-container");
+    const tempoDisplay = document.getElementById("tempo-display");
     
-    // CONFIGURACIÓN MATEMÁTICA EXACTA
-    const MAX_LINE_WIDTH = 1200; // ANCHO TOTAL DISPONIBLE
+    // CONFIGURACIÓN PROFESIONAL
+    const MAX_LINE_WIDTH = 1200;
     const MAX_COMPASSES_PER_LINE = 5;
     const FIRST_STAVE_WIDTH = 300;
     const minStaveWidth = 180;
-    const lineHeight = 200;
+    const lineHeight = 160; // **REDUCIDO DE 200px**
     
     let width = Math.max(600, container.clientWidth);
     let currentHeight = 280;
@@ -302,7 +306,6 @@
       treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
       bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
     };
-    const noteNameMap = { c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si" };
     const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
     const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
 
@@ -320,7 +323,14 @@
       };
       document.getElementById("velocidad").onchange = e => {
         bpm = +e.target.value;
+        if (bpm) {
+          tempoDisplay.textContent = `${bpm} BPM`;
+          tempoDisplay.style.display = "block";
+        } else {
+          tempoDisplay.style.display = "none";
+        }
         if (Tone.Transport.state === "started") Tone.Transport.bpm.value = bpm;
+        redibujarPentagrama();
       };
       
       initFiguras();
@@ -341,7 +351,7 @@
 
     function redibujarPentagrama() {
       if (!isPlaying) {
-        document.querySelectorAll(".note-label, .nota").forEach(el => el.remove());
+        document.querySelectorAll(".nota").forEach(el => el.remove());
       }
       
       context.clear();
@@ -351,10 +361,7 @@
         lines.forEach((line, li) => {
           let x = 40;
           
-          // **CORTAR A 5 COMPASES MÁXIMO**
-          const compasesVisibles = line.slice(0, MAX_COMPASSES_PER_LINE);
-          
-          compasesVisibles.forEach((c, ci) => {
+          line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
             if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
@@ -362,21 +369,17 @@
             const formatter = new VF.Formatter();
             if (c.notas.length) formatter.joinVoices([voice]);
             
-            let extra = c.notas.filter(n => n.duracion === '8').length * 20 + 
-                       (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 10;
-            
-            // **ANCHO BASE**
             let w = (ci === 0 && li === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
             
-            // **AJUSTE POR NOTAS**
             if (c.notas.length) {
+              let extra = c.notas.filter(n => n.duracion === '8').length * 20;
               w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + 50 + extra);
             }
             
-            // **CORTE MATEMÁTICO DEFINITIVO - NUNCA SE SALE**
+            // **CORTE DEFINITIVO**
             const espacioRestante = MAX_LINE_WIDTH - x;
             if (w > espacioRestante) {
-              w = Math.max(100, espacioRestante - 20); // MÍNIMO 100px
+              w = Math.max(100, espacioRestante - 20);
             }
             
             c.staveWidth = w;
@@ -400,12 +403,11 @@
             x += w;
           });
           
-          y += lineHeight;
+          y += lineHeight; // **160px REDUCIDO**
         });
       }
       
-      // **ALTURA AUTOMÁTICA - 10 LÍNEAS MÁXIMO**
-      currentHeight = Math.max(280, Math.min(y + 60, lineHeight * 10 + 100));
+      currentHeight = Math.max(280, y + 60);
       renderer.resize(width, currentHeight);
       container.style.height = `${currentHeight}px`;
       
@@ -429,15 +431,21 @@
           document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
           figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
           f.classList.add("activa");
-          if (metronomeLoop) metronomeLoop.stop();
-          if (!isPlaying) Tone.Transport.stop();
         };
       });
     }
 
     function initControles() {
-      document.getElementById("notas").onclick = () => toggleMode("notas", () => { showNoteLabels = !showNoteLabels; });
-      document.getElementById("metronomo").onclick = () => toggleMode("metronomo", () => { metronomeOn = !metronomeOn; });
+      document.getElementById("notas").onclick = () => {
+        showNoteLabels = !showNoteLabels;
+        document.getElementById("notas").classList.toggle("activa", showNoteLabels);
+      };
+      
+      document.getElementById("metronomo").onclick = () => {
+        metronomeOn = !metronomeOn;
+        document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
+      };
+      
       document.getElementById("play-stop").onclick = playStop;
       document.getElementById("cerrar-compas").onclick = cerrarCompas;
       document.getElementById("borrar-ultimo").onclick = borrarUltimo;
@@ -447,22 +455,12 @@
       document.getElementById("file-input").onchange = abrir;
     }
 
-    function toggleMode(id, fn) {
-      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-      figuraActiva = null;
-      fn();
-      document.getElementById(id).classList.toggle("activa", id === "notas" ? showNoteLabels : metronomeOn);
-      if (!isPlaying) updateDraggableNotes();
-    }
-
-    // **CERRAR COMPÁS - CREA LÍNEAS ILIMITADAS**
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
       if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
       
       curr.closed = true;
       
-      // **SI LÍNEA LLENA (5 compases) → NUEVA LÍNEA**
       if (lines[currentLine].length >= MAX_COMPASSES_PER_LINE) {
         lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
         currentLine = lines.length - 1;
@@ -473,19 +471,142 @@
       redibujarPentagrama();
     }
 
+    // **PLAY COMPLETAMENTE REPARADO**
+    function playStop() {
+      Tone.start().then(() => {
+        if (isPlaying) {
+          stopPlayback();
+          return;
+        }
+        
+        if (!compas) return alert("¡Selecciona un compás!");
+        if (!bpm) return alert("¡Selecciona una velocidad!");
+        
+        Tone.Transport.bpm.value = bpm;
+        Tone.Transport.cancel();
+        
+        let totalTime = 0;
+        let events = [];
+        let gi = 0;
+        
+        // **LECTURA CORREGIDA - TODAS LAS LÍNEAS**
+        lines.forEach(line => {
+          line.slice(0, MAX_COMPASSES_PER_LINE).forEach(c => {
+            c.notas.forEach(n => {
+              if (n.tipo === "nota") {
+                events.push({
+                  time: totalTime,
+                  note: n.noteName,
+                  dur: duracionTiempo[n.duracion],
+                  gi: gi
+                });
+              }
+              totalTime += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
+              gi++;
+            });
+          });
+        });
+        
+        if (!events.length && !metronomeOn) {
+          return alert("¡Añade notas para reproducir!");
+        }
+        
+        // **METRÓNOMO FUNCIONANDO**
+        if (metronomeOn) {
+          const beatDuration = Tone.Time("4n").toSeconds();
+          const beatsPerMeasure = +compas.split("/")[0];
+          
+          for (let i = 0; i < beatsPerMeasure; i++) {
+            Tone.Transport.schedule(t => {
+              new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3", "8n", t);
+            }, i * beatDuration);
+          }
+          
+          metronomeLoop = new Tone.Loop((time) => {
+            new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3", "8n", time);
+          }, "4n").start(0);
+        }
+        
+        // **REPRODUCCIÓN NOTAS**
+        const allNotes = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
+        
+        events.forEach(event => {
+          const startTime = event.time;
+          const duration = Tone.Time(event.dur).toSeconds();
+          
+          // SONIDO
+          Tone.Transport.schedule((time) => {
+            synth.triggerAttackRelease(
+              event.note.split("/")[0].toUpperCase() + event.note.split("/")[1],
+              event.dur,
+              time
+            );
+          }, startTime);
+          
+          // RESALTADO VISUAL
+          Tone.Transport.schedule((time) => {
+            const noteElement = allNotes[event.gi];
+            if (noteElement) {
+              noteElement.querySelectorAll('path, line, circle').forEach(el => {
+                el.style.stroke = 'red';
+                el.style.fill = 'red';
+              });
+            }
+          }, startTime);
+          
+          Tone.Transport.schedule((time) => {
+            const noteElement = allNotes[event.gi];
+            if (noteElement) {
+              noteElement.querySelectorAll('path, line, circle').forEach(el => {
+                el.style.stroke = 'black';
+                el.style.fill = 'black';
+              });
+            }
+          }, startTime + duration);
+        });
+        
+        // **DETENER AL FINAL**
+        Tone.Transport.schedule(() => {
+          stopPlayback();
+        }, totalTime);
+        
+        Tone.Transport.start();
+        document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
+        isPlaying = true;
+      });
+    }
+
+    function stopPlayback() {
+      Tone.Transport.stop();
+      Tone.Transport.cancel();
+      if (metronomeLoop) {
+        metronomeLoop.stop();
+        metronomeLoop.dispose();
+        metronomeLoop = null;
+      }
+      
+      // **RESTABLECER COLORES**
+      context.svg.querySelectorAll('g.vf-stavenote path, g.vf-stavenote line, g.vf-stavenote circle').forEach(el => {
+        el.style.stroke = 'black';
+        el.style.fill = 'black';
+      });
+      
+      document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
+      isPlaying = false;
+      updateDraggableNotes();
+    }
+
     div.onclick = e => {
-      if (!compas) return alert("Por favor, selecciona un compás antes de añadir notas.");
-      if (!figuraActiva) return alert("Por favor, selecciona una figura musical.");
+      if (!compas || !figuraActiva) return;
       
       const rect = div.getBoundingClientRect();
       const clickX = e.clientX - rect.left + div.scrollLeft;
       const clickY = e.clientY - rect.top + div.scrollTop;
       
       let targetLine = currentLine;
-      let targetCompas = lines[currentLine]?.length - 1 || -1;
+      let targetCompas = 0;
       let minDistance = Infinity;
       
-      // ENCONTRAR COMPÁS MÁS CERCANO
       lines.forEach((line, li) => {
         let x = 40;
         line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
@@ -499,8 +620,7 @@
         });
       });
       
-      // **CREAR NUEVA LÍNEA/COMPÁS**
-      if (targetCompas === -1 || lines[targetLine][targetCompas]?.closed) {
+      if (lines[targetLine].length <= targetCompas || lines[targetLine][targetCompas].closed) {
         if (lines[targetLine].length >= MAX_COMPASSES_PER_LINE) {
           lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
           targetLine = lines.length - 1;
@@ -512,34 +632,29 @@
       }
       
       const curr = lines[targetLine][targetCompas];
-      if (curr.closed) return alert("El compás está cerrado.");
+      if (curr.closed) return;
       
       const noteName = getNoteFromY(clickY, targetLine);
-      if (!noteName) return alert("Posición inválida.");
+      if (!noteName) return;
       
       currentLine = targetLine;
-      Tone.start().then(() => {
-        addNota(figuraActiva.tipo, figuraActiva.duracion, noteName, targetCompas);
-      });
+      addNota(figuraActiva.tipo, figuraActiva.duracion, noteName, targetCompas);
     };
 
     function getNoteFromY(y, lineIndex) {
       const lineY = lineIndex * lineHeight + 40;
       const relY = y - lineY;
-      
-      const noteHeight = 160;
+      const noteHeight = 140;
       const numNotes = noteMap[clave].length;
       const step = noteHeight / (numNotes - 1);
-      
       const normalizedY = Math.max(0, Math.min(noteHeight, noteHeight - relY));
       const idx = Math.round(normalizedY / step);
-      
       return noteMap[clave][Math.max(0, Math.min(numNotes - 1, idx))];
     }
 
     function addNota(tipo, dur, noteName, compasIndex) {
       const beats = +compas.split("/")[0];
-      let currentCompas = lines[currentLine][compasIndex];
+      const currentCompas = lines[currentLine][compasIndex];
       
       if (currentCompas.beats + duracionBeats[dur] > beats) {
         return alert("¡Compás lleno!");
@@ -578,91 +693,51 @@
       document.querySelectorAll(".nota").forEach(n => n.remove());
       
       let gi = 0;
-      lines.forEach((line, li) => line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => c.notas.forEach((n, ni) => {
-        if (n.tipo === "silencio") { gi++; return; }
-        
-        const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
-        if (!g) return;
-        
-        const bbox = g.getBBox();
-        const d = document.createElement("div");
-        d.className = "nota";
-        d.style.left = `${bbox.x}px`;
-        d.style.top = `${bbox.y}px`;
-        d.style.width = `${bbox.width}px`;
-        d.style.height = `${bbox.height}px`;
-        d.dataset.li = li;
-        d.dataset.ci = ci;
-        d.dataset.ni = ni;
-        d.dataset.id = `${li}-${ci}-${ni}`;
-        
-        const plus = document.createElement("div");
-        plus.textContent = "+";
-        plus.className = "plus";
-        const minus = document.createElement("div");
-        minus.textContent = "−";
-        minus.className = "minus";
-        
-        let t;
-        const showControls = () => {
-          clearTimeout(t);
-          d.classList.add("show-controls");
-          activeNoteId = d.dataset.id;
-        };
-        
-        plus.onclick = e => {
-          e.stopPropagation();
-          showControls();
-          Tone.start().then(() => changePitch(d, 1));
-        };
-        minus.onclick = e => {
-          e.stopPropagation();
-          showControls();
-          Tone.start().then(() => changePitch(d, -1));
-        };
-        
-        d.onmouseover = showControls;
-        d.onclick = e => {
-          e.stopPropagation();
-          showControls();
-        };
-        
-        d.appendChild(plus);
-        d.appendChild(minus);
-        div.appendChild(d);
-        
-        interact(d).draggable({
-          listeners: {
-            move(e) {
-              const dy = +d.getAttribute("dy") || 0 + e.dy;
-              d.style.transform = `translateY(${dy}px)`;
-              d.setAttribute("dy", dy);
-            },
-            end(e) {
-              const y = e.clientY - div.getBoundingClientRect().top + div.scrollTop;
-              const newName = getNoteFromY(y, +d.dataset.li);
-              if (!newName) return;
-              
-              const nota = lines[+d.dataset.li][+d.dataset.ci].notas[+d.dataset.ni];
-              nota.noteName = newName;
-              
-              const list = noteMap[clave];
-              const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
-              const idx = list.indexOf(newName);
-              nota.vf = new VF.StaveNote({ 
-                clef: clave, 
-                keys: [newName], 
-                duration: nota.duracion, 
-                stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP 
-              });
-              
-              d.remove();
-              redibujarPentagrama();
+      lines.forEach((line, li) => {
+        line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
+          c.notas.forEach((n, ni) => {
+            if (n.tipo === "silencio") { 
+              gi++; 
+              return; 
             }
-          }
+            
+            const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
+            if (!g) return;
+            
+            const bbox = g.getBBox();
+            const d = document.createElement("div");
+            d.className = "nota";
+            d.style.left = `${bbox.x}px`;
+            d.style.top = `${bbox.y}px`;
+            d.style.width = `${bbox.width}px`;
+            d.style.height = `${bbox.height}px`;
+            d.dataset.li = li;
+            d.dataset.ci = ci;
+            d.dataset.ni = ni;
+            
+            const plus = document.createElement("div");
+            plus.textContent = "+";
+            plus.className = "plus";
+            const minus = document.createElement("div");
+            minus.textContent = "−";
+            minus.className = "minus";
+            
+            plus.onclick = e => {
+              e.stopPropagation();
+              changePitch(d, 1);
+            };
+            minus.onclick = e => {
+              e.stopPropagation();
+              changePitch(d, -1);
+            };
+            
+            d.appendChild(plus);
+            d.appendChild(minus);
+            div.appendChild(d);
+            gi++;
+          });
         });
-        gi++;
-      })));
+      });
     }
 
     function changePitch(div, dir) {
@@ -683,19 +758,13 @@
       });
       
       redibujarPentagrama();
-    }
-
-    function playStop() {
-      if (isPlaying) {
-        Tone.Transport.stop();
-        document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
-        isPlaying = false;
-        return;
-      }
       
-      Tone.Transport.start();
-      document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
-      isPlaying = true;
+      if (synth) {
+        synth.triggerAttackRelease(
+          nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], 
+          duracionTiempo[nota.duracion]
+        );
+      }
     }
 
     function borrarUltimo() {
@@ -737,6 +806,9 @@
         try {
           const d = JSON.parse(ev.target.result);
           document.getElementById("titulo-editable").value = d.titulo || "Mi Partitura";
+          document.getElementById("clave").value = d.clave;
+          document.getElementById("compas").value = d.compas;
+          document.getElementById("velocidad").value = d.bpm;
           clave = d.clave;
           compas = d.compas;
           bpm = d.bpm;
@@ -765,6 +837,8 @@
           }));
           
           currentLine = lines.length - 1;
+          tempoDisplay.textContent = `${bpm} BPM`;
+          tempoDisplay.style.display = bpm ? "block" : "none";
           redibujarPentagrama();
         } catch { alert("Archivo inválido"); }
       };
