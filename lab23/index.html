@@ -205,7 +205,7 @@
     button:hover { transform: scale(1.1); }
     button:disabled { background: #ccc; cursor: not-allowed; }
     button.activa { background: #ff80b5 !important; }
-    /* **CONTROLES + Y - Y NOMBRES** */
+    /* **CONTROLES + Y - RESTAURADOS** */
     .nota {
       position: absolute;
       cursor: move;
@@ -238,27 +238,6 @@
     }
     .nota .plus { top: -28px; left: 50%; transform: translateX(-50%); }
     .nota .minus { bottom: -28px; left: 50%; transform: translateX(-50%); }
-    
-    /* **NUEVO: NOMBRE DEBAJO DE CADA NOTA** */
-    .nota-label {
-      position: absolute;
-      bottom: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 10px;
-      font-weight: bold;
-      color: #333;
-      background: rgba(255,255,255,0.9);
-      padding: 2px 6px;
-      border-radius: 4px;
-      white-space: nowrap;
-      z-index: 102;
-      border: 1px solid #4ae2f2;
-      font-family: serif;
-      min-width: 30px;
-      text-align: center;
-    }
-    
     @media (max-width: 600px) {
       header { padding: 8px; }
       header h1 { font-size: 1.4em; }
@@ -289,12 +268,6 @@
         top: 45px;
       }
       .nota .plus, .nota .minus { width: 20px; height: 20px; line-height: 18px; font-size: 0.8em; }
-      .nota-label { 
-        font-size: 8px; 
-        padding: 1px 4px; 
-        bottom: -22px;
-        min-width: 25px;
-      }
     }
   </style>
 </head>
@@ -546,7 +519,7 @@
       document.getElementById("file-input").onchange = abrir;
     }
 
-    // **PLAY COMPLETO**
+    // **PLAY COMPLETO CON TODO**
     function playStop() {
       Tone.start().then(() => {
         if (isPlaying) {
@@ -673,7 +646,7 @@
       updateDraggableNotes();
     }
 
-    // **+ Y - + NOMBRE DEBAJO**
+    // **+ Y - FUNCIONANDO PERFECTO**
     function updateDraggableNotes() {
       document.querySelectorAll(".nota").forEach(n => n.remove());
       
@@ -717,14 +690,8 @@
               changePitch(d, -1);
             };
             
-            // **NOMBRE DEBAJO DE LA NOTA**
-            const label = document.createElement("div");
-            label.className = "nota-label";
-            label.textContent = getNoteName(n.noteName);
-            
             d.appendChild(plus);
             d.appendChild(minus);
-            d.appendChild(label);
             div.appendChild(d);
             gi++;
           });
@@ -759,7 +726,7 @@
       }
     }
 
-    // **RESTO DE FUNCIONES SIN CAMBIOS**
+    // **RESTO DE FUNCIONES**
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
       if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
