@@ -205,11 +205,15 @@
     button:hover { transform: scale(1.1); }
     button:disabled { background: #ccc; cursor: not-allowed; }
     button.activa { background: #ff80b5 !important; }
+    /* **CONTROLES + Y - Y NOMBRES** */
     .nota {
       position: absolute;
       cursor: move;
       z-index: 100;
       pointer-events: auto;
+    }
+    .nota:hover .plus, .nota:hover .minus {
+      opacity: 1;
     }
     .nota .plus, .nota .minus {
       width: 22px;
@@ -221,14 +225,40 @@
       text-align: center;
       line-height: 22px;
       font-size: 0.9em;
+      font-weight: bold;
       cursor: pointer;
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity 0.2s, transform 0.1s;
       z-index: 101;
+      border: 2px solid #fff;
     }
-    .nota.show-controls .plus, .nota.show-controls .minus { opacity: 1; }
+    .nota .plus:hover, .nota .minus:hover {
+      background: #ff80b5;
+      transform: scale(1.2);
+    }
     .nota .plus { top: -28px; left: 50%; transform: translateX(-50%); }
     .nota .minus { bottom: -28px; left: 50%; transform: translateX(-50%); }
+    
+    /* **NUEVO: NOMBRE DEBAJO DE CADA NOTA** */
+    .nota-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: bold;
+      color: #333;
+      background: rgba(255,255,255,0.9);
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 102;
+      border: 1px solid #4ae2f2;
+      font-family: serif;
+      min-width: 30px;
+      text-align: center;
+    }
+    
     @media (max-width: 600px) {
       header { padding: 8px; }
       header h1 { font-size: 1.4em; }
@@ -257,6 +287,13 @@
         font-size: 20px;
         padding: 6px 12px;
         top: 45px;
+      }
+      .nota .plus, .nota .minus { width: 20px; height: 20px; line-height: 18px; font-size: 0.8em; }
+      .nota-label { 
+        font-size: 8px; 
+        padding: 1px 4px; 
+        bottom: -22px;
+        min-width: 25px;
       }
     }
   </style>
@@ -509,7 +546,7 @@
       document.getElementById("file-input").onchange = abrir;
     }
 
-    // **PLAY COMPLETO: METRÓNOMO + NOTAS COMBINADOS + DESSELECCIÓN**
+    // **PLAY COMPLETO**
     function playStop() {
       Tone.start().then(() => {
         if (isPlaying) {
@@ -520,7 +557,7 @@
         if (!compas) return alert("¡Selecciona un compás!");
         if (!bpm) return alert("¡Selecciona una velocidad!");
         
-        // **DESSELECCIONAR FIGURAS AL EMPEZAR**
+        // **DESSELECCIONAR FIGURAS**
         document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
         figuraActiva = null;
         
@@ -553,7 +590,6 @@
           return alert("¡Añade notas para reproducir!");
         }
         
-        // **METRÓNOMO SIEMPRE FUNCIONA**
         if (metronomeOn) {
           metronomeLoop = new Tone.Loop((time) => {
             new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3", "8n", time);
@@ -566,7 +602,6 @@
           const startTime = event.time;
           const duration = Tone.Time(event.dur).toSeconds();
           
-          // **SONIDO DE NOTA**
           Tone.Transport.schedule((time) => {
             synth.triggerAttackRelease(
               event.note.split("/")[0].toUpperCase() + event.note.split("/")[1],
@@ -575,7 +610,6 @@
             );
           }, startTime);
           
-          // **RESALTADO ROJO**
           Tone.Transport.schedule((time) => {
             const noteElement = allNotes[event.gi];
             if (noteElement) {
@@ -586,7 +620,6 @@
             }
           }, startTime);
           
-          // **NOMBRE DE NOTA VISUAL (SI ACTIVADO)**
           if (showNoteLabels) {
             Tone.Transport.schedule((time) => {
               notaDisplay.textContent = event.noteName;
@@ -597,7 +630,6 @@
             }, startTime);
           }
           
-          // **RESET COLOR**
           Tone.Transport.schedule((time) => {
             const noteElement = allNotes[event.gi];
             if (noteElement) {
@@ -641,6 +673,93 @@
       updateDraggableNotes();
     }
 
+    // **+ Y - + NOMBRE DEBAJO**
+    function updateDraggableNotes() {
+      document.querySelectorAll(".nota").forEach(n => n.remove());
+      
+      let gi = 0;
+      lines.forEach((line, li) => {
+        line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
+          c.notas.forEach((n, ni) => {
+            if (n.tipo === "silencio") { 
+              gi++; 
+              return; 
+            }
+            
+            const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
+            if (!g) return;
+            
+            const bbox = g.getBBox();
+            const d = document.createElement("div");
+            d.className = "nota";
+            d.style.left = `${bbox.x}px`;
+            d.style.top = `${bbox.y}px`;
+            d.style.width = `${bbox.width}px`;
+            d.style.height = `${bbox.height}px`;
+            d.dataset.li = li;
+            d.dataset.ci = ci;
+            d.dataset.ni = ni;
+            
+            // **BOTONES + Y -**
+            const plus = document.createElement("div");
+            plus.textContent = "+";
+            plus.className = "plus";
+            const minus = document.createElement("div");
+            minus.textContent = "−";
+            minus.className = "minus";
+            
+            plus.onclick = e => {
+              e.stopPropagation();
+              changePitch(d, 1);
+            };
+            minus.onclick = e => {
+              e.stopPropagation();
+              changePitch(d, -1);
+            };
+            
+            // **NOMBRE DEBAJO DE LA NOTA**
+            const label = document.createElement("div");
+            label.className = "nota-label";
+            label.textContent = getNoteName(n.noteName);
+            
+            d.appendChild(plus);
+            d.appendChild(minus);
+            d.appendChild(label);
+            div.appendChild(d);
+            gi++;
+          });
+        });
+      });
+    }
+
+    function changePitch(div, dir) {
+      const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni;
+      const nota = lines[li][ci].notas[ni];
+      const list = noteMap[clave];
+      const idx = list.indexOf(nota.noteName) + dir;
+      
+      if (idx < 0 || idx >= list.length) return;
+      
+      nota.noteName = list[idx];
+      const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+      nota.vf = new VF.StaveNote({ 
+        clef: clave, 
+        keys: [nota.noteName], 
+        duration: nota.duracion, 
+        stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP 
+      });
+      
+      redibujarPentagrama();
+      
+      if (synth) {
+        synth.triggerAttackRelease(
+          nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], 
+          duracionTiempo[nota.duracion]
+        );
+      }
+    }
+
+    // **RESTO DE FUNCIONES SIN CAMBIOS**
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
       if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
@@ -746,84 +865,6 @@
         synth.triggerAttackRelease(
           noteName.split("/")[0].toUpperCase() + noteName.split("/")[1], 
           duracionTiempo[dur]
-        );
-      }
-    }
-
-    function updateDraggableNotes() {
-      document.querySelectorAll(".nota").forEach(n => n.remove());
-      
-      let gi = 0;
-      lines.forEach((line, li) => {
-        line.slice(0, MAX_COMPASSES_PER_LINE).forEach((c, ci) => {
-          c.notas.forEach((n, ni) => {
-            if (n.tipo === "silencio") { 
-              gi++; 
-              return; 
-            }
-            
-            const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
-            if (!g) return;
-            
-            const bbox = g.getBBox();
-            const d = document.createElement("div");
-            d.className = "nota";
-            d.style.left = `${bbox.x}px`;
-            d.style.top = `${bbox.y}px`;
-            d.style.width = `${bbox.width}px`;
-            d.style.height = `${bbox.height}px`;
-            d.dataset.li = li;
-            d.dataset.ci = ci;
-            d.dataset.ni = ni;
-            
-            const plus = document.createElement("div");
-            plus.textContent = "+";
-            plus.className = "plus";
-            const minus = document.createElement("div");
-            minus.textContent = "−";
-            minus.className = "minus";
-            
-            plus.onclick = e => {
-              e.stopPropagation();
-              changePitch(d, 1);
-            };
-            minus.onclick = e => {
-              e.stopPropagation();
-              changePitch(d, -1);
-            };
-            
-            d.appendChild(plus);
-            d.appendChild(minus);
-            div.appendChild(d);
-            gi++;
-          });
-        });
-      });
-    }
-
-    function changePitch(div, dir) {
-      const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni;
-      const nota = lines[li][ci].notas[ni];
-      const list = noteMap[clave];
-      const idx = list.indexOf(nota.noteName) + dir;
-      
-      if (idx < 0 || idx >= list.length) return;
-      
-      nota.noteName = list[idx];
-      const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
-      nota.vf = new VF.StaveNote({ 
-        clef: clave, 
-        keys: [nota.noteName], 
-        duration: nota.duracion, 
-        stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP 
-      });
-      
-      redibujarPentagrama();
-      
-      if (synth) {
-        synth.triggerAttackRelease(
-          nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1], 
-          duracionTiempo[nota.duracion]
         );
       }
     }
