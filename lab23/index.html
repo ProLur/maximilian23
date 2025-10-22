@@ -77,18 +77,19 @@
       width: 100%;
       max-width: 1400px;
     }
+    /* CUADRO COMPACTO - ESPACIO OPTIMIZADO */
     #pentagrama-container {
       background: #fff;
       border: 3px solid #4ae2f2;
       border-radius: 15px;
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      margin: 8px auto;
+      margin: 5px auto; /* REDUCIDO */
       width: 95%;
       max-width: 1400px;
       min-width: 600px;
-      /* ALTURA FIJA - NO SE MUEVE NUNCA */
-      height: 420px !important;
+      /* ALTURA COMPACTA - TODO VISIBLE */
+      height: 280px !important; /* REDUCIDA */
       position: relative;
     }
     #pentagrama {
@@ -103,9 +104,9 @@
     #figuras {
       display: flex;
       justify-content: center;
-      gap: 8px; /* REDUCIDO */
+      gap: 8px;
       flex-wrap: nowrap;
-      margin: 8px 0;
+      margin: 5px 0; /* REDUCIDO */
       width: 100%;
       max-width: 600px;
       overflow-x: auto;
@@ -114,13 +115,13 @@
     #controles-modo, #controles-otros {
       display: flex;
       justify-content: center;
-      gap: 10px; /* REDUCIDO */
+      gap: 10px;
       flex-wrap: wrap;
-      margin: 8px 0;
+      margin: 5px 0; /* REDUCIDO */
       width: 100%;
       max-width: 600px;
     }
-    /* BOTONES REDONDOS FIJOS EN TODAS LAS PANTALLAS */
+    /* BOTONES REDONDOS FIJOS */
     .figura {
       width: 48px !important; 
       height: 48px !important;
@@ -197,7 +198,6 @@
       z-index: 150;
       pointer-events: none;
     }
-    /* RESPONSIVE MEJORADO */
     @media (max-width: 600px) {
       header { padding: 8px; }
       header h1 { font-size: 1.4em; }
@@ -206,7 +206,6 @@
       #creado-por { font-size: 0.7em; right: 10px; }
       #titulo-editable { font-size: 1.2em; padding: 5px 10px; }
       select { padding: 5px 8px; font-size: 0.8em; }
-      /* BOTONES SIEMPRE 48px EN MÓVIL */
       .figura { 
         width: 48px !important; 
         height: 48px !important; 
@@ -216,7 +215,7 @@
       #pentagrama-container { 
         min-width: 95vw !important; 
         width: 95vw !important;
-        height: 350px !important;
+        height: 240px !important; /* MÁS COMPACTO EN MÓVIL */
       }
       #figuras { gap: 6px; padding: 3px; }
       #controles-modo, #controles-otros { gap: 8px; }
@@ -281,13 +280,12 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     const container = document.getElementById("pentagrama-container");
     
-    // DIMENSIONES FIJAS
-    const FIXED_HEIGHT = 420;
+    // DIMENSIONES COMPACTAS
+    const FIXED_HEIGHT = 280; // COMPACTO
     const FIXED_MIN_WIDTH = 600;
     const minStaveWidth = 250;
-    const lineHeight = 150;
+    const lineHeight = 120; // REDUCIDO PARA MÁS LÍNEAS VISIBLES
     
-    // Inicializar con dimensiones fijas
     let width = Math.max(FIXED_MIN_WIDTH, container.clientWidth);
     renderer.resize(width, FIXED_HEIGHT);
     const context = renderer.getContext();
@@ -308,7 +306,6 @@
     const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
 
     function init() {
-      // RESIZE FIJO - NO CAMBIA ALTURA
       window.addEventListener('resize', () => {
         width = Math.max(FIXED_MIN_WIDTH, container.clientWidth);
         renderer.resize(width, FIXED_HEIGHT);
@@ -343,13 +340,12 @@
     }
 
     function redibujarPentagrama() {
-      // NO LIMPIAR CONTROLES DE NOTAS DURANTE REPRODUCCIÓN
       if (!isPlaying) {
         document.querySelectorAll(".note-label, .nota").forEach(el => el.remove());
       }
       
       context.clear();
-      let y = 80;
+      let y = 40; // INICIO MÁS ARRIBA - COMPACTO
       
       if (compas) {
         lines.forEach((line, li) => {
@@ -362,21 +358,27 @@
             const formatter = new VF.Formatter();
             if (c.notas.length) formatter.joinVoices([voice]);
             
-            const extra = c.notas.filter(n => n.duracion === '8').length * 30 + 
-                         (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 15;
+            const extra = c.notas.filter(n => n.duracion === '8').length * 25 + 
+                         (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 12;
             const w = Math.max(minStaveWidth, 
-              c.notas.length ? formatter.preCalculateMinTotalWidth([voice]) + 80 + extra : minStaveWidth);
+              c.notas.length ? formatter.preCalculateMinTotalWidth([voice]) + 60 + extra : minStaveWidth);
             c.staveWidth = w;
             
-            const stave = new VF.Stave(x, y, w, { spacing_between_lines_px: 18 });
-            if (li === 0 && ci === 0) stave.addClef(clave).addTimeSignature(compas);
-            if (c.closed) stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
+            const stave = new VF.Stave(x, y, w);
+            
+            // UNA SOLA LÍNEA DE COMPÁS - CORREGIDO
+            if (li === 0 && ci === 0) {
+              stave.addClef(clave).addTimeSignature(compas);
+            } else if (c.closed) {
+              // SOLO UNA BARLINE SIMPLE AL FINAL
+              stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
+            }
             
             stave.setContext(context).draw();
             c.stave = stave;
             
             if (c.notas.length) {
-              formatter.format([voice], w - 80);
+              formatter.format([voice], w - 60);
               voice.draw(context, stave);
             }
             x += w;
@@ -385,10 +387,8 @@
         });
       }
       
-      // ALTURA SIEMPRE FIJA
       renderer.resize(width, FIXED_HEIGHT);
       
-      // SOLO ACTUALIZAR DRAGGING SI NO ESTÁ REPRODUCIENDO
       if (!isPlaying) {
         updateDraggableNotes();
       }
@@ -396,13 +396,14 @@
       const curr = lines[currentLine][lines[currentLine].length - 1];
       document.getElementById("cerrar-compas").disabled = !curr || curr.closed || curr.beats !== +compas.split("/")[0];
       
-      // SCROLL SUAVE AL FINAL - SOLO UNA VEZ
       if (curr?.stave && !isPlaying) {
         setTimeout(() => {
-          div.scrollTop = Math.max(0, curr.stave.getYForLine(0) - div.clientHeight / 3);
+          div.scrollTop = Math.max(0, curr.stave.getYForLine(0) - 50);
         }, 100);
       }
     }
+
+    // ... (initFiguras, initControles, toggleMode, playStop, stopPlayback, getNoteFromY, addNota, updateDraggableNotes, changePitch MANTIENEN IGUALES)
 
     function initFiguras() {
       document.querySelectorAll(".figura").forEach(f => {
@@ -436,110 +437,28 @@
       if (!isPlaying) updateDraggableNotes();
     }
 
-    function playStop() {
-      Tone.start().then(() => {
-        if (isPlaying) {
-          stopPlayback();
-          return;
-        }
-        if (!compas) return alert("Configura un compás");
-        if (!bpm) return alert("Selecciona una velocidad");
-        
-        Tone.Transport.bpm.value = bpm;
-        let time = 0, events = [], gi = 0;
-        
-        lines.forEach(l => l.forEach(c => c.notas.forEach(n => {
-          if (n.tipo === "nota") events.push({ time, note: n.noteName, dur: duracionTiempo[n.duracion], gi });
-          time += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
-          gi++;
-        })));
-        
-        Tone.Transport.cancel();
-        let offset = 0;
-        
-        // METRONOMO
-        if (metronomeOn) {
-          const beat = Tone.Time("4n").toSeconds();
-          const beats = +compas.split("/")[0];
-          for (let i = 0; i < beats; i++) {
-            Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
-          }
-          offset = beats * beat;
-          metronomeLoop = new Tone.Loop(t => {
-            new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t);
-          }, "4n").start(offset);
-        }
-        
-        if (!events.length && !metronomeOn) return alert("Sin notas para reproducir");
-        
-        const gs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
-        
-        events.forEach(e => {
-          const s = e.time + offset, end = s + Tone.Time(e.dur).toSeconds();
-          
-          // SONIDO
-          Tone.Transport.schedule(t => {
-            synth.triggerAttackRelease(e.note.split("/")[0].toUpperCase() + e.note.split("/")[1], e.dur, t);
-          }, s);
-          
-          // RESALTAR - SIN SCROLL
-          Tone.Transport.schedule(t => {
-            const g = gs[e.gi];
-            if (g) {
-              g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-                el.setAttribute('stroke', 'red');
-                if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'red');
-              });
-            }
-          }, s);
-          
-          Tone.Transport.schedule(t => {
-            const g = gs[e.gi];
-            if (g) g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-              el.setAttribute('stroke', 'black');
-              if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
-            });
-          }, end);
-          
-          // ETIQUETAS
-          if (showNoteLabels && gs[e.gi]) {
-            const bbox = gs[e.gi].getBBox();
-            Tone.Transport.schedule(t => {
-              document.querySelectorAll(".note-label").forEach(l => l.remove());
-              const lbl = document.createElement("div");
-              lbl.className = "note-label";
-              lbl.textContent = noteNameMap[e.note.split("/")[0]] + e.note.split("/")[1];
-              lbl.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
-              lbl.style.top = `${bbox.y + bbox.height + 10}px`;
-              div.appendChild(lbl);
-            }, s);
-            Tone.Transport.schedule(t => document.querySelectorAll(".note-label").forEach(l => l.remove()), end);
-          }
-        });
-        
-        // FIN AUTOMÁTICO
-        Tone.Transport.schedule(() => stopPlayback(), time + offset);
-        Tone.Transport.start();
-        document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
-        isPlaying = true;
-      });
+    // CERRAR COMPÁS - LÓGICA CORREGIDA
+    function cerrarCompas() {
+      const curr = lines[currentLine][lines[currentLine].length - 1];
+      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
+      
+      curr.closed = true;
+      
+      // SI LA LÍNEA ACTUAL ESTÁ LLENA, CREAR NUEVA LÍNEA
+      const totalW = lines[currentLine].reduce((s, c) => s + c.staveWidth, 0) + 80;
+      if (totalW > width - 100) {
+        // NUEVA LÍNEA
+        lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
+        currentLine = lines.length - 1;
+      } else {
+        // MISMA LÍNEA - NUEVO COMPÁS
+        lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+      }
+      
+      redibujarPentagrama();
     }
 
-    function stopPlayback() {
-      Tone.Transport.cancel();
-      Tone.Transport.stop();
-      if (metronomeLoop) metronomeLoop.stop();
-      context.svg.querySelectorAll('g.vf-stavenote').forEach(g => g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
-        el.setAttribute('stroke', 'black');
-        if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
-      }));
-      document.querySelectorAll(".note-label").forEach(l => l.remove());
-      document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
-      isPlaying = false;
-      updateDraggableNotes(); // Restaurar controles
-    }
-
-    // CLICK PRECISO - SE PONE EXACTAMENTE DONDE CLICAS
+    // CLICK PRECISO
     div.onclick = e => {
       if (!compas) return alert("Por favor, selecciona un compás antes de añadir notas.");
       if (!figuraActiva) return alert("Por favor, selecciona una figura musical.");
@@ -548,7 +467,6 @@
       const clickX = e.clientX - rect.left + div.scrollLeft;
       const clickY = e.clientY - rect.top + div.scrollTop;
       
-      // ENCONTRAR COMPÁS MÁS CERCANO
       let targetLine = 0, targetCompas = 0;
       let minDistance = Infinity;
       
@@ -566,13 +484,12 @@
       });
       
       if (!lines[targetLine][targetCompas]) {
-        lines[targetLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+        lines[targetLine][targetCompas] = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth };
       }
       
       const curr = lines[targetLine][targetCompas];
       if (curr.closed) return alert("El compás está cerrado. Cierra el compás o crea uno nuevo.");
       
-      // CÁLCULO PRECISO DE NOTA POR POSICIÓN Y
       const noteName = getNoteFromY(clickY, targetLine);
       if (!noteName) return alert("No se pudo determinar la posición de la nota. Intenta de nuevo.");
       
@@ -582,17 +499,14 @@
       });
     };
 
-    // CÁLCULO MEJORADO DE NOTA POR POSICIÓN EXACTA
     function getNoteFromY(y, lineIndex) {
-      const lineY = lineIndex * lineHeight + 80;
+      const lineY = lineIndex * lineHeight + 40;
       const relY = y - lineY;
       
-      // ESCALA PRECISA PARA EL PENTAGRAMA
-      const noteHeight = 140; // Altura total del rango de notas
+      const noteHeight = 100;
       const numNotes = noteMap[clave].length;
       const step = noteHeight / (numNotes - 1);
       
-      // CÁLCULO EXACTO
       const normalizedY = Math.max(0, Math.min(noteHeight, noteHeight - relY));
       const idx = Math.round(normalizedY / step);
       
@@ -635,6 +549,8 @@
         );
       }
     }
+
+    // ... (resto de funciones: updateDraggableNotes, changePitch, borrarUltimo, guardar, abrir MANTIENEN IGUALES)
 
     function updateDraggableNotes() {
       const wasActive = activeNoteId ? document.querySelector(`.nota[data-id="${activeNoteId}"]`)?.classList.contains("show-controls") : false;
@@ -780,21 +696,102 @@
       }
     }
 
-    function cerrarCompas() {
-      const curr = lines[currentLine][lines[currentLine].length - 1];
-      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
-      
-      curr.closed = true;
-      const nuevo = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth };
-      lines[currentLine].push(nuevo);
-      
-      const totalW = lines[currentLine].reduce((s, c) => s + c.staveWidth, 0) + 80;
-      if (totalW > width) {
-        lines[currentLine].pop();
-        lines.push([nuevo]);
-        currentLine++;
-      }
-      redibujarPentagrama();
+    function playStop() {
+      Tone.start().then(() => {
+        if (isPlaying) {
+          stopPlayback();
+          return;
+        }
+        if (!compas) return alert("Configura un compás");
+        if (!bpm) return alert("Selecciona una velocidad");
+        
+        Tone.Transport.bpm.value = bpm;
+        let time = 0, events = [], gi = 0;
+        
+        lines.forEach(l => l.forEach(c => c.notas.forEach(n => {
+          if (n.tipo === "nota") events.push({ time, note: n.noteName, dur: duracionTiempo[n.duracion], gi });
+          time += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
+          gi++;
+        })));
+        
+        Tone.Transport.cancel();
+        let offset = 0;
+        
+        if (metronomeOn) {
+          const beat = Tone.Time("4n").toSeconds();
+          const beats = +compas.split("/")[0];
+          for (let i = 0; i < beats; i++) {
+            Tone.Transport.schedule(t => new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t), i * beat);
+          }
+          offset = beats * beat;
+          metronomeLoop = new Tone.Loop(t => {
+            new Tone.MembraneSynth().toDestination().triggerAttackRelease("C2", "8n", t);
+          }, "4n").start(offset);
+        }
+        
+        if (!events.length && !metronomeOn) return alert("Sin notas para reproducir");
+        
+        const gs = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
+        
+        events.forEach(e => {
+          const s = e.time + offset, end = s + Tone.Time(e.dur).toSeconds();
+          
+          Tone.Transport.schedule(t => {
+            synth.triggerAttackRelease(e.note.split("/")[0].toUpperCase() + e.note.split("/")[1], e.dur, t);
+          }, s);
+          
+          Tone.Transport.schedule(t => {
+            const g = gs[e.gi];
+            if (g) {
+              g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
+                el.setAttribute('stroke', 'red');
+                if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'red');
+              });
+            }
+          }, s);
+          
+          Tone.Transport.schedule(t => {
+            const g = gs[e.gi];
+            if (g) g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
+              el.setAttribute('stroke', 'black');
+              if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
+            });
+          }, end);
+          
+          if (showNoteLabels && gs[e.gi]) {
+            const bbox = gs[e.gi].getBBox();
+            Tone.Transport.schedule(t => {
+              document.querySelectorAll(".note-label").forEach(l => l.remove());
+              const lbl = document.createElement("div");
+              lbl.className = "note-label";
+              lbl.textContent = noteNameMap[e.note.split("/")[0]] + e.note.split("/")[1];
+              lbl.style.left = `${bbox.x + bbox.width / 2 - 20}px`;
+              lbl.style.top = `${bbox.y + bbox.height + 10}px`;
+              div.appendChild(lbl);
+            }, s);
+            Tone.Transport.schedule(t => document.querySelectorAll(".note-label").forEach(l => l.remove()), end);
+          }
+        });
+        
+        Tone.Transport.schedule(() => stopPlayback(), time + offset);
+        Tone.Transport.start();
+        document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
+        isPlaying = true;
+      });
+    }
+
+    function stopPlayback() {
+      Tone.Transport.cancel();
+      Tone.Transport.stop();
+      if (metronomeLoop) metronomeLoop.stop();
+      context.svg.querySelectorAll('g.vf-stavenote').forEach(g => g.querySelectorAll('path,line,circle,ellipse,rect').forEach(el => {
+        el.setAttribute('stroke', 'black');
+        if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', 'black');
+      }));
+      document.querySelectorAll(".note-label").forEach(l => l.remove());
+      document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
+      isPlaying = false;
+      updateDraggableNotes();
     }
 
     function borrarUltimo() {
