@@ -352,7 +352,7 @@
     const context = renderer.getContext();
     
     let clave = "treble", compas = "", bpm = 0;
-    let lines = [[]], currentLine = 0;
+    let lines = [[]], currentLine = 0, measureCounter = 0;
     let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
     let metronomeLoop = null;
     let synth = null;
@@ -383,7 +383,7 @@
     function init() {
       window.addEventListener('resize', () => {
         width = Math.max(280, container.clientWidth);
-        MAX_LINE_WIDTH = width - 20; // Account for padding
+        MAX_LINE_WIDTH = width - 20;
         renderer.resize(width, currentHeight);
         redibujarPentagrama();
       });
@@ -418,7 +418,8 @@
     function resetPartitura() {
       lines = [[]];
       currentLine = 0;
-      if (compas) lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH, measureId: 0 });
+      measureCounter = 0;
+      if (compas) lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH, measureId: measureCounter++ });
       redibujarPentagrama();
     }
 
@@ -432,34 +433,19 @@
       let tempLines = [];
       let currentTempLine = [];
       let currentLineWidth = 0;
-      let measureCounter = 0;
 
       if (compas) {
-        let lineIndex = 0;
         lines.forEach((line) => {
-          line.forEach((c, ci) => {
-            const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
-            voice.setStrict(false);
-            if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
-            
-            const formatter = new VF.Formatter();
-            if (c.notas.length) formatter.joinVoices([voice]);
-            
-            let totalWidth = (ci === 0 && lineIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
-            if (c.notas.length) {
-              let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
-              totalWidth = Math.max(totalWidth, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 30);
-            }
-            
-            // Split measure if too wide
+          line.forEach((c) => {
             let remainingNotes = [...c.notas];
             let remainingBeats = c.beats;
             let startIndex = 0;
+            
             while (remainingNotes.length > 0) {
-              let currentWidth = (ci === 0 && lineIndex === 0 && startIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
               let notesInSegment = [];
               let segmentBeats = 0;
               let segmentWidth = 0;
+              let currentWidth = (currentTempLine.length === 0 && y === 40 && startIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
               
               const tempVoice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
               tempVoice.setStrict(false);
@@ -483,7 +469,6 @@
               }
               
               if (notesInSegment.length === 0 && remainingNotes.length > 0) {
-                // Force at least one note to avoid infinite loop
                 notesInSegment.push(remainingNotes[0]);
                 segmentBeats += duracionBeats[remainingNotes[0].duracion];
                 segmentWidth += noteWidthFactors[remainingNotes[0].duracion] || 50;
@@ -491,11 +476,12 @@
               }
               
               if (currentLineWidth + currentWidth > MAX_LINE_WIDTH) {
-                tempLines.push(currentTempLine);
-                currentTempLine = [];
-                currentLineWidth = 0;
-                lineIndex++;
-                y += lineHeight;
+                if (currentTempLine.length > 0) {
+                  tempLines.push(currentTempLine);
+                  currentTempLine = [];
+                  currentLineWidth = 0;
+                  y += lineHeight;
+                }
               }
               
               currentTempLine.push({
@@ -517,7 +503,7 @@
             tempLines.push(currentTempLine);
             currentTempLine = [];
             currentLineWidth = 0;
-            lineIndex++;
+            y += lineHeight;
           }
         });
         
@@ -527,18 +513,24 @@
         
         lines = tempLines;
         
+        // Render staves
         lines.forEach((line, li) => {
-          // Calculate total line width to center the staves
           let totalLineWidth = line.reduce((sum, c) => sum + c.staveWidth, 0);
-          let x = 10 + (MAX_LINE_WIDTH - totalLineWidth) / 2; // Center the line
+          let x = 10 + Math.max(0, (MAX_LINE_WIDTH - totalLineWidth) / 2); // Center the line
           
           line.forEach((c, ci) => {
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
-            if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
+            if (c.notas.length) {
+              voice.addTickables(c.notas.map(n => n.vf));
+            } else {
+              // Add a rest to ensure stave renders
+              const rest = clave === "treble" ? "b/4" : "d/3";
+              voice.addTickable(new VF.StaveNote({ clef: clave, keys: [rest], duration: "qr" }));
+            }
             
             const formatter = new VF.Formatter();
-            if (c.notas.length) formatter.joinVoices([voice]);
+            formatter.joinVoices([voice]);
             
             const stave = new VF.Stave(x, y, c.staveWidth);
             
@@ -546,23 +538,27 @@
               stave.addClef(clave).addTimeSignature(compas);
             } else if (c.closed && !c.isContinuation) {
               stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
-            } else if (c.isContinuation) {
+            } else {
               stave.addModifier(new VF.Barline(VF.Barline.type.NONE));
             }
             
             stave.setContext(context).draw();
             c.stave = stave;
             
-            if (c.notas.length) {
-              formatter.format([voice], c.staveWidth - 30);
-              voice.draw(context, stave);
-            }
+            formatter.format([voice], c.staveWidth - 30);
+            voice.draw(context, stave);
             
             x += c.staveWidth;
           });
           
           y += lineHeight;
         });
+      } else {
+        // Render a single empty stave if no time signature
+        const stave = new VF.Stave(10, 40, FIRST_STAVE_WIDTH);
+        stave.addClef(clave);
+        stave.setContext(context).draw();
+        y = 140;
       }
       
       currentHeight = Math.max(240, y + 60);
@@ -804,7 +800,7 @@
     }
 
     function changePitch(div, dir) {
-      const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni, measureId = +div.dataset.measureId;
+      const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni;
       const nota = lines[li][ci].notas[ni];
       const list = noteMap[clave];
       const idx = list.indexOf(nota.noteName) + dir;
@@ -836,8 +832,13 @@
       
       curr.closed = true;
       
-      lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth, measureId: curr.measureId + 1 });
-      currentLine = lines.length - 1;
+      lines[currentLine].push({ 
+        notas: [], 
+        beats: 0, 
+        closed: false, 
+        staveWidth: minStaveWidth, 
+        measureId: measureCounter++ 
+      });
       
       redibujarPentagrama();
     }
@@ -849,12 +850,11 @@
       const clickX = e.clientX - rect.left + div.scrollLeft;
       const clickY = e.clientY - rect.top + div.scrollTop;
       
-      let targetLine = currentLine;
-      let targetCompas = 0;
-      let minDistance = Infinity;
+      let targetLine = 0, targetCompas = 0, minDistance = Infinity;
       
       lines.forEach((line, li) => {
-        let x = 10 + (MAX_LINE_WIDTH - line.reduce((sum, c) => sum + c.staveWidth, 0)) / 2;
+        let totalLineWidth = line.reduce((sum, c) => sum + c.staveWidth, 0);
+        let x = 10 + Math.max(0, (MAX_LINE_WIDTH - totalLineWidth) / 2);
         line.forEach((c, ci) => {
           const distance = Math.abs(clickX - (x + c.staveWidth / 2));
           if (distance < minDistance && !c.closed) {
@@ -866,14 +866,15 @@
         });
       });
       
-      if (lines[targetLine].length <= targetCompas || lines[targetLine][targetCompas].closed) {
-        const lastMeasure = lines[targetLine][lines[targetLine].length - 1];
+      if (!lines[targetLine] || lines[targetLine].length <= targetCompas || lines[targetLine][targetCompas].closed) {
+        const lastMeasure = lines[targetLine] && lines[targetLine][lines[targetLine].length - 1];
+        lines[targetLine] = lines[targetLine] || [];
         lines[targetLine].push({ 
           notas: [], 
           beats: 0, 
           closed: false, 
           staveWidth: minStaveWidth, 
-          measureId: lastMeasure ? lastMeasure.measureId + 1 : 0 
+          measureId: lastMeasure ? lastMeasure.measureId + 1 : measureCounter++ 
         });
         targetCompas = lines[targetLine].length - 1;
       }
@@ -1009,6 +1010,7 @@
             return comp;
           }));
           
+          measureCounter = Math.max(...lines.flat().map(c => c.measureId)) + 1;
           currentLine = lines.length - 1;
           redibujarPentagrama();
         } catch { alert("Archivo inválido"); }
