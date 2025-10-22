@@ -115,34 +115,29 @@
       border: 1px solid #ddd;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    #nota-display {
+    .note-label {
       position: absolute;
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 24px;
+      font-size: 14px;
       font-weight: bold;
       color: #ff4444;
       background: rgba(255,255,255,0.95);
-      padding: 8px 16px;
-      border-radius: 12px;
+      padding: 4px 8px;
+      border-radius: 8px;
       z-index: 20;
       font-family: serif;
-      border: 2px solid #ff4444;
-      box-shadow: 0 4px 12px rgba(255,68,68,0.3);
+      border: 1px solid #ff4444;
+      text-align: center;
       opacity: 0;
       transition: opacity 0.3s ease;
-      min-width: 80px;
-      text-align: center;
     }
-    #nota-display.show {
+    .note-label.show {
       opacity: 1;
       animation: pulse 0.5s ease-in-out;
     }
     @keyframes pulse {
-      0% { transform: translateX(-50%) scale(1); }
-      50% { transform: translateX(-50%) scale(1.1); }
-      100% { transform: translateX(-50%) scale(1); }
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
     }
     #figuras {
       display: flex;
@@ -263,10 +258,9 @@
         padding: 2px 5px; 
         left: 40px;
       }
-      #nota-display {
-        font-size: 20px;
-        padding: 6px 12px;
-        top: 45px;
+      .note-label {
+        font-size: 12px;
+        padding: 3px 6px;
       }
       .nota .plus, .nota .minus { 
         width: 20px; 
@@ -304,7 +298,6 @@
   <div id="main-content">
     <div id="pentagrama-container">
       <div id="tempo-display" class="tempo-text" style="display:none;"></div>
-      <div id="nota-display"></div>
       <div id="pentagrama"></div>
     </div>
     <div id="figuras">
@@ -337,14 +330,13 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     const container = document.getElementById("pentagrama-container");
     const tempoDisplay = document.getElementById("tempo-display");
-    const notaDisplay = document.getElementById("nota-display");
     
     // CONFIGURACIÓN PROFESIONAL
     let MAX_LINE_WIDTH = Math.max(600, container.clientWidth - 40);
     const FIRST_STAVE_WIDTH = 300;
     const minStaveWidth = 120;
     const lineHeight = 100;
-    const noteWidthFactors = { w: 30, h: 40, q: 50, '8': 60 }; // Width factors for different note durations
+    const noteWidthFactors = { w: 30, h: 40, q: 50, '8': 60 };
     
     let width = Math.max(600, container.clientWidth);
     let currentHeight = 280;
@@ -423,7 +415,7 @@
 
     function redibujarPentagrama() {
       if (!isPlaying) {
-        document.querySelectorAll(".nota").forEach(el => el.remove());
+        document.querySelectorAll(".nota, .note-label").forEach(el => el.remove());
       }
       
       context.clear();
@@ -602,7 +594,7 @@
         
         const numBeats = +compas.split("/")[0];
         const beatDuration = Tone.Time("4n").toSeconds();
-        const introTime = numBeats * beatDuration;
+        const introTime = metronomeOn ? numBeats * beatDuration : 0;
 
         if (metronomeOn) {
           metronomeLoop = new Tone.Loop((time) => {
@@ -611,7 +603,6 @@
         }
         
         const allNotes = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
-        let noteDisplayY = 50;
         
         events.forEach(event => {
           const startTime = event.time + introTime;
@@ -637,16 +628,21 @@
           
           if (showNoteLabels) {
             Tone.Transport.schedule((time) => {
-              notaDisplay.textContent = event.noteName;
-              notaDisplay.style.top = `${noteDisplayY}px`;
-              notaDisplay.classList.add("show");
-              setTimeout(() => {
-                notaDisplay.classList.remove("show");
-                noteDisplayY += 30;
-                if (noteDisplayY > currentHeight - 50) {
-                  noteDisplayY = 50;
-                }
-              }, duration * 1000 * 0.8);
+              const noteElement = allNotes[event.gi];
+              if (noteElement) {
+                const bbox = noteElement.getBBox();
+                const label = document.createElement("div");
+                label.className = "note-label";
+                label.textContent = event.noteName;
+                label.style.left = `${bbox.x + bbox.width / 2}px`;
+                label.style.top = `${bbox.y + bbox.height + 10}px`;
+                div.appendChild(label);
+                label.classList.add("show");
+                setTimeout(() => {
+                  label.classList.remove("show");
+                  setTimeout(() => label.remove(), 300);
+                }, duration * 1000 * 0.8);
+              }
             }, startTime);
           }
           
@@ -663,7 +659,6 @@
         
         Tone.Transport.schedule(() => {
           stopPlayback();
-          noteDisplayY = 50;
         }, totalTime + introTime);
         
         Tone.Transport.start();
@@ -686,8 +681,7 @@
         el.style.fill = 'black';
       });
       
-      notaDisplay.classList.remove("show");
-      notaDisplay.textContent = "";
+      document.querySelectorAll(".note-label").forEach(el => el.remove());
       
       document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
       isPlaying = false;
