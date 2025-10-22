@@ -6,7 +6,6 @@
   <title>Laboratorio Musical de Maximilian 23</title>
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,7 +76,6 @@
       width: 100%;
       max-width: 1400px;
     }
-    /* CUADRO PROFESIONAL */
     #pentagrama-container {
       background: #fff;
       border: 3px solid #4ae2f2;
@@ -102,7 +100,6 @@
       position: relative;
       z-index: 1;
     }
-    /* VELOCIDAD COMPLETA SOBRE PRIMER COMPÁS */
     .tempo-text {
       position: absolute;
       top: 8px;
@@ -117,6 +114,35 @@
       font-family: serif;
       border: 1px solid #ddd;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #nota-display {
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff4444;
+      background: rgba(255,255,255,0.95);
+      padding: 8px 16px;
+      border-radius: 12px;
+      z-index: 20;
+      font-family: serif;
+      border: 2px solid #ff4444;
+      box-shadow: 0 4px 12px rgba(255,68,68,0.3);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      min-width: 80px;
+      text-align: center;
+    }
+    #nota-display.show {
+      opacity: 1;
+      animation: pulse 0.5s ease-in-out;
+    }
+    @keyframes pulse {
+      0% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.1); }
+      100% { transform: translateX(-50%) scale(1); }
     }
     #figuras {
       display: flex;
@@ -227,6 +253,11 @@
         padding: 2px 5px; 
         left: 40px;
       }
+      #nota-display {
+        font-size: 20px;
+        padding: 6px 12px;
+        top: 45px;
+      }
     }
   </style>
 </head>
@@ -257,6 +288,7 @@
   <div id="main-content">
     <div id="pentagrama-container">
       <div id="tempo-display" class="tempo-text" style="display:none;"></div>
+      <div id="nota-display"></div>
       <div id="pentagrama"></div>
     </div>
     <div id="figuras">
@@ -289,6 +321,7 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     const container = document.getElementById("pentagrama-container");
     const tempoDisplay = document.getElementById("tempo-display");
+    const notaDisplay = document.getElementById("nota-display");
     
     // CONFIGURACIÓN PROFESIONAL
     const MAX_LINE_WIDTH = 1200;
@@ -307,22 +340,29 @@
     let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
     let metronomeLoop = null;
     let synth = null;
-    let activeNoteId = null;
     
     const noteMap = {
       treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
       bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
     };
+    
+    const noteNameMap = { 
+      c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si" 
+    };
+    
     const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
     const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
-
-    // **MAPPING COMPLETO PARA TEMPO**
     const tempoNames = {
       80: "Andante (80 BPM)",
       90: "Moderado (90 BPM)",
       120: "Allegro (120 BPM)",
       160: "Presto (160 BPM)"
     };
+
+    function getNoteName(note) {
+      const [letter, octave] = note.split("/");
+      return `${noteNameMap[letter]} ${octave}`;
+    }
 
     function init() {
       window.addEventListener('resize', () => {
@@ -339,7 +379,7 @@
       document.getElementById("velocidad").onchange = e => {
         bpm = +e.target.value;
         if (bpm) {
-          tempoDisplay.textContent = tempoNames[bpm]; // **TEXTO COMPLETO**
+          tempoDisplay.textContent = tempoNames[bpm];
           tempoDisplay.style.display = "block";
         } else {
           tempoDisplay.style.display = "none";
@@ -391,7 +431,6 @@
               w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + 50 + extra);
             }
             
-            // **CORTE DEFINITIVO**
             const espacioRestante = MAX_LINE_WIDTH - x;
             if (w > espacioRestante) {
               w = Math.max(100, espacioRestante - 20);
@@ -470,23 +509,7 @@
       document.getElementById("file-input").onchange = abrir;
     }
 
-    function cerrarCompas() {
-      const curr = lines[currentLine][lines[currentLine].length - 1];
-      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
-      
-      curr.closed = true;
-      
-      if (lines[currentLine].length >= MAX_COMPASSES_PER_LINE) {
-        lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
-        currentLine = lines.length - 1;
-      } else {
-        lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
-      }
-      
-      redibujarPentagrama();
-    }
-
-    // **PLAY COMPLETAMENTE FUNCIONANDO**
+    // **PLAY COMPLETO: METRÓNOMO + NOTAS COMBINADOS + DESSELECCIÓN**
     function playStop() {
       Tone.start().then(() => {
         if (isPlaying) {
@@ -496,6 +519,10 @@
         
         if (!compas) return alert("¡Selecciona un compás!");
         if (!bpm) return alert("¡Selecciona una velocidad!");
+        
+        // **DESSELECCIONAR FIGURAS AL EMPEZAR**
+        document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+        figuraActiva = null;
         
         Tone.Transport.bpm.value = bpm;
         Tone.Transport.cancel();
@@ -512,7 +539,8 @@
                   time: totalTime,
                   note: n.noteName,
                   dur: duracionTiempo[n.duracion],
-                  gi: gi
+                  gi: gi,
+                  noteName: getNoteName(n.noteName)
                 });
               }
               totalTime += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
@@ -525,6 +553,7 @@
           return alert("¡Añade notas para reproducir!");
         }
         
+        // **METRÓNOMO SIEMPRE FUNCIONA**
         if (metronomeOn) {
           metronomeLoop = new Tone.Loop((time) => {
             new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3", "8n", time);
@@ -537,6 +566,7 @@
           const startTime = event.time;
           const duration = Tone.Time(event.dur).toSeconds();
           
+          // **SONIDO DE NOTA**
           Tone.Transport.schedule((time) => {
             synth.triggerAttackRelease(
               event.note.split("/")[0].toUpperCase() + event.note.split("/")[1],
@@ -545,6 +575,7 @@
             );
           }, startTime);
           
+          // **RESALTADO ROJO**
           Tone.Transport.schedule((time) => {
             const noteElement = allNotes[event.gi];
             if (noteElement) {
@@ -555,6 +586,18 @@
             }
           }, startTime);
           
+          // **NOMBRE DE NOTA VISUAL (SI ACTIVADO)**
+          if (showNoteLabels) {
+            Tone.Transport.schedule((time) => {
+              notaDisplay.textContent = event.noteName;
+              notaDisplay.classList.add("show");
+              setTimeout(() => {
+                notaDisplay.classList.remove("show");
+              }, duration * 1000 * 0.8);
+            }, startTime);
+          }
+          
+          // **RESET COLOR**
           Tone.Transport.schedule((time) => {
             const noteElement = allNotes[event.gi];
             if (noteElement) {
@@ -590,12 +633,30 @@
         el.style.fill = 'black';
       });
       
+      notaDisplay.classList.remove("show");
+      notaDisplay.textContent = "";
+      
       document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
       isPlaying = false;
       updateDraggableNotes();
     }
 
-    // [Resto de funciones igual que antes - div.onclick, getNoteFromY, addNota, etc.]
+    function cerrarCompas() {
+      const curr = lines[currentLine][lines[currentLine].length - 1];
+      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
+      
+      curr.closed = true;
+      
+      if (lines[currentLine].length >= MAX_COMPASSES_PER_LINE) {
+        lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
+        currentLine = lines.length - 1;
+      } else {
+        lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+      }
+      
+      redibujarPentagrama();
+    }
+
     div.onclick = e => {
       if (!compas || !figuraActiva) return;
       
