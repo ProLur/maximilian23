@@ -77,24 +77,26 @@
       width: 100%;
       max-width: 1400px;
     }
-    /* CUADRO COMPACTO - ESPACIO OPTIMIZADO */
+    /* CUADRO AUTO-EXPANSIBLE */
     #pentagrama-container {
       background: #fff;
       border: 3px solid #4ae2f2;
       border-radius: 15px;
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      margin: 5px auto; /* REDUCIDO */
+      margin: 5px auto;
       width: 95%;
       max-width: 1400px;
       min-width: 600px;
-      /* ALTURA COMPACTA - TODO VISIBLE */
-      height: 280px !important; /* REDUCIDA */
+      /* ALTURA DINÁMICA - SE EXPANDE */
+      min-height: 280px !important;
+      height: auto !important;
+      max-height: calc(100vh - 300px);
       position: relative;
     }
     #pentagrama {
       width: 100%;
-      height: 100%;
+      min-height: 280px;
       overflow-y: auto;
       overflow-x: hidden;
       scroll-behavior: smooth;
@@ -106,7 +108,7 @@
       justify-content: center;
       gap: 8px;
       flex-wrap: nowrap;
-      margin: 5px 0; /* REDUCIDO */
+      margin: 5px 0;
       width: 100%;
       max-width: 600px;
       overflow-x: auto;
@@ -117,11 +119,10 @@
       justify-content: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin: 5px 0; /* REDUCIDO */
+      margin: 5px 0;
       width: 100%;
       max-width: 600px;
     }
-    /* BOTONES REDONDOS FIJOS */
     .figura {
       width: 48px !important; 
       height: 48px !important;
@@ -215,7 +216,7 @@
       #pentagrama-container { 
         min-width: 95vw !important; 
         width: 95vw !important;
-        height: 240px !important; /* MÁS COMPACTO EN MÓVIL */
+        min-height: 240px !important;
       }
       #figuras { gap: 6px; padding: 3px; }
       #controles-modo, #controles-otros { gap: 8px; }
@@ -280,14 +281,14 @@
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     const container = document.getElementById("pentagrama-container");
     
-    // DIMENSIONES COMPACTAS
-    const FIXED_HEIGHT = 280; // COMPACTO
-    const FIXED_MIN_WIDTH = 600;
-    const minStaveWidth = 250;
-    const lineHeight = 120; // REDUCIDO PARA MÁS LÍNEAS VISIBLES
+    // DIMENSIONES REALES COMO PARTITURA
+    const MAX_LINE_WIDTH = 1200; // ANCHO FIJO POR LÍNEA
+    const minStaveWidth = 220;
+    const lineHeight = 160; // ESPACIO GRANDE PARA NOTAS
     
-    let width = Math.max(FIXED_MIN_WIDTH, container.clientWidth);
-    renderer.resize(width, FIXED_HEIGHT);
+    let width = Math.max(600, container.clientWidth);
+    let currentHeight = 280;
+    renderer.resize(width, currentHeight);
     const context = renderer.getContext();
     
     let clave = "treble", compas = "", bpm = 0;
@@ -307,8 +308,7 @@
 
     function init() {
       window.addEventListener('resize', () => {
-        width = Math.max(FIXED_MIN_WIDTH, container.clientWidth);
-        renderer.resize(width, FIXED_HEIGHT);
+        width = Math.max(600, container.clientWidth);
         redibujarPentagrama();
       });
 
@@ -345,12 +345,16 @@
       }
       
       context.clear();
-      let y = 40; // INICIO MÁS ARRIBA - COMPACTO
+      let y = 40;
       
       if (compas) {
         lines.forEach((line, li) => {
           let x = 40;
+          const maxCompases = Math.floor((MAX_LINE_WIDTH - 80) / minStaveWidth);
+          
           line.forEach((c, ci) => {
+            if (ci >= maxCompases) return; // CORTAR SI EXCEDE
+            
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
             if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
@@ -358,19 +362,24 @@
             const formatter = new VF.Formatter();
             if (c.notas.length) formatter.joinVoices([voice]);
             
-            const extra = c.notas.filter(n => n.duracion === '8').length * 25 + 
-                         (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 12;
-            const w = Math.max(minStaveWidth, 
+            let extra = c.notas.filter(n => n.duracion === '8').length * 25 + 
+                       (c.notas.length - c.notas.filter(n => n.duracion === '8').length) * 12;
+            
+            let w = Math.max(minStaveWidth, 
               c.notas.length ? formatter.preCalculateMinTotalWidth([voice]) + 60 + extra : minStaveWidth);
+            
+            // AJUSTAR ÚLTIMO COMPÁS PARA QUE NO SE SALGA
+            if (x + w > MAX_LINE_WIDTH) {
+              w = Math.max(minStaveWidth, MAX_LINE_WIDTH - x);
+            }
+            
             c.staveWidth = w;
             
             const stave = new VF.Stave(x, y, w);
             
-            // UNA SOLA LÍNEA DE COMPÁS - CORREGIDO
             if (li === 0 && ci === 0) {
               stave.addClef(clave).addTimeSignature(compas);
             } else if (c.closed) {
-              // SOLO UNA BARLINE SIMPLE AL FINAL
               stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
             }
             
@@ -387,7 +396,10 @@
         });
       }
       
-      renderer.resize(width, FIXED_HEIGHT);
+      // CALCULAR ALTURA DINÁMICA
+      currentHeight = Math.max(280, y + 60);
+      renderer.resize(width, currentHeight);
+      container.style.height = `${currentHeight}px`;
       
       if (!isPlaying) {
         updateDraggableNotes();
@@ -398,12 +410,10 @@
       
       if (curr?.stave && !isPlaying) {
         setTimeout(() => {
-          div.scrollTop = Math.max(0, curr.stave.getYForLine(0) - 50);
+          div.scrollTop = Math.max(0, curr.stave.getYForLine(0) - 60);
         }, 100);
       }
     }
-
-    // ... (initFiguras, initControles, toggleMode, playStop, stopPlayback, getNoteFromY, addNota, updateDraggableNotes, changePitch MANTIENEN IGUALES)
 
     function initFiguras() {
       document.querySelectorAll(".figura").forEach(f => {
@@ -437,28 +447,27 @@
       if (!isPlaying) updateDraggableNotes();
     }
 
-    // CERRAR COMPÁS - LÓGICA CORREGIDA
+    // CERRAR COMPÁS - PARTITURA REAL
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
       if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
       
       curr.closed = true;
       
-      // SI LA LÍNEA ACTUAL ESTÁ LLENA, CREAR NUEVA LÍNEA
-      const totalW = lines[currentLine].reduce((s, c) => s + c.staveWidth, 0) + 80;
-      if (totalW > width - 100) {
+      // VERIFICAR SI LA LÍNEA ACTUAL PUEDE AGREGAR MÁS
+      const maxCompases = Math.floor((MAX_LINE_WIDTH - 80) / minStaveWidth);
+      if (lines[currentLine].length >= maxCompases) {
         // NUEVA LÍNEA
         lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
         currentLine = lines.length - 1;
       } else {
-        // MISMA LÍNEA - NUEVO COMPÁS
+        // NUEVO COMPÁS EN MISMA LÍNEA
         lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
       }
       
       redibujarPentagrama();
     }
 
-    // CLICK PRECISO
     div.onclick = e => {
       if (!compas) return alert("Por favor, selecciona un compás antes de añadir notas.");
       if (!figuraActiva) return alert("Por favor, selecciona una figura musical.");
@@ -483,8 +492,17 @@
         });
       });
       
+      // CREAR COMPÁS SI NO EXISTE
       if (!lines[targetLine][targetCompas]) {
-        lines[targetLine][targetCompas] = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth };
+        const maxCompases = Math.floor((MAX_LINE_WIDTH - 80) / minStaveWidth);
+        if (lines[targetLine].length >= maxCompases) {
+          lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
+          targetLine = lines.length - 1;
+          targetCompas = 0;
+        } else {
+          lines[targetLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+          targetCompas = lines[targetLine].length - 1;
+        }
       }
       
       const curr = lines[targetLine][targetCompas];
@@ -503,7 +521,7 @@
       const lineY = lineIndex * lineHeight + 40;
       const relY = y - lineY;
       
-      const noteHeight = 100;
+      const noteHeight = 120; // AJUSTADO PARA ESPACIO GRANDE
       const numNotes = noteMap[clave].length;
       const step = noteHeight / (numNotes - 1);
       
@@ -550,7 +568,8 @@
       }
     }
 
-    // ... (resto de funciones: updateDraggableNotes, changePitch, borrarUltimo, guardar, abrir MANTIENEN IGUALES)
+    // Resto de funciones (updateDraggableNotes, changePitch, playStop, etc.) MANTIENEN IGUALES
+    // [Código igual que en la versión anterior para estas funciones]
 
     function updateDraggableNotes() {
       const wasActive = activeNoteId ? document.querySelector(`.nota[data-id="${activeNoteId}"]`)?.classList.contains("show-controls") : false;
