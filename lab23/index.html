@@ -199,6 +199,12 @@
     button:hover { transform: scale(1.1); }
     button:disabled { background: #ccc; cursor: not-allowed; }
     button.activa { background: #ff80b5 !important; }
+    #play-stop.play-active {
+      background: #28a745 !important; /* Verde para Play */
+    }
+    #play-stop.stop-active {
+      background: #dc3545 !important; /* Rojo para Stop */
+    }
     .nota {
       position: absolute;
       cursor: move;
@@ -317,7 +323,7 @@
     </div>
     <div id="controles-modo">
       <button id="notas"><i class="fas fa-music"></i> Notas</button>
-      <button id="play-stop"><i class="fas fa-play"></i> Play</button>
+      <button id="play-stop" class="play-active"><i class="fas fa-play"></i> Play</button>
       <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
     </div>
     <div id="controles-otros">
@@ -592,6 +598,7 @@
 
     function playStop() {
       initSynth();
+      const playStopButton = document.getElementById("play-stop");
       if (isPlaying) {
         stopPlayback();
         return;
@@ -704,7 +711,9 @@
       }, totalTime + introTime);
 
       Tone.Transport.start();
-      document.getElementById("play-stop").innerHTML = '<i class="fas fa-stop"></i> Stop';
+      playStopButton.innerHTML = '<i class="fas fa-stop"></i> Stop';
+      playStopButton.classList.remove("play-active");
+      playStopButton.classList.add("stop-active");
       isPlaying = true;
     }
 
@@ -724,7 +733,10 @@
 
       document.querySelectorAll(".note-label").forEach(el => el.remove());
 
-      document.getElementById("play-stop").innerHTML = '<i class="fas fa-play"></i> Play';
+      const playStopButton = document.getElementById("play-stop");
+      playStopButton.innerHTML = '<i class="fas fa-play"></i> Play';
+      playStopButton.classList.remove("stop-active");
+      playStopButton.classList.add("play-active");
       isPlaying = false;
       updateDraggableNotes();
     }
