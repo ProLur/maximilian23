@@ -388,6 +388,27 @@
     }
 
     function init() {
+      // Leer valores iniciales de los menús desplegables
+      const claveSelect = document.getElementById("clave");
+      const compasSelect = document.getElementById("compas");
+      const velocidadSelect = document.getElementById("velocidad");
+
+      // Forzar valores iniciales a "---" para compás y velocidad
+      compasSelect.value = "";
+      velocidadSelect.value = "";
+      clave = claveSelect.value || "treble";
+      compas = compasSelect.value || "";
+      bpm = +velocidadSelect.value || 0;
+
+      // Actualizar la visualización del tempo
+      if (bpm) {
+        tempoDisplay.textContent = tempoNames[bpm];
+        tempoDisplay.style.display = "block";
+      } else {
+        tempoDisplay.style.display = "none";
+      }
+
+      // Configurar eventos de cambio
       window.addEventListener('resize', () => {
         width = Math.max(280, container.clientWidth);
         MAX_LINE_WIDTH = width - 40;
@@ -395,13 +416,16 @@
         redibujarPentagrama();
       });
 
-      document.getElementById("clave").onchange = e => { clave = e.target.value; resetPartitura(); };
-      document.getElementById("compas").onchange = e => {
+      claveSelect.onchange = e => {
+        clave = e.target.value;
+        resetPartitura();
+      };
+      compasSelect.onchange = e => {
         compas = e.target.value;
         resetPartitura();
         document.getElementById("play-stop").disabled = !compas;
       };
-      document.getElementById("velocidad").onchange = e => {
+      velocidadSelect.onchange = e => {
         bpm = +e.target.value;
         if (bpm) {
           tempoDisplay.textContent = tempoNames[bpm];
@@ -421,7 +445,10 @@
     function resetPartitura() {
       lines = [[]];
       currentLine = 0;
-      if (compas) lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH });
+      // Solo crear un compás inicial si hay un compás seleccionado
+      if (compas) {
+        lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH });
+      }
       redibujarPentagrama();
     }
 
@@ -538,7 +565,6 @@
           document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
           figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
           f.classList.add("activa");
-          // Inicializar sintetizador al seleccionar una figura
           initSynth();
         };
       });
