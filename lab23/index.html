@@ -918,9 +918,18 @@
       }
 
       currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
-      currentCompas.beats += duracionBeats[dur];
+currentCompas.beats = +(currentCompas.beats + duracionBeats[dur]).toFixed(2);
 
-      redibujarPentagrama();
+// Si se completa el compás justo, lo marcamos como cerrado automáticamente
+const beatsTotales = +compas.split("/")[0];
+if (Math.abs(currentCompas.beats - beatsTotales) < 0.001) {
+  currentCompas.closed = true;
+  // Prepara el siguiente compás
+  if (!lines[currentLine]) lines[currentLine] = [];
+  lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+}
+
+redibujarPentagrama();
 
       if (tipo === "nota") {
         initSynth();
