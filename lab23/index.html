@@ -347,10 +347,10 @@
 
     // CONFIGURACIÓN PROFESIONAL
     let MAX_LINE_WIDTH = Math.max(280, container.clientWidth - 40);
-    const FIRST_STAVE_WIDTH = 300;
+    const FIRST_STAVE_WIDTH = 350;
     const minStaveWidth = 100;
     const lineHeight = 100;
-    const noteWidthFactors = { w: 50, h: 50, q: 55, '8': 70 };
+    const noteWidthFactors = { w: 50, h: 50, q: 55, '8': 80 };
 
     let width = Math.max(280, container.clientWidth);
     let currentHeight = 240;
@@ -479,11 +479,10 @@
             const formatter = new VF.Formatter();
             if (c.notas.length) formatter.joinVoices([voice]);
 
-            let w = (ci === 0 && lineIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
-
+            let w = (ci === 0 && lineIndex === 0) ? FIRST_STAVE_WIDTH : c.staveWidth || minStaveWidth;
             if (c.notas.length) {
               let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
-              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 40);
+              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 50);
             }
 
             if (currentLineWidth + w > MAX_LINE_WIDTH) {
@@ -847,23 +846,9 @@
       const clickY = e.clientY - rect.top + div.scrollTop;
 
       let targetLine = currentLine;
-      let targetCompas = 0;
-      let minDistance = Infinity;
+      let targetCompas = lines[currentLine].length - 1;
 
-      lines.forEach((line, li) => {
-        let x = 10;
-        line.forEach((c, ci) => {
-          const distance = Math.abs(clickX - (x + c.staveWidth / 2));
-          if (distance < minDistance && !c.closed) {
-            minDistance = distance;
-            targetLine = li;
-            targetCompas = ci;
-          }
-          x += c.staveWidth;
-        });
-      });
-
-      if (lines[targetLine].length <= targetCompas || lines[targetLine][targetCompas].closed) {
+      if (!lines[targetLine][targetCompas] || lines[targetLine][targetCompas].closed) {
         if (lines[targetLine].length >= Math.floor(MAX_LINE_WIDTH / minStaveWidth)) {
           lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
           targetLine = lines.length - 1;
@@ -900,11 +885,11 @@
       const currentCompas = lines[currentLine][compasIndex];
 
       if (currentCompas.beats + duracionBeats[dur] > beats) {
-        return alert("¡Algo no cuadra!");
+        return alert("¡No hay suficiente espacio en el compás!");
       }
 
       let noteWidth = noteWidthFactors[dur] || 50;
-      currentCompas.staveWidth = Math.max(currentCompas.staveWidth, minStaveWidth + noteWidth);
+      currentCompas.staveWidth = Math.max(currentCompas.staveWidth || minStaveWidth, minStaveWidth + noteWidth * (currentCompas.notas.length + 1));
 
       let vf;
       if (tipo === "nota") {
@@ -930,6 +915,7 @@
         currentCompas.closed = true;
         if (!lines[currentLine]) lines[currentLine] = [];
         lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+        currentLine = lines.length - 1;
       }
 
       redibujarPentagrama();
@@ -953,6 +939,7 @@
             c.beats -= duracionBeats[c.notas[c.notas.length - 1].duracion];
             c.notas.pop();
             c.closed = false;
+            c.staveWidth = Math.max(minStaveWidth, minStaveWidth + (c.notas.length * 80)); // Ajustar ancho al borrar
             redibujarPentagrama();
             return;
           }
@@ -967,7 +954,8 @@
         lines: lines.map(l => l.map(c => ({
           notas: c.notas.map(n => ({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName })),
           beats: c.beats,
-          closed: c.closed
+          closed: c.closed,
+          staveWidth: c.staveWidth
         })))
       };
       const a = document.createElement("a");
@@ -995,7 +983,7 @@
           tempoDisplay.style.display = bpm ? "block" : "none";
 
           lines = d.lines.map(l => l.map(c => {
-            const comp = { notas: [], beats: c.beats, closed: c.closed, staveWidth: minStaveWidth };
+            const comp = { notas: [], beats: c.beats, closed: c.closed, staveWidth: c.staveWidth || minStaveWidth };
             c.notas.forEach(n => {
               let vf;
               if (n.tipo === "nota") {
