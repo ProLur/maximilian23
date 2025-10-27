@@ -502,10 +502,19 @@
       context.clear();
       let y = 40;
 
+      // Filtrar líneas vacías
+      lines = lines.filter(line => line.length > 0);
+      if (lines.length === 0) {
+        lines = [[{ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH }]];
+        currentLine = 0;
+      }
+
       if (compas) {
         lines.forEach((line, li) => {
           let x = 10;
           line.forEach((c, ci) => {
+            if (c.notas.length === 0 && ci !== line.length - 1 && !c.closed) return; // No renderizar compases vacíos intermedios
+
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
             if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
@@ -812,10 +821,12 @@
       redibujarPentagrama();
 
       if (synth) {
-        synth.triggerAttackRelease(
-          nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1],
-          duracionTiempo[nota.duracion]
-        );
+        Tone.start().then(() => {
+          synth.triggerAttackRelease(
+            nota.noteName.split("/")[0].toUpperCase() + nota.noteName.split("/")[1],
+            duracionTiempo[nota.duracion]
+          );
+        });
       }
     }
 
@@ -912,8 +923,16 @@
       currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
       currentCompas.beats = +(currentCompas.beats + duracionBeats[dur]).toFixed(2);
 
-      currentCompas.staveWidth = Math.max(currentCompas.staveWidth || minStaveWidth, minStaveWidth + (noteWidthFactors[dur] || 50) * currentCompas.notas.length);
+      // Actualizar ancho del compás
+      const tempVoice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
+      tempVoice.setStrict(false);
+      if (currentCompas.notas.length) tempVoice.addTickables(currentCompas.notas.map(n => n.vf));
+      const formatter = new VF.Formatter();
+      if (currentCompas.notas.length) formatter.joinVoices([tempVoice]);
+      let noteWidth = currentCompas.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
+      currentCompas.staveWidth = Math.max(minStaveWidth, formatter.preCalculateMinTotalWidth([tempVoice]) + noteWidth + 50);
 
+      // Verificar si la línea excede el ancho
       const lineSum = lines[currentLine].reduce((sum, c) => sum + (c.staveWidth || minStaveWidth), 0);
       if (lineSum > MAX_LINE_WIDTH && lines[currentLine].length > 1) {
         const lastCompas = lines[currentLine].pop();
