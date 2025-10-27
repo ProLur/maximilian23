@@ -86,9 +86,8 @@
       width: 95%;
       max-width: 1400px;
       min-width: 280px;
-      min-height: 240px !important;
-      height: auto !important;
-      max-height: none !important;
+      min-height: 240px;
+      height: auto;
       position: relative;
     }
     #pentagrama {
@@ -158,10 +157,16 @@
       width: 100%;
       max-width: 600px;
     }
+    #controles-otros {
+      justify-content: space-between;
+    }
+    #limpiar {
+      margin-left: auto;
+    }
     .figura {
-      width: 48px !important;
-      height: 48px !important;
-      min-width: 48px !important;
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
       flex-shrink: 0;
       background: #fff;
       border: 3px solid #4ae2f2;
@@ -172,7 +177,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5em !important;
+      font-size: 1.5em;
       color: #333;
     }
     .figura:hover, .figura.activa {
@@ -200,10 +205,10 @@
     button:disabled { background: #ccc; cursor: not-allowed; }
     button.activa { background: #ff80b5 !important; }
     #play-stop.play-active {
-      background: #28a745 !important; /* Verde para Play */
+      background: #28a745 !important;
     }
     #play-stop.stop-active {
-      background: #dc3545 !important; /* Rojo para Stop */
+      background: #dc3545 !important;
     }
     .nota {
       position: absolute;
@@ -247,38 +252,13 @@
       #creado-por { font-size: 0.7em; right: 10px; }
       #titulo-editable { font-size: 1.2em; padding: 5px 10px; }
       select { padding: 5px 8px; font-size: 0.8em; }
-      .figura {
-        width: 48px !important;
-        height: 48px !important;
-        font-size: 1.3em !important;
-      }
+      .figura { width: 48px; height: 48px; font-size: 1.3em; }
       button { padding: 6px 12px; font-size: 0.8em; }
-      #pentagrama-container {
-        min-width: 95vw !important;
-        width: 95vw !important;
-        min-height: 200px !important;
-        padding: 5px;
-      }
-      #pentagrama {
-        min-height: 200px !important;
-        overflow-x: auto;
-        overflow-y: auto;
-      }
-      .tempo-text {
-        font-size: 11px;
-        padding: 2px 5px;
-        left: 10px;
-      }
-      .note-label {
-        font-size: 12px;
-        padding: 3px 6px;
-      }
-      .nota .plus, .nota .minus {
-        width: 20px;
-        height: 20px;
-        line-height: 18px;
-        font-size: 0.8em;
-      }
+      #pentagrama-container { min-width: 95vw; width: 95vw; min-height: 200px; padding: 5px; }
+      #pentagrama { min-height: 200px; overflow-x: auto; overflow-y: auto; }
+      .tempo-text { font-size: 11px; padding: 2px 5px; left: 10px; }
+      .note-label { font-size: 12px; padding: 3px 6px; }
+      .nota .plus, .nota .minus { width: 20px; height: 20px; line-height: 18px; font-size: 0.8em; }
     }
   </style>
 </head>
@@ -327,11 +307,13 @@
       <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
     </div>
     <div id="controles-otros">
-      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
-      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
-      <input type="file" id="file-input" accept=".json" style="display:none">
-      <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
-      <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
+      <div>
+        <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
+        <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
+        <input type="file" id="file-input" accept=".json" style="display:none">
+        <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
+        <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
+      </div>
       <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
     </div>
   </div>
@@ -342,7 +324,7 @@
     const container = document.getElementById("pentagrama-container");
     const tempoDisplay = document.getElementById("tempo-display");
 
-    // CONFIGURACIÓN PROFESIONAL
+    // CONFIGURACIÓN
     let MAX_LINE_WIDTH = Math.max(280, container.clientWidth - 40);
     const FIRST_STAVE_WIDTH = 250;
     const minStaveWidth = 100;
@@ -387,26 +369,21 @@
       if (!synth) {
         Tone.start().then(() => {
           synth = new Tone.Synth().toDestination();
-        }).catch(err => {
-          console.error("Error al inicializar Tone.js:", err);
-        });
+        }).catch(err => console.error("Error al inicializar Tone.js:", err));
       }
     }
 
     function init() {
-      // Leer valores iniciales de los menús desplegables
       const claveSelect = document.getElementById("clave");
       const compasSelect = document.getElementById("compas");
       const velocidadSelect = document.getElementById("velocidad");
 
-      // Forzar valores iniciales a "---" para compás y velocidad
       compasSelect.value = "";
       velocidadSelect.value = "";
       clave = claveSelect.value || "treble";
       compas = compasSelect.value || "";
       bpm = +velocidadSelect.value || 0;
 
-      // Actualizar la visualización del tempo
       if (bpm) {
         tempoDisplay.textContent = tempoNames[bpm];
         tempoDisplay.style.display = "block";
@@ -414,7 +391,6 @@
         tempoDisplay.style.display = "none";
       }
 
-      // Configurar eventos de cambio
       window.addEventListener('resize', () => {
         width = Math.max(280, container.clientWidth);
         MAX_LINE_WIDTH = width - 40;
@@ -451,7 +427,6 @@
     function resetPartitura() {
       lines = [[]];
       currentLine = 0;
-      // Solo crear un compás inicial si hay un compás seleccionado
       if (compas) {
         lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH });
       }
@@ -482,7 +457,6 @@
             if (c.notas.length) formatter.joinVoices([voice]);
 
             let w = (ci === 0 && lineIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
-
             if (c.notas.length) {
               let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
               w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 30);
@@ -515,7 +489,6 @@
 
         lines.forEach((line, li) => {
           let x = 10;
-
           line.forEach((c, ci) => {
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
@@ -525,7 +498,6 @@
             if (c.notas.length) formatter.joinVoices([voice]);
 
             const stave = new VF.Stave(x, y, c.staveWidth);
-
             if (li === 0 && ci === 0) {
               stave.addClef(clave).addTimeSignature(compas);
             } else if (c.closed) {
@@ -542,7 +514,6 @@
 
             x += c.staveWidth;
           });
-
           y += lineHeight;
         });
       }
@@ -556,7 +527,7 @@
       }
 
       const curr = lines[currentLine]?.[lines[currentLine].length - 1];
-      document.getElementById("cerrar-compas").disabled = !curr || curr.closed || curr.beats !== +compas.split("/")[0];
+      document.getElementById("cerrar-compas").disabled = !curr || curr.closed || Math.abs(curr.beats - +compas.split("/")[0]) > 0.001;
 
       if (curr?.stave && !isPlaying) {
         setTimeout(() => {
@@ -590,7 +561,11 @@
       document.getElementById("play-stop").onclick = playStop;
       document.getElementById("cerrar-compas").onclick = cerrarCompas;
       document.getElementById("borrar-ultimo").onclick = borrarUltimo;
-      document.getElementById("limpiar").onclick = resetPartitura;
+      document.getElementById("limpiar").onclick = () => {
+        if (confirm("¿Realmente quieres borrarlo?")) {
+          resetPartitura();
+        }
+      };
       document.getElementById("guardar").onclick = guardar;
       document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
       document.getElementById("file-input").onchange = abrir;
@@ -822,7 +797,7 @@
 
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
-      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
+      if (!curr || curr.closed || Math.abs(curr.beats - +compas.split("/")[0]) > 0.001) return;
 
       curr.closed = true;
 
@@ -845,15 +820,13 @@
       const clickY = e.clientY - rect.top + div.scrollTop;
 
       let targetLine = currentLine;
-      let targetCompas = 0;
-      let minDistance = Infinity;
+      let targetCompas = lines[currentLine].length - 1;
 
       lines.forEach((line, li) => {
         let x = 10;
         line.forEach((c, ci) => {
           const distance = Math.abs(clickX - (x + c.staveWidth / 2));
-          if (distance < minDistance && !c.closed) {
-            minDistance = distance;
+          if (distance < 50 && !c.closed) {
             targetLine = li;
             targetCompas = ci;
           }
@@ -871,9 +844,6 @@
           targetCompas = lines[targetLine].length - 1;
         }
       }
-
-      const curr = lines[targetLine][targetCompas];
-      if (curr.closed) return;
 
       const noteName = getNoteFromY(clickY, targetLine);
       if (!noteName) return;
@@ -894,11 +864,12 @@
     }
 
     function addNota(tipo, dur, noteName, compasIndex) {
-      const beats = +compas.split("/")[0];
+      if (!compas) return alert("¡Selecciona un compás primero!");
+      const beatsTotales = +compas.split("/")[0];
       const currentCompas = lines[currentLine][compasIndex];
 
-      if (currentCompas.beats + duracionBeats[dur] > beats) {
-        return alert("¡Algo no cuadra!");
+      if (currentCompas.beats + duracionBeats[dur] > beatsTotales + 0.001) {
+        return alert("¡La nota no cabe en el compás! Cierra el compás o usa una duración menor.");
       }
 
       let vf;
@@ -918,18 +889,19 @@
       }
 
       currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
-currentCompas.beats = +(currentCompas.beats + duracionBeats[dur]).toFixed(2);
+      currentCompas.beats += duracionBeats[dur];
 
-// Si se completa el compás justo, lo marcamos como cerrado automáticamente
-const beatsTotales = +compas.split("/")[0];
-if (Math.abs(currentCompas.beats - beatsTotales) < 0.001) {
-  currentCompas.closed = true;
-  // Prepara el siguiente compás
-  if (!lines[currentLine]) lines[currentLine] = [];
-  lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
-}
+      if (Math.abs(currentCompas.beats - beatsTotales) < 0.001) {
+        currentCompas.closed = true;
+        if (lines[currentLine].length >= Math.floor(MAX_LINE_WIDTH / minStaveWidth)) {
+          lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
+          currentLine = lines.length - 1;
+        } else {
+          lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+        }
+      }
 
-redibujarPentagrama();
+      redibujarPentagrama();
 
       if (tipo === "nota") {
         initSynth();
