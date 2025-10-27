@@ -86,8 +86,9 @@
       width: 95%;
       max-width: 1400px;
       min-width: 280px;
-      min-height: 240px;
-      height: auto;
+      min-height: 240px !important;
+      height: auto !important;
+      max-height: none !important;
       position: relative;
     }
     #pentagrama {
@@ -156,15 +157,11 @@
       margin: 5px 0;
       width: 100%;
       max-width: 600px;
-      align-items: center;
-    }
-    #limpiar {
-      margin-left: 20px; /* Espacio para separar el botón Limpiar */
     }
     .figura {
-      width: 48px;
-      height: 48px;
-      min-width: 48px;
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
       flex-shrink: 0;
       background: #fff;
       border: 3px solid #4ae2f2;
@@ -175,7 +172,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5em;
+      font-size: 1.5em !important;
       color: #333;
     }
     .figura:hover, .figura.activa {
@@ -203,10 +200,10 @@
     button:disabled { background: #ccc; cursor: not-allowed; }
     button.activa { background: #ff80b5 !important; }
     #play-stop.play-active {
-      background: #28a745 !important;
+      background: #28a745 !important; /* Verde para Play */
     }
     #play-stop.stop-active {
-      background: #dc3545 !important;
+      background: #dc3545 !important; /* Rojo para Stop */
     }
     .nota {
       position: absolute;
@@ -250,14 +247,38 @@
       #creado-por { font-size: 0.7em; right: 10px; }
       #titulo-editable { font-size: 1.2em; padding: 5px 10px; }
       select { padding: 5px 8px; font-size: 0.8em; }
-      .figura { width: 48px; height: 48px; font-size: 1.3em; }
+      .figura {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.3em !important;
+      }
       button { padding: 6px 12px; font-size: 0.8em; }
-      #pentagrama-container { min-width: 95vw; width: 95vw; min-height: 200px; padding: 5px; }
-      #pentagrama { min-height: 200px; overflow-x: auto; overflow-y: auto; }
-      .tempo-text { font-size: 11px; padding: 2px 5px; left: 10px; }
-      .note-label { font-size: 12px; padding: 3px 6px; }
-      .nota .plus, .nota .minus { width: 20px; height: 20px; line-height: 18px; font-size: 0.8em; }
-      #limpiar { margin-left: 15px; }
+      #pentagrama-container {
+        min-width: 95vw !important;
+        width: 95vw !important;
+        min-height: 200px !important;
+        padding: 5px;
+      }
+      #pentagrama {
+        min-height: 200px !important;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+      .tempo-text {
+        font-size: 11px;
+        padding: 2px 5px;
+        left: 10px;
+      }
+      .note-label {
+        font-size: 12px;
+        padding: 3px 6px;
+      }
+      .nota .plus, .nota .minus {
+        width: 20px;
+        height: 20px;
+        line-height: 18px;
+        font-size: 0.8em;
+      }
     }
   </style>
 </head>
@@ -321,12 +342,12 @@
     const container = document.getElementById("pentagrama-container");
     const tempoDisplay = document.getElementById("tempo-display");
 
-    // CONFIGURACIÓN
+    // CONFIGURACIÓN PROFESIONAL
     let MAX_LINE_WIDTH = Math.max(280, container.clientWidth - 40);
     const FIRST_STAVE_WIDTH = 250;
-    const minStaveWidth = 120; // Aumentado para dar más espacio a corcheas
+    const minStaveWidth = 100;
     const lineHeight = 100;
-    const noteWidthFactors = { w: 40, h: 45, q: 50, '8': 65 }; // Ajustado para corcheas
+    const noteWidthFactors = { w: 40, h: 45, q: 50, '8': 60 };
 
     let width = Math.max(280, container.clientWidth);
     let currentHeight = 240;
@@ -366,21 +387,26 @@
       if (!synth) {
         Tone.start().then(() => {
           synth = new Tone.Synth().toDestination();
-        }).catch(err => console.error("Error al inicializar Tone.js:", err));
+        }).catch(err => {
+          console.error("Error al inicializar Tone.js:", err);
+        });
       }
     }
 
     function init() {
+      // Leer valores iniciales de los menús desplegables
       const claveSelect = document.getElementById("clave");
       const compasSelect = document.getElementById("compas");
       const velocidadSelect = document.getElementById("velocidad");
 
+      // Forzar valores iniciales a "---" para compás y velocidad
       compasSelect.value = "";
       velocidadSelect.value = "";
       clave = claveSelect.value || "treble";
       compas = compasSelect.value || "";
       bpm = +velocidadSelect.value || 0;
 
+      // Actualizar la visualización del tempo
       if (bpm) {
         tempoDisplay.textContent = tempoNames[bpm];
         tempoDisplay.style.display = "block";
@@ -388,6 +414,7 @@
         tempoDisplay.style.display = "none";
       }
 
+      // Configurar eventos de cambio
       window.addEventListener('resize', () => {
         width = Math.max(280, container.clientWidth);
         MAX_LINE_WIDTH = width - 40;
@@ -424,6 +451,7 @@
     function resetPartitura() {
       lines = [[]];
       currentLine = 0;
+      // Solo crear un compás inicial si hay un compás seleccionado
       if (compas) {
         lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH });
       }
@@ -454,9 +482,10 @@
             if (c.notas.length) formatter.joinVoices([voice]);
 
             let w = (ci === 0 && lineIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
+
             if (c.notas.length) {
               let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
-              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 40); // Aumentado para evitar desbordamiento
+              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 30);
             }
 
             if (currentLineWidth + w > MAX_LINE_WIDTH) {
@@ -486,6 +515,7 @@
 
         lines.forEach((line, li) => {
           let x = 10;
+
           line.forEach((c, ci) => {
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
@@ -495,6 +525,7 @@
             if (c.notas.length) formatter.joinVoices([voice]);
 
             const stave = new VF.Stave(x, y, c.staveWidth);
+
             if (li === 0 && ci === 0) {
               stave.addClef(clave).addTimeSignature(compas);
             } else if (c.closed) {
@@ -505,12 +536,13 @@
             c.stave = stave;
 
             if (c.notas.length) {
-              formatter.format([voice], c.staveWidth - 40); // Ajustado para mejor alineación
+              formatter.format([voice], c.staveWidth - 30);
               voice.draw(context, stave);
             }
 
             x += c.staveWidth;
           });
+
           y += lineHeight;
         });
       }
@@ -524,7 +556,7 @@
       }
 
       const curr = lines[currentLine]?.[lines[currentLine].length - 1];
-      document.getElementById("cerrar-compas").disabled = !curr || curr.closed || Math.abs(curr.beats - +compas.split("/")[0]) > 0.001;
+      document.getElementById("cerrar-compas").disabled = !curr || curr.closed || curr.beats !== +compas.split("/")[0];
 
       if (curr?.stave && !isPlaying) {
         setTimeout(() => {
@@ -558,11 +590,7 @@
       document.getElementById("play-stop").onclick = playStop;
       document.getElementById("cerrar-compas").onclick = cerrarCompas;
       document.getElementById("borrar-ultimo").onclick = borrarUltimo;
-      document.getElementById("limpiar").onclick = () => {
-        if (confirm("¿Realmente quieres borrarlo?")) {
-          resetPartitura();
-        }
-      };
+      document.getElementById("limpiar").onclick = resetPartitura;
       document.getElementById("guardar").onclick = guardar;
       document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
       document.getElementById("file-input").onchange = abrir;
@@ -794,7 +822,7 @@
 
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length - 1];
-      if (!curr || curr.closed || Math.abs(curr.beats - +compas.split("/")[0]) > 0.001) return;
+      if (curr.beats !== +compas.split("/")[0] || curr.closed) return;
 
       curr.closed = true;
 
@@ -817,27 +845,23 @@
       const clickY = e.clientY - rect.top + div.scrollTop;
 
       let targetLine = currentLine;
-      let targetCompas = lines[currentLine].length - 1;
+      let targetCompas = 0;
       let minDistance = Infinity;
 
       lines.forEach((line, li) => {
         let x = 10;
         line.forEach((c, ci) => {
-          if (!c.closed) {
-            const staveCenter = x + c.staveWidth / 2;
-            const distance = Math.abs(clickX - staveCenter);
-            if (distance < minDistance) {
-              minDistance = distance;
-              targetLine = li;
-              targetCompas = ci;
-            }
+          const distance = Math.abs(clickX - (x + c.staveWidth / 2));
+          if (distance < minDistance && !c.closed) {
+            minDistance = distance;
+            targetLine = li;
+            targetCompas = ci;
           }
           x += c.staveWidth;
         });
       });
 
-      // Si el compás está cerrado o no existe, intentar usar o crear uno nuevo
-      if (!lines[targetLine] || targetCompas >= lines[targetLine].length || lines[targetLine][targetCompas].closed) {
+      if (lines[targetLine].length <= targetCompas || lines[targetLine][targetCompas].closed) {
         if (lines[targetLine].length >= Math.floor(MAX_LINE_WIDTH / minStaveWidth)) {
           lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
           targetLine = lines.length - 1;
@@ -847,6 +871,9 @@
           targetCompas = lines[targetLine].length - 1;
         }
       }
+
+      const curr = lines[targetLine][targetCompas];
+      if (curr.closed) return;
 
       const noteName = getNoteFromY(clickY, targetLine);
       if (!noteName) return;
@@ -867,12 +894,11 @@
     }
 
     function addNota(tipo, dur, noteName, compasIndex) {
-      if (!compas) return alert("¡Selecciona un compás primero!");
-      const beatsTotales = +compas.split("/")[0];
+      const beats = +compas.split("/")[0];
       const currentCompas = lines[currentLine][compasIndex];
 
-      if (currentCompas.beats + duracionBeats[dur] > beatsTotales + 0.001) {
-        return alert("¡La nota no cabe en el compás! Cierra el compás o usa una duración menor.");
+      if (currentCompas.beats + duracionBeats[dur] > beats) {
+        return alert("¡Algo no cuadra!");
       }
 
       let vf;
@@ -892,19 +918,18 @@
       }
 
       currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
-      currentCompas.beats += duracionBeats[dur];
+currentCompas.beats = +(currentCompas.beats + duracionBeats[dur]).toFixed(2);
 
-      if (Math.abs(currentCompas.beats - beatsTotales) < 0.001) {
-        currentCompas.closed = true;
-        if (lines[currentLine].length >= Math.floor(MAX_LINE_WIDTH / minStaveWidth)) {
-          lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
-          currentLine = lines.length - 1;
-        } else {
-          lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
-        }
-      }
+// Si se completa el compás justo, lo marcamos como cerrado automáticamente
+const beatsTotales = +compas.split("/")[0];
+if (Math.abs(currentCompas.beats - beatsTotales) < 0.001) {
+  currentCompas.closed = true;
+  // Prepara el siguiente compás
+  if (!lines[currentLine]) lines[currentLine] = [];
+  lines[currentLine].push({ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth });
+}
 
-      redibujarPentagrama();
+redibujarPentagrama();
 
       if (tipo === "nota") {
         initSynth();
