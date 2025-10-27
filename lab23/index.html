@@ -156,12 +156,10 @@
       margin: 5px 0;
       width: 100%;
       max-width: 600px;
-    }
-    #controles-otros {
-      justify-content: space-between;
+      align-items: center;
     }
     #limpiar {
-      margin-left: auto;
+      margin-left: 20px; /* Espacio para separar el botón Limpiar */
     }
     .figura {
       width: 48px;
@@ -259,6 +257,7 @@
       .tempo-text { font-size: 11px; padding: 2px 5px; left: 10px; }
       .note-label { font-size: 12px; padding: 3px 6px; }
       .nota .plus, .nota .minus { width: 20px; height: 20px; line-height: 18px; font-size: 0.8em; }
+      #limpiar { margin-left: 15px; }
     }
   </style>
 </head>
@@ -307,13 +306,11 @@
       <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
     </div>
     <div id="controles-otros">
-      <div>
-        <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
-        <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
-        <input type="file" id="file-input" accept=".json" style="display:none">
-        <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
-        <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
-      </div>
+      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
+      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
+      <input type="file" id="file-input" accept=".json" style="display:none">
+      <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
+      <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
       <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
     </div>
   </div>
@@ -327,9 +324,9 @@
     // CONFIGURACIÓN
     let MAX_LINE_WIDTH = Math.max(280, container.clientWidth - 40);
     const FIRST_STAVE_WIDTH = 250;
-    const minStaveWidth = 100;
+    const minStaveWidth = 120; // Aumentado para dar más espacio a corcheas
     const lineHeight = 100;
-    const noteWidthFactors = { w: 40, h: 45, q: 50, '8': 60 };
+    const noteWidthFactors = { w: 40, h: 45, q: 50, '8': 65 }; // Ajustado para corcheas
 
     let width = Math.max(280, container.clientWidth);
     let currentHeight = 240;
@@ -459,7 +456,7 @@
             let w = (ci === 0 && lineIndex === 0) ? FIRST_STAVE_WIDTH : minStaveWidth;
             if (c.notas.length) {
               let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
-              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 30);
+              w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 40); // Aumentado para evitar desbordamiento
             }
 
             if (currentLineWidth + w > MAX_LINE_WIDTH) {
@@ -508,7 +505,7 @@
             c.stave = stave;
 
             if (c.notas.length) {
-              formatter.format([voice], c.staveWidth - 30);
+              formatter.format([voice], c.staveWidth - 40); // Ajustado para mejor alineación
               voice.draw(context, stave);
             }
 
@@ -821,20 +818,26 @@
 
       let targetLine = currentLine;
       let targetCompas = lines[currentLine].length - 1;
+      let minDistance = Infinity;
 
       lines.forEach((line, li) => {
         let x = 10;
         line.forEach((c, ci) => {
-          const distance = Math.abs(clickX - (x + c.staveWidth / 2));
-          if (distance < 50 && !c.closed) {
-            targetLine = li;
-            targetCompas = ci;
+          if (!c.closed) {
+            const staveCenter = x + c.staveWidth / 2;
+            const distance = Math.abs(clickX - staveCenter);
+            if (distance < minDistance) {
+              minDistance = distance;
+              targetLine = li;
+              targetCompas = ci;
+            }
           }
           x += c.staveWidth;
         });
       });
 
-      if (lines[targetLine].length <= targetCompas || lines[targetLine][targetCompas].closed) {
+      // Si el compás está cerrado o no existe, intentar usar o crear uno nuevo
+      if (!lines[targetLine] || targetCompas >= lines[targetLine].length || lines[targetLine][targetCompas].closed) {
         if (lines[targetLine].length >= Math.floor(MAX_LINE_WIDTH / minStaveWidth)) {
           lines.push([{ notas: [], beats: 0, closed: false, staveWidth: minStaveWidth }]);
           targetLine = lines.length - 1;
