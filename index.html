@@ -34,10 +34,49 @@
     }
     header img { height: 40px; width: auto; }
 
-    /* 🎵 BOTÓN LABORATORIO MUSICAL */
+    #policyIcon {
+      display: none;
+      position: absolute;
+      right: 12px;
+      font-size: 22px;
+      color: #00ffcc;
+      cursor: pointer;
+      transition: transform .3s ease;
+    }
+    #policyIcon:hover { transform: rotate(30deg); }
+    @media (max-width:600px) { #policyIcon { display: block; } }
+
+    .container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* PANEL IZQUIERDO CON MAXIMILIAN Y BOTÓN */
+    .left-panel {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,17,23,0.9);
+      border-right: 2px solid #00ffcc;
+      position: relative;
+    }
+    .left-panel img {
+      max-width: 220px;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid #00ffcc;
+      box-shadow: 0 0 15px #00ffcc88;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .left-panel img:hover { transform: scale(1.05); }
+
+    /* 🎵 BOTÓN LABORATORIO MUSICAL ENCIMA DEL DIBUJO */
     #labButton {
       position: absolute;
-      top: -18px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,255,204,0.08);
@@ -65,41 +104,6 @@
       50% { transform: translateX(-50%) translateY(-3px); }
     }
 
-    #policyIcon {
-      display: none;
-      position: absolute;
-      right: 12px;
-      font-size: 22px;
-      color: #00ffcc;
-      cursor: pointer;
-      transition: transform .3s ease;
-    }
-    #policyIcon:hover { transform: rotate(30deg); }
-    @media (max-width:600px) { #policyIcon { display: block; } }
-
-    .container {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-    .left-panel {
-      display: none;
-      flex: 1;
-      align-items: center;
-      justify-content: center;
-      background: rgba(13,17,23,0.9);
-      border-right: 2px solid #00ffcc;
-    }
-    .left-panel img {
-      max-width: 220px;
-      height: auto;
-      border-radius: 10px;
-      border: 2px solid #00ffcc;
-      box-shadow: 0 0 15px #00ffcc88;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .left-panel img:hover { transform: scale(1.05); }
     .chat-panel {
       flex: 2;
       display: flex;
@@ -108,6 +112,7 @@
       height: 100%;
     }
     @media (min-width:768px) { .left-panel { display: flex; } }
+
     #chat {
       flex: 1;
       overflow-y: auto;
@@ -237,9 +242,6 @@
 </head>
 <body>
   <header>
-    <div id="labButton" onclick="window.open('https://maximilian23.com/lab23/', '_blank')" title="Ir al Laboratorio Musical">
-      🎵 Laboratorio Musical
-    </div>
     <img src="Cabeza.png" alt="Maximilian">
     Maximilian 23
     <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
@@ -247,6 +249,9 @@
 
   <div class="container">
     <div class="left-panel">
+      <div id="labButton" onclick="window.open('https://maximilian23.com/lab23/', '_blank')" title="Ir al Laboratorio Musical">
+        🎵 Laboratorio Musical
+      </div>
       <img id="maxImage" src="max.png" alt="Maximilian grande">
     </div>
 
@@ -276,7 +281,6 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    // 🧩 LINKIFY MEJORADO
     function linkify(text) {
       if (!text) return "";
       if (text.includes("<a ")) return text;
