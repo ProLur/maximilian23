@@ -33,6 +33,38 @@
       position: relative;
     }
     header img { height: 40px; width: auto; }
+
+    /* 🎵 BOTÓN LABORATORIO MUSICAL */
+    #labButton {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,255,204,0.08);
+      color: #00ffcc;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      border: 1px solid #00ffcc88;
+      border-radius: 20px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 6px #00ffcc;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 10px #00ffcc55;
+      z-index: 10;
+      animation: float 3s ease-in-out infinite;
+    }
+    #labButton:hover {
+      background: rgba(0,255,204,0.2);
+      box-shadow: 0 0 12px #00ffcc;
+      transform: translateX(-50%) scale(1.05);
+    }
+    @keyframes float {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-3px); }
+    }
+
     #policyIcon {
       display: none;
       position: absolute;
@@ -205,6 +237,9 @@
 </head>
 <body>
   <header>
+    <div id="labButton" onclick="window.open('https://maximilian23.com/lab23/', '_blank')" title="Ir al Laboratorio Musical">
+      🎵 Laboratorio Musical
+    </div>
     <img src="Cabeza.png" alt="Maximilian">
     Maximilian 23
     <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
@@ -243,24 +278,14 @@
 
     // 🧩 LINKIFY MEJORADO
     function linkify(text) {
-  if (!text) return "";
-  if (text.includes("<a ")) return text;
-
-  // Detecta enlaces con http(s) o www, y limpia signos finales
-  const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
-
-  return text.replace(urlRegex, (match) => {
-    // 1️⃣ Limpia caracteres finales no deseados
-    let clean = match.trim().replace(/[.,!?;:]+$/, "");
-
-    // 2️⃣ Añade https:// si solo empieza por www
-    if (!/^https?:\/\//i.test(clean)) {
-      clean = "https://" + clean;
-    }
-
-    // 3️⃣ Devuelve enlace clicable
-    return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
-  });
+      if (!text) return "";
+      if (text.includes("<a ")) return text;
+      const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
+      return text.replace(urlRegex, (match) => {
+        let clean = match.trim().replace(/[.,!?;:]+$/, "");
+        if (!/^https?:\/\//i.test(clean)) clean = "https://" + clean;
+        return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
+      });
     }
 
     function typeWriterEffect(el, text, delay = 30, done = null) {
