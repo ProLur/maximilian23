@@ -2,48 +2,83 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Dibujo Paso a Paso</title>
+<title>Búho Paso a Paso</title>
 <style>
   body {
     background: #fafafa;
     font-family: sans-serif;
     text-align: center;
+    padding-top: 20px;
   }
-  svg {
+
+  #buho {
     width: 300px;
     margin-top: 30px;
+  }
+
+  .instruccion {
+    font-size: 18px;
+    margin-top: 20px;
   }
 </style>
 </head>
 <body>
 
-<h2>Pulsa ESPACIO para dibujar poco a poco</h2>
+<h2>Dibujo paso a paso</h2>
+<p class="instruccion">Pulsa la <strong>barra espaciadora</strong> para revelar el siguiente trazo</p>
 
-<svg id="dibujo" viewBox="0 0 200 200" stroke="black" fill="none" stroke-width="3">
-  <!-- Ejemplo: una carita tonta hecha de varios trazos -->
-  <path d="M100 20 A80 80 0 1 1 99.9 20" style="display:none"/> <!-- contorno -->
-  <path d="M70 80 A10 10 0 1 1 69.9 80" style="display:none"/>   <!-- ojo izq -->
-  <path d="M130 80 A10 10 0 1 1 129.9 80" style="display:none"/> <!-- ojo der -->
-  <path d="M70 120 Q100 150 130 120" style="display:none"/>      <!-- sonrisa -->
+<svg id="buho" viewBox="0 0 200 200" stroke="black" fill="none" stroke-width="4">
+  <!-- 1. Contorno cabeza/cuerpo -->
+  <path d="M100 20 
+           C60 20, 40 50, 40 90
+           C40 140, 60 170, 100 180
+           C140 170, 160 140, 160 90
+           C160 50, 140 20, 100 20Z" style="display:none"/>
+
+  <!-- 2. Ojo izquierdo -->
+  <circle cx="75" cy="80" r="18" style="display:none"/>
+
+  <!-- 3. Ojo derecho -->
+  <circle cx="125" cy="80" r="18" style="display:none"/>
+
+  <!-- 4. Pupila izquierda -->
+  <circle cx="75" cy="80" r="7" style="display:none"/>
+
+  <!-- 5. Pupila derecha -->
+  <circle cx="125" cy="80" r="7" style="display:none"/>
+
+  <!-- 6. Pico -->
+  <path d="M95 100 L105 100 L100 112 Z" style="display:none"/>
+
+  <!-- 7. Ala izquierda -->
+  <path d="M70 110 
+           C55 130, 55 150, 75 160" style="display:none"/>
+
+  <!-- 8. Ala derecha -->
+  <path d="M130 110 
+           C145 130, 145 150, 125 160" style="display:none"/>
+
+  <!-- 9. Patitas -->
+  <path d="M90 175 L90 185 M110 175 L110 185" style="display:none"/>
 </svg>
 
 <script>
-let paths = Array.from(document.querySelectorAll("#dibujo path"));
-let index = 0;
+  let trazos = Array.from(document.querySelectorAll("#buho path, #buho circle"));
+  let paso = 0;
 
-function mostrarSiguiente() {
-  if (index < paths.length) {
-    paths[index].style.display = "block";
-    index++;
+  function mostrarSiguiente() {
+    if (paso < trazos.length) {
+      trazos[paso].style.display = "block";
+      paso++;
+    }
   }
-}
 
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") {
-    e.preventDefault();
-    mostrarSiguiente();
-  }
-});
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+      e.preventDefault();
+      mostrarSiguiente();
+    }
+  });
 </script>
 
 </body>
