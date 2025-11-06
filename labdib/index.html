@@ -2,68 +2,52 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Búho Paso a Paso</title>
+<title>Personaje estilo Ghibli - Dibujado paso a paso</title>
 <style>
   body {
-    background: #fafafa;
+    background:#faf7ef;
     font-family: sans-serif;
     text-align: center;
     padding-top: 20px;
+    user-select: none;
+    touch-action: manipulation;
   }
 
-  #buho {
-    width: 300px;
-    margin-top: 30px;
+  svg {
+    width: 60vw;
+    max-width: 380px;
+    margin-top: 25px;
   }
 
-  .instruccion {
+  p {
     font-size: 18px;
-    margin-top: 20px;
+    margin-top: 10px;
   }
 </style>
 </head>
 <body>
 
-<h2>Dibujo paso a paso</h2>
-<p class="instruccion">Pulsa la <strong>barra espaciadora</strong> para revelar el siguiente trazo</p>
+<h2>Personaje estilo Studio Ghibli</h2>
+<p>Toca la pantalla para dibujar paso a paso.</p>
 
-<svg id="buho" viewBox="0 0 200 200" stroke="black" fill="none" stroke-width="4">
-  <!-- 1. Contorno cabeza/cuerpo -->
-  <path d="M100 20 
-           C60 20, 40 50, 40 90
-           C40 140, 60 170, 100 180
-           C140 170, 160 140, 160 90
-           C160 50, 140 20, 100 20Z" style="display:none"/>
+<svg id="gibli" viewBox="0 0 300 300" stroke="black" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
 
-  <!-- 2. Ojo izquierdo -->
-  <circle cx="75" cy="80" r="18" style="display:none"/>
+  <path d="M150 80 C125 80, 110 100, 110 125 C110 160, 125 180, 150 180 C175 180, 190 160, 190 125 C190 100, 175 80, 150 80Z" style="display:none"/>
+  <path d="M120 105 C135 90, 165 90, 180 105" style="display:none"/>
+  <path d="M120 105 C110 120, 115 135, 125 140" style="display:none"/>
+  <path d="M180 105 C190 120, 185 135, 175 140" style="display:none"/>
+  <path d="M135 125 C138 130, 138 130, 135 135" style="display:none"/>
+  <path d="M165 125 C162 130, 162 130, 165 135" style="display:none"/>
+  <path d="M142 150 Q150 158, 158 150" style="display:none"/>
+  <path d="M145 180 L145 205 M155 180 L155 205" style="display:none"/>
+  <path d="M120 210 C135 195, 165 195, 180 210" style="display:none"/>
+  <path d="M120 210 C115 230, 115 245, 125 255 M180 210 C185 230, 185 245, 175 255" style="display:none"/>
+  <path d="M125 255 C140 270, 160 270, 175 255" style="display:none"/>
 
-  <!-- 3. Ojo derecho -->
-  <circle cx="125" cy="80" r="18" style="display:none"/>
-
-  <!-- 4. Pupila izquierda -->
-  <circle cx="75" cy="80" r="7" style="display:none"/>
-
-  <!-- 5. Pupila derecha -->
-  <circle cx="125" cy="80" r="7" style="display:none"/>
-
-  <!-- 6. Pico -->
-  <path d="M95 100 L105 100 L100 112 Z" style="display:none"/>
-
-  <!-- 7. Ala izquierda -->
-  <path d="M70 110 
-           C55 130, 55 150, 75 160" style="display:none"/>
-
-  <!-- 8. Ala derecha -->
-  <path d="M130 110 
-           C145 130, 145 150, 125 160" style="display:none"/>
-
-  <!-- 9. Patitas -->
-  <path d="M90 175 L90 185 M110 175 L110 185" style="display:none"/>
 </svg>
 
 <script>
-  let trazos = Array.from(document.querySelectorAll("#buho path, #buho circle"));
+  let trazos = Array.from(document.querySelectorAll("#gibli path"));
   let paso = 0;
 
   function mostrarSiguiente() {
@@ -73,12 +57,9 @@
     }
   }
 
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
-      e.preventDefault();
-      mostrarSiguiente();
-    }
-  });
+  // Click / Tap en toda la pantalla
+  document.addEventListener("click", mostrarSiguiente);
+  document.addEventListener("touchstart", mostrarSiguiente);
 </script>
 
 </body>
