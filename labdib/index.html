@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dibujo Paso a Paso</title>
+<style>
+  body {
+    background: #fafafa;
+    font-family: sans-serif;
+    text-align: center;
+  }
+  svg {
+    width: 300px;
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Pulsa ESPACIO para dibujar poco a poco</h2>
+
+<svg id="dibujo" viewBox="0 0 200 200" stroke="black" fill="none" stroke-width="3">
+  <!-- Ejemplo: una carita tonta hecha de varios trazos -->
+  <path d="M100 20 A80 80 0 1 1 99.9 20" style="display:none"/> <!-- contorno -->
+  <path d="M70 80 A10 10 0 1 1 69.9 80" style="display:none"/>   <!-- ojo izq -->
+  <path d="M130 80 A10 10 0 1 1 129.9 80" style="display:none"/> <!-- ojo der -->
+  <path d="M70 120 Q100 150 130 120" style="display:none"/>      <!-- sonrisa -->
+</svg>
+
+<script>
+let paths = Array.from(document.querySelectorAll("#dibujo path"));
+let index = 0;
+
+function mostrarSiguiente() {
+  if (index < paths.length) {
+    paths[index].style.display = "block";
+    index++;
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    mostrarSiguiente();
+  }
+});
+</script>
+
+</body>
+</html>
