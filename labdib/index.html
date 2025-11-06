@@ -2,65 +2,146 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Personaje estilo Ghibli - Dibujado paso a paso</title>
+<title>Cobaya Bombero - Dibujo Paso a Paso</title>
 <style>
   body {
     background:#faf7ef;
     font-family: sans-serif;
-    text-align: center;
-    padding-top: 20px;
-    user-select: none;
+    text-align:center;
+    padding-top:15px;
     touch-action: manipulation;
+    user-select: none;
   }
-
   svg {
     width: 60vw;
-    max-width: 380px;
-    margin-top: 25px;
+    max-width: 420px;
+    margin-top:20px;
   }
-
   p {
-    font-size: 18px;
-    margin-top: 10px;
+    font-size:18px;
   }
 </style>
 </head>
 <body>
 
-<h2>Personaje estilo Studio Ghibli</h2>
-<p>Toca la pantalla para dibujar paso a paso.</p>
+<h2>Cobaya Bombero</h2>
+<p>Toca la pantalla para dibujar el personaje poco a poco.</p>
 
-<svg id="gibli" viewBox="0 0 300 300" stroke="black" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<svg id="coba" viewBox="0 0 300 300" stroke="black" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
 
-  <path d="M150 80 C125 80, 110 100, 110 125 C110 160, 125 180, 150 180 C175 180, 190 160, 190 125 C190 100, 175 80, 150 80Z" style="display:none"/>
-  <path d="M120 105 C135 90, 165 90, 180 105" style="display:none"/>
-  <path d="M120 105 C110 120, 115 135, 125 140" style="display:none"/>
-  <path d="M180 105 C190 120, 185 135, 175 140" style="display:none"/>
-  <path d="M135 125 C138 130, 138 130, 135 135" style="display:none"/>
-  <path d="M165 125 C162 130, 162 130, 165 135" style="display:none"/>
-  <path d="M142 150 Q150 158, 158 150" style="display:none"/>
-  <path d="M145 180 L145 205 M155 180 L155 205" style="display:none"/>
-  <path d="M120 210 C135 195, 165 195, 180 210" style="display:none"/>
-  <path d="M120 210 C115 230, 115 245, 125 255 M180 210 C185 230, 185 245, 175 255" style="display:none"/>
-  <path d="M125 255 C140 270, 160 270, 175 255" style="display:none"/>
+  <!-- 1 cabeza -->
+  <path d="M150 70 C120 70 100 95 100 130 C100 170 120 195 150 195 C180 195 200 170 200 130 C200 95 180 70 150 70Z" style="display:none"/>
+
+  <!-- 2 oreja izq -->
+  <path d="M115 100 C100 90 95 110 110 120" style="display:none"/>
+
+  <!-- 3 oreja der -->
+  <path d="M185 100 C200 90 205 110 190 120" style="display:none"/>
+
+  <!-- 4 hocico -->
+  <path d="M140 135 C140 150 160 150 160 135 C160 125 140 125 140 135Z" style="display:none"/>
+
+  <!-- 5 nariz -->
+  <circle cx="150" cy="135" r="3" style="display:none"/>
+
+  <!-- 6 boca -->
+  <path d="M145 145 Q150 150 155 145" style="display:none"/>
+
+  <!-- 7 ojo izq -->
+  <circle cx="135" cy="120" r="7" style="display:none"/>
+
+  <!-- 8 pupila izq -->
+  <circle cx="135" cy="120" r="3" style="display:none"/>
+
+  <!-- 9 ojo der -->
+  <circle cx="165" cy="120" r="7" style="display:none"/>
+
+  <!-- 10 pupila der -->
+  <circle cx="165" cy="120" r="3" style="display:none"/>
+
+  <!-- 11 casco contorno -->
+  <path d="M120 80 C130 60 170 60 180 80" style="display:none"/>
+
+  <!-- 12 casco parte superior -->
+  <path d="M130 65 C150 50 170 65 170 65" style="display:none"/>
+
+  <!-- 13 visera -->
+  <path d="M115 90 L185 90" style="display:none"/>
+
+  <!-- 14 placa casco -->
+  <path d="M145 80 L155 80 L155 90 L145 90Z" style="display:none"/>
+
+  <!-- 15 detalle llama -->
+  <path d="M150 80 C152 83 148 85 150 88" style="display:none"/>
+
+  <!-- 16 cuerpo contorno -->
+  <path d="M115 195 C110 230 110 255 150 260 C190 255 190 230 185 195Z" style="display:none"/>
+
+  <!-- 17 chaqueta frontal izq -->
+  <path d="M135 195 L135 245" style="display:none"/>
+
+  <!-- 18 chaqueta frontal der -->
+  <path d="M165 195 L165 245" style="display:none"/>
+
+  <!-- 19 línea media chaqueta -->
+  <path d="M150 195 L150 245" style="display:none"/>
+
+  <!-- 20 solapa izq -->
+  <path d="M135 205 L120 210" style="display:none"/>
+
+  <!-- 21 solapa der -->
+  <path d="M165 205 L180 210" style="display:none"/>
+
+  <!-- 22 brazo izq parte superior -->
+  <path d="M115 200 C100 220 105 245 120 250" style="display:none"/>
+
+  <!-- 23 brazo izq parte inferior -->
+  <path d="M120 250 C125 255 135 255 140 250" style="display:none"/>
+
+  <!-- 24 mano izq -->
+  <circle cx="138" cy="250" r="4" style="display:none"/>
+
+  <!-- 25 brazo der parte superior -->
+  <path d="M185 200 C200 220 195 245 180 250" style="display:none"/>
+
+  <!-- 26 brazo der parte inferior -->
+  <path d="M180 250 C175 255 165 255 160 250" style="display:none"/>
+
+  <!-- 27 mano der -->
+  <circle cx="162" cy="250" r="4" style="display:none"/>
+
+  <!-- 28 pierna izq -->
+  <path d="M140 260 L140 280" style="display:none"/>
+
+  <!-- 29 pie izq -->
+  <path d="M130 280 L150 280" style="display:none"/>
+
+  <!-- 30 pierna der -->
+  <path d="M160 260 L160 280" style="display:none"/>
+
+  <!-- 31 pie der -->
+  <path d="M150 280 L170 280" style="display:none"/>
+
+  <!-- 32 bolsillo chaqueta -->
+  <path d="M145 230 L155 230 L155 240 L145 240Z" style="display:none"/>
+
+  <!-- 33 colita -->
+  <path d="M110 230 C100 240 100 255 110 260" style="display:none"/>
 
 </svg>
 
 <script>
-  let trazos = Array.from(document.querySelectorAll("#gibli path"));
-  let paso = 0;
-
-  function mostrarSiguiente() {
-    if (paso < trazos.length) {
-      trazos[paso].style.display = "block";
-      paso++;
+  let pasos = Array.from(document.querySelectorAll("#coba path, #coba circle"));
+  let i = 0;
+  function siguiente() {
+    if (i < pasos.length) {
+      pasos[i].style.display = "block";
+      i++;
     }
   }
-
-  // Click / Tap en toda la pantalla
-  document.addEventListener("click", mostrarSiguiente);
-  document.addEventListener("touchstart", mostrarSiguiente);
+  document.addEventListener("click", siguiente);
+  document.addEventListener("touchstart", siguiente);
 </script>
 
 </body>
-</html>
+  </html>
