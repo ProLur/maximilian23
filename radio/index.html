@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radio Maximilian 23 - Emisora escolar CEIP Juan XXIII</title>
+
+  <style>
+    :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; }
+    body {
+      background: var(--bg); color: var(--glow); font-family: "Courier New", monospace;
+      text-align: center; margin: 0; padding: 16px; min-height: 100vh; display: flex;
+      flex-direction: column; justify-content: center;
+    }
+    .logo { width: 38vw; max-width: 150px; filter: drop-shadow(0 0 10px var(--glow)); }
+    h1 { text-shadow: 0 0 6px var(--glow); }
+    .terminal-box { border:1px solid var(--glow); padding:16px; max-width:420px; margin:auto; background:rgba(0,20,0,0.6); border-radius:8px; }
+    canvas { height: 60px; width: 100%; }
+    .btn-group { display:flex; gap:8px; margin-top:10px; justify-content:center; align-items:center; }
+
+    button {
+      flex:1; max-width:120px; background:var(--dark); border:1px solid var(--glow); color:var(--glow);
+      padding:10px 0; border-radius:6px; font-size:1rem; cursor:pointer; transition:0.2s; font-weight:bold;
+    }
+    button:hover { background:rgba(0,255,114,0.1); box-shadow:0 0 8px var(--glow); }
+
+    /* Slider volumen */
+    #volumeSlider {
+      width: 100px;
+      accent-color: #00ff72;
+      cursor: pointer;
+    }
+
+    .note { font-size:0.75rem; opacity:0.7; margin-top:12px; }
+  </style>
+</head>
+
+<body>
+
+  <img src="max2.png" class="logo" alt="Logo">
+
+  <h1>RADIO MAXIMILIAN 23</h1>
+
+  <div class="terminal-box">
+    <canvas id="oscilograma"></canvas>
+    <div id="nowPlaying">Cargando señal...</div>
+
+    <button id="startBtn" disabled>▶️ Iniciar Emisión</button>
+
+    <div class="btn-group" id="controls" style="display:none;">
+      <button id="nextBtn">⏭️</button>
+      <button id="playPauseBtn">⏸️</button>
+
+      <!-- NUEVA BARRA DE VOLUMEN -->
+      <input type="range" id="volumeSlider" min="0" max="100" value="80">
+    </div>
+
+    <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin" style="width:1px;height:1px;opacity:0;"></iframe>
+  </div>
+
+  <p class="note">Emisión 24/7 • Creado por Manuel</p>
+
+<script>
+let items = [], currentIndex = 0;
+let paused = false;
+
+const startBtn=document.getElementById("startBtn");
+const nextBtn=document.getElementById("nextBtn");
+const playPauseBtn=document.getElementById("playPauseBtn");
+const volumeSlider=document.getElementById("volumeSlider");
+const controls=document.getElementById("controls");
+const player=document.getElementById("player");
+const nowPlaying=document.getElementById("nowPlaying");
+
+// Control YT:
+function playVideo(){ try{ player.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo'}),'*'); }catch(e){} }
+function pauseVideo(){ try{ player.contentWindow.postMessage(JSON.stringify({event:'command',func:'pauseVideo'}),'*'); }catch(e){} }
+function setVolume(v){ try{ player.contentWindow.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[v]}),'*'); }catch(e){} }
+
+async function loadPlaylists(){
+  const res=await fetch("playlists.txt?t="+Date.now());
+  const lines=(await res.text()).split("\n").map(l=>l.trim()).filter(l=>l);
+  items = lines.map(url=>({id:url.split("v=")[1], title:url}));
+  preload();
+}
+function preload(){
+  currentIndex=Math.floor(Math.random()*items.length);
+  player.src=`https://www.youtube.com/embed/${items[currentIndex].id}?enablejsapi=1&mute=1`;
+  nowPlaying.textContent=items[currentIndex].title;
+  startBtn.disabled=false;
+}
+
+function startPlayback(){
+  startBtn.style.display="none";
+  controls.style.display="flex";
+  playVideo();
+  setTimeout(()=>setVolume(volumeSlider.value),600);
+}
+nextBtn.onclick=()=>{
+  currentIndex=(currentIndex+1)%items.length;
+  player.src=`https://www.youtube.com/embed/${items[currentIndex].id}?enablejsapi=1`;
+  nowPlaying.textContent=items[currentIndex].title;
+  playVideo();
+};
+
+// PLAY/PAUSE
+playPauseBtn.onclick=()=>{
+  if(!paused){
+    pauseVideo();
+    paused=true;
+    playPauseBtn.textContent="▶️";
+  } else {
+    playVideo();
+    paused=false;
+    playPauseBtn.textContent="⏸️";
+  }
+};
+
+// CONTROL VOLUMEN (dinámico)
+volumeSlider.oninput=()=> setVolume(volumeSlider.value);
+
+// Oscilograma fake suave
+const canvas=document.getElementById("oscilograma"), ctx=canvas.getContext("2d");
+function wave(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.beginPath(); ctx.strokeStyle="#00ff72";
+  for(let x=0;x<canvas.width;x++){ let y=30+Math.sin(x*0.05+performance.now()*0.005)*20; ctx.lineTo(x,y); }
+  ctx.stroke(); requestAnimationFrame(wave);
+}
+wave();
+
+startBtn.onclick=startPlayback;
+loadPlaylists();
+</script>
+
+</body>
+</html>
