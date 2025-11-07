@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Radio Web</title>
+<style>
+  body {
+    background: #101710;
+    color: #8cff8c;
+    font-family: monospace;
+    text-align: center;
+    padding-top: 40px;
+  }
+  #player {
+    width: 90%;
+    max-width: 600px;
+    height: 340px;
+    border: none;
+    border-radius: 12px;
+  }
+</style>
+</head>
+
+<body>
+<h1>🎙️ Radio Web</h1>
+<p>Toca reproducir para comenzar</p>
+
+<iframe id="player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+<script>
+async function loadPlaylists() {
+  const response = await fetch('playlists.txt');
+  const text = await response.text();
+  const lines = text.split('\n').map(x => x.trim()).filter(x => x.length > 0);
+  return lines;
+}
+
+function playlistToEmbed(url) {
+  // Extrae el ID de playlist
+  const match = url.match(/list=([^&]+)/);
+  const listID = match ? match[1] : null;
+  return `https://www.youtube.com/embed/videoseries?list=${listID}&autoplay=1&loop=1`;
+}
+
+async function start() {
+  const playlists = await loadPlaylists();
+  let index = 0;
+
+  function loadCurrent() {
+    document.getElementById('player').src = playlistToEmbed(playlists[index]);
+  }
+
+  loadCurrent();
+
+  // Cambiar de playlist cada 15 minutos (modificable)
+  const minutes = 15;
+  setInterval(() => {
+    index = (index + 1) % playlists.length;
+    loadCurrent();
+  }, minutes * 60 * 1000);
+}
+
+start();
+</script>
+
+</body>
+</html>
