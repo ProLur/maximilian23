@@ -49,9 +49,12 @@
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 
-  <p class="note">Emisión 24/7 • Duckling de música • Voz ultra metálica</p>
+  <p class="note">Emisión 24/7 • Título vía API • Voz metálica</p>
 
   <script>
+    // === TU API KEY (CÁMBIAA AQUÍ) ===
+    const YOUTUBE_API_KEY = 'TU_API_KEY_AQUI'; // ← ¡Pega tu clave aquí!
+
     // === FRASES FONÉTICAS ===
     const PHRASES = {
       start: "Estás es-cu-chan-do Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
@@ -68,14 +71,9 @@
     };
 
     const CONFIG = { 
-      voiceRate: 0.75,     // Más lento = más robótico
-      voicePitch: 0.3,     // MÁS GRAVE = MÁS MASCULINO
-      voiceVolume: 1.0, 
-      musicVolumeLow: 0.15,   // Volumen música al hablar
-      musicVolumeHigh: 1.0,   // Volumen normal
-      announcementInterval: 4, 
-      hourAnnounce: true, 
-      beepBeforeVoice: true 
+      voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0, 
+      musicVolumeLow: 0.15, musicVolumeHigh: 1.0, 
+      announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true 
     };
 
     const els = {
@@ -86,55 +84,75 @@
     };
 
     let playlists = [], currentIndex = 0, songCount = 0;
-    let isPlaying = false, voiceEnabled = false;
+    let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
-    let isSpeaking = false;
+    let currentVideoId = null;
 
-    // === CONTROL DE VOLUMEN DE MÚSICA ===
+    // === OBTENER TÍTULO Y AUTOR CON YOUTUBE API ===
+    async function fetchVideoTitle(videoId) {
+      if (!videoId || !YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'TU_API_KEY_AQUI') {
+        els.nowPlaying.innerHTML = 'API Key no configurada';
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${YOUTUBE_API_KEY}`);
+        const data = await res.json();
+        if (data.items && data.items[0]) {
+          const item = data.items[0].snippet;
+          let title = item.title || 'Sin título';
+          let artist = item.channelTitle || 'Artista desconocido';
+          artist = artist.replace(/ - Topic$/i, '').trim();
+
+          if (title.length > 50) title = title.substring(0, 47) + '...';
+          if (artist.length > 30) artist = artist.substring(0, 27) + '...';
+
+          els.nowPlaying.innerHTML = `<strong>${title}</strong><br><small>por ${artist}</small>`;
+        } else {
+          els.nowPlaying.innerHTML = 'Video no encontrado';
+        }
+      } catch (e) {
+        console.error("Error API:", e);
+        els.nowPlaying.innerHTML = 'Error de señal';
+      }
+    }
+
+    // === EXTRAER VIDEO ID DEL IFRAME ===
+    function getCurrentVideoId() {
+      try {
+        const src = els.player.src;
+        const url = new URL(src);
+        if (url.hostname.includes('youtube.com') && url.pathname.includes('/embed/')) {
+          return url.pathname.split('/embed/')[1].split('?')[0];
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    // === ACTUALIZAR TÍTULO CADA 8 SEGUNDOS ===
+    function updateNowPlaying() {
+      const videoId = getCurrentVideoId();
+      if (videoId && videoId !== currentVideoId) {
+        currentVideoId = videoId;
+        fetchVideoTitle(videoId);
+      }
+    }
+
+    // === CONTROL DE VOLUMEN ===
     function setMusicVolume(volume) {
       try {
         const iframeWin = els.player.contentWindow;
-        if (iframeWin && iframeWin.YT && iframeWin.YT.Player) {
-          const player = iframeWin.player;
-          if (player && typeof player.setVolume === 'function') {
-            player.setVolume(volume * 100);
-          }
+        if (iframeWin && iframeWin.postMessage) {
+          iframeWin.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'setVolume',
+            args: [volume * 100]
+          }), '*');
         }
-      } catch (e) {
-        console.warn("No se pudo ajustar volumen del iframe:", e);
-      }
+      } catch (e) {}
     }
 
-    // === OBTENER TÍTULO Y AUTOR ===
-    function updateNowPlaying() {
-      try {
-        const iframeDoc = els.player.contentDocument || els.player.contentWindow.document;
-        if (!iframeDoc) return;
-
-        const titleEl = iframeDoc.querySelector('.ytp-title-text a') || iframeDoc.querySelector('.ytp-title-link');
-        const channelEl = iframeDoc.querySelector('.ytp-title-channel a') || iframeDoc.querySelector('.ytp-title-channel-name');
-
-        let title = titleEl ? titleEl.textContent.trim() : 'Título desconocido';
-        let artist = channelEl ? channelEl.textContent.trim() : 'Artista desconocido';
-
-        artist = artist.replace(/ - Topic$/i, '').trim();
-
-        if (title.length > 50) title = title.substring(0, 47) + '...';
-        if (artist.length > 30) artist = artist.substring(0, 27) + '...';
-
-        els.nowPlaying.innerHTML = `<strong>${title}</strong><br><small>por ${artist}</small>`;
-      } catch (e) {
-        els.nowPlaying.innerHTML = 'Señal encriptada...';
-      }
-    }
-
-    // === CONTADOR DE OYENTES ===
-    function updateListeners() {
-      const count = Math.floor(Math.random() * (127 - 47 + 1)) + 47;
-      els.listenerCount.textContent = count;
-    }
-
-    // === VOZ ULTRA METÁLICA Y MASCULINA ===
+    // === VOZ METÁLICA ===
     function speak(text, callback) {
       if (!voiceEnabled || !('speechSynthesis' in window)) {
         if (callback) callback();
@@ -143,28 +161,17 @@
 
       isSpeaking = true;
       els.voiceOutput.textContent = '';
-      els.voiceOutput.style.opacity = 0;
-
-      // BAJAR MÚSICA
       setMusicVolume(CONFIG.musicVolumeLow);
 
       const utter = new SpeechSynthesisUtterance(text);
       let voices = speechSynthesis.getVoices();
       if (voices.length === 0) voices = speechSynthesis.getVoices();
-
-      // Seleccionar voz más grave
-      let candidates = voices
-        .filter(v => v.lang.startsWith('es'))
-        .map(v => ({ voice: v, score: (v.name.includes('male') || v.name.includes('hombre') ? 10 : 0) + (v.name.includes('deep') || v.name.includes('grave') ? 8 : 0) }))
-        .sort((a, b) => b.score - a.score);
-
-      let selectedVoice = candidates[0]?.voice || voices.find(v => v.lang.startsWith('es')) || voices[0];
+      let selectedVoice = voices.find(v => v.lang.startsWith('es')) || voices[0];
       utter.voice = selectedVoice;
       utter.rate = CONFIG.voiceRate;
-      utter.pitch = CONFIG.voicePitch;  // MÁS GRAVE
+      utter.pitch = CONFIG.voicePitch;
       utter.volume = CONFIG.voiceVolume;
 
-      // BEEP
       if (CONFIG.beepBeforeVoice) {
         els.beep.currentTime = 0;
         els.beep.play().catch(() => {});
@@ -172,7 +179,6 @@
 
       utter.onend = () => {
         isSpeaking = false;
-        // SUBIR MÚSICA
         setTimeout(() => setMusicVolume(CONFIG.musicVolumeHigh), 300);
         if (callback) callback();
       };
@@ -241,11 +247,12 @@
       const url = generateEmbedUrl(playlists[currentIndex]);
       if (!url) return;
 
+      currentVideoId = null;
       els.player.src = '';
       setTimeout(() => { 
         els.player.src = url; 
         els.nowPlaying.innerHTML = 'Conectando...';
-        setMusicVolume(CONFIG.musicVolumeHigh); // Asegurar volumen alto
+        setMusicVolume(CONFIG.musicVolumeHigh);
       }, 150);
 
       songCount++;
@@ -275,98 +282,17 @@
         }
       }, 60000);
 
-      // Contador oyentes
       if (listenerInterval) clearInterval(listenerInterval);
-      listenerInterval = setInterval(updateListeners, 30000);
-      updateListeners();
+      listenerInterval = setInterval(() => {
+        const count = Math.floor(Math.random() * (127 - 47 + 1)) + 47;
+        els.listenerCount.textContent = count;
+      }, 30000);
+      els.listenerCount.textContent = Math.floor(Math.random() * 80) + 47;
 
-      // Título en vivo
       if (titleCheckInterval) clearInterval(titleCheckInterval);
-      titleCheckInterval = setInterval(updateNowPlaying, 5000);
+      titleCheckInterval = setInterval(updateNowPlaying, 8000);
 
       isPlaying = true;
     }
 
-    // === DETENER ===
-    function stopRadio() {
-      isPlaying = false;
-      voiceEnabled = false;
-      speechSynthesis.cancel();
-      els.player.src = '';
-      if (checkInterval) clearInterval(checkInterval);
-      if (listenerInterval) clearInterval(listenerInterval);
-      if (titleCheckInterval) clearInterval(titleCheckInterval);
-      checkInterval = listenerInterval = titleCheckInterval = null;
-
-      els.status.textContent = 'Emisión detenida.';
-      els.nowPlaying.innerHTML = 'Silencio en la frecuencia...';
-      els.controls.style.display = 'none';
-      els.startBtn.style.display = 'block';
-      els.listenerCount.textContent = '0';
-      isSpeaking = false;
-    }
-
-    // === BOTONES ===
-    els.startBtn.addEventListener('click', () => {
-      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      audioContext.resume();
-      voiceEnabled = true;
-      startRadio();
-    });
-
-    els.nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % playlists.length;
-      loadNewEntry();
-    });
-
-    els.stopBtn.addEventListener('click', () => {
-      speak(PHRASES.pause, () => { stopRadio(); });
-    });
-
-    // === OSCILOGRAMA ===
-    function initOscilloscope() {
-      const canvas = els.canvas;
-      const ctx = canvas.getContext('2d');
-      function resize() {
-        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-        canvas.height = 60 * window.devicePixelRatio;
-        canvas.style.height = '60px';
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      }
-      resize();
-      window.addEventListener('resize', resize);
-
-      let t = 0;
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'var(--glow)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        const w = canvas.offsetWidth;
-        const h = 60;
-        t += 0.8;
-        for (let x = 0; x <= w; x += 2) {
-          const phase = (x / w) * Math.PI * 4 + t * 0.02;
-          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
-          const y = h / 2 + amp;
-          ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-        requestAnimationFrame(draw);
-      }
-      draw();
-    }
-
-    // === INICIALIZAR ===
-    window.addEventListener('load', async () => {
-      if ('speechSynthesis' in window) {
-        speechSynthesis.onvoiceschanged = () => {};
-        speechSynthesis.getVoices();
-      }
-      await loadPlaylists();
-      initOscilloscope();
-      els.startBtn.disabled = false;
-    });
-  </script>
-</body>
-</html>
+    // === DETENER
