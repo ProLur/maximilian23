@@ -101,7 +101,7 @@
     <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls" style="display:none;">
       <button id="nextBtn">Siguiente</button>
-      <button id="stopBtn">Pausar</button>
+      <button id="muteBtn">Mute</button>
     </div>
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
@@ -110,8 +110,8 @@
   <script>
     const PHRASES = {
       start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
-      pause: "Emisión pausada. Volveremos pronto.",
-      resume: "Emisión reanudada.",
+      mute: "Sonido silenciado.",
+      unmute: "Volumen restaurado.",
       hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
       ads: [
         "Transmisión en directo desde el ciberespacio.",
@@ -130,7 +130,7 @@
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
-      stopBtn: document.getElementById('stopBtn'),
+      muteBtn: document.getElementById('muteBtn'),
       controls: document.getElementById('controls'),
       player: document.getElementById('player'),
       status: document.getElementById('status'),
@@ -144,7 +144,7 @@
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
-    let isPaused = false, pauseTime = 0;
+    let isMuted = false;
 
     // === CONTROLES YOUTUBE ===
     function playVideo() {
@@ -153,15 +153,14 @@
     function pauseVideo() {
       try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo' }), '*'); } catch(e) {}
     }
+    function setVolume(volume) {
+      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [volume] }), '*'); } catch(e) {}
+    }
     function unMuteAndSetVolume() {
-      try {
-        const win = els.player.contentWindow;
-        win?.postMessage(JSON.stringify({ event: 'command', func: 'unMute' }), '*');
-        win?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*');
-      } catch(e) {}
+      setVolume(100);
     }
 
-    // === CARGAR VIDEO AL INICIO (sin autoplay) ===
+    // === CARGAR VIDEO AL INICIO ===
     function preloadFirstVideo() {
       if (!items.length) return;
       currentIndex = Math.floor(Math.random() * items.length);
@@ -174,15 +173,15 @@
       els.startBtn.disabled = false;
     }
 
-    // === REPRODUCIR AL PULSAR INICIAR ===
+    // === INICIAR EMISIÓN ===
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
       els.status.textContent = "";
-      isPaused = false;
-      els.stopBtn.textContent = 'Pausar';
+      isMuted = false;
+      els.muteBtn.textContent = 'Mute';
 
       speak(PHRASES.start, () => {
         playVideo();
@@ -197,7 +196,7 @@
       updateListeners();
     }
 
-    // === CARGAR Y REPRODUCIR NUEVO ===
+    // === SIGUIENTE CANCIÓN ===
     function loadAndPlayNext() {
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
@@ -210,15 +209,13 @@
         updateNowPlaying();
         setTimeout(() => {
           playVideo();
-          setTimeout(unMuteAndSetVolume, 800);
+          setTimeout(() => setVolume(isMuted ? 0 : 100), 300);
         }, 800);
       }, 200);
 
       songCount++;
       playAnnouncement();
       els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
-      isPaused = false;
-      els.stopBtn.textContent = 'Pausar';
     }
 
     // === RESTO ===
@@ -267,13 +264,13 @@
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
-      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [15] }), '*'); } catch(e){}
+      setVolume(15);
       const utter = new SpeechSynthesisUtterance(text);
       const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
       utter.voice = voice;
       utter.rate = CONFIG.voiceRate; utter.pitch = CONFIG.voicePitch; utter.volume = CONFIG.voiceVolume;
       if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
-      utter.onend = () => { isSpeaking = false; setTimeout(() => { try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*'); } catch(e){} }, 300); cb?.(); };
+      utter.onend = () => { isSpeaking = false; setTimeout(() => setVolume(isMuted ? 0 : 100), 300); cb?.(); };
       speechSynthesis.cancel(); speechSynthesis.speak(utter);
     }
 
@@ -287,7 +284,7 @@
     }
 
     function stopRadio() {
-      isPlaying = false; voiceEnabled = false; isPaused = false;
+      isPlaying = false; voiceEnabled = false;
       pauseVideo();
       speechSynthesis.cancel();
       els.player.src = '';
@@ -297,7 +294,8 @@
       els.controls.style.display = 'none';
       els.startBtn.style.display = 'block';
       els.listenerCount.textContent = '0';
-      els.stopBtn.textContent = 'Pausar';
+      els.muteBtn.textContent = 'Mute';
+      isMuted = false;
     }
 
     // === BOTONES ===
@@ -309,87 +307,32 @@
       }).catch(() => els.status.textContent = "Error de audio. Recarga.");
     });
 
-    // === PLAY / PAUSA ===
-    els.stopBtn.addEventListener('click', () => {
+    // === MUTE / UNMUTE ===
+    els.muteBtn.addEventListener('click', () => {
       if (!isPlaying) return;
 
-      if (isPaused) {
-        // REANUDAR
-        try {
-          els.player.contentWindow?.postMessage(JSON.stringify({
-            event: 'command',
-            func: 'seekTo',
-            args: [pauseTime]
-          }), '*');
-          setTimeout(() => {
-            playVideo();
-            setTimeout(unMuteAndSetVolume, 300);
-          }, 200);
-        } catch(e) {}
-        els.stopBtn.textContent = 'Pausar';
-        isPaused = false;
-        els.status.textContent = `Reproduciendo desde ${formatTime(pauseTime)}`;
-        speak(PHRASES.resume);
+      if (isMuted) {
+        setVolume(100);
+        els.muteBtn.textContent = 'Mute';
+        isMuted = false;
+        els.status.textContent = "Volumen restaurado";
+        speak(PHRASES.unmute);
       } else {
-        // PAUSAR
-        const handler = (event) => {
-          if (event.data && typeof event.data === 'string') {
-            try {
-              const data = JSON.parse(event.data);
-              if (data.event === 'infoDelivery' && data.info?.currentTime !== undefined) {
-                pauseTime = data.info.currentTime;
-                pauseVideo();
-                els.stopBtn.textContent = 'Play';
-                isPaused = true;
-                els.status.textContent = `Pausado en ${formatTime(pauseTime)}`;
-                speak(PHRASES.pause);
-                window.removeEventListener('message', handler);
-              }
-            } catch(e) {}
-          }
-        };
-        window.addEventListener('message', handler);
-
-        // Solicitar tiempo actual
-        try {
-          els.player.contentWindow?.postMessage(JSON.stringify({
-            event: 'command',
-            func: 'getCurrentTime'
-          }), '*');
-        } catch(e) {}
-
-        // Fallback por si no responde
-        setTimeout(() => {
-          if (!isPaused) {
-            pauseVideo();
-            pauseTime = 0;
-            els.stopBtn.textContent = 'Play';
-            isPaused = true;
-            els.status.textContent = "Pausado";
-            speak(PHRASES.pause);
-          }
-          window.removeEventListener('message', handler);
-        }, 1000);
+        setVolume(0);
+        els.muteBtn.textContent = 'Unmute';
+        isMuted = true;
+        els.status.textContent = "Sonido silenciado";
+        speak(PHRASES.mute);
       }
     });
 
-    els.nextBtn.addEventListener('click', () => {
-      isPaused = false;
-      els.stopBtn.textContent = 'Pausar';
-      loadAndPlayNext();
-    });
+    els.nextBtn.addEventListener('click', loadAndPlayNext);
 
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
       logo.classList.remove('glow-normal'); logo.classList.add('glow-intenso');
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
-
-    function formatTime(seconds) {
-      const m = Math.floor(seconds / 60);
-      const s = Math.floor(seconds % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
 
     function initOscilloscope() {
       const canvas = els.canvas; const ctx = canvas.getContext('2d');
@@ -426,4 +369,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
