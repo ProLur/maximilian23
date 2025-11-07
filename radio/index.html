@@ -124,7 +124,6 @@
     };
     const CONFIG = {
       voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
-      musicVolumeLow: 0.15, musicVolumeHigh: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true
     };
     const els = {
@@ -147,45 +146,54 @@
     let isMuted = false;
 
     // === CONTROLES YOUTUBE ===
-    function playVideo() {
-      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'playVideo' }), '*'); } catch(e) {}
+    function sendCommand(func, args = []) {
+      try {
+        els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+      } catch(e) { console.warn("Error enviando comando:", func); }
     }
-    function pauseVideo() {
-      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo' }), '*'); } catch(e) {}
-    }
-    function setVolume(volume) {
-      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [volume] }), '*'); } catch(e) {}
-    }
-    function unMuteAndSetVolume() {
-      setVolume(100);
-    }
+    function playVideo() { sendCommand('playVideo'); }
+    function pauseVideo() { sendCommand('pauseVideo'); }
+    function setVolume(volume) { sendCommand('setVolume', [volume]); }
+    function unMute() { sendCommand('unMute'); }
 
     // === CARGAR VIDEO AL INICIO ===
     function preloadFirstVideo() {
       if (!items.length) return;
       currentIndex = Math.floor(Math.random() * items.length);
       const { id, title } = items[currentIndex];
-      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=1&rel=0&modestbranding=1&enablejsapi=1&t=${Date.now()}`;
-      
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
       els.player.src = url;
       els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
       els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
       els.startBtn.disabled = false;
     }
 
-    // === INICIAR EMISIÓN ===
+    // === INICIAR EMISIÓN (CON SONIDO GARANTIZADO) ===
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
-      els.status.textContent = "";
+      els.status.textContent = "Iniciando emisión...";
       isMuted = false;
       els.muteBtn.textContent = 'Mute';
 
-      speak(PHRASES.start, () => {
-        playVideo();
-        setTimeout(unMuteAndSetVolume, 800);
+      // 1. RESUMIR AUDIO CONTEXT
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioContext.resume().then(() => {
+        // 2. ESPERAR A QUE EL IFRAME ESTÉ LISTO
+        setTimeout(() => {
+          playVideo();
+          setTimeout(() => {
+            unMute();
+            setVolume(100);
+            els.status.textContent = "Emisión en directo";
+            speak(PHRASES.start);
+          }, 1000);
+        }, 500);
+      }).catch(err => {
+        els.status.textContent = "Error de audio. Recarga.";
+        console.error(err);
       });
 
       titleCheckInterval = setInterval(updateNowPlaying, 3000);
@@ -201,7 +209,7 @@
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
       const { id, title } = items[currentIndex];
-      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=1&rel=0&modestbranding=1&enablejsapi=1&t=${Date.now()}`;
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
       
       els.player.src = '';
       setTimeout(() => {
@@ -209,8 +217,13 @@
         updateNowPlaying();
         setTimeout(() => {
           playVideo();
-          setTimeout(() => setVolume(isMuted ? 0 : 100), 300);
-        }, 800);
+          setTimeout(() => {
+            if (!isMuted) {
+              unMute();
+              setVolume(100);
+            }
+          }, 800);
+        }, 600);
       }, 200);
 
       songCount++;
@@ -300,18 +313,15 @@
 
     // === BOTONES ===
     els.startBtn.addEventListener('click', () => {
-      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      audioContext.resume().then(() => {
-        voiceEnabled = true;
-        startPlayback();
-      }).catch(() => els.status.textContent = "Error de audio. Recarga.");
+      voiceEnabled = true;
+      startPlayback();
     });
 
-    // === MUTE / UNMUTE ===
     els.muteBtn.addEventListener('click', () => {
       if (!isPlaying) return;
 
       if (isMuted) {
+        unMute();
         setVolume(100);
         els.muteBtn.textContent = 'Mute';
         isMuted = false;
@@ -369,4 +379,4 @@
     });
   </script>
 </body>
-</html>
+  </html>
