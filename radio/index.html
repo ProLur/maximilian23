@@ -140,6 +140,8 @@
       margin: 6px 0;
       opacity: 0.9;
       font-style: italic;
+      min-height: 1.2em;
+      transition: opacity 0.5s;
     }
 
     @media (max-width: 480px) {
@@ -162,27 +164,27 @@
     <canvas id="oscilograma"></canvas>
     <div class="status" id="status">Inicializando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
-    <button id="startBtn">▶ Iniciar Emisión</button>
-    <button id="nextBtn" style="display:none;">⏭ Siguiente</button>
+    <button id="startBtn">Iniciar Emisión</button>
+    <button id="nextBtn" style="display:none;">Siguiente</button>
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 
   <p class="note">
-    Emisión en directo 24/7 • Voz sintética en tiempo real • YouTube oficial
+    Emisión 24/7 • Locución masculina • YouTube oficial
   </p>
 
   <script>
-    // === Configuración ===
+    // === CONFIGURACIÓN ===
     const CONFIG = {
-      voiceRate: 1.1,
-      voicePitch: 1,
-      voiceVolume: 0.9,
-      announcementInterval: 4, // cada X canciones
+      voiceRate: 0.95,     // Más lento = más grave y profesional
+      voicePitch: 0.7,     // 0.7 = voz grave (másculina)
+      voiceVolume: 1.0,
+      announcementInterval: 4,
       hourAnnounce: true,
       beepBeforeVoice: true
     };
 
-    // === Elementos ===
+    // === ELEMENTOS ===
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
@@ -197,7 +199,7 @@
     let isPlaying = false, voiceEnabled = false;
     let audioContext = null, lastHour = -1;
 
-    // === Cargar playlists ===
+    // === CARGAR PLAYLISTS ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now());
@@ -207,12 +209,12 @@
         if (playlists.length === 0) throw new Error();
         els.status.textContent = `Frecuencia activa: ${playlists.length} bloques`;
       } catch {
-        els.status.textContent = 'Señal de emergencia activada';
+        els.status.textContent = 'Señal de emergencia';
         playlists = ['https://www.youtube.com/playlist?list=PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc'];
       }
     }
 
-    // === Convertir a embed ===
+    // === CONVERTIR A EMBED ===
     function toEmbed(url) {
       try {
         const list = new URL(url).searchParams.get('list');
@@ -220,22 +222,51 @@
       } catch { return ''; }
     }
 
-    // === Sintetizar voz ===
+    // === FUNCIÓN PARA ESTIMAR GRAVEDAD DE VOZ ===
+    function getVoicePitchScore(voice) {
+      const name = voice.name.toLowerCase();
+      let score = 0;
+      if (name.includes('male') || name.includes('hombre') || name.includes('man')) score += 10;
+      if (name.includes('deep') || name.includes('bass') || name.includes('grave')) score += 8;
+      if (name.includes('jorge') || name.includes('enrique') || name.includes('carlos')) score += 5;
+      return score;
+    }
+
+    // === SINTETIZAR VOZ (MASCULINA Y PROFESIONAL) ===
     function speak(text, callback) {
       if (!voiceEnabled || !('speechSynthesis' in window)) {
         if (callback) callback();
         return;
       }
 
-      // Mostrar texto
       els.voiceOutput.textContent = `"...${text}..."`;
       els.voiceOutput.style.opacity = 1;
 
       const utter = new SpeechSynthesisUtterance(text);
-      const voices = speechSynthesis.getVoices();
-      const esVoice = voices.find(v => v.lang.startsWith('es')) || voices[0];
-      
-      utter.voice = esVoice;
+      let voices = speechSynthesis.getVoices();
+
+      if (voices.length === 0) {
+        speechSynthesis.getVoices();
+        voices = speechSynthesis.getVoices();
+      }
+
+      // === BUSCAR VOZ MASCULINA EN ESPAÑOL ===
+      let candidates = voices
+        .filter(v => v.lang.startsWith('es'))
+        .map(v => ({ voice: v, score: getVoicePitchScore(v) }))
+        .sort((a, b) => b.score - a.score);
+
+      let selectedVoice = candidates[0]?.voice;
+
+      // === SI NO HAY ESPAÑOL, USAR CUALQUIER VOZ MASCULINA GRAVE ===
+      if (!selectedVoice) {
+        candidates = voices
+          .map(v => ({ voice: v, score: getVoicePitchScore(v) }))
+          .sort((a, b) => b.score - a.score);
+        selectedVoice = candidates[0]?.voice || voices[0];
+      }
+
+      utter.voice = selectedVoice;
       utter.rate = CONFIG.voiceRate;
       utter.pitch = CONFIG.voicePitch;
       utter.volume = CONFIG.voiceVolume;
@@ -248,10 +279,10 @@
       };
 
       utter.onend = () => {
-        els.voiceOutput.style.opacity = 0.6;
         setTimeout(() => {
-          els.voiceOutput.textContent = '';
-        }, 1000);
+          els.voiceOutput.style.opacity = 0.6;
+          setTimeout(() => { els.voiceOutput.textContent = ''; }, 1000);
+        }, 500);
         if (callback) callback();
       };
 
@@ -259,10 +290,11 @@
       speechSynthesis.speak(utter);
     }
 
-    // === Anuncios programados ===
+    // === ANUNCIOS ===
     function playAnnouncement() {
-      const hour = new Date().getHours();
-      const mins = new Date().getMinutes();
+      const now = new Date();
+      const hour = now.getHours();
+      const mins = now.getMinutes();
       const isNewHour = hour !== lastHour && mins < 5;
 
       let msg = '';
@@ -276,7 +308,8 @@
           "Sintoniza la señal verde. Radio Maximilian 23.",
           "Frecuencia activa. No cambies de canal.",
           "Aquí solo suena lo que importa.",
-          "Conectado. Escuchando. Transmitiendo."
+          "Conectado. Escuchando. Transmitiendo.",
+          "Señal clara. Volumen máximo."
         ];
         msg = frases[Math.floor(Math.random() * frases.length)];
       }
@@ -286,7 +319,7 @@
       }
     }
 
-    // === Iniciar radio ===
+    // === INICIAR RADIO ===
     function startRadio() {
       if (!playlists.length) return;
       const url = toEmbed(playlists[currentIndex]);
@@ -295,12 +328,11 @@
       els.player.src = url;
       songCount++;
       playAnnouncement();
-
       els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
       isPlaying = true;
     }
 
-    // === Botón Play (con voz) ===
+    // === BOTÓN INICIAR ===
     els.startBtn.addEventListener('click', () => {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -315,13 +347,13 @@
       });
     });
 
-    // === Siguiente ===
+    // === SIGUIENTE ===
     els.nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % playlists.length;
       startRadio();
     });
 
-    // === Oscilograma mejorado ===
+    // === OSCILOGRAMA ===
     function initOscilloscope() {
       const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
@@ -358,13 +390,12 @@
       draw();
     }
 
-    // === Detectar fin de video (aproximado) ===
+    // === DETECCIÓN APROXIMADA DE CANCIÓN ===
     let checkInterval;
     els.player.addEventListener('load', () => {
       if (isPlaying && !checkInterval) {
         checkInterval = setInterval(() => {
-          // YouTube no da eventos directos, pero podemos aproximar
-          if (Math.random() < 0.03) { // ~cada 3-5 min
+          if (Math.random() < 0.03) {
             songCount++;
             playAnnouncement();
             els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
@@ -373,9 +404,8 @@
       }
     });
 
-    // === Inicializar ===
+    // === INICIALIZAR ===
     window.addEventListener('load', async () => {
-      // Cargar voces
       if ('speechSynthesis' in window) {
         speechSynthesis.onvoiceschanged = () => {};
         speechSynthesis.getVoices();
