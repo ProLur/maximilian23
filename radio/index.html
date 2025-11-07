@@ -75,9 +75,7 @@
     button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
     button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
-    #startBtn {
-      margin-top: 12px;
-    }
+    #startBtn { margin-top: 12px; }
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
     .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
@@ -108,6 +106,7 @@
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
   <p class="note">Emisión 24/7 • Powered by YouTube • Creado por Manuel</p>
+
   <script>
     const PHRASES = {
       start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
@@ -145,7 +144,7 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
 
-    // === FORZAR REPRODUCCIÓN EN YOUTUBE (ANDROID) ===
+    // === FORZAR REPRODUCCIÓN EN YOUTUBE ===
     function playYouTube() {
       try {
         const iframeWin = els.player.contentWindow;
@@ -157,6 +156,7 @@
         }
       } catch (e) { console.warn('Error forzando play:', e); }
     }
+
     function pauseYouTube() {
       try {
         const iframeWin = els.player.contentWindow;
@@ -211,10 +211,10 @@
       }
     }
 
-    // === EMBED (sin autoplay) ===
+    // === EMBED URL ===
     function generateEmbedUrl(id) {
       const t = Date.now();
-      return `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=0&rel=0&modestbranding=1&t=${t}`;
+      return `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=0&rel=0&modestbranding=1&enablejsapi=1&t=${t}`;
     }
 
     // === MOSTRAR TÍTULO ===
@@ -235,9 +235,9 @@
       } catch (e) {}
     }
 
-    // === OYENTES: AHORA ENTRE 1 Y 3 ===
+    // === OYENTES: 1, 2 o 3 ===
     function updateListeners() {
-      els.listenerCount.textContent = Math.floor(Math.random() * 3) + 1; // 1, 2 o 3
+      els.listenerCount.textContent = Math.floor(Math.random() * 3) + 1;
     }
 
     function speak(text, cb) {
@@ -262,38 +262,48 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === CARGAR ELEMENTO (sin autoplay) ===
+    // === CARGAR VIDEO (sin autoplay) ===
     function loadNewEntry() {
       if (!isPlaying || !items.length) return;
       const { id } = items[currentIndex];
       const url = generateEmbedUrl(id);
-      els.player.src = '';
+
+      els.player.src = ''; // Limpiar
+
       setTimeout(() => {
         els.player.src = url;
         updateNowPlaying();
         setMusicVolume(CONFIG.musicVolumeHigh);
-      }, 150);
+
+        // Reproducir solo si ya se inició
+        if (isPlaying) {
+          setTimeout(playYouTube, 800);
+        }
+      }, 200);
+
       songCount++;
       playAnnouncement();
       els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
     }
 
-    // === INICIAR (FORZAR PLAY EN ANDROID) ===
+    // === INICIAR RADIO ===
     function startRadio() {
       if (!items.length || isPlaying) return;
       currentIndex = Math.floor(Math.random() * items.length);
       songCount = 0;
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
+
       speak(PHRASES.start, () => {
         loadNewEntry();
-        setTimeout(playYouTube, 500);
         if (titleCheckInterval) clearInterval(titleCheckInterval);
         titleCheckInterval = setInterval(updateNowPlaying, 3000);
       });
+
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03 && isPlaying) { songCount++; playAnnouncement(); }
       }, 60000);
+
       listenerInterval = setInterval(updateListeners, 30000);
       updateListeners();
       isPlaying = true;
@@ -303,8 +313,11 @@
     function stopRadio() {
       isPlaying = false; voiceEnabled = false;
       pauseYouTube();
-      speechSynthesis.cancel(); els.player.src = '';
-      clearInterval(checkInterval); clearInterval(listenerInterval); clearInterval(titleCheckInterval);
+      speechSynthesis.cancel(); 
+      els.player.src = '';
+      clearInterval(checkInterval); 
+      clearInterval(listenerInterval); 
+      clearInterval(titleCheckInterval);
       els.status.textContent = 'Emisión detenida.';
       els.nowPlaying.innerHTML = 'Silencio en la frecuencia...';
       els.controls.style.display = 'none';
@@ -314,17 +327,23 @@
 
     // === BOTONES ===
     els.startBtn.addEventListener('click', () => {
-      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
       audioContext.resume().then(() => {
         voiceEnabled = true;
         startRadio();
+      }).catch(err => {
+        console.error("Error AudioContext:", err);
+        els.status.textContent = "Error de audio. Recarga.";
       });
     });
+
     els.nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % items.length;
       loadNewEntry();
-      setTimeout(playYouTube, 500);
     });
+
     els.stopBtn.addEventListener('click', () => {
       speak(PHRASES.pause, stopRadio);
     });
@@ -332,13 +351,18 @@
     // === LOGO BRILLO ===
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
-      logo.classList.remove('glow-normal'); logo.classList.add('glow-intenso');
-      setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
+      logo.classList.remove('glow-normal'); 
+      logo.classList.add('glow-intenso');
+      setTimeout(() => { 
+        logo.classList.remove('glow-intenso'); 
+        logo.classList.add('glow-normal'); 
+      }, 3000);
     });
 
     // === OSCILOGRAMA ===
     function initOscilloscope() {
-      const canvas = els.canvas; const ctx = canvas.getContext('2d');
+      const canvas = els.canvas; 
+      const ctx = canvas.getContext('2d');
       function resize() {
         const dpr = window.devicePixelRatio;
         canvas.width = canvas.offsetWidth * dpr;
@@ -346,11 +370,14 @@
         canvas.style.height = '60px';
         ctx.scale(dpr, dpr);
       }
-      resize(); window.addEventListener('resize', resize);
+      resize(); 
+      window.addEventListener('resize', resize);
       let t = 0;
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'var(--glow)'; ctx.lineWidth = 2; ctx.beginPath();
+        ctx.strokeStyle = 'var(--glow)'; 
+        ctx.lineWidth = 2; 
+        ctx.beginPath();
         const w = canvas.offsetWidth, h = 60;
         t += 0.8;
         for (let x = 0; x <= w; x += 2) {
