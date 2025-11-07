@@ -2,48 +2,93 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radio Maximilian 23</title>
 
 <style>
   body {
-    background: #021b01;
+    background: #001400;
     color: #00ff72;
     font-family: "Courier New", monospace;
     text-align: center;
-    padding: 30px;
+    padding: 20px;
     overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Fondo radar animado */
+  body:before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 220vw; height: 220vw;
+    background: radial-gradient(circle, rgba(0,255,114,0.25) 3%, transparent 60%);
+    animation: radar 7s linear infinite;
+    opacity: 0.12;
+  }
+
+  @keyframes radar {
+    100% { transform: rotate(360deg); }
   }
 
   .logo {
-    width: 160px;
+    width: 45vw;
+    max-width: 200px;
     height: auto;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 0 6px #00ff72);
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 14px #00ff72);
   }
 
   h1 {
-    font-size: 32px;
-    margin: 10px 0 25px 0;
-    text-shadow: 0 0 6px #00ff72;
+    font-size: 7vw;
+    max-font-size: 34px;
+    text-shadow: 0 0 8px #00ff72;
+    margin-bottom: 20px;
   }
 
   .terminal-box {
     border: 1px solid #00ff72;
-    padding: 20px;
-    width: 90%;
+    padding: 18px;
+    width: 95%;
     max-width: 650px;
-    margin: 0 auto 30px auto;
+    margin: 0 auto 25px auto;
     border-radius: 8px;
-    box-shadow: 0 0 12px #00ff72;
+    box-shadow: 0 0 14px #00ff72;
+    background: rgba(0, 18, 0, 0.65);
   }
 
-  .note {
-    margin-top: 30px;
-    font-size: 12px;
-    opacity: 0.8;
+  /* Botones táctiles */
+  button {
+    background: #001f00;
+    border: 1px solid #00ff72;
+    color: #00ff72;
+    padding: 14px 26px;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.3s;
+    font-size: 4vw;
+    max-font-size: 18px;
+    margin-top: 12px;
+    width: 80%;
+    max-width: 330px;
+  }
+  button:hover {
+    background: #00ff72;
+    color: #001400;
   }
 
-  /* Ocultamos el video visual, dejamos solo el audio */
+  /* Oscilograma responsive */
+  #oscilograma {
+    width: 90%;
+    max-width: 380px;
+    height: 80px;
+    margin: 0 auto 16px auto;
+    display: block;
+    filter: drop-shadow(0 0 7px #00ff72);
+  }
+
+  /* Ocultar reproductor visual */
   #player {
     width: 1px;
     height: 1px;
@@ -51,32 +96,47 @@
     pointer-events: none;
     position: absolute;
   }
+
+  .note {
+    margin-top: 26px;
+    font-size: 3vw;
+    max-font-size: 13px;
+    opacity: 0.8;
+  }
 </style>
 </head>
 
 <body>
 
-<img src="max.png" class="logo" alt="Maximilian">
+<audio id="beep" src="beep.mp3" preload="auto"></audio>
 
+<img src="max2.png" class="logo" alt="Maximilian">
 <h1>RADIO MAXIMILIAN 23</h1>
 
 <div class="terminal-box">
-  <p>Presiona reproducir en el cuadro emergente si el navegador lo pide.</p>
+  <canvas id="oscilograma"></canvas>
+
+  <button id="startBtn">▶ Iniciar Radio</button>
+  <button id="nextBtn" style="display:none;">Siguiente playlist</button>
+
   <iframe id="player" allow="autoplay; encrypted-media"></iframe>
 </div>
 
 <p class="note">
-  La música proviene de YouTube.<br>
-  Esta web no almacena ni redistribuye contenido audiovisual.<br>
-  Se utiliza el reproductor oficial según los Términos de Uso de YouTube.
+  La música proviene de YouTube y se reproduce mediante su reproductor oficial.<br>
+  Esta web no almacena ni redistribuye contenido audiovisual.
 </p>
 
 <script>
+let playlists = [];
+let index = 0;
+let started = false;
+
+/* Cargar playlists */
 async function loadPlaylists() {
   const res = await fetch('playlists.txt');
   const text = await res.text();
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-  return lines.length > 0 ? lines[0] : null;
+  playlists = text.split('\n').map(l => l.trim()).filter(l => l);
 }
 
 function playlistToEmbed(url) {
@@ -85,14 +145,49 @@ function playlistToEmbed(url) {
   return `https://www.youtube.com/embed/videoseries?list=${listID}&autoplay=1&loop=1`;
 }
 
-async function start() {
-  const playlist = await loadPlaylists();
-  if (playlist) {
-    document.getElementById('player').src = playlistToEmbed(playlist);
-  }
+function loadCurrent() {
+  document.getElementById('player').src = playlistToEmbed(playlists[index]);
+  document.getElementById('beep').play();
 }
 
-start();
+/* Botón iniciar */
+document.getElementById('startBtn').onclick = () => {
+  if (!started) {
+    started = true;
+    loadCurrent();
+    document.getElementById('startBtn').style.display = "none";
+    document.getElementById('nextBtn').style.display = "inline-block";
+  }
+};
+
+/* Botón siguiente playlist */
+document.getElementById('nextBtn').onclick = () => {
+  index = (index + 1) % playlists.length;
+  loadCurrent();
+};
+
+/* Oscilograma */
+const canvas = document.getElementById('oscilograma');
+const ctx = canvas.getContext('2d');
+
+function drawOscilograma() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle = '#00ff72';
+  ctx.beginPath();
+  let t = Date.now() / 140;
+  for (let x = 0; x < canvas.width; x++) {
+    let y = (canvas.height/2) + Math.sin((x + t) / 7) * (canvas.height/3);
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  requestAnimationFrame(drawOscilograma);
+}
+drawOscilograma();
+
+/* Start */
+(async () => {
+  await loadPlaylists();
+})();
 </script>
 
 </body>
