@@ -126,7 +126,7 @@
     const CONFIG = {
       voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true,
-      listenerTimeout: 15 * 60 * 1000 // 15 minutos
+      listenerTimeout: 15 * 60 * 1000
     };
     const els = {
       startBtn: document.getElementById('startBtn'),
@@ -149,7 +149,7 @@
     let userId = null;
     let activeUsers = {};
 
-    // === IP SIMULADA (para pruebas locales) ===
+    // === IP SIMULADA ===
     function getUserId() {
       let id = localStorage.getItem('radio_user_id');
       if (!id) {
@@ -159,7 +159,7 @@
       return id;
     }
 
-    // === CONTADOR DE OYENTES (IP + 15 MIN) ===
+    // === OYENTES ===
     function addListener() {
       const id = getUserId();
       const now = Date.now();
@@ -168,7 +168,7 @@
         saveListeners();
         updateListenerCount();
       } else {
-        activeUsers[id] = now; // renueva tiempo
+        activeUsers[id] = now;
       }
     }
 
@@ -195,7 +195,7 @@
       const saved = localStorage.getItem('radio_active_users');
       if (saved) {
         activeUsers = JSON.parse(saved);
-        removeInactive(); // limpia al cargar
+        removeInactive();
       }
     }
 
@@ -203,11 +203,34 @@
       els.listenerCount.textContent = Object.keys(activeUsers).length;
     }
 
+    // === YOUTUBE API ===
+    function sendCommand(func, args = []) {
+      try {
+        els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+      } catch(e) { console.warn("Error enviando comando:", func); }
+    }
+    function playVideo() { sendCommand('playVideo'); }
+    function pauseVideo() { sendCommand('pauseVideo'); }
+    function setVolume(volume) { sendCommand('setVolume', [volume]); }
+    function unMute() { sendCommand('unMute'); }
+
+    // === CARGAR PRIMERA CANCIÓN (sin autoplay) ===
+    function preloadFirstVideo() {
+      if (!items.length) return;
+      currentIndex = Math.floor(Math.random() * items.length);
+      const { id, title } = items[currentIndex];
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
+      els.player.src = url;
+      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
+      els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
+      els.startBtn.disabled = false;
+    }
+
     // === INICIAR EMISIÓN ===
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
-      addListener(); // +1 oyente
+      addListener();
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
       els.status.textContent = "Iniciando emisión...";
@@ -233,33 +256,31 @@
       titleCheckInterval = setInterval(updateNowPlaying, 3000);
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
-        removeInactive(); // limpia inactivos
+        removeInactive();
       }, 60000);
       updateListenerCount();
     }
 
-    // === SIGUIENTE → SONIDO ON + BOTÓN "Mute" + SIN "Volumen restaurado" ===
+    // === SIGUIENTE → SUENA + autoplay=1 ===
     function loadAndPlayNext() {
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
       const { id, title } = items[currentIndex];
-      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
+      // AUTOPLAY=1 → SUENA AL CAMBIAR
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=1`;
       
       els.player.src = '';
       setTimeout(() => {
         els.player.src = url;
         updateNowPlaying();
         setTimeout(() => {
-          playVideo();
-          setTimeout(() => {
-            unMute();
-            setVolume(100);
-            els.muteBtn.textContent = 'Mute';
-            isMuted = false;
-            els.status.textContent = "Siguiente canción...";
-            speak(PHRASES.next); // SIN "Volumen restaurado"
-          }, 800);
-        }, 600);
+          unMute();
+          setVolume(100);
+          els.muteBtn.textContent = 'Mute';
+          isMuted = false;
+          els.status.textContent = "Siguiente canción...";
+          speak(PHRASES.next);
+        }, 800);
       }, 200);
 
       songCount++;
@@ -268,27 +289,6 @@
     }
 
     // === RESTO ===
-    function sendCommand(func, args = []) {
-      try {
-        els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
-      } catch(e) { console.warn("Error enviando comando:", func); }
-    }
-    function playVideo() { sendCommand('playVideo'); }
-    function pauseVideo() { sendCommand('pauseVideo'); }
-    function setVolume(volume) { sendCommand('setVolume', [volume]); }
-    function unMute() { sendCommand('unMute'); }
-
-    function preloadFirstVideo() {
-      if (!items.length) return;
-      currentIndex = Math.floor(Math.random() * items.length);
-      const { id, title } = items[currentIndex];
-      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
-      els.player.src = url;
-      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
-      els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
-      els.startBtn.disabled = false;
-    }
-
     function parseLine(line) {
       const parts = line.split(' - ');
       const urlPart = parts[0].trim();
@@ -382,7 +382,7 @@
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
 
-    // === OSCILOGRAMA EN VERDE MAXIMILIAN ===
+    // === OSCILOGRAMA VERDE ===
     function initOscilloscope() {
       const canvas = els.canvas; const ctx = canvas.getContext('2d');
       function resize() {
@@ -414,11 +414,11 @@
     // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
-      loadListeners(); // carga oyentes previos
+      loadListeners();
       await loadPlaylists();
       initOscilloscope();
-      setInterval(removeInactive, 60000); // limpia cada minuto
+      setInterval(removeInactive, 60000);
     });
   </script>
 </body>
-                                    </html>
+  </html>
