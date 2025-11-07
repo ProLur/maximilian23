@@ -5,165 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radio Maximilian 23</title>
   <style>
-    :root {
-      --glow: #00ff72;
-      --bg: #001400;
-      --dark: #001f00;
-    }
-
+    :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; }
     * { box-sizing: border-box; }
-
-    body {
-      background: var(--bg);
-      color: var(--glow);
-      font-family: "Courier New", monospace;
-      text-align: center;
-      margin: 0;
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      top: 50%; left: 50%;
-      width: 200vmax; height: 200vmax;
-      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
-      transform: translate(-50%, -50%);
-      animation: radar 12s linear infinite;
-      opacity: 0.08;
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    @keyframes radar {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    .logo {
-      width: 38vw;
-      max-width: 150px;
-      height: auto;
-      margin: 0 auto 12px;
-      display: block;
-      filter: drop-shadow(0 0 10px var(--glow));
-    }
-
-    h1 {
-      font-size: clamp(1.8rem, 6vw, 2.5rem);
-      margin: 0 0 18px 0;
-      text-shadow: 0 0 6px var(--glow);
-      line-height: 1.2;
-    }
-
-    .terminal-box {
-      border: 1px solid var(--glow);
-      padding: 16px;
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      border-radius: 8px;
-      box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
-      background: rgba(0, 20, 0, 0.7);
-      backdrop-filter: blur(2px);
-    }
-
-    #oscilograma {
-      width: 100%;
-      height: 60px;
-      display: block;
-      margin-bottom: 14px;
-      image-rendering: pixelated;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    button {
-      flex: 1;
-      max-width: 130px;
-      background: var(--dark);
-      border: 1px solid var(--glow);
-      color: var(--glow);
-      padding: 12px 0;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: rgba(0, 255, 114, 0.1);
-      box-shadow: 0 0 8px var(--glow);
-    }
-
-    button:active {
-      background: var(--glow);
-      color: var(--bg);
-      transform: scale(0.98);
-    }
-
-    #player {
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      position: absolute;
-      pointer-events: none;
-    }
-
-    .note {
-      margin-top: 20px;
-      font-size: 0.75rem;
-      opacity: 0.7;
-      max-width: 420px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.4;
-    }
-
-    .status {
-      font-size: 0.8rem;
-      margin-top: 8px;
-      opacity: 0.8;
-      min-height: 1.2em;
-    }
-
-    .voice-line {
-      font-size: 0.85rem;
-      margin: 6px 0;
-      opacity: 0.9;
-      font-style: italic;
-      min-height: 1.2em;
-      transition: opacity 0.5s;
-    }
-
-    @media (max-width: 480px) {
-      .terminal-box { padding: 14px; }
-      button { font-size: 0.9rem; padding: 10px 0; }
-      .btn-group { gap: 6px; }
-    }
+    body { background: var(--bg); color: var(--glow); font-family: "Courier New", monospace; text-align: center; margin: 0; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; overflow-x: hidden; position: relative; }
+    body::before { content: ""; position: fixed; top: 50%; left: 50%; width: 200vmax; height: 200vmax; background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%); transform: translate(-50%, -50%); animation: radar 12s linear infinite; opacity: 0.08; z-index: -1; pointer-events: none; }
+    @keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .logo { width: 38vw; max-width: 150px; height: auto; margin: 0 auto 12px; display: block; filter: drop-shadow(0 0 10px var(--glow)); }
+    h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin: 0 0 18px 0; text-shadow: 0 0 6px var(--glow); line-height: 1.2; }
+    .terminal-box { border: 1px solid var(--glow); padding: 16px; width: 100%; max-width: 420px; margin: 0 auto; border-radius: 8px; box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1); background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px); }
+    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; }
+    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+    button { flex: 1; max-width: 130px; background: var(--dark); border: 1px solid var(--glow); color: var(--glow); padding: 12px 0; border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer; transition: all 0.2s ease; font-weight: bold; }
+    button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
+    button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
+    #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
+    .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
+    .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
+    .voice-line { font-size: 0.85rem; margin: 6px 0; opacity: 0.9; font-style: italic; min-height: 1.2em; transition: opacity 0.5s; }
+    @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } }
   </style>
 </head>
 <body>
 
-  <audio id="beep" preload="auto">
-    <source src="beep.mp3" type="audio/mpeg">
-  </audio>
-
+  <audio id="beep" preload="auto"><source src="beep.mp3" type="audio/mpeg"></audio>
   <img src="max2.png" class="logo" alt="Logo Maximilian" onerror="this.style.display='none'">
-
   <h1>RADIO MAXIMILIAN 23</h1>
 
   <div class="terminal-box">
@@ -178,102 +43,81 @@
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 
-  <p class="note">
-    Emisión 24/7 • Soporte videos individuales • Voz masculina
-  </p>
+  <p class="note">Emisión 24/7 • Videos individuales OK • Pronunciación perfecta</p>
 
   <script>
-    // === CONFIGURACIÓN ===
-    const CONFIG = {
-      voiceRate: 0.95,
-      voicePitch: 0.7,
-      voiceVolume: 1.0,
-      announcementInterval: 4,
-      hourAnnounce: true,
-      beepBeforeVoice: true
+    // === FRASES FONÉTICAS ===
+    const PHRASES = {
+      start: "Estás es-cu-chan-do Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
+      pause: "Emisión pausada. Volveremos pronto.",
+      hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
+      ads: [
+        "Transmisión en directo desde el ciberespacio.",
+        "Sintoniza la señal verde. Radio Max-i-mi-lian veintitrés.",
+        "Frecuencia activa. No cambies de canal.",
+        "Aquí solo suena lo que importa.",
+        "Conectado. Escuchando. Transmitiendo.",
+        "Señal clara. Volumen máximo."
+      ]
     };
 
-    // === ELEMENTOS ===
+    const CONFIG = { voiceRate: 0.95, voicePitch: 0.7, voiceVolume: 1.0, announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true };
     const els = {
-      startBtn: document.getElementById('startBtn'),
-      nextBtn: document.getElementById('nextBtn'),
-      stopBtn: document.getElementById('stopBtn'),
-      controls: document.getElementById('controls'),
-      player: document.getElementById('player'),
-      status: document.getElementById('status'),
-      voiceOutput: document.getElementById('voiceOutput'),
-      beep: document.getElementById('beep'),
-      canvas: document.getElementById('oscilograma')
+      startBtn: document.getElementById('startBtn'), nextBtn: document.getElementById('nextBtn'), stopBtn: document.getElementById('stopBtn'),
+      controls: document.getElementById('controls'), player: document.getElementById('player'), status: document.getElementById('status'),
+      voiceOutput: document.getElementById('voiceOutput'), beep: document.getElementById('beep'), canvas: document.getElementById('oscilograma')
     };
 
     let playlists = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false;
-    let audioContext = null, lastHour = -1;
-    let checkInterval = null;
+    let audioContext = null, lastHour = -1, checkInterval = null;
 
-    // === CARGAR PLAYLISTS (MEJORADO: SOPORTE PARA VIDEOS INDIVIDUALES) ===
+    // === CARGAR PLAYLISTS (PLAYLIST + VIDEO INDIVIDUAL) ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now());
-        if (!res.ok) throw new Error('Archivo no encontrado');
+        if (!res.ok) throw new Error();
         const text = await res.text();
         const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
         playlists = lines.map(line => {
           try {
             const url = new URL(line);
-            let id = null;
-
-            // Si es playlist (tiene list=)
             const listId = url.searchParams.get('list');
-            if (listId) {
-              console.log(`Cargando playlist: ${listId}`);
-              return { type: 'playlist', id: listId, original: line };
-            }
+            if (listId) return { type: 'playlist', id: listId, url: line };
 
-            // Si es video individual (tiene v=)
             const videoId = url.searchParams.get('v');
-            if (videoId) {
-              console.log(`Cargando video individual: ${videoId}`);
-              return { type: 'video', id: videoId, original: line };
-            }
+            if (videoId) return { type: 'video', id: videoId, url: line };
 
             return null;
-          } catch {
-            console.warn(`URL inválida: ${line}`);
-            return null;
-          }
+          } catch { return null; }
         }).filter(p => p);
 
-        if (playlists.length === 0) throw new Error('No hay URLs válidas');
-
-        console.log(`Cargadas ${playlists.length} entradas:`, playlists.map(p => `${p.type}: ${p.id}`));
-        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques (${playlists.filter(p => p.type === 'playlist').length} playlists, ${playlists.filter(p => p.type === 'video').length} videos)`;
+        if (playlists.length === 0) throw new Error();
+        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques`;
+        console.log("Cargadas:", playlists);
       } catch (err) {
-        console.error('Error cargando playlists:', err);
+        console.error("Error:", err);
         els.status.textContent = 'Señal de emergencia';
-        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc', original: '' }];
+        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc' }];
       }
     }
 
-    // === GENERAR EMBED URL (MEJORADO PARA VIDEOS INDIVIDUALES) ===
+    // === GENERAR URL CORRECTA SEGÚN TIPO ===
     function generateEmbedUrl(entry) {
       if (!entry) return '';
-      const t = Date.now(); // Evita caché
-      let baseUrl;
+      const t = Date.now();
 
       if (entry.type === 'playlist') {
-        baseUrl = `https://www.youtube.com/embed/videoseries?list=${entry.id}`;
-      } else { // video individual → playlist de 1 video
-        baseUrl = `https://www.youtube.com/embed/videoseries?list=${entry.id}`;
-        // Nota: Para un solo video, se puede usar /embed/{videoId}, pero videoseries funciona igual
+        const index = Math.floor(Math.random() * 50);
+        return `https://www.youtube.com/embed/videoseries?list=${entry.id}&autoplay=1&loop=1&playlist=${entry.id}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
       }
 
-      const index = Math.floor(Math.random() * 50); // Aleatorio si aplica
-      return `${baseUrl}&autoplay=1&loop=1&playlist=${entry.id}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
+      // VIDEO INDIVIDUAL → embed directo + loop
+      return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
     }
 
-    // === ESTIMAR GRAVEDAD DE VOZ ===
+    // === VOZ MASCULINA ===
     function getVoicePitchScore(voice) {
       const name = voice.name.toLowerCase();
       let score = 0;
@@ -283,7 +127,6 @@
       return score;
     }
 
-    // === SINTETIZAR VOZ MASCULINA ===
     function speak(text, callback) {
       if (!voiceEnabled || !('speechSynthesis' in window)) {
         if (callback) callback();
@@ -297,11 +140,7 @@
       let voices = speechSynthesis.getVoices();
       if (voices.length === 0) voices = speechSynthesis.getVoices();
 
-      let candidates = voices
-        .filter(v => v.lang.startsWith('es'))
-        .map(v => ({ voice: v, score: getVoicePitchScore(v) }))
-        .sort((a, b) => b.score - a.score);
-
+      let candidates = voices.filter(v => v.lang.startsWith('es')).map(v => ({ voice: v, score: getVoicePitchScore(v) })).sort((a, b) => b.score - a.score);
       let selectedVoice = candidates[0]?.voice;
       if (!selectedVoice) {
         candidates = voices.map(v => ({ voice: v, score: getVoicePitchScore(v) })).sort((a, b) => b.score - a.score);
@@ -342,30 +181,21 @@
       let msg = '';
       if (isNewHour && CONFIG.hourAnnounce) {
         lastHour = hour;
-        msg = `Son las ${hour} ${mins > 0 ? `y ${mins}` : ''}. Estás en Radio Maximilian 23, la frecuencia del futuro.`;
+        msg = PHRASES.hour(hour, mins);
       } else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) {
-        const frases = [
-          "Transmisión en directo desde el ciberespacio.",
-          "Sintoniza la señal verde. Radio Maximilian 23.",
-          "Frecuencia activa. No cambies de canal.",
-          "Aquí solo suena lo que importa.",
-          "Conectado. Escuchando. Transmitiendo.",
-          "Señal clara. Volumen máximo."
-        ];
-        msg = frases[Math.floor(Math.random() * frases.length)];
+        msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)];
       }
 
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === CARGAR NUEVA ENTRADA (FORZAR RECARGA) ===
+    // === CARGAR NUEVA ENTRADA ===
     function loadNewEntry() {
       if (!isPlaying || !playlists.length) return;
 
       const url = generateEmbedUrl(playlists[currentIndex]);
       if (!url) return;
 
-      // Forzar recarga del iframe (vaciar y recargar)
       els.player.src = '';
       setTimeout(() => {
         els.player.src = url;
@@ -376,24 +206,20 @@
       els.status.textContent = `${playlists[currentIndex].type === 'playlist' ? 'Playlist' : 'Video'} #${currentIndex + 1} | Canción ${songCount}`;
     }
 
-    // === INICIAR RADIO (ALEATORIO) ===
+    // === INICIAR ===
     function startRadio() {
       if (!playlists.length) return;
 
-      // Elegir entrada aleatoria
       currentIndex = Math.floor(Math.random() * playlists.length);
       songCount = 0;
 
-      // Mostrar controles INMEDIATAMENTE
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
 
-      // Iniciar voz + reproducción
-      speak("Estás escuchando Radio Maximilian 23. Emisión continua iniciada.", () => {
+      speak(PHRASES.start, () => {
         loadNewEntry();
       });
 
-      // Iniciar detección de canciones (aprox. cada 3-5 min)
       if (checkInterval) clearInterval(checkInterval);
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03 && isPlaying) {
@@ -406,7 +232,7 @@
       isPlaying = true;
     }
 
-    // === DETENER TODO ===
+    // === DETENER ===
     function stopRadio() {
       isPlaying = false;
       voiceEnabled = false;
@@ -427,19 +253,17 @@
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         audioContext.resume();
       }
-
       voiceEnabled = true;
       startRadio();
     });
 
     els.nextBtn.addEventListener('click', () => {
-      // Cambiar a siguiente (cíclico)
       currentIndex = (currentIndex + 1) % playlists.length;
       loadNewEntry();
     });
 
     els.stopBtn.addEventListener('click', () => {
-      speak("Emisión pausada. Volveremos pronto.", () => {
+      speak(PHRASES.pause, () => {
         stopRadio();
       });
     });
@@ -448,7 +272,6 @@
     function initOscilloscope() {
       const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
-
       function resize() {
         canvas.width = canvas.offsetWidth * window.devicePixelRatio;
         canvas.height = 60 * window.devicePixelRatio;
@@ -464,10 +287,8 @@
         ctx.strokeStyle = 'var(--glow)';
         ctx.lineWidth = 2;
         ctx.beginPath();
-
         const w = canvas.offsetWidth;
         const h = 60;
-
         t += 0.8;
         for (let x = 0; x <= w; x += 2) {
           const phase = (x / w) * Math.PI * 4 + t * 0.02;
@@ -487,7 +308,6 @@
         speechSynthesis.onvoiceschanged = () => {};
         speechSynthesis.getVoices();
       }
-
       await loadPlaylists();
       initOscilloscope();
       els.startBtn.disabled = false;
