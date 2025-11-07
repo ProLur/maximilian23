@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- METADATOS SEO (para Google, NO se muestran al usuario) -->
+  <meta name="description" content="Laboratorio Musical de Maximilian 23 del CEIP Juan XXIII de Zafra. Herramienta educativa interactiva para componer música, aprender notas, ritmos y pentagramas. Ideal para niños: crea, toca, guarda y comparte tus partituras con VexFlow y Tone.js.">
+  <meta name="keywords" content="laboratorio musical, maximilian 23, CEIP Juan XXIII, Zafra, educación musical, componer música, pentagrama interactivo, aprender notas, niños, música para primaria, partitura digital">
+  <meta name="author" content="Manuel">
+  <meta name="robots" content="index, follow">
+
   <title>Laboratorio Musical de Maximilian 23</title>
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
@@ -40,38 +47,6 @@
       font-size: 0.8em;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
     }
-
-    /* NUEVA SECCIÓN: DESCRIPCIÓN */
-    #descripcion {
-      background: rgba(255, 255, 255, 0.95);
-      border: 3px solid #4ae2f2;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 10px auto;
-      max-width: 600px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-      font-size: 1em;
-      line-height: 1.5;
-      color: #333;
-    }
-    #descripcion h2 {
-      color: #ff6b9d;
-      font-size: 1.4em;
-      margin-bottom: 10px;
-      text-align: center;
-      text-shadow: 1px 1px 2px rgba(255,107,157,0.2);
-    }
-    #descripcion ul {
-      margin: 10px 0;
-      padding-left: 20px;
-    }
-    #descripcion li {
-      margin: 6px 0;
-    }
-    #descripcion strong {
-      color: #4ae2f2;
-    }
-
     #titulo-partitura { text-align: center; margin: 8px 0; width: 100%; max-width: 600px; }
     #titulo-editable {
       font: inherit;
@@ -314,14 +289,6 @@
         line-height: 18px;
         font-size: 0.8em;
       }
-      #descripcion {
-        margin: 8px 10px;
-        padding: 12px;
-        font-size: 0.9em;
-      }
-      #descripcion h2 {
-        font-size: 1.2em;
-      }
     }
   </style>
 </head>
@@ -332,20 +299,6 @@
     <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
     <div id="creado-por">Creado por Manuel</div>
   </header>
-
-  <!-- DESCRIPCIÓN DETALLADA -->
-  <div id="descripcion">
-    <h2>¡Bienvenidos al Laboratorio Musical de Maximilian 23!</h2>
-    <p>Este es un <strong>taller de composición musical interactivo</strong> diseñado especialmente para los alumnos del <strong>CEIP Juan XXIII de Zafra</strong>. Con Maximilian 23, nuestro robot musical, podrás:</p>
-    <ul>
-      <li><strong>Crear tus propias canciones</strong> haciendo clic en el pentagrama.</li>
-      <li><strong>Aprender las notas</strong> (Do, Re, Mi...) con etiquetas que aparecen al reproducir.</li>
-      <strong>Cambiar el tono</strong> de las notas con los botones + y −.</li>
-      <li><strong>Escuchar tu música</strong> con un sintetizador real y metrónomo.</li>
-      <li><strong>Guardar y compartir</strong> tus partituras en formato digital.</li>
-    </ul>
-    <p>Elige <strong>clave, compás y velocidad</strong>, selecciona una figura rítmica (redonda, blanca, negra, corchea o silencio), ¡y empieza a componer! Ideal para clases de música, proyectos creativos o diversión en casa.</p>
-  </div>
 
   <div id="titulo-partitura">
     <input type="text" id="titulo-editable" value="Mi Partitura">
@@ -370,14 +323,14 @@
       <div id="pentagrama"></div>
     </div>
     <div id="figuras">
-      <div class="figura" data-tipo="nota" data-duracion="w">𝅝</div>
-      <div class="figura" data-tipo="nota" data-duracion="h">𝅗𝅥</div>
-      <div class="figura" data-tipo="nota" data-duracion="q">𝅘𝅥</div>
-      <div class="figura" data-tipo="nota" data-duracion="8">𝅘𝅥𝅮</div>
-      <div class="figura" data-tipo="silencio" data-duracion="w">𝄻</div>
-      <div class="figura" data-tipo="silencio" data-duracion="h">𝄼</div>
-      <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div>
-      <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div>
+      <div class="figura" data-tipo="nota" data-duracion="w">Whole Note</div>
+      <div class="figura" data-tipo="nota" data-duracion="h">Half Note</div>
+      <div class="figura" data-tipo="nota" data-duracion="q">Quarter Note</div>
+      <div class="figura" data-tipo="nota" data-duracion="8">Eighth Note</div>
+      <div class="figura" data-tipo="silencio" data-duracion="w">Whole Rest</div>
+      <div class="figura" data-tipo="silencio" data-duracion="h">Half Rest</div>
+      <div class="figura" data-tipo="silencio" data-duracion="q">Quarter Rest</div>
+      <div class="figura" data-tipo="silencio" data-duracion="8">Eighth Rest</div>
     </div>
     <div id="controles-modo">
       <button id="notas"><i class="fas fa-music"></i> Notas</button>
@@ -394,7 +347,6 @@
     </div>
   </div>
 
-  <!-- EL RESTO DEL SCRIPT SE MANTIENE IGUAL -->
   <script>
     const VF = Vex.Flow;
     const div = document.getElementById("pentagrama");
@@ -430,15 +382,18 @@
       120: "Allegro (120 BPM)",
       160: "Presto (160 BPM)"
     };
+
     function getNoteName(note) {
       const [letter, octave] = note.split("/");
       return `${noteNameMap[letter]} ${octave}`;
     }
+
     function initSynth() {
       if (!synth) {
         synth = new Tone.Synth().toDestination();
       }
     }
+
     function init() {
       const claveSelect = document.getElementById("clave");
       const compasSelect = document.getElementById("compas");
@@ -485,6 +440,7 @@
       initControles();
       resetPartitura();
     }
+
     function resetPartitura() {
       lines = [[]];
       currentLine = 0;
@@ -493,6 +449,7 @@
       }
       redibujarPentagrama();
     }
+
     function reflowLines() {
       let i = 0;
       while (i < lines.length) {
@@ -515,6 +472,7 @@
         }
       }
     }
+
     function calculateStaveWidth(c, li, ci) {
       const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
       voice.setStrict(false);
@@ -531,6 +489,7 @@
       }
       return w;
     }
+
     function redibujarPentagrama() {
       if (!isPlaying) {
         document.querySelectorAll(".nota, .note-label").forEach(el => el.remove());
@@ -585,6 +544,7 @@
         }, 100);
       }
     }
+
     function initFiguras() {
       document.querySelectorAll(".figura").forEach(f => {
         f.onclick = () => {
@@ -595,6 +555,7 @@
         };
       });
     }
+
     function initControles() {
       document.getElementById("notas").onclick = () => {
         showNoteLabels = !showNoteLabels;
@@ -616,6 +577,41 @@
       document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
       document.getElementById("file-input").onchange = abrir;
     }
+
+    // FUNCIÓN CORREGIDA: CERRAR COMPÁS SIN CREAR LÍNEAS DOBLES
+    function cerrarCompas() {
+      const curr = lines[currentLine][lines[currentLine].length - 1];
+      if (!curr || curr.closed || curr.beats !== +compas.split("/")[0]) return;
+
+      // 1. Cerrar compás actual
+      curr.closed = true;
+
+      // 2. Recalcular ancho REAL del compás cerrado
+      const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
+      voice.setStrict(false);
+      if (curr.notas.length) voice.addTickables(curr.notas.map(n => n.vf));
+      const formatter = new VF.Formatter();
+      if (curr.notas.length) formatter.joinVoices([voice]);
+      let noteWidth = curr.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
+      curr.staveWidth = Math.max(minStaveWidth, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 50);
+
+      // 3. Crear nuevo compás
+      const newCompas = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth };
+
+      // 4. Calcular ancho total de la línea actual (con compás cerrado)
+      const lineTotalWidth = lines[currentLine].reduce((sum, c) => sum + (c.staveWidth || minStaveWidth), 0) + minStaveWidth;
+
+      // 5. ¿Cabe el nuevo compás?
+      if (lineTotalWidth > MAX_LINE_WIDTH) {
+        lines.push([newCompas]);
+        currentLine = lines.length - 1;
+      } else {
+        lines[currentLine].push(newCompas);
+      }
+
+      redibujarPentagrama();
+    }
+
     function playStop() {
       const playStopButton = document.getElementById("play-stop");
       if (isPlaying) {
@@ -725,6 +721,7 @@
         alert("Error al iniciar la reproducción. Asegúrate de interactuar con la página primero.");
       });
     }
+
     function stopPlayback() {
       Tone.Transport.stop();
       Tone.Transport.cancel();
@@ -745,6 +742,7 @@
       isPlaying = false;
       updateDraggableNotes();
     }
+
     function updateDraggableNotes() {
       document.querySelectorAll(".nota").forEach(n => n.remove());
       let gi = 0;
@@ -789,6 +787,7 @@
         });
       });
     }
+
     function changePitch(div, dir) {
       initSynth();
       const li = +div.dataset.li, ci = +div.dataset.ci, ni = +div.dataset.ni;
@@ -814,20 +813,7 @@
         });
       }
     }
-    function cerrarCompas() {
-      const curr = lines[currentLine][lines[currentLine].length - 1];
-      if (!curr || curr.closed || curr.beats !== +compas.split("/")[0]) return;
-      curr.closed = true;
-      const newCompas = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth };
-      const lineSum = lines[currentLine].reduce((sum, c) => sum + (c.staveWidth || minStaveWidth), 0) + minStaveWidth;
-      if (lineSum > MAX_LINE_WIDTH) {
-        lines.push([newCompas]);
-        currentLine = lines.length - 1;
-      } else {
-        lines[currentLine].push(newCompas);
-      }
-      redibujarPentagrama();
-    }
+
     div.onclick = e => {
       initSynth();
       if (!compas || !figuraActiva) return;
@@ -857,6 +843,7 @@
       currentLine = targetLine;
       addNota(figuraActiva.tipo, figuraActiva.duracion, noteName, targetCompasIdx);
     };
+
     function getNoteFromY(y, lineIndex) {
       const lineY = lineIndex * lineHeight + 40;
       const relY = y - lineY;
@@ -867,6 +854,7 @@
       const idx = Math.round(normalizedY / step);
       return noteMap[clave][Math.max(0, Math.min(numNotes - 1, idx))];
     }
+
     function addNota(tipo, dur, noteName, compasIndex) {
       const beats = +compas.split("/")[0];
       const currentCompas = lines[currentLine][compasIndex];
@@ -917,6 +905,7 @@
         }
       }
     }
+
     function borrarUltimo() {
       for (let li = lines.length - 1; li >= 0; li--) {
         for (let ci = lines[li].length - 1; ci >= 0; ci--) {
@@ -933,6 +922,7 @@
         }
       }
     }
+
     function guardar() {
       const data = {
         titulo: document.getElementById("titulo-editable").value,
@@ -949,6 +939,7 @@
       a.download = `${data.titulo || "partitura"}.json`;
       a.click();
     }
+
     function abrir(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -999,6 +990,7 @@
       };
       r.readAsText(file);
     }
+
     init();
   </script>
 </body>
