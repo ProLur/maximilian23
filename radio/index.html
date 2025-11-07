@@ -61,7 +61,7 @@
     button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     #startBtn {
-      margin-top: 12px; /* ← ESPACIO ENTRE STATUS Y BOTÓN */
+      margin-top: 12px;
     }
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
@@ -112,6 +112,7 @@
       musicVolumeLow: 0.15, musicVolumeHigh: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true
     };
+
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
@@ -126,10 +127,37 @@
       nowPlaying: document.getElementById('nowPlaying'),
       radioLogo: document.getElementById('radioLogo')
     };
+
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
-    // === EXTRAER ID Y TÍTULO: "URL - Título" ===
+
+    // === FORZAR REPRODUCCIÓN EN YOUTUBE (ANDROID) ===
+    function playYouTube() {
+      try {
+        const iframeWin = els.player.contentWindow;
+        if (iframeWin?.postMessage) {
+          iframeWin.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'playVideo'
+          }), '*');
+        }
+      } catch (e) { console.warn('Error forzando play:', e); }
+    }
+
+    function pauseYouTube() {
+      try {
+        const iframeWin = els.player.contentWindow;
+        if (iframeWin?.postMessage) {
+          iframeWin.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'pauseVideo'
+          }), '*');
+        }
+      } catch (e) {}
+    }
+
+    // === EXTRAER ID Y TÍTULO ===
     function parseLine(line) {
       const parts = line.split(' - ');
       const urlPart = parts[0].trim();
@@ -148,16 +176,15 @@
       }
       return id ? { id, title } : null;
     }
-    // === CARGAR playlists.txt CON TÍTULOS ===
+
+    // === CARGAR playlists.txt ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
         if (!res.ok) throw new Error();
         const text = await res.text();
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-        console.log('Líneas leídas:', lines);
         items = lines.map(parseLine).filter(i => i);
-        console.log('Elementos con título:', items);
         if (items.length === 0) throw new Error();
         els.status.textContent = `Frecuencia activa: ${items.length} elemento${items.length > 1 ? 's' : ''}`;
       } catch (err) {
@@ -171,18 +198,20 @@
         els.startBtn.disabled = false;
       }
     }
-    // === EMBED ===
+
+    // === EMBED (sin autoplay) ===
     function generateEmbedUrl(id) {
       const t = Date.now();
-      return `https://www.youtube.com/embed/${id}?autoplay=1&loop=1&playlist=${id}&mute=0&rel=0&modestbranding=1&t=${t}`;
+      return `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=0&rel=0&modestbranding=1&t=${t}`;
     }
-    // === MOSTRAR TÍTULO PERSONALIZADO ===
+
+    // === MOSTRAR TÍTULO ===
     function updateNowPlaying() {
       if (!items[currentIndex]) return;
-      const title = items[currentIndex].title;
-      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
+      els.nowPlaying.innerHTML = `<strong>${items[currentIndex].title}</strong>`;
     }
-    // === VOLUMEN, OYENTES, VOZ ===
+
+    // === VOLUMEN ===
     function setMusicVolume(volume) {
       try {
         const iframeWin = els.player.contentWindow;
@@ -193,9 +222,11 @@
         }
       } catch (e) {}
     }
+
     function updateListeners() {
       els.listenerCount.textContent = Math.floor(Math.random() * (127 - 47 + 1)) + 47;
     }
+
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
@@ -208,7 +239,7 @@
       utter.onend = () => { isSpeaking = false; setTimeout(() => setMusicVolume(CONFIG.musicVolumeHigh), 300); cb?.(); };
       speechSynthesis.cancel(); speechSynthesis.speak(utter);
     }
-    // === ANUNCIOS ===
+
     function playAnnouncement() {
       const now = new Date();
       const h = now.getHours(), m = now.getMinutes();
@@ -217,7 +248,8 @@
       else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) { msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)]; }
       if (msg) setTimeout(() => speak(msg), 800);
     }
-    // === CARGAR ELEMENTO ===
+
+    // === CARGAR ELEMENTO (sin autoplay) ===
     function loadNewEntry() {
       if (!isPlaying || !items.length) return;
       const { id } = items[currentIndex];
@@ -227,23 +259,28 @@
         els.player.src = url;
         updateNowPlaying();
         setMusicVolume(CONFIG.musicVolumeHigh);
+        // NO REPRODUCIR AÚN → ESPERAR AL CLIC
       }, 150);
       songCount++;
       playAnnouncement();
       els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
     }
-    // === INICIAR ===
+
+    // === INICIAR (FORZAR PLAY EN ANDROID) ===
     function startRadio() {
       if (!items.length || isPlaying) return;
       currentIndex = Math.floor(Math.random() * items.length);
       songCount = 0;
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
+
       speak(PHRASES.start, () => {
         loadNewEntry();
+        setTimeout(playYouTube, 500); // FORZAR REPRODUCCIÓN DESPUÉS DE CARGAR
         if (titleCheckInterval) clearInterval(titleCheckInterval);
         titleCheckInterval = setInterval(updateNowPlaying, 3000);
       });
+
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03 && isPlaying) { songCount++; playAnnouncement(); }
       }, 60000);
@@ -251,9 +288,11 @@
       updateListeners();
       isPlaying = true;
     }
+
     // === DETENER ===
     function stopRadio() {
       isPlaying = false; voiceEnabled = false;
+      pauseYouTube();
       speechSynthesis.cancel(); els.player.src = '';
       clearInterval(checkInterval); clearInterval(listenerInterval); clearInterval(titleCheckInterval);
       els.status.textContent = 'Emisión detenida.';
@@ -262,26 +301,33 @@
       els.startBtn.style.display = 'block';
       els.listenerCount.textContent = '0';
     }
+
     // === BOTONES ===
     els.startBtn.addEventListener('click', () => {
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      audioContext.resume();
-      voiceEnabled = true;
-      startRadio();
+      audioContext.resume().then(() => {
+        voiceEnabled = true;
+        startRadio();
+      });
     });
+
     els.nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % items.length;
       loadNewEntry();
+      setTimeout(playYouTube, 500); // FORZAR PLAY AL CAMBIAR
     });
+
     els.stopBtn.addEventListener('click', () => {
       speak(PHRASES.pause, stopRadio);
     });
+
     // === LOGO BRILLO ===
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
       logo.classList.remove('glow-normal'); logo.classList.add('glow-intenso');
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
+
     // === OSCILOGRAMA ===
     function initOscilloscope() {
       const canvas = els.canvas; const ctx = canvas.getContext('2d');
@@ -309,6 +355,7 @@
       }
       draw();
     }
+
     // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
