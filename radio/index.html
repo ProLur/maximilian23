@@ -11,97 +11,84 @@
     color: #00ff72;
     font-family: "Courier New", monospace;
     text-align: center;
-    padding: 20px;
+    margin: 0;
+    padding: 16px;
     overflow-x: hidden;
-    position: relative;
   }
 
-  /* Fondo radar animado */
   body:before {
     content: "";
     position: fixed;
     top: 0; left: 0;
-    width: 220vw; height: 220vw;
-    background: radial-gradient(circle, rgba(0,255,114,0.25) 3%, transparent 60%);
-    animation: radar 7s linear infinite;
-    opacity: 0.12;
+    width: 200vw; height: 200vw;
+    background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
+    animation: radar 8s linear infinite;
+    opacity: 0.09;
+    z-index: -1;
   }
-
-  @keyframes radar {
-    100% { transform: rotate(360deg); }
-  }
+  @keyframes radar { 100% { transform: rotate(360deg); } }
 
   .logo {
-    width: 45vw;
-    max-width: 200px;
+    width: 38vw;
+    max-width: 150px;
     height: auto;
-    margin-bottom: 12px;
-    filter: drop-shadow(0 0 14px #00ff72);
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 10px #00ff72);
   }
 
   h1 {
-    font-size: 7vw;
-    max-font-size: 34px;
-    text-shadow: 0 0 8px #00ff72;
-    margin-bottom: 20px;
+    font-size: 6vw;
+    max-width: 300px;
+    margin: 0 auto 18px auto;
+    text-shadow: 0 0 6px #00ff72;
   }
 
   .terminal-box {
     border: 1px solid #00ff72;
-    padding: 18px;
-    width: 95%;
-    max-width: 650px;
-    margin: 0 auto 25px auto;
+    padding: 14px;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
     border-radius: 8px;
-    box-shadow: 0 0 14px #00ff72;
-    background: rgba(0, 18, 0, 0.65);
+    box-shadow: 0 0 10px #00ff72;
+    background: rgba(0,18,0,0.6);
   }
 
-  /* Botones táctiles */
+  #oscilograma {
+    width: 100%;
+    height: 60px;
+    display: block;
+    margin-bottom: 12px;
+  }
+
   button {
+    width: 100%;
+    max-width: 260px;
     background: #001f00;
     border: 1px solid #00ff72;
     color: #00ff72;
-    padding: 14px 26px;
-    font-family: inherit;
-    cursor: pointer;
+    padding: 10px 0;
     border-radius: 6px;
-    transition: 0.3s;
-    font-size: 4vw;
-    max-font-size: 18px;
-    margin-top: 12px;
-    width: 80%;
-    max-width: 330px;
+    font-size: 16px;
+    margin: 6px auto;
+    display: block;
   }
-  button:hover {
+  button:active {
     background: #00ff72;
     color: #001400;
   }
 
-  /* Oscilograma responsive */
-  #oscilograma {
-    width: 90%;
-    max-width: 380px;
-    height: 80px;
-    margin: 0 auto 16px auto;
-    display: block;
-    filter: drop-shadow(0 0 7px #00ff72);
-  }
-
-  /* Ocultar reproductor visual */
   #player {
     width: 1px;
     height: 1px;
     opacity: 0;
-    pointer-events: none;
     position: absolute;
   }
 
   .note {
-    margin-top: 26px;
-    font-size: 3vw;
-    max-font-size: 13px;
-    opacity: 0.8;
+    margin-top: 18px;
+    font-size: 11px;
+    opacity: 0.7;
   }
 </style>
 </head>
@@ -123,8 +110,7 @@
 </div>
 
 <p class="note">
-  La música proviene de YouTube y se reproduce mediante su reproductor oficial.<br>
-  Esta web no almacena ni redistribuye contenido audiovisual.
+  La música proviene de YouTube y se reproduce mediante su reproductor oficial.
 </p>
 
 <script>
@@ -132,7 +118,6 @@ let playlists = [];
 let index = 0;
 let started = false;
 
-/* Cargar playlists */
 async function loadPlaylists() {
   const res = await fetch('playlists.txt');
   const text = await res.text();
@@ -142,52 +127,47 @@ async function loadPlaylists() {
 function playlistToEmbed(url) {
   const match = url.match(/list=([^&]+)/);
   const listID = match ? match[1] : null;
-  return `https://www.youtube.com/embed/videoseries?list=${listID}&autoplay=1&loop=1`;
+  return `https://www.youtube.com/embed/videoseries?list=${listID}&autoplay=1&loop=1&mute=0`;
 }
 
-function loadCurrent() {
+function startRadio() {
   document.getElementById('player').src = playlistToEmbed(playlists[index]);
   document.getElementById('beep').play();
 }
 
-/* Botón iniciar */
-document.getElementById('startBtn').onclick = () => {
-  if (!started) {
-    started = true;
-    loadCurrent();
-    document.getElementById('startBtn').style.display = "none";
-    document.getElementById('nextBtn').style.display = "inline-block";
-  }
-};
+/* El botón ahora garantiza el user-gesture */
+document.getElementById('startBtn').addEventListener('click', () => {
+  started = true;
+  startRadio();
+  document.getElementById('startBtn').style.display = "none";
+  document.getElementById('nextBtn').style.display = "block";
+});
 
-/* Botón siguiente playlist */
-document.getElementById('nextBtn').onclick = () => {
+/* Cambiar playlist */
+document.getElementById('nextBtn').addEventListener('click', () => {
   index = (index + 1) % playlists.length;
-  loadCurrent();
-};
+  startRadio();
+});
 
 /* Oscilograma */
 const canvas = document.getElementById('oscilograma');
 const ctx = canvas.getContext('2d');
 
-function drawOscilograma() {
+function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.strokeStyle = '#00ff72';
   ctx.beginPath();
-  let t = Date.now() / 140;
+  let t = Date.now() / 120;
   for (let x = 0; x < canvas.width; x++) {
-    let y = (canvas.height/2) + Math.sin((x + t) / 7) * (canvas.height/3);
+    let y = canvas.height/2 + Math.sin((x+t)/7)*20;
     ctx.lineTo(x, y);
   }
   ctx.stroke();
-  requestAnimationFrame(drawOscilograma);
+  requestAnimationFrame(draw);
 }
-drawOscilograma();
+draw();
 
-/* Start */
-(async () => {
-  await loadPlaylists();
-})();
+(async () => { await loadPlaylists(); })();
 </script>
 
 </body>
