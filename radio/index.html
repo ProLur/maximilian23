@@ -112,6 +112,7 @@
       start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
       mute: "Sonido silenciado.",
       unmute: "Volumen restaurado.",
+      next: "Siguiente canción...",
       hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
       ads: [
         "Transmisión en directo desde el ciberespacio.",
@@ -124,7 +125,8 @@
     };
     const CONFIG = {
       voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
-      announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true
+      announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true,
+      listenerTimeout: 15 * 60 * 1000 // 15 minutos
     };
     const els = {
       startBtn: document.getElementById('startBtn'),
@@ -142,36 +144,70 @@
     };
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
-    let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
+    let audioContext = null, lastHour = -1, checkInterval = null, titleCheckInterval = null;
     let isMuted = false;
+    let userId = null;
+    let activeUsers = {};
 
-    // === CONTROLES YOUTUBE ===
-    function sendCommand(func, args = []) {
-      try {
-        els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
-      } catch(e) { console.warn("Error enviando comando:", func); }
+    // === IP SIMULADA (para pruebas locales) ===
+    function getUserId() {
+      let id = localStorage.getItem('radio_user_id');
+      if (!id) {
+        id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('radio_user_id', id);
+      }
+      return id;
     }
-    function playVideo() { sendCommand('playVideo'); }
-    function pauseVideo() { sendCommand('pauseVideo'); }
-    function setVolume(volume) { sendCommand('setVolume', [volume]); }
-    function unMute() { sendCommand('unMute'); }
 
-    // === CARGAR VIDEO AL INICIO ===
-    function preloadFirstVideo() {
-      if (!items.length) return;
-      currentIndex = Math.floor(Math.random() * items.length);
-      const { id, title } = items[currentIndex];
-      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
-      els.player.src = url;
-      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
-      els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
-      els.startBtn.disabled = false;
+    // === CONTADOR DE OYENTES (IP + 15 MIN) ===
+    function addListener() {
+      const id = getUserId();
+      const now = Date.now();
+      if (!activeUsers[id]) {
+        activeUsers[id] = now;
+        saveListeners();
+        updateListenerCount();
+      } else {
+        activeUsers[id] = now; // renueva tiempo
+      }
+    }
+
+    function removeInactive() {
+      const now = Date.now();
+      let changed = false;
+      for (const id in activeUsers) {
+        if (now - activeUsers[id] > CONFIG.listenerTimeout) {
+          delete activeUsers[id];
+          changed = true;
+        }
+      }
+      if (changed) {
+        saveListeners();
+        updateListenerCount();
+      }
+    }
+
+    function saveListeners() {
+      localStorage.setItem('radio_active_users', JSON.stringify(activeUsers));
+    }
+
+    function loadListeners() {
+      const saved = localStorage.getItem('radio_active_users');
+      if (saved) {
+        activeUsers = JSON.parse(saved);
+        removeInactive(); // limpia al cargar
+      }
+    }
+
+    function updateListenerCount() {
+      els.listenerCount.textContent = Object.keys(activeUsers).length;
     }
 
     // === INICIAR EMISIÓN ===
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
+      addListener(); // +1 oyente
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
       els.status.textContent = "Iniciando emisión...";
@@ -197,12 +233,12 @@
       titleCheckInterval = setInterval(updateNowPlaying, 3000);
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
+        removeInactive(); // limpia inactivos
       }, 60000);
-      listenerInterval = setInterval(updateListeners, 30000);
-      updateListeners();
+      updateListenerCount();
     }
 
-    // === SIGUIENTE → SONIDO ACTIVADO + BOTÓN "Mute" ===
+    // === SIGUIENTE → SONIDO ON + BOTÓN "Mute" + SIN "Volumen restaurado" ===
     function loadAndPlayNext() {
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
@@ -216,13 +252,12 @@
         setTimeout(() => {
           playVideo();
           setTimeout(() => {
-            // SONIDO ACTIVADO + BOTÓN "Mute"
             unMute();
             setVolume(100);
             els.muteBtn.textContent = 'Mute';
             isMuted = false;
-            els.status.textContent = "Volumen restaurado (Siguiente)";
-            speak(PHRASES.unmute);
+            els.status.textContent = "Siguiente canción...";
+            speak(PHRASES.next); // SIN "Volumen restaurado"
           }, 800);
         }, 600);
       }, 200);
@@ -233,6 +268,27 @@
     }
 
     // === RESTO ===
+    function sendCommand(func, args = []) {
+      try {
+        els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+      } catch(e) { console.warn("Error enviando comando:", func); }
+    }
+    function playVideo() { sendCommand('playVideo'); }
+    function pauseVideo() { sendCommand('pauseVideo'); }
+    function setVolume(volume) { sendCommand('setVolume', [volume]); }
+    function unMute() { sendCommand('unMute'); }
+
+    function preloadFirstVideo() {
+      if (!items.length) return;
+      currentIndex = Math.floor(Math.random() * items.length);
+      const { id, title } = items[currentIndex];
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
+      els.player.src = url;
+      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
+      els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
+      els.startBtn.disabled = false;
+    }
+
     function parseLine(line) {
       const parts = line.split(' - ');
       const urlPart = parts[0].trim();
@@ -271,10 +327,6 @@
       els.nowPlaying.innerHTML = `<strong>${items[currentIndex].title}</strong>`;
     }
 
-    function updateListeners() {
-      els.listenerCount.textContent = Math.floor(Math.random() * 3) + 1;
-    }
-
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
@@ -295,21 +347,6 @@
       if (h !== lastHour && m < 5 && CONFIG.hourAnnounce) { lastHour = h; msg = PHRASES.hour(h, m); }
       else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) { msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)]; }
       if (msg) setTimeout(() => speak(msg), 800);
-    }
-
-    function stopRadio() {
-      isPlaying = false; voiceEnabled = false;
-      pauseVideo();
-      speechSynthesis.cancel();
-      els.player.src = '';
-      clearInterval(checkInterval); clearInterval(listenerInterval); clearInterval(titleCheckInterval);
-      els.status.textContent = 'Emisión detenida.';
-      els.nowPlaying.innerHTML = 'Silencio en la frecuencia...';
-      els.controls.style.display = 'none';
-      els.startBtn.style.display = 'block';
-      els.listenerCount.textContent = '0';
-      els.muteBtn.textContent = 'Mute';
-      isMuted = false;
     }
 
     // === BOTONES ===
@@ -345,7 +382,7 @@
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
 
-    // === OSCILOGRAMA EN VERDE MAXIMILIAN (#00ff72) ===
+    // === OSCILOGRAMA EN VERDE MAXIMILIAN ===
     function initOscilloscope() {
       const canvas = els.canvas; const ctx = canvas.getContext('2d');
       function resize() {
@@ -359,7 +396,7 @@
       let t = 0;
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'var(--glow)'; // VERDE MAXIMILIAN #00ff72
+        ctx.strokeStyle = 'var(--glow)';
         ctx.lineWidth = 2; ctx.beginPath();
         const w = canvas.offsetWidth, h = 60;
         t += 0.8;
@@ -377,9 +414,11 @@
     // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
+      loadListeners(); // carga oyentes previos
       await loadPlaylists();
       initOscilloscope();
+      setInterval(removeInactive, 60000); // limpia cada minuto
     });
   </script>
 </body>
-  </html>
+                                    </html>
