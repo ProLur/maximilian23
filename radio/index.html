@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radio Maximilian 23 - Emisora escolar CEIP Juan XXIII</title>
  
-  <!-- SEO / Indexación Google -->
+  <!-- SEO -->
   <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII donde podemos oír las audiciones de la asignatura de música. Emisión 24/7 con interpretaciones de los alumnos, clásicos y más, powered by YouTube." />
   <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, audiciones música, colegio Alicante, emisora infantil, música alumnos, radio online 24/7" />
   <meta name="author" content="Manuel - CEIP Juan XXIII" />
@@ -96,7 +96,7 @@
     <canvas id="oscilograma"></canvas>
     <div id="listenerCounter" class="listener-counter">Oyentes online: <span id="listenerCount">0</span></div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
-    <div class="status" id="status">Inicializando frecuencia...</div>
+    <div class="status" id="status">Cargando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls" style="display:none;">
@@ -144,52 +144,69 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
 
-    // === CONTROL TOTAL DEL PLAYER ===
+    // === CONTROLES YOUTUBE ===
     function playVideo() {
-      try {
-        const win = els.player.contentWindow;
-        win?.postMessage(JSON.stringify({ event: 'command', func: 'playVideo' }), '*');
-      } catch (e) {}
+      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'playVideo' }), '*'); } catch(e) {}
     }
-
     function pauseVideo() {
-      try {
-        const win = els.player.contentWindow;
-        win?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo' }), '*');
-      } catch (e) {}
+      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo' }), '*'); } catch(e) {}
     }
-
     function unMuteAndSetVolume() {
       try {
         const win = els.player.contentWindow;
         win?.postMessage(JSON.stringify({ event: 'command', func: 'unMute' }), '*');
         win?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*');
-      } catch (e) {}
+      } catch(e) {}
     }
 
-    // === EMBED SIN AUTOPLAY (para móviles) ===
-    function generateEmbedUrl(id) {
-      const t = Date.now();
-      return `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=1&rel=0&modestbranding=1&enablejsapi=1&t=${t}`;
+    // === CARGAR VIDEO AL INICIO (sin autoplay) ===
+    function preloadFirstVideo() {
+      if (!items.length) return;
+      currentIndex = Math.floor(Math.random() * items.length);
+      const { id, title } = items[currentIndex];
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=1&rel=0&modestbranding=1&enablejsapi=1&t=${Date.now()}`;
+      
+      els.player.src = url;
+      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
+      els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
+      els.startBtn.disabled = false;
     }
 
-    // === CARGAR Y REPRODUCIR CON GESTO ===
-    function loadAndPlay() {
-      if (!isPlaying || !items.length) return;
-      const { id } = items[currentIndex];
-      const url = generateEmbedUrl(id);
+    // === REPRODUCIR AL PULSAR INICIAR ===
+    function startPlayback() {
+      if (isPlaying) return;
+      isPlaying = true;
+      els.startBtn.style.display = 'none';
+      els.controls.style.display = 'flex';
 
+      speak(PHRASES.start, () => {
+        playVideo();
+        setTimeout(unMuteAndSetVolume, 800);
+      });
+
+      titleCheckInterval = setInterval(updateNowPlaying, 3000);
+      checkInterval = setInterval(() => {
+        if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
+      }, 60000);
+      listenerInterval = setInterval(updateListeners, 30000);
+      updateListeners();
+    }
+
+    // === CARGAR Y REPRODUCIR NUEVO ===
+    function loadAndPlayNext() {
+      if (!items.length) return;
+      currentIndex = (currentIndex + 1) % items.length;
+      const { id, title } = items[currentIndex];
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=1&rel=0&modestbranding=1&enablejsapi=1&t=${Date.now()}`;
+      
       els.player.src = '';
       setTimeout(() => {
         els.player.src = url;
         updateNowPlaying();
-
-        // Reproducir + desmutear DESPUÉS del gesto
         setTimeout(() => {
           playVideo();
           setTimeout(unMuteAndSetVolume, 800);
         }, 800);
-
       }, 200);
 
       songCount++;
@@ -197,7 +214,7 @@
       els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
     }
 
-    // === RESTO DE FUNCIONES (igual) ===
+    // === RESTO ===
     function parseLine(line) {
       const parts = line.split(' - ');
       const urlPart = parts[0].trim();
@@ -205,8 +222,7 @@
       let id = null;
       try {
         const url = new URL(urlPart);
-        if (url.hostname === 'youtu.be') id = url.pathname.slice(1).split('?')[0];
-        else id = url.searchParams.get('v');
+        id = url.hostname === 'youtu.be' ? url.pathname.slice(1).split('?')[0] : url.searchParams.get('v');
       } catch {
         const match = urlPart.match(/(?:youtu\.be\/|v=)([^?&"'>]+)/);
         id = match ? match[1] : null;
@@ -222,17 +238,14 @@
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
         items = lines.map(parseLine).filter(i => i);
         if (items.length === 0) throw new Error();
-        els.status.textContent = `Frecuencia activa: ${items.length} elemento${items.length > 1 ? 's' : ''}`;
       } catch (err) {
         console.warn('Error en playlists.txt, usando fallback');
-        els.status.textContent = 'Señal de emergencia';
         items = [
           { id: 'k1-TrAvp_xs', title: 'Mozart - Lacrimosa' },
           { id: 'RdUyf6FLLTQ', title: 'Mozart - Pequeña Serenata Nocturna' }
         ];
-      } finally {
-        els.startBtn.disabled = false;
       }
+      preloadFirstVideo(); // CARGAR AL INICIO
     }
 
     function updateNowPlaying() {
@@ -266,28 +279,6 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    function startRadio() {
-      if (!items.length || isPlaying) return;
-      currentIndex = Math.floor(Math.random() * items.length);
-      songCount = 0;
-      els.startBtn.style.display = 'none';
-      els.controls.style.display = 'flex';
-
-      speak(PHRASES.start, () => {
-        loadAndPlay();
-        if (titleCheckInterval) clearInterval(titleCheckInterval);
-        titleCheckInterval = setInterval(updateNowPlaying, 3000);
-      });
-
-      checkInterval = setInterval(() => {
-        if (Math.random() < 0.03 && isPlaying) { songCount++; playAnnouncement(); }
-      }, 60000);
-
-      listenerInterval = setInterval(updateListeners, 30000);
-      updateListeners();
-      isPlaying = true;
-    }
-
     function stopRadio() {
       isPlaying = false; voiceEnabled = false;
       pauseVideo();
@@ -306,20 +297,12 @@
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audioContext.resume().then(() => {
         voiceEnabled = true;
-        startRadio();
-      }).catch(() => {
-        els.status.textContent = "Error de audio. Recarga.";
-      });
+        startPlayback();
+      }).catch(() => els.status.textContent = "Error de audio. Recarga.");
     });
 
-    els.nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % items.length;
-      loadAndPlay();
-    });
-
-    els.stopBtn.addEventListener('click', () => {
-      speak(PHRASES.pause, stopRadio);
-    });
+    els.nextBtn.addEventListener('click', loadAndPlayNext);
+    els.stopBtn.addEventListener('click', () => speak(PHRASES.pause, stopRadio));
 
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
@@ -354,6 +337,7 @@
       draw();
     }
 
+    // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
       await loadPlaylists();
