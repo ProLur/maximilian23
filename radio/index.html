@@ -29,24 +29,9 @@
       transition: transform 0.2s; position: relative; z-index: 1;
     }
     .logo:hover { transform: scale(1.05); }
-    .glow-normal {
-      filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow));
-      animation: pulse-normal 3s ease-in-out infinite;
-    }
-    .glow-intenso {
-      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc);
-      animation: pulse-intenso 1.2s ease-in-out infinite;
-    }
-    @keyframes pulse-normal {
-      0%, 100% { filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow)); }
-      50% { filter: drop-shadow(0 0 15px var(--glow)) drop-shadow(0 0 30px var(--glow)); }
-    }
-    @keyframes pulse-intenso {
-      0%, 100% { filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc); }
-      50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px #00ffcc); }
-    }
 
     h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin: 0 0 18px 0; text-shadow: 0 0 6px var(--glow); line-height: 1.2; }
+
     .terminal-box {
       border: 1px solid var(--glow); padding: 16px; width: 100%; max-width: 420px; margin: 0 auto;
       border-radius: 8px; box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
@@ -60,32 +45,24 @@
       transition: all 0.2s ease; font-weight: bold;
     }
     button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
-    button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
-    .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
-    .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
-    .listener-counter { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
-    .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
-    @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
-    @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } .now-playing { font-size: 0.8rem; } }
+
+    .listener-counter, .now-playing, .status { margin-top: 8px; }
   </style>
 </head>
 <body>
   <audio id="beep" preload="auto"><source src="beep.mp3" type="audio/mpeg"></audio>
 
   <div class="logo-container">
-    <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
+    <img src="max2.png" class="logo" id="radioLogo" alt="Logo Maximilian">
   </div>
 
   <h1>RADIO MAXIMILIAN 23</h1>
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-    <div id="listenerCounter" class="listener-counter">Oyentes online: <span id="listenerCount">0</span></div>
+    <div class="listener-counter">Oyentes online: <span id="listenerCount">0</span></div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
-    <div class="status" id="status">Inicializando frecuencia...</div>
-    <div id="voiceOutput" class="voice-line"></div>
+    <div id="status" class="status">Inicializando frecuencia...</div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls" style="display:none;">
       <button id="nextBtn">Siguiente</button>
@@ -93,243 +70,74 @@
     </div>
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
-  <p class="note">Emisión 24/7 • Powered by YouTube • Creado por Manuel</p>
 
-  <script>
-    // === CONFIG ===
-    const PHRASES = {
-      start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
-      pause: "Emisión pausada. Volveremos pronto.",
-      hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
-      ads: [
-        "Transmisión en directo desde el ciberespacio.",
-        "Sintoniza la señal verde. Radio Max-i-mi-lian veintitrés.",
-        "Frecuencia activa. No cambies de canal.",
-        "Aquí solo suena lo que importa.",
-        "Conectado. Escuchando. Transmitiendo.",
-        "Señal clara. Volumen máximo."
-      ]
-    };
-    const CONFIG = {
-      voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
-      musicVolumeLow: 0.15, musicVolumeHigh: 1.0,
-      announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true
-    };
+<script>
+let playlists = [], currentIndex = 0, songCount = 0;
+let isPlaying = false;
 
-    // === ELEMENTOS ===
-    const els = {
-      startBtn: document.getElementById('startBtn'),
-      nextBtn: document.getElementById('nextBtn'),
-      stopBtn: document.getElementById('stopBtn'),
-      controls: document.getElementById('controls'),
-      player: document.getElementById('player'),
-      status: document.getElementById('status'),
-      voiceOutput: document.getElementById('voiceOutput'),
-      beep: document.getElementById('beep'),
-      canvas: document.getElementById('oscilograma'),
-      listenerCount: document.getElementById('listenerCount'),
-      nowPlaying: document.getElementById('nowPlaying'),
-      radioLogo: document.getElementById('radioLogo')
-    };
+// === Carga playlists.txt ===
+async function loadPlaylists() {
+  const res = await fetch('playlists.txt?t=' + Date.now(), { cache:'no-cache' });
+  const text = await res.text();
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
 
-    let playlists = [], currentIndex = 0, songCount = 0;
-    let isPlaying = false, voiceEnabled = false, isSpeaking = false;
-    let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
+  playlists = lines.map(line => {
+    try {
+      const url = new URL(line);
+      const vid = url.searchParams.get('v');
+      return { type:'video', id: vid };
+    } catch { return null; }
+  }).filter(x => x);
 
-    // === CARGAR playlists.txt (SIEMPRE RECIENTE) ===
-    async function loadPlaylists() {
-      try {
-        const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
-        if (!res.ok) throw new Error();
-        const text = await res.text();
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-        playlists = lines.map(line => {
-          try {
-            const url = new URL(line);
-            const listId = url.searchParams.get('list');
-            if (listId) return { type: 'playlist', id: listId };
-            const videoId = url.searchParams.get('v');
-            if (videoId) return { type: 'video', id: videoId };
-            return null;
-          } catch { return null; }
-        }).filter(p => p);
+  startBtn.disabled = false;
+}
 
-        if (playlists.length === 0) throw new Error();
-        els.status.textContent = `Frecuencia activa: ${playlists.length} bloque${playlists.length > 1 ? 's' : ''}`;
-      } catch {
-        els.status.textContent = 'Señal de emergencia';
-        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc' }];
-      } finally {
-        // ACTIVAR BOTÓN SOLO CUANDO ESTÉ LISTO
-        els.startBtn.disabled = false;
-      }
-    }
+// === Generar URL de vídeo INDIVIDUAL (sin loop) ===
+function generateEmbedUrl(entry) {
+  const t = Date.now();
+  return `https://www.youtube.com/embed/${entry.id}?autoplay=1&rel=0&modestbranding=1&t=${t}`;
+}
 
-    // === VOLUMEN ===
-    function setMusicVolume(volume) {
-      try {
-        const iframeWin = els.player.contentWindow;
-        if (iframeWin?.postMessage) {
-          iframeWin.postMessage(JSON.stringify({
-            event: 'command', func: 'setVolume', args: [volume * 100]
-          }), '*');
-        }
-      } catch (e) {}
-    }
+// === Cargar canción aleatoria ===
+function loadNewEntry() {
+  if (!isPlaying || !playlists.length) return;
+  currentIndex = Math.floor(Math.random() * playlists.length);
+  const url = generateEmbedUrl(playlists[currentIndex]);
 
-    // === TÍTULO ===
-    function updateNowPlaying() {
-      try {
-        const doc = els.player.contentDocument || els.player.contentWindow?.document;
-        if (!doc) return;
-        const title = doc.querySelector('.ytp-title-text a')?.textContent?.trim() || 'Título desconocido';
-        const artist = doc.querySelector('.ytp-title-channel a')?.textContent?.trim().replace(/ - Topic$/i, '') || 'Artista desconocido';
-        els.nowPlaying.innerHTML = `<strong>${title.slice(0,47)}${title.length>47?'...':''}</strong><br><small>por ${artist.slice(0,27)}${artist.length>27?'...':''}</small>`;
-      } catch {
-        els.nowPlaying.innerHTML = 'Señal encriptada...';
-      }
-    }
+  player.src = '';
+  setTimeout(() => { player.src = url; }, 120);
 
-    // === OYENTES ===
-    function updateListeners() {
-      els.listenerCount.textContent = Math.floor(Math.random() * (127 - 47 + 1)) + 47;
-    }
+  songCount++;
+  status.textContent = `Canción ${songCount}`;
+  nowPlaying.textContent = "Conectando...";
+}
 
-    // === VOZ ===
-    function speak(text, cb) {
-      if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
-      isSpeaking = true;
-      setMusicVolume(CONFIG.musicVolumeLow);
-      const utter = new SpeechSynthesisUtterance(text);
-      const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
-      utter.voice = voice;
-      utter.rate = CONFIG.voiceRate; utter.pitch = CONFIG.voicePitch; utter.volume = CONFIG.voiceVolume;
-      if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
-      utter.onend = () => { isSpeaking = false; setTimeout(() => setMusicVolume(CONFIG.musicVolumeHigh), 300); cb?.(); };
-      speechSynthesis.cancel(); speechSynthesis.speak(utter);
-    }
+// === Iniciar ===
+function startRadio() {
+  if (isPlaying) return;
+  isPlaying = true;
+  startBtn.style.display = "none";
+  controls.style.display = "flex";
+  loadNewEntry();
+}
 
-    // === EMBED ===
-    function generateEmbedUrl(entry) {
-      const t = Date.now();
-      if (entry.type === 'playlist') {
-        const index = Math.floor(Math.random() * 50);
-        return `https://www.youtube.com/embed/videoseries?list=${entry.id}&autoplay=1&loop=1&playlist=${entry.id}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
-      }
-      return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
-    }
+// === Detener ===
+function stopRadio() {
+  isPlaying = false;
+  player.src = '';
+  controls.style.display = "none";
+  startBtn.style.display = "block";
+  nowPlaying.textContent = "Silencio...";
+}
 
-    // === ANUNCIOS ===
-    function playAnnouncement() {
-      const now = new Date();
-      const h = now.getHours(), m = now.getMinutes();
-      let msg = '';
-      if (h !== lastHour && m < 5 && CONFIG.hourAnnounce) { lastHour = h; msg = PHRASES.hour(h, m); }
-      else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) { msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)]; }
-      if (msg) setTimeout(() => speak(msg), 800);
-    }
+// === Eventos ===
+startBtn.addEventListener('click', startRadio);
+nextBtn.addEventListener('click', loadNewEntry);
+stopBtn.addEventListener('click', stopRadio);
 
-    // === CARGAR CANCIÓN ===
-    function loadNewEntry() {
-      if (!isPlaying || !playlists.length) return;
-      const url = generateEmbedUrl(playlists[currentIndex]);
-      els.player.src = '';
-      setTimeout(() => {
-        els.player.src = url;
-        els.nowPlaying.innerHTML = 'Conectando...';
-        setMusicVolume(CONFIG.musicVolumeHigh);
-      }, 150);
-      songCount++;
-      playAnnouncement();
-      els.status.textContent = `${playlists[currentIndex].type === 'playlist' ? 'Playlist' : 'Video'} #${currentIndex + 1} | Canción ${songCount}`;
-    }
+// === Inicio ===
+window.addEventListener('load', loadPlaylists);
+</script>
 
-    // === INICIAR ===
-    function startRadio() {
-      if (!playlists.length || isPlaying) return;
-      currentIndex = Math.floor(Math.random() * playlists.length);
-      songCount = 0;
-      els.startBtn.style.display = 'none';
-      els.controls.style.display = 'flex';
-      speak(PHRASES.start, loadNewEntry);
-
-      checkInterval = setInterval(() => {
-        if (Math.random() < 0.03 && isPlaying) { songCount++; playAnnouncement(); }
-      }, 60000);
-      listenerInterval = setInterval(updateListeners, 30000);
-      titleCheckInterval = setInterval(updateNowPlaying, 5000);
-      updateListeners();
-      isPlaying = true;
-    }
-
-    // === DETENER ===
-    function stopRadio() {
-      isPlaying = false; voiceEnabled = false;
-      speechSynthesis.cancel(); els.player.src = '';
-      clearInterval(checkInterval); clearInterval(listenerInterval); clearInterval(titleCheckInterval);
-      els.status.textContent = 'Emisión detenida.';
-      els.nowPlaying.innerHTML = 'Silencio en la frecuencia...';
-      els.controls.style.display = 'none';
-      els.startBtn.style.display = 'block';
-      els.listenerCount.textContent = '0';
-    }
-
-    // === BOTONES ===
-    els.startBtn.addEventListener('click', () => {
-      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      audioContext.resume();
-      voiceEnabled = true;
-      startRadio();
-    });
-
-    els.nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % playlists.length;
-      loadNewEntry();
-    });
-
-    els.stopBtn.addEventListener('click', () => {
-      speak(PHRASES.pause, stopRadio);
-    });
-
-    // === LOGO BRILLO ===
-    els.radioLogo.addEventListener('click', () => {
-      const logo = els.radioLogo;
-      logo.classList.remove('glow-normal'); logo.classList.add('glow-intenso');
-      setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
-    });
-
-    // === OSCILOGRAMA ===
-    function initOscilloscope() {
-      const ctx = els.canvas.getContext('2d');
-      let t = 0;
-      function draw() {
-        ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
-        ctx.strokeStyle = 'var(--glow)'; ctx.lineWidth = 2; ctx.beginPath();
-        const w = els.canvas.offsetWidth, h = 60;
-        t += 0.8;
-        for (let x = 0; x <= w; x += 2) {
-          const phase = (x / w) * Math.PI * 4 + t * 0.02;
-          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
-          ctx.lineTo(x, h / 2 + amp);
-        }
-        ctx.stroke();
-        requestAnimationFrame(draw);
-      }
-      function resize() {
-        els.canvas.width = els.canvas.offsetWidth * devicePixelRatio;
-        els.canvas.height = 60 * devicePixelRatio;
-        ctx.scale(devicePixelRatio, devicePixelRatio);
-      }
-      resize(); window.addEventListener('resize', resize);
-      draw();
-    }
-
-    // === INICIO ===
-    window.addEventListener('load', async () => {
-      if ('speechSynthesis' in window) speechSynthesis.getVoices();
-      await loadPlaylists();  // RECARGA playlists.txt
-      initOscilloscope();
-    });
-  </script>
 </body>
 </html>
