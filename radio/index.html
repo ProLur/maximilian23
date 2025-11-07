@@ -388,34 +388,55 @@
     });
 
     // === OSCILOGRAMA ===
-    function initOscilloscope() {
-      const canvas = els.canvas; const ctx = canvas.getContext('2d');
-      function resize() {
-        const dpr = window.devicePixelRatio;
-        canvas.width = canvas.offsetWidth * dpr;
-        canvas.height = 60 * dpr;
-        canvas.style.height = '60px';
-        ctx.scale(dpr, dpr);
-      }
-      resize(); window.addEventListener('resize', resize);
-      let t = 0;
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'var(--glow)';
-        ctx.lineWidth = 2; ctx.beginPath();
-        const w = canvas.offsetWidth, h = 60;
-        t += 0.8;
-        for (let x = 0; x <= w; x += 2) {
-          const phase = (x / w) * Math.PI * 4 + t * 0.02;
-          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
-          ctx.lineTo(x, h / 2 + amp);
-        }
-        ctx.stroke();
-        requestAnimationFrame(draw);
-      }
-      draw();
+   function initOscilloscope() {
+  const canvas = els.canvas;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = 60 * dpr;
+    canvas.style.height = '60px';
+    ctx.scale(dpr, dpr);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let t = 0;
+
+  function draw() {
+    const w = canvas.offsetWidth;
+    const h = 60;
+
+    // Fondo oscuro con transparencia para efecto "terminal"
+    ctx.fillStyle = 'rgba(0, 20, 0, 0.6)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Línea verde brillante
+    ctx.strokeStyle = 'var(--glow)'; // #00ff72
+    ctx.lineWidth = 2.5;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#00ff72';
+    ctx.beginPath();
+
+    t += 0.8;
+
+    for (let x = 0; x <= w; x += 2) {
+      const phase = (x / w) * Math.PI * 4 + t * 0.02;
+      const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
+      ctx.lineTo(x, h / 2 + amp);
     }
 
+    ctx.stroke();
+
+    // Quitar sombra para el próximo frame
+    ctx.shadowBlur = 0;
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
     // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
