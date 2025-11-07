@@ -4,21 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radio Maximilian 23 - Emisora escolar CEIP Juan XXIII</title>
- 
   <!-- SEO -->
   <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII donde podemos oír las audiciones de la asignatura de música. Emisión 24/7 con interpretaciones de los alumnos, clásicos y más, powered by YouTube." />
   <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, audiciones música, colegio Alicante, emisora infantil, música alumnos, radio online 24/7" />
   <meta name="author" content="Manuel - CEIP Juan XXIII" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
- 
   <!-- Open Graph -->
   <meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
   <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
   <meta property="og:image" content="https://tudominio.com/max2.png" />
   <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
   <meta property="og:type" content="website" />
- 
   <style>
     :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; }
     * { box-sizing: border-box; }
@@ -94,7 +91,7 @@
   <h1>RADIO MAXIMILIAN 23</h1>
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-    <div id="listenerCounter" class="listener-counter">Oyentes online: <span id="listenerCount">0</span></div>
+    <div id="listenerCounter" class="listener-counter">Oyentes últimos 30 días: <span id="listenerCount">0</span></div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
@@ -122,11 +119,13 @@
         "Señal clara. Volumen máximo."
       ]
     };
+
     const CONFIG = {
       voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true,
       listenerTimeout: 30 * 24 * 60 * 60 * 1000 // 30 DÍAS (1 MES)
     };
+
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
@@ -141,6 +140,7 @@
       nowPlaying: document.getElementById('nowPlaying'),
       radioLogo: document.getElementById('radioLogo')
     };
+
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, titleCheckInterval = null;
@@ -157,7 +157,7 @@
       return id;
     }
 
-    // === OYENTES: 24 HORAS ===
+    // === OYENTES: 30 DÍAS ===
     function addListener() {
       const id = getUserId();
       const now = Date.now();
@@ -201,12 +201,13 @@
       els.listenerCount.textContent = Object.keys(activeUsers).length;
     }
 
-    // === YOUTUBE ===
+    // === YOUTUBE COMMANDS ===
     function sendCommand(func, args = []) {
       try {
         els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
       } catch(e) { console.warn("Error enviando comando:", func); }
     }
+
     function playVideo() { sendCommand('playVideo'); }
     function setVolume(volume) { sendCommand('setVolume', [volume]); }
     function unMute() { sendCommand('unMute'); }
@@ -233,7 +234,6 @@
       els.status.textContent = "Iniciando emisión...";
       isMuted = false;
       els.muteBtn.textContent = 'Mute';
-
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audioContext.resume().then(() => {
         setTimeout(() => {
@@ -249,7 +249,6 @@
         els.status.textContent = "Error de audio. Recarga.";
         console.error(err);
       });
-
       titleCheckInterval = setInterval(updateNowPlaying, 3000);
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
@@ -258,7 +257,7 @@
       updateListenerCount();
     }
 
-    // === SIGUIENTE → SOLO CAMBIA CANCIÓN, SIN VOZ ===
+    // === SIGUIENTE CANCIÓN (AUTOMÁTICA O MANUAL) ===
     function loadAndPlayNext() {
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
@@ -274,16 +273,28 @@
           setVolume(100);
           els.muteBtn.textContent = 'Mute';
           isMuted = false;
-          els.status.textContent = ""; // SIN MENSAJE
-          // speak(PHRASES.next); → ELIMINADO
+          els.status.textContent = "";
         }, 800);
       }, 200);
-
       songCount++;
       playAnnouncement();
     }
 
-    // === RESTO ===
+    // === DETECTAR FIN DE VÍDEO (YouTube API) ===
+    function initYouTubePlayer() {
+      window.addEventListener('message', (event) => {
+        if (event.origin !== 'https://www.youtube.com') return;
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'onStateChange' && data.info === 0) {
+            // Vídeo terminado → siguiente
+            loadAndPlayNext();
+          }
+        } catch (e) {}
+      });
+    }
+
+    // === CARGAR PLAYLIST ===
     function parseLine(line) {
       const parts = line.split(' - ');
       const urlPart = parts[0].trim();
@@ -352,7 +363,6 @@
 
     els.muteBtn.addEventListener('click', () => {
       if (!isPlaying) return;
-
       if (isMuted) {
         unMute();
         setVolume(100);
@@ -377,7 +387,7 @@
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
 
-    // === OSCILOGRAMA VERDE ===
+    // === OSCILOGRAMA ===
     function initOscilloscope() {
       const canvas = els.canvas; const ctx = canvas.getContext('2d');
       function resize() {
@@ -413,6 +423,9 @@
       await loadPlaylists();
       initOscilloscope();
       setInterval(removeInactive, 60000);
+      
+      // Iniciar detección de fin de vídeo
+      initYouTubePlayer();
     });
   </script>
 </body>
