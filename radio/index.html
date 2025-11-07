@@ -130,25 +130,33 @@
       radioLogo: document.getElementById('radioLogo')
     };
 
-    let playlists = [], currentIndex = 0, songCount = 0;
+    let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
 
-    // === EXTRAER ID DE YOUTUBE ===
-    function extractVideoId(urlStr) {
+    // === EXTRAER ID Y TÍTULO: "URL - Título" ===
+    function parseLine(line) {
+      const parts = line.split(' - ');
+      const urlPart = parts[0].trim();
+      const title = parts.slice(1).join(' - ').trim() || 'Título desconocido';
+
+      let id = null;
       try {
-        const url = new URL(urlStr);
+        const url = new URL(urlPart);
         if (url.hostname === 'youtu.be') {
-          return url.pathname.slice(1).split('?')[0];
+          id = url.pathname.slice(1).split('?')[0];
+        } else {
+          id = url.searchParams.get('v');
         }
-        return url.searchParams.get('v');
       } catch {
-        const match = urlStr.match(/(?:youtu\.be\/|v=)([^?&"'>]+)/);
-        return match ? match[1] : null;
+        const match = urlPart.match(/(?:youtu\.be\/|v=)([^?&"'>]+)/);
+        id = match ? match[1] : null;
       }
+
+      return id ? { id, title } : null;
     }
 
-    // === CARGAR playlists.txt (CON "ELEMENTOS") ===
+    // === CARGAR playlists.txt CON TÍTULOS ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
@@ -157,22 +165,17 @@
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
         console.log('Líneas leídas:', lines);
 
-        playlists = lines.map(line => {
-          const id = extractVideoId(line);
-          return id ? { type: 'video', id } : null;
-        }).filter(p => p);
+        items = lines.map(parseLine).filter(i => i);
+        console.log('Elementos con título:', items);
 
-        console.log('Elementos cargados:', playlists);
-
-        if (playlists.length === 0) throw new Error();
-        // "ELEMENTOS" EN LUGAR DE "VIDEOS"
-        els.status.textContent = `Frecuencia activa: ${playlists.length} elemento${playlists.length > 1 ? 's' : ''}`;
+        if (items.length === 0) throw new Error();
+        els.status.textContent = `Frecuencia activa: ${items.length} elemento${items.length > 1 ? 's' : ''}`;
       } catch (err) {
         console.warn('Error en playlists.txt, usando fallback');
         els.status.textContent = 'Señal de emergencia';
-        playlists = [
-          { type: 'video', id: 'k1-TrAvp_xs' },
-          { type: 'video', id: 'RdUyf6FLLTQ' }
+        items = [
+          { id: 'k1-TrAvp_xs', title: 'Mozart - Lacrimosa' },
+          { id: 'RdUyf6FLLTQ', title: 'Mozart - Pequeña Serenata Nocturna' }
         ];
       } finally {
         els.startBtn.disabled = false;
@@ -180,12 +183,19 @@
     }
 
     // === EMBED ===
-    function generateEmbedUrl(entry) {
+    function generateEmbedUrl(id) {
       const t = Date.now();
-      return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
+      return `https://www.youtube.com/embed/${id}?autoplay=1&loop=1&playlist=${id}&mute=0&rel=0&modestbranding=1&t=${t}`;
     }
 
-    // === VOLUMEN, TÍTULO, OYENTES, VOZ ===
+    // === MOSTRAR TÍTULO PERSONALIZADO ===
+    function updateNowPlaying() {
+      if (!items[currentIndex]) return;
+      const title = items[currentIndex].title;
+      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
+    }
+
+    // === VOLUMEN, OYENTES, VOZ ===
     function setMusicVolume(volume) {
       try {
         const iframeWin = els.player.contentWindow;
@@ -195,18 +205,6 @@
           }), '*');
         }
       } catch (e) {}
-    }
-
-    function updateNowPlaying() {
-      try {
-        const doc = els.player.contentDocument || els.player.contentWindow?.document;
-        if (!doc) return;
-        const title = doc.querySelector('.ytp-title-text a')?.textContent?.trim() || 'Título desconocido';
-        const artist = doc.querySelector('.ytp-title-channel a')?.textContent?.trim().replace(/ - Topic$/i, '') || 'Artista desconocido';
-        els.nowPlaying.innerHTML = `<strong>${title.slice(0,47)}${title.length>47?'...':''}</strong><br><small>por ${artist.slice(0,27)}${artist.length>27?'...':''}</small>`;
-      } catch {
-        els.nowPlaying.innerHTML = 'Señal encriptada...';
-      }
     }
 
     function updateListeners() {
@@ -238,35 +236,37 @@
 
     // === CARGAR ELEMENTO ===
     function loadNewEntry() {
-      if (!isPlaying || !playlists.length) return;
-      const url = generateEmbedUrl(playlists[currentIndex]);
-      console.log('Reproduciendo elemento:', playlists[currentIndex].id);
+      if (!isPlaying || !items.length) return;
+      const { id } = items[currentIndex];
+      const url = generateEmbedUrl(id);
       els.player.src = '';
       setTimeout(() => {
         els.player.src = url;
-        els.nowPlaying.innerHTML = 'Conectando...';
+        updateNowPlaying();  // ← TÍTULO PERSONALIZADO
         setMusicVolume(CONFIG.musicVolumeHigh);
       }, 150);
       songCount++;
       playAnnouncement();
-      // "ELEMENTO" EN LUGAR DE "VIDEO"
-      els.status.textContent = `Elemento ${currentIndex + 1}/${playlists.length} | Canción ${songCount}`;
+      els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
     }
 
     // === INICIAR ===
     function startRadio() {
-      if (!playlists.length || isPlaying) return;
-      currentIndex = Math.floor(Math.random() * playlists.length);
+      if (!items.length || isPlaying) return;
+      currentIndex = Math.floor(Math.random() * items.length);
       songCount = 0;
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
-      speak(PHRASES.start, loadNewEntry);
+      speak(PHRASES.start, () => {
+        loadNewEntry();
+        if (titleCheckInterval) clearInterval(titleCheckInterval);
+        titleCheckInterval = setInterval(updateNowPlaying, 3000);  // Refresca título
+      });
 
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03 && isPlaying) { songCount++; playAnnouncement(); }
       }, 60000);
       listenerInterval = setInterval(updateListeners, 30000);
-      titleCheckInterval = setInterval(updateNowPlaying, 5000);
       updateListeners();
       isPlaying = true;
     }
@@ -292,7 +292,7 @@
     });
 
     els.nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % playlists.length;
+      currentIndex = (currentIndex + 1) % items.length;
       loadNewEntry();
     });
 
