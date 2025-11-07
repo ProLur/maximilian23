@@ -202,7 +202,7 @@
       updateListeners();
     }
 
-    // === SIGUIENTE CANCIÓN → SIEMPRE MUTE ===
+    // === SIGUIENTE → SONIDO ACTIVADO + BOTÓN "Mute" ===
     function loadAndPlayNext() {
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
@@ -216,12 +216,13 @@
         setTimeout(() => {
           playVideo();
           setTimeout(() => {
-            // FORZAR MUTE SIEMPRE AL CAMBIAR CANCIÓN
-            setVolume(0);
-            els.muteBtn.textContent = 'Unmute';
-            isMuted = true;
-            els.status.textContent = "Sonido silenciado (Siguiente)";
-            speak(PHRASES.mute);
+            // SONIDO ACTIVADO + BOTÓN "Mute"
+            unMute();
+            setVolume(100);
+            els.muteBtn.textContent = 'Mute';
+            isMuted = false;
+            els.status.textContent = "Volumen restaurado (Siguiente)";
+            speak(PHRASES.unmute);
           }, 800);
         }, 600);
       }, 200);
@@ -282,7 +283,7 @@
       const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
       utter.voice = voice;
       utter.rate = CONFIG.voiceRate; utter.pitch = CONFIG.voicePitch; utter.volume = CONFIG.voiceVolume;
-      if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
+      if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().)^catch(() => {}); }
       utter.onend = () => { isSpeaking = false; setTimeout(() => setVolume(isMuted ? 0 : 100), 300); cb?.(); };
       speechSynthesis.cancel(); speechSynthesis.speak(utter);
     }
@@ -344,6 +345,7 @@
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
 
+    // === OSCILOGRAMA EN VERDE MAXIMILIAN (#00ff72) ===
     function initOscilloscope() {
       const canvas = els.canvas; const ctx = canvas.getContext('2d');
       function resize() {
@@ -357,7 +359,8 @@
       let t = 0;
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'var(--glow)'; ctx.lineWidth = 2; ctx.beginPath();
+        ctx.strokeStyle = 'var(--glow)'; // VERDE MAXIMILIAN
+        ctx.lineWidth = 2; ctx.beginPath();
         const w = canvas.offsetWidth, h = 60;
         t += 0.8;
         for (let x = 0; x <= w; x += 2) {
@@ -379,4 +382,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
