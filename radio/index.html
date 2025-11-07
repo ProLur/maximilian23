@@ -48,7 +48,7 @@
       animation: pulse-normal 3s ease-in-out infinite;
     }
     .glow-intenso {
-      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc);
+      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0, 60px #00ffcc);
       animation: pulse-intenso 1.2s ease-in-out infinite;
     }
     @keyframes pulse-normal {
@@ -168,7 +168,7 @@
       els.startBtn.disabled = false;
     }
 
-    // === INICIAR EMISIÓN (CON SONIDO GARANTIZADO) ===
+    // === INICIAR EMISIÓN ===
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
@@ -178,10 +178,8 @@
       isMuted = false;
       els.muteBtn.textContent = 'Mute';
 
-      // 1. RESUMIR AUDIO CONTEXT
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audioContext.resume().then(() => {
-        // 2. ESPERAR A QUE EL IFRAME ESTÉ LISTO
         setTimeout(() => {
           playVideo();
           setTimeout(() => {
@@ -204,7 +202,7 @@
       updateListeners();
     }
 
-    // === SIGUIENTE CANCIÓN ===
+    // === SIGUIENTE CANCIÓN (MUTE AUTOMÁTICO SI ESTABA CON SONIDO) ===
     function loadAndPlayNext() {
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
@@ -218,9 +216,15 @@
         setTimeout(() => {
           playVideo();
           setTimeout(() => {
+            // SI ESTABA CON SONIDO → SE PONE EN MUTE
             if (!isMuted) {
-              unMute();
-              setVolume(100);
+              setVolume(0);
+              els.muteBtn.textContent = 'Unmute';
+              isMuted = true;
+              els.status.textContent = "Sonido silenciado (Siguiente)";
+              speak(PHRASES.mute);
+            } else {
+              setVolume(0); // mantiene mute
             }
           }, 800);
         }, 600);
