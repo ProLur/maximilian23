@@ -21,7 +21,6 @@
       opacity: 0.08; z-index: -1; pointer-events: none;
     }
     @keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-
     .logo-container { position: relative; display: inline-block; margin: 0 auto 12px; }
     .logo {
       width: 38vw; max-width: 150px; height: auto; display: block;
@@ -45,7 +44,6 @@
       0%, 100% { filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc); }
       50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px #00ffcc); }
     }
-
     h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin: 0 0 18px 0; text-shadow: 0 0 6px var(--glow); line-height: 1.2; }
     .terminal-box {
       border: 1px solid var(--glow); padding: 16px; width: 100%; max-width: 420px; margin: 0 auto;
@@ -62,6 +60,9 @@
     button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
     button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #startBtn {
+      margin-top: 12px; /* ← ESPACIO ENTRE STATUS Y BOTÓN */
+    }
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
     .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
@@ -74,11 +75,9 @@
 </head>
 <body>
   <audio id="beep" preload="auto"><source src="beep.mp3" type="audio/mpeg"></audio>
-
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
   </div>
-
   <h1>RADIO MAXIMILIAN 23</h1>
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
@@ -94,7 +93,6 @@
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
   <p class="note">Emisión 24/7 • Powered by YouTube • Creado por Manuel</p>
-
   <script>
     const PHRASES = {
       start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
@@ -114,7 +112,6 @@
       musicVolumeLow: 0.15, musicVolumeHigh: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true
     };
-
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
@@ -129,17 +126,14 @@
       nowPlaying: document.getElementById('nowPlaying'),
       radioLogo: document.getElementById('radioLogo')
     };
-
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
-
     // === EXTRAER ID Y TÍTULO: "URL - Título" ===
     function parseLine(line) {
       const parts = line.split(' - ');
       const urlPart = parts[0].trim();
       const title = parts.slice(1).join(' - ').trim() || 'Título desconocido';
-
       let id = null;
       try {
         const url = new URL(urlPart);
@@ -152,10 +146,8 @@
         const match = urlPart.match(/(?:youtu\.be\/|v=)([^?&"'>]+)/);
         id = match ? match[1] : null;
       }
-
       return id ? { id, title } : null;
     }
-
     // === CARGAR playlists.txt CON TÍTULOS ===
     async function loadPlaylists() {
       try {
@@ -164,10 +156,8 @@
         const text = await res.text();
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
         console.log('Líneas leídas:', lines);
-
         items = lines.map(parseLine).filter(i => i);
         console.log('Elementos con título:', items);
-
         if (items.length === 0) throw new Error();
         els.status.textContent = `Frecuencia activa: ${items.length} elemento${items.length > 1 ? 's' : ''}`;
       } catch (err) {
@@ -181,20 +171,17 @@
         els.startBtn.disabled = false;
       }
     }
-
     // === EMBED ===
     function generateEmbedUrl(id) {
       const t = Date.now();
       return `https://www.youtube.com/embed/${id}?autoplay=1&loop=1&playlist=${id}&mute=0&rel=0&modestbranding=1&t=${t}`;
     }
-
     // === MOSTRAR TÍTULO PERSONALIZADO ===
     function updateNowPlaying() {
       if (!items[currentIndex]) return;
       const title = items[currentIndex].title;
       els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
     }
-
     // === VOLUMEN, OYENTES, VOZ ===
     function setMusicVolume(volume) {
       try {
@@ -206,11 +193,9 @@
         }
       } catch (e) {}
     }
-
     function updateListeners() {
       els.listenerCount.textContent = Math.floor(Math.random() * (127 - 47 + 1)) + 47;
     }
-
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
@@ -223,7 +208,6 @@
       utter.onend = () => { isSpeaking = false; setTimeout(() => setMusicVolume(CONFIG.musicVolumeHigh), 300); cb?.(); };
       speechSynthesis.cancel(); speechSynthesis.speak(utter);
     }
-
     // === ANUNCIOS ===
     function playAnnouncement() {
       const now = new Date();
@@ -233,7 +217,6 @@
       else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) { msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)]; }
       if (msg) setTimeout(() => speak(msg), 800);
     }
-
     // === CARGAR ELEMENTO ===
     function loadNewEntry() {
       if (!isPlaying || !items.length) return;
@@ -242,14 +225,13 @@
       els.player.src = '';
       setTimeout(() => {
         els.player.src = url;
-        updateNowPlaying();  // ← TÍTULO PERSONALIZADO
+        updateNowPlaying();
         setMusicVolume(CONFIG.musicVolumeHigh);
       }, 150);
       songCount++;
       playAnnouncement();
       els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
     }
-
     // === INICIAR ===
     function startRadio() {
       if (!items.length || isPlaying) return;
@@ -260,9 +242,8 @@
       speak(PHRASES.start, () => {
         loadNewEntry();
         if (titleCheckInterval) clearInterval(titleCheckInterval);
-        titleCheckInterval = setInterval(updateNowPlaying, 3000);  // Refresca título
+        titleCheckInterval = setInterval(updateNowPlaying, 3000);
       });
-
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03 && isPlaying) { songCount++; playAnnouncement(); }
       }, 60000);
@@ -270,7 +251,6 @@
       updateListeners();
       isPlaying = true;
     }
-
     // === DETENER ===
     function stopRadio() {
       isPlaying = false; voiceEnabled = false;
@@ -282,7 +262,6 @@
       els.startBtn.style.display = 'block';
       els.listenerCount.textContent = '0';
     }
-
     // === BOTONES ===
     els.startBtn.addEventListener('click', () => {
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -290,23 +269,19 @@
       voiceEnabled = true;
       startRadio();
     });
-
     els.nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % items.length;
       loadNewEntry();
     });
-
     els.stopBtn.addEventListener('click', () => {
       speak(PHRASES.pause, stopRadio);
     });
-
     // === LOGO BRILLO ===
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
       logo.classList.remove('glow-normal'); logo.classList.add('glow-intenso');
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
-
     // === OSCILOGRAMA ===
     function initOscilloscope() {
       const canvas = els.canvas; const ctx = canvas.getContext('2d');
@@ -334,7 +309,6 @@
       }
       draw();
     }
-
     // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
