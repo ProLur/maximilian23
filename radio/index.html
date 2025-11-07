@@ -211,10 +211,10 @@
       }
     }
 
-    // === EMBED URL ===
+    // === EMBED URL CON AUTOPLAY Y MUTE PARA MOVILES ===
     function generateEmbedUrl(id) {
       const t = Date.now();
-      return `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=0&rel=0&modestbranding=1&enablejsapi=1&t=${t}`;
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&t=${t}`;
     }
 
     // === MOSTRAR TÍTULO ===
@@ -262,7 +262,7 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === CARGAR VIDEO (sin autoplay) ===
+    // === CARGAR VIDEO CON AUTOPLAY Y UNMUTE ===
     function loadNewEntry() {
       if (!isPlaying || !items.length) return;
       const { id } = items[currentIndex];
@@ -273,12 +273,16 @@
       setTimeout(() => {
         els.player.src = url;
         updateNowPlaying();
-        setMusicVolume(CONFIG.musicVolumeHigh);
 
-        // Reproducir solo si ya se inició
-        if (isPlaying) {
-          setTimeout(playYouTube, 800);
-        }
+        // Unmute y volumen alto después de cargar (post-gesture)
+        setTimeout(() => {
+          const iframeWin = els.player.contentWindow;
+          if (iframeWin?.postMessage) {
+            iframeWin.postMessage(JSON.stringify({ event: 'command', func: 'unMute' }), '*');
+            setMusicVolume(CONFIG.musicVolumeHigh);
+          }
+        }, 1500); // Esperar a que cargue y autoplay mute
+
       }, 200);
 
       songCount++;
