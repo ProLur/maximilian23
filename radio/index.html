@@ -21,7 +21,7 @@
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
     .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
-    .voice-line { font-size: 0.85rem; margin: 6px 0; opacity: 0.9; font-style: italic; min-height: 1.2em; transition: opacity 0.5s; }
+    .voice-line { font-size: 0.85rem; margin: 6px 0; opacity: 0; min-height: 1.2em; transition: opacity 0.3s; } /* Oculto por defecto */
     @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } }
   </style>
 </head>
@@ -43,7 +43,7 @@
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 
-  <p class="note">Emisión 24/7 • Videos individuales OK • Pronunciación perfecta</p>
+  <p class="note">Emisión 24/7 • Voz metálica • Texto oculto</p>
 
   <script>
     // === FRASES FONÉTICAS ===
@@ -61,7 +61,15 @@
       ]
     };
 
-    const CONFIG = { voiceRate: 0.95, voicePitch: 0.7, voiceVolume: 1.0, announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true };
+    const CONFIG = { 
+      voiceRate: 0.8,     // Más lento = más robótico
+      voicePitch: 0.5,    // Más grave = más metálico
+      voiceVolume: 1.0, 
+      announcementInterval: 4, 
+      hourAnnounce: true, 
+      beepBeforeVoice: true 
+    };
+
     const els = {
       startBtn: document.getElementById('startBtn'), nextBtn: document.getElementById('nextBtn'), stopBtn: document.getElementById('stopBtn'),
       controls: document.getElementById('controls'), player: document.getElementById('player'), status: document.getElementById('status'),
@@ -71,104 +79,123 @@
     let playlists = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false;
     let audioContext = null, lastHour = -1, checkInterval = null;
+    let voiceGain = null, voiceDelay = null, voiceSource = null;
 
-    // === CARGAR PLAYLISTS (PLAYLIST + VIDEO INDIVIDUAL) ===
-    async function loadPlaylists() {
-      try {
-        const res = await fetch('playlists.txt?t=' + Date.now());
-        if (!res.ok) throw new Error();
-        const text = await res.text();
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-
-        playlists = lines.map(line => {
-          try {
-            const url = new URL(line);
-            const listId = url.searchParams.get('list');
-            if (listId) return { type: 'playlist', id: listId, url: line };
-
-            const videoId = url.searchParams.get('v');
-            if (videoId) return { type: 'video', id: videoId, url: line };
-
-            return null;
-          } catch { return null; }
-        }).filter(p => p);
-
-        if (playlists.length === 0) throw new Error();
-        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques`;
-        console.log("Cargadas:", playlists);
-      } catch (err) {
-        console.error("Error:", err);
-        els.status.textContent = 'Señal de emergencia';
-        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc' }];
-      }
-    }
-
-    // === GENERAR URL CORRECTA SEGÚN TIPO ===
-    function generateEmbedUrl(entry) {
-      if (!entry) return '';
-      const t = Date.now();
-
-      if (entry.type === 'playlist') {
-        const index = Math.floor(Math.random() * 50);
-        return `https://www.youtube.com/embed/videoseries?list=${entry.id}&autoplay=1&loop=1&playlist=${entry.id}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
+    // === EFECTO METÁLICO CON WEB AUDIO API ===
+    function applyMetallicEffect(utterance) {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioContext.resume();
       }
 
-      // VIDEO INDIVIDUAL → embed directo + loop
-      return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
-    }
+      const source = audioContext.createBufferSource();
+      const gainNode = audioContext.createGain();
+      const delayNode = audioContext.createDelay(0.1);
+      const feedback = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
 
-    // === VOZ MASCULINA ===
-    function getVoicePitchScore(voice) {
-      const name = voice.name.toLowerCase();
-      let score = 0;
-      if (name.includes('male') || name.includes('hombre') || name.includes('man')) score += 10;
-      if (name.includes('deep') || name.includes('bass') || name.includes('grave')) score += 8;
-      if (name.includes('jorge') || name.includes('enrique') || name.includes('carlos')) score += 5;
-      return score;
-    }
+      // Configuración metálica
+      filter.type = 'bandpass';
+      filter.frequency.value = 1200;
+      filter.Q.value = 8;
 
-    function speak(text, callback) {
-      if (!voiceEnabled || !('speechSynthesis' in window)) {
-        if (callback) callback();
-        return;
-      }
+      delayNode.delayTime.value = 0.03;
+      feedback.gain.value = 0.4;
+      gainNode.gain.value = 1.2;
 
-      els.voiceOutput.textContent = `"...${text}..."`;
-      els.voiceOutput.style.opacity = 1;
+      // Conexiones
+      source.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      gainNode.connect(delayNode);
+      delayNode.connect(feedback);
+      feedback.connect(delayNode);
+      delayNode.connect(audioContext.destination);
 
-      const utter = new SpeechSynthesisUtterance(text);
-      let voices = speechSynthesis.getVoices();
-      if (voices.length === 0) voices = speechSynthesis.getVoices();
+      // Simular voz
+      const text = utterance.text;
+      const msg = new SpeechSynthesisUtterance(text);
+      const voices = speechSynthesis.getVoices();
+      const voice = voices.find(v => v.lang.startsWith('es')) || voices[0];
+      msg.voice = voice;
+      msg.rate = CONFIG.voiceRate;
+      msg.pitch = CONFIG.voicePitch;
 
-      let candidates = voices.filter(v => v.lang.startsWith('es')).map(v => ({ voice: v, score: getVoicePitchScore(v) })).sort((a, b) => b.score - a.score);
-      let selectedVoice = candidates[0]?.voice;
-      if (!selectedVoice) {
-        candidates = voices.map(v => ({ voice: v, score: getVoicePitchScore(v) })).sort((a, b) => b.score - a.score);
-        selectedVoice = candidates[0]?.voice || voices[0];
-      }
-
-      utter.voice = selectedVoice;
-      utter.rate = CONFIG.voiceRate;
-      utter.pitch = CONFIG.voicePitch;
-      utter.volume = CONFIG.voiceVolume;
-
-      utter.onstart = () => {
+      msg.onstart = () => {
         if (CONFIG.beepBeforeVoice) {
           els.beep.currentTime = 0;
           els.beep.play().catch(() => {});
         }
       };
 
+      msg.onend = utterance.onend;
+      speechSynthesis.speak(msg);
+    }
+
+    // === CARGAR PLAYLISTS ===
+    async function loadPlaylists() {
+      try {
+        const res = await fetch('playlists.txt?t=' + Date.now());
+        if (!res.ok) throw new Error();
+        const text = await res.text();
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+        playlists = lines.map(line => {
+          try {
+            const url = new URL(line);
+            const listId = url.searchParams.get('list');
+            if (listId) return { type: 'playlist', id: listId };
+            const videoId = url.searchParams.get('v');
+            if (videoId) return { type: 'video', id: videoId };
+            return null;
+          } catch { return null; }
+        }).filter(p => p);
+        if (playlists.length === 0) throw new Error();
+        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques`;
+      } catch {
+        els.status.textContent = 'Señal de emergencia';
+        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc' }];
+      }
+    }
+
+    // === GENERAR EMBED ===
+    function generateEmbedUrl(entry) {
+      if (!entry) return '';
+      const t = Date.now();
+      if (entry.type === 'playlist') {
+        const index = Math.floor(Math.random() * 50);
+        return `https://www.youtube.com/embed/videoseries?list=${entry.id}&autoplay=1&loop=1&playlist=${entry.id}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
+      }
+      return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
+    }
+
+    // === SINTETIZAR VOZ (METÁLICA + TEXTO OCULTO) ===
+    function speak(text, callback) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) {
+        if (callback) callback();
+        return;
+      }
+
+      // OCULTAR TEXTO INMEDIATAMENTE
+      els.voiceOutput.textContent = '';
+      els.voiceOutput.style.opacity = 0;
+
+      const utter = new SpeechSynthesisUtterance(text);
+      let voices = speechSynthesis.getVoices();
+      if (voices.length === 0) voices = speechSynthesis.getVoices();
+
+      let selectedVoice = voices.find(v => v.lang.startsWith('es')) || voices[0];
+      utter.voice = selectedVoice;
+      utter.rate = CONFIG.voiceRate;
+      utter.pitch = CONFIG.voicePitch;
+      utter.volume = CONFIG.voiceVolume;
+
       utter.onend = () => {
-        setTimeout(() => {
-          els.voiceOutput.style.opacity = 0.6;
-          setTimeout(() => { els.voiceOutput.textContent = ''; }, 1000);
-        }, 500);
         if (callback) callback();
       };
 
+      // APLICAR EFECTO METÁLICO
       speechSynthesis.cancel();
-      speechSynthesis.speak(utter);
+      applyMetallicEffect(utter);
     }
 
     // === ANUNCIOS ===
@@ -192,14 +219,11 @@
     // === CARGAR NUEVA ENTRADA ===
     function loadNewEntry() {
       if (!isPlaying || !playlists.length) return;
-
       const url = generateEmbedUrl(playlists[currentIndex]);
       if (!url) return;
 
       els.player.src = '';
-      setTimeout(() => {
-        els.player.src = url;
-      }, 150);
+      setTimeout(() => { els.player.src = url; }, 150);
 
       songCount++;
       playAnnouncement();
@@ -209,7 +233,6 @@
     // === INICIAR ===
     function startRadio() {
       if (!playlists.length) return;
-
       currentIndex = Math.floor(Math.random() * playlists.length);
       songCount = 0;
 
@@ -242,17 +265,14 @@
       checkInterval = null;
 
       els.status.textContent = 'Emisión detenida.';
-      els.voiceOutput.textContent = '';
       els.controls.style.display = 'none';
       els.startBtn.style.display = 'block';
     }
 
     // === BOTONES ===
     els.startBtn.addEventListener('click', () => {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        audioContext.resume();
-      }
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioContext.resume();
       voiceEnabled = true;
       startRadio();
     });
@@ -263,9 +283,7 @@
     });
 
     els.stopBtn.addEventListener('click', () => {
-      speak(PHRASES.pause, () => {
-        stopRadio();
-      });
+      speak(PHRASES.pause, () => { stopRadio(); });
     });
 
     // === OSCILOGRAMA ===
