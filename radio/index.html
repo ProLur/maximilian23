@@ -1,174 +1,318 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Radio Maximilian 23</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radio Maximilian 23</title>
+  <style>
+    :root {
+      --glow: #00ff72;
+      --bg: #001400;
+      --dark: #001f00;
+    }
 
-<style>
-  body {
-    background: #001400;
-    color: #00ff72;
-    font-family: "Courier New", monospace;
-    text-align: center;
-    margin: 0;
-    padding: 16px;
-    overflow-x: hidden;
-  }
+    * {
+      box-sizing: border-box;
+    }
 
-  body:before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0;
-    width: 200vw; height: 200vw;
-    background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
-    animation: radar 8s linear infinite;
-    opacity: 0.09;
-    z-index: -1;
-  }
-  @keyframes radar { 100% { transform: rotate(360deg); } }
+    body {
+      background: var(--bg);
+      color: var(--glow);
+      font-family: "Courier New", monospace;
+      text-align: center;
+      margin: 0;
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
 
-  .logo {
-    width: 38vw;
-    max-width: 150px;
-    height: auto;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 10px #00ff72);
-  }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 50%; left: 50%;
+      width: 200vmax; height: 200vmax;
+      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
+      transform: translate(-50%, -50%);
+      animation: radar 12s linear infinite;
+      opacity: 0.08;
+      z-index: -1;
+      pointer-events: none;
+    }
 
-  h1 {
-    font-size: 6vw;
-    max-width: 300px;
-    margin: 0 auto 18px auto;
-    text-shadow: 0 0 6px #00ff72;
-  }
+    @keyframes radar {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
 
-  .terminal-box {
-    border: 1px solid #00ff72;
-    padding: 14px;
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-    border-radius: 8px;
-    box-shadow: 0 0 10px #00ff72;
-    background: rgba(0,18,0,0.6);
-  }
+    .logo {
+      width: 38vw;
+      max-width: 150px;
+      height: auto;
+      margin: 0 auto 12px;
+      display: block;
+      filter: drop-shadow(0 0 10px var(--glow));
+    }
 
-  #oscilograma {
-    width: 100%;
-    height: 60px;
-    display: block;
-    margin-bottom: 12px;
-  }
+    h1 {
+      font-size: clamp(1.8rem, 6vw, 2.5rem);
+      margin: 0 0 18px 0;
+      text-shadow: 0 0 6px var(--glow);
+      line-height: 1.2;
+    }
 
-  button {
-    width: 100%;
-    max-width: 260px;
-    background: #001f00;
-    border: 1px solid #00ff72;
-    color: #00ff72;
-    padding: 10px 0;
-    border-radius: 6px;
-    font-size: 16px;
-    margin: 6px auto;
-    display: block;
-  }
-  button:active {
-    background: #00ff72;
-    color: #001400;
-  }
+    .terminal-box {
+      border: 1px solid var(--glow);
+      padding: 16px;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
+      background: rgba(0, 20, 0, 0.7);
+      backdrop-filter: blur(2px);
+    }
 
-  #player {
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    position: absolute;
-  }
+    #oscilograma {
+      width: 100%;
+      height: 60px;
+      display: block;
+      margin-bottom: 14px;
+      image-rendering: pixelated;
+    }
 
-  .note {
-    margin-top: 18px;
-    font-size: 11px;
-    opacity: 0.7;
-  }
-</style>
+    button {
+      width: 100%;
+      max-width: 260px;
+      background: var(--dark);
+      border: 1px solid var(--glow);
+      color: var(--glow);
+      padding: 12px 0;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      margin: 8px auto;
+      display: block;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: rgba(0, 255, 114, 0.1);
+      box-shadow: 0 0 8px var(--glow);
+    }
+
+    button:active {
+      background: var(--glow);
+      color: var(--bg);
+      transform: scale(0.98);
+    }
+
+    #player {
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .note {
+      margin-top: 20px;
+      font-size: 0.75rem;
+      opacity: 0.7;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.4;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      margin-top: 8px;
+      opacity: 0.8;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 480px) {
+      .terminal-box {
+        padding: 14px;
+      }
+      button {
+        font-size: 0.95rem;
+        padding: 11px 0;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
-<audio id="beep" src="beep.mp3" preload="auto"></audio>
+  <audio id="beep" preload="auto">
+    <source src="beep.mp3" type="audio/mpeg">
+    <!-- Fallback silencioso si no hay beep -->
+  </audio>
 
-<img src="max2.png" class="logo" alt="Maximilian">
-<h1>RADIO MAXIMILIAN 23</h1>
+  <img src="max2.png" class="logo" alt="Logo Maximilian" onerror="this.style.display='none'">
 
-<div class="terminal-box">
-  <canvas id="oscilograma"></canvas>
+  <h1>RADIO MAXIMILIAN 23</h1>
 
-  <button id="startBtn">▶ Iniciar Radio</button>
-  <button id="nextBtn" style="display:none;">Siguiente playlist</button>
+  <div class="terminal-box">
+    <canvas id="oscilograma"></canvas>
+    <div class="status" id="status">Cargando playlists...</div>
+    <button id="startBtn">▶ Iniciar Radio</button>
+    <button id="nextBtn" style="display:none;">⏭ Siguiente Playlist</button>
+    <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
 
-  <iframe id="player" allow="autoplay; encrypted-media"></iframe>
-</div>
+  <p class="note">
+    La música proviene de YouTube y se reproduce mediante su reproductor oficial.<br>
+    Requiere interacción para iniciar (política de navegadores).
+  </p>
 
-<p class="note">
-  La música proviene de YouTube y se reproduce mediante su reproductor oficial.
-</p>
+  <script>
+    // === Variables globales ===
+    let playlists = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let audioContext = null;
 
-<script>
-let playlists = [];
-let index = 0;
-let started = false;
+    const elements = {
+      startBtn: document.getElementById('startBtn'),
+      nextBtn: document.getElementById('nextBtn'),
+      player: document.getElementById('player'),
+      status: document.getElementById('status'),
+      beep: document.getElementById('beep'),
+      canvas: document.getElementById('oscilograma'),
+      ctx: null
+    };
 
-async function loadPlaylists() {
-  const res = await fetch('playlists.txt');
-  const text = await res.text();
-  playlists = text.split('\n').map(l => l.trim()).filter(l => l);
-}
+    // === Cargar playlists con fallback ===
+    async function loadPlaylists() {
+      try {
+        const res = await fetch('playlists.txt?t=' + Date.now());
+        if (!res.ok) throw new Error('No se pudo cargar playlists.txt');
+        const text = await res.text();
+        playlists = text
+          .split('\n')
+          .map(l => l.trim())
+          .filter(l => l && l.startsWith('http'));
+        
+        if (playlists.length === 0) throw new Error('No hay playlists válidas');
+        
+        elements.status.textContent = `Listo: ${playlists.length} playlist${playlists.length > 1 ? 's' : ''} cargadas.`;
+        elements.startBtn.disabled = false;
+      } catch (err) {
+        console.warn('Error cargando playlists:', err);
+        elements.status.textContent = '⚠️ Usando playlist de emergencia...';
+        // Playlist de respaldo (puedes cambiarla)
+        playlists = ['https://www.youtube.com/playlist?list=PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc'];
+      }
+    }
 
-function playlistToEmbed(url) {
-  const match = url.match(/list=([^&]+)/);
-  const listID = match ? match[1] : null;
-  return `https://www.youtube.com/embed/videoseries?list=${listID}&autoplay=1&loop=1&mute=0`;
-}
+    // === Convertir URL a embed ===
+    function playlistToEmbed(url) {
+      try {
+        const urlObj = new URL(url);
+        const listId = urlObj.searchParams.get('list');
+        if (!listId) throw new Error('No list ID');
+        return `https://www.youtube.com/embed/videoseries?list=${listId}&autoplay=1&loop=1&playlist=${listId}&mute=0&rel=0&modestbranding=1`;
+      } catch {
+        return '';
+      }
+    }
 
-function startRadio() {
-  document.getElementById('player').src = playlistToEmbed(playlists[index]);
-  document.getElementById('beep').play();
-}
+    // === Iniciar radio ===
+    function startRadio() {
+      if (!playlists.length) return;
 
-/* El botón ahora garantiza el user-gesture */
-document.getElementById('startBtn').addEventListener('click', () => {
-  started = true;
-  startRadio();
-  document.getElementById('startBtn').style.display = "none";
-  document.getElementById('nextBtn').style.display = "block";
-});
+      const embedUrl = playlistToEmbed(playlists[currentIndex]);
+      if (!embedUrl) {
+        elements.status.textContent = 'Error: URL inválida';
+        return;
+      }
 
-/* Cambiar playlist */
-document.getElementById('nextBtn').addEventListener('click', () => {
-  index = (index + 1) % playlists.length;
-  startRadio();
-});
+      elements.player.src = embedUrl;
+      elements.beep.currentTime = 0;
+      elements.beep.play().catch(() => {}); // Silenciar error si no hay beep
 
-/* Oscilograma */
-const canvas = document.getElementById('oscilograma');
-const ctx = canvas.getContext('2d');
+      elements.status.textContent = `Reproduciendo #${currentIndex + 1}`;
+      isPlaying = true;
+    }
 
-function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.strokeStyle = '#00ff72';
-  ctx.beginPath();
-  let t = Date.now() / 120;
-  for (let x = 0; x < canvas.width; x++) {
-    let y = canvas.height/2 + Math.sin((x+t)/7)*20;
-    ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-  requestAnimationFrame(draw);
-}
-draw();
+    // === Botón Iniciar ===
+    elements.startBtn.addEventListener('click', () => {
+      // Desbloquear audio en móviles
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioContext.resume();
+      }
 
-(async () => { await loadPlaylists(); })();
-</script>
+      startRadio();
+      elements.startBtn.style.display = 'none';
+      elements.nextBtn.style.display = 'block';
+    });
 
+    // === Botón Siguiente ===
+    elements.nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % playlists.length;
+      startRadio();
+    });
+
+    // === Oscilograma animado (mejorado) ===
+    function initOscilloscope() {
+      const canvas = elements.canvas;
+      const ctx = canvas.getContext('2d');
+      elements.ctx = ctx;
+
+      function resizeCanvas() {
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+        canvas.height = 60 * window.devicePixelRatio;
+        canvas.style.height = '60px';
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      let time = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'var(--glow)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        const w = canvas.offsetWidth;
+        const h = canvas.height / window.devicePixelRatio;
+
+        time += 0.8;
+        for (let x = 0; x <= w; x += 2) {
+          const phase = (x / w) * Math.PI * 4 + time * 0.02;
+          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10;
+          const y = h / 2 + amp;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    // === Inicialización ===
+    window.addEventListener('load', async () => {
+      elements.startBtn.disabled = true;
+      await loadPlaylists();
+      initOscilloscope();
+    });
+
+    // === Manejo de errores de iframe ===
+    elements.player.addEventListener('load', () => {
+      if (isPlaying) {
+        elements.status.textContent = `En vivo: Playlist #${currentIndex + 1}`;
+      }
+    });
+  </script>
 </body>
 </html>
