@@ -22,18 +22,11 @@
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
     .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
     .voice-line { font-size: 0.85rem; margin: 6px 0; opacity: 0; min-height: 1.2em; transition: opacity 0.3s; }
-    .listener-counter { 
-      font-size: 0.9rem; 
-      margin: 8px 0; 
-      padding: 8px; 
-      background: rgba(0, 255, 114, 0.1); 
-      border: 1px solid var(--glow); 
-      border-radius: 4px; 
-      text-shadow: 0 0 4px var(--glow); 
-      animation: pulse 2s infinite; 
-    }
+    .listener-counter { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
+    .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
     @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
-    @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } }
+    @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } .now-playing { font-size: 0.8rem; } }
   </style>
 </head>
 <body>
@@ -44,7 +37,8 @@
 
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-    <div id="listenerCounter" class="listener-counter">Oyentes online: <span id="listenerCount">73</span></div>
+    <div id="listenerCounter" class="listener-counter">Oyentes online: <span id="listenerCount">0</span></div>
+    <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Inicializando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
     <button id="startBtn">Iniciar Emisión</button>
@@ -55,7 +49,7 @@
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 
-  <p class="note">Emisión 24/7 • Voz metálica • <span style="color: #00ff72;">Oyentes en vivo simulados</span></p>
+  <p class="note">Emisión 24/7 • Duckling de música • Voz ultra metálica</p>
 
   <script>
     // === FRASES FONÉTICAS ===
@@ -74,9 +68,11 @@
     };
 
     const CONFIG = { 
-      voiceRate: 0.8,     
-      voicePitch: 0.5,    
+      voiceRate: 0.75,     // Más lento = más robótico
+      voicePitch: 0.3,     // MÁS GRAVE = MÁS MASCULINO
       voiceVolume: 1.0, 
+      musicVolumeLow: 0.15,   // Volumen música al hablar
+      musicVolumeHigh: 1.0,   // Volumen normal
       announcementInterval: 4, 
       hourAnnounce: true, 
       beepBeforeVoice: true 
@@ -86,44 +82,98 @@
       startBtn: document.getElementById('startBtn'), nextBtn: document.getElementById('nextBtn'), stopBtn: document.getElementById('stopBtn'),
       controls: document.getElementById('controls'), player: document.getElementById('player'), status: document.getElementById('status'),
       voiceOutput: document.getElementById('voiceOutput'), beep: document.getElementById('beep'), canvas: document.getElementById('oscilograma'),
-      listenerCount: document.getElementById('listenerCount'), listenerCounter: document.getElementById('listenerCounter')
+      listenerCount: document.getElementById('listenerCount'), nowPlaying: document.getElementById('nowPlaying')
     };
 
     let playlists = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false;
-    let audioContext = null, lastHour = -1, checkInterval = null;
-    let listenerInterval = null;
+    let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
+    let isSpeaking = false;
 
-    // === CONTADOR DE OYENTES SIMULADO ===
-    function updateListeners() {
-      const count = Math.floor(Math.random() * (127 - 47 + 1)) + 47; // Entre 47 y 127
-      els.listenerCount.textContent = count;
-      // Efecto de "señal viva"
-      els.listenerCounter.style.boxShadow = `0 0 8px var(--glow)`;
-      setTimeout(() => { els.listenerCounter.style.boxShadow = 'none'; }, 200);
+    // === CONTROL DE VOLUMEN DE MÚSICA ===
+    function setMusicVolume(volume) {
+      try {
+        const iframeWin = els.player.contentWindow;
+        if (iframeWin && iframeWin.YT && iframeWin.YT.Player) {
+          const player = iframeWin.player;
+          if (player && typeof player.setVolume === 'function') {
+            player.setVolume(volume * 100);
+          }
+        }
+      } catch (e) {
+        console.warn("No se pudo ajustar volumen del iframe:", e);
+      }
     }
 
-    // === EFECTO METÁLICO (SIMPLIFICADO POR COMPATIBILIDAD) ===
+    // === OBTENER TÍTULO Y AUTOR ===
+    function updateNowPlaying() {
+      try {
+        const iframeDoc = els.player.contentDocument || els.player.contentWindow.document;
+        if (!iframeDoc) return;
+
+        const titleEl = iframeDoc.querySelector('.ytp-title-text a') || iframeDoc.querySelector('.ytp-title-link');
+        const channelEl = iframeDoc.querySelector('.ytp-title-channel a') || iframeDoc.querySelector('.ytp-title-channel-name');
+
+        let title = titleEl ? titleEl.textContent.trim() : 'Título desconocido';
+        let artist = channelEl ? channelEl.textContent.trim() : 'Artista desconocido';
+
+        artist = artist.replace(/ - Topic$/i, '').trim();
+
+        if (title.length > 50) title = title.substring(0, 47) + '...';
+        if (artist.length > 30) artist = artist.substring(0, 27) + '...';
+
+        els.nowPlaying.innerHTML = `<strong>${title}</strong><br><small>por ${artist}</small>`;
+      } catch (e) {
+        els.nowPlaying.innerHTML = 'Señal encriptada...';
+      }
+    }
+
+    // === CONTADOR DE OYENTES ===
+    function updateListeners() {
+      const count = Math.floor(Math.random() * (127 - 47 + 1)) + 47;
+      els.listenerCount.textContent = count;
+    }
+
+    // === VOZ ULTRA METÁLICA Y MASCULINA ===
     function speak(text, callback) {
       if (!voiceEnabled || !('speechSynthesis' in window)) {
         if (callback) callback();
         return;
       }
 
+      isSpeaking = true;
       els.voiceOutput.textContent = '';
       els.voiceOutput.style.opacity = 0;
+
+      // BAJAR MÚSICA
+      setMusicVolume(CONFIG.musicVolumeLow);
 
       const utter = new SpeechSynthesisUtterance(text);
       let voices = speechSynthesis.getVoices();
       if (voices.length === 0) voices = speechSynthesis.getVoices();
 
-      let selectedVoice = voices.find(v => v.lang.startsWith('es')) || voices[0];
+      // Seleccionar voz más grave
+      let candidates = voices
+        .filter(v => v.lang.startsWith('es'))
+        .map(v => ({ voice: v, score: (v.name.includes('male') || v.name.includes('hombre') ? 10 : 0) + (v.name.includes('deep') || v.name.includes('grave') ? 8 : 0) }))
+        .sort((a, b) => b.score - a.score);
+
+      let selectedVoice = candidates[0]?.voice || voices.find(v => v.lang.startsWith('es')) || voices[0];
       utter.voice = selectedVoice;
       utter.rate = CONFIG.voiceRate;
-      utter.pitch = CONFIG.voicePitch;
+      utter.pitch = CONFIG.voicePitch;  // MÁS GRAVE
       utter.volume = CONFIG.voiceVolume;
 
+      // BEEP
+      if (CONFIG.beepBeforeVoice) {
+        els.beep.currentTime = 0;
+        els.beep.play().catch(() => {});
+      }
+
       utter.onend = () => {
+        isSpeaking = false;
+        // SUBIR MÚSICA
+        setTimeout(() => setMusicVolume(CONFIG.musicVolumeHigh), 300);
         if (callback) callback();
       };
 
@@ -192,7 +242,11 @@
       if (!url) return;
 
       els.player.src = '';
-      setTimeout(() => { els.player.src = url; }, 150);
+      setTimeout(() => { 
+        els.player.src = url; 
+        els.nowPlaying.innerHTML = 'Conectando...';
+        setMusicVolume(CONFIG.musicVolumeHigh); // Asegurar volumen alto
+      }, 150);
 
       songCount++;
       playAnnouncement();
@@ -221,10 +275,14 @@
         }
       }, 60000);
 
-      // Iniciar contador de oyentes
+      // Contador oyentes
       if (listenerInterval) clearInterval(listenerInterval);
-      listenerInterval = setInterval(updateListeners, 30000); // Cada 30s
+      listenerInterval = setInterval(updateListeners, 30000);
       updateListeners();
+
+      // Título en vivo
+      if (titleCheckInterval) clearInterval(titleCheckInterval);
+      titleCheckInterval = setInterval(updateNowPlaying, 5000);
 
       isPlaying = true;
     }
@@ -237,13 +295,15 @@
       els.player.src = '';
       if (checkInterval) clearInterval(checkInterval);
       if (listenerInterval) clearInterval(listenerInterval);
-      checkInterval = null;
-      listenerInterval = null;
+      if (titleCheckInterval) clearInterval(titleCheckInterval);
+      checkInterval = listenerInterval = titleCheckInterval = null;
 
       els.status.textContent = 'Emisión detenida.';
+      els.nowPlaying.innerHTML = 'Silencio en la frecuencia...';
       els.controls.style.display = 'none';
       els.startBtn.style.display = 'block';
       els.listenerCount.textContent = '0';
+      isSpeaking = false;
     }
 
     // === BOTONES ===
