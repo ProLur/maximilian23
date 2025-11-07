@@ -2,62 +2,94 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Radio Web</title>
+<title>Radio Maximilian 23</title>
+
 <style>
   body {
-    background: #101710;
-    color: #8cff8c;
-    font-family: monospace;
+    background: #021b01;
+    color: #00ff72;
+    font-family: "Courier New", monospace;
     text-align: center;
-    padding-top: 40px;
+    padding: 30px;
+    overflow-x: hidden;
   }
-  #player {
+
+  .logo {
+    width: 160px;
+    height: auto;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 6px #00ff72);
+  }
+
+  h1 {
+    font-size: 32px;
+    margin: 10px 0 25px 0;
+    text-shadow: 0 0 6px #00ff72;
+  }
+
+  .terminal-box {
+    border: 1px solid #00ff72;
+    padding: 20px;
     width: 90%;
-    max-width: 600px;
-    height: 340px;
-    border: none;
-    border-radius: 12px;
+    max-width: 650px;
+    margin: 0 auto 30px auto;
+    border-radius: 8px;
+    box-shadow: 0 0 12px #00ff72;
+  }
+
+  .note {
+    margin-top: 30px;
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  /* Ocultamos el video visual, dejamos solo el audio */
+  #player {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
   }
 </style>
 </head>
 
 <body>
-<h1>🎙️ Radio Web</h1>
-<p>Toca reproducir para comenzar</p>
 
-<iframe id="player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<img src="max.png" class="logo" alt="Maximilian">
+
+<h1>RADIO MAXIMILIAN 23</h1>
+
+<div class="terminal-box">
+  <p>Presiona reproducir en el cuadro emergente si el navegador lo pide.</p>
+  <iframe id="player" allow="autoplay; encrypted-media"></iframe>
+</div>
+
+<p class="note">
+  La música proviene de YouTube.<br>
+  Esta web no almacena ni redistribuye contenido audiovisual.<br>
+  Se utiliza el reproductor oficial según los Términos de Uso de YouTube.
+</p>
 
 <script>
 async function loadPlaylists() {
-  const response = await fetch('playlists.txt');
-  const text = await response.text();
-  const lines = text.split('\n').map(x => x.trim()).filter(x => x.length > 0);
-  return lines;
+  const res = await fetch('playlists.txt');
+  const text = await res.text();
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  return lines.length > 0 ? lines[0] : null;
 }
 
 function playlistToEmbed(url) {
-  // Extrae el ID de playlist
   const match = url.match(/list=([^&]+)/);
   const listID = match ? match[1] : null;
   return `https://www.youtube.com/embed/videoseries?list=${listID}&autoplay=1&loop=1`;
 }
 
 async function start() {
-  const playlists = await loadPlaylists();
-  let index = 0;
-
-  function loadCurrent() {
-    document.getElementById('player').src = playlistToEmbed(playlists[index]);
+  const playlist = await loadPlaylists();
+  if (playlist) {
+    document.getElementById('player').src = playlistToEmbed(playlist);
   }
-
-  loadCurrent();
-
-  // Cambiar de playlist cada 15 minutos (modificable)
-  const minutes = 15;
-  setInterval(() => {
-    index = (index + 1) % playlists.length;
-    loadCurrent();
-  }, minutes * 60 * 1000);
 }
 
 start();
