@@ -48,7 +48,6 @@
       display: flex;
       overflow: hidden;
     }
-    /* PANEL IZQUIERDO CON MAXIMILIAN Y BOTONES */
     .left-panel {
       display: none;
       flex: 1;
@@ -57,6 +56,11 @@
       background: rgba(13,17,23,0.9);
       border-right: 2px solid #00ffcc;
       position: relative;
+      flex-direction: column;
+    }
+    .image-container {
+      margin-top: 100px;
+      text-align: center;
     }
     .left-panel img {
       max-width: 220px;
@@ -72,7 +76,7 @@
     /* BOTÓN LABORATORIO MUSICAL */
     #labButton {
       position: absolute;
-      top: 20px;
+      top: 15px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,255,204,0.08);
@@ -96,10 +100,10 @@
       transform: translateX(-50%) scale(1.05);
     }
 
-    /* NUEVO BOTÓN: RADIO MAXIMILIAN 23 */
+    /* BOTÓN RADIO MAXIMILIAN 23 */
     #radioButton {
       position: absolute;
-      top: 70px;
+      top: 65px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,255,204,0.08);
@@ -273,60 +277,28 @@
     @media (min-width:601px) and (max-height:650px) {
       footer { padding-bottom: 50px; }
     }
-
-    /* MODAL PARA RADIO EN PC */
-    #radioModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(8px);
-    }
-    #radioModal.show { display: flex; }
-    #radioModal iframe {
-      width: 90%;
-      height: 90%;
-      border: 2px solid #00ffcc;
-      border-radius: 12px;
-      box-shadow: 0 0 20px #00ffcc88;
-    }
-    #closeRadio {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: #00ffcc;
-      color: #000;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      font-size: 20px;
-      cursor: pointer;
-      box-shadow: 0 0 10px #00ffcc;
-      z-index: 1001;
-    }
   </style>
 </head>
 <body>
   <header>
     <img src="Cabeza.png" alt="Maximilian">
     Maximilian 23
-    <div id="policyIcon" title="Ver políticas de uso">⚙️</div>
+    <div id="policyIcon" title="Ver políticas de uso">Configuración</div>
   </header>
   <div class="container">
     <div class="left-panel">
-      <!-- BOTÓN LABORATORIO MUSICAL -->
+      <!-- BOTONES FLOTANTES -->
       <div id="labButton" onclick="window.open('https://maximilian23.com/lab23/', '_blank')" title="Ir al Laboratorio Musical">
-        🎵 Laboratorio Musical
+        Laboratorio Musical
       </div>
-      <!-- NUEVO BOTÓN: RADIO MAXIMILIAN 23 -->
-      <div id="radioButton" title="Escuchar Radio Maximilian 23">
-        📻 Radio Maximilian 23
+      <div id="radioButton" onclick="window.open('https://maximilian23.com/radio/', '_blank')" title="Escuchar Radio Maximilian 23">
+        Radio Maximilian 23
       </div>
-      <img id="maxImage" src="max.png" alt="Maximilian grande">
+
+      <!-- IMAGEN CON ESPACIO -->
+      <div class="image-container">
+        <img id="maxImage" src="max.png" alt="Maximilian grande">
+      </div>
     </div>
     <div class="chat-panel">
       <div id="chat"></div>
@@ -337,17 +309,11 @@
       </footer>
     </div>
   </div>
-  <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
+  <div id="policyButton" title="Ver políticas de uso">Configuración Políticas</div>
   <div id="policyBanner">
     Al continuar, aceptas nuestras
     <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
     <button id="acceptPolicies">Aceptar</button>
-  </div>
-
-  <!-- MODAL PARA RADIO EN PC -->
-  <div id="radioModal">
-    <button id="closeRadio">×</button>
-    <iframe src="https://maximilian23.com/radio/" frameborder="0"></iframe>
   </div>
 
   <script>
@@ -422,32 +388,6 @@
         scrollBottom();
       }
     }
-
-    // DETECTAR SI ES MÓVIL
-    function isMobile() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    }
-
-    // ABRIR RADIO
-    document.getElementById("radioButton").addEventListener("click", () => {
-      if (isMobile()) {
-        window.open("https://maximilian23.com/radio/", "_blank");
-      } else {
-        document.getElementById("radioModal").classList.add("show");
-      }
-    });
-
-    // CERRAR MODAL
-    document.getElementById("closeRadio").addEventListener("click", () => {
-      document.getElementById("radioModal").classList.remove("show");
-    });
-
-    // CERRAR AL HACER CLIC FUERA
-    document.getElementById("radioModal").addEventListener("click", (e) => {
-      if (e.target === document.getElementById("radioModal")) {
-        document.getElementById("radioModal").classList.remove("show");
-      }
-    });
 
     window.addEventListener("DOMContentLoaded", () => {
       const chat = document.getElementById("chat");
