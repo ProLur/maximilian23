@@ -21,7 +21,18 @@
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
     .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
-    .voice-line { font-size: 0.85rem; margin: 6px 0; opacity: 0; min-height: 1.2em; transition: opacity 0.3s; } /* Oculto por defecto */
+    .voice-line { font-size: 0.85rem; margin: 6px 0; opacity: 0; min-height: 1.2em; transition: opacity 0.3s; }
+    .listener-counter { 
+      font-size: 0.9rem; 
+      margin: 8px 0; 
+      padding: 8px; 
+      background: rgba(0, 255, 114, 0.1); 
+      border: 1px solid var(--glow); 
+      border-radius: 4px; 
+      text-shadow: 0 0 4px var(--glow); 
+      animation: pulse 2s infinite; 
+    }
+    @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
     @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } }
   </style>
 </head>
@@ -33,6 +44,7 @@
 
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
+    <div id="listenerCounter" class="listener-counter">Oyentes online: <span id="listenerCount">73</span></div>
     <div class="status" id="status">Inicializando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
     <button id="startBtn">Iniciar Emisión</button>
@@ -43,12 +55,12 @@
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 
-  <p class="note">Emisión 24/7 • Voz metálica • Texto oculto</p>
+  <p class="note">Emisión 24/7 • Voz metálica • <span style="color: #00ff72;">Oyentes en vivo simulados</span></p>
 
   <script>
     // === FRASES FONÉTICAS ===
     const PHRASES = {
-      start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
+      start: "Estás es-cu-chan-do Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
       pause: "Emisión pausada. Volveremos pronto.",
       hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
       ads: [
@@ -62,8 +74,8 @@
     };
 
     const CONFIG = { 
-      voiceRate: 0.8,     // Más lento = más robótico
-      voicePitch: 0.5,    // Más grave = más metálico
+      voiceRate: 0.8,     
+      voicePitch: 0.5,    
       voiceVolume: 1.0, 
       announcementInterval: 4, 
       hourAnnounce: true, 
@@ -73,63 +85,50 @@
     const els = {
       startBtn: document.getElementById('startBtn'), nextBtn: document.getElementById('nextBtn'), stopBtn: document.getElementById('stopBtn'),
       controls: document.getElementById('controls'), player: document.getElementById('player'), status: document.getElementById('status'),
-      voiceOutput: document.getElementById('voiceOutput'), beep: document.getElementById('beep'), canvas: document.getElementById('oscilograma')
+      voiceOutput: document.getElementById('voiceOutput'), beep: document.getElementById('beep'), canvas: document.getElementById('oscilograma'),
+      listenerCount: document.getElementById('listenerCount'), listenerCounter: document.getElementById('listenerCounter')
     };
 
     let playlists = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false;
     let audioContext = null, lastHour = -1, checkInterval = null;
-    let voiceGain = null, voiceDelay = null, voiceSource = null;
+    let listenerInterval = null;
 
-    // === EFECTO METÁLICO CON WEB AUDIO API ===
-    function applyMetallicEffect(utterance) {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        audioContext.resume();
+    // === CONTADOR DE OYENTES SIMULADO ===
+    function updateListeners() {
+      const count = Math.floor(Math.random() * (127 - 47 + 1)) + 47; // Entre 47 y 127
+      els.listenerCount.textContent = count;
+      // Efecto de "señal viva"
+      els.listenerCounter.style.boxShadow = `0 0 8px var(--glow)`;
+      setTimeout(() => { els.listenerCounter.style.boxShadow = 'none'; }, 200);
+    }
+
+    // === EFECTO METÁLICO (SIMPLIFICADO POR COMPATIBILIDAD) ===
+    function speak(text, callback) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) {
+        if (callback) callback();
+        return;
       }
 
-      const source = audioContext.createBufferSource();
-      const gainNode = audioContext.createGain();
-      const delayNode = audioContext.createDelay(0.1);
-      const feedback = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
+      els.voiceOutput.textContent = '';
+      els.voiceOutput.style.opacity = 0;
 
-      // Configuración metálica
-      filter.type = 'bandpass';
-      filter.frequency.value = 1200;
-      filter.Q.value = 8;
+      const utter = new SpeechSynthesisUtterance(text);
+      let voices = speechSynthesis.getVoices();
+      if (voices.length === 0) voices = speechSynthesis.getVoices();
 
-      delayNode.delayTime.value = 0.03;
-      feedback.gain.value = 0.4;
-      gainNode.gain.value = 1.2;
+      let selectedVoice = voices.find(v => v.lang.startsWith('es')) || voices[0];
+      utter.voice = selectedVoice;
+      utter.rate = CONFIG.voiceRate;
+      utter.pitch = CONFIG.voicePitch;
+      utter.volume = CONFIG.voiceVolume;
 
-      // Conexiones
-      source.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      gainNode.connect(delayNode);
-      delayNode.connect(feedback);
-      feedback.connect(delayNode);
-      delayNode.connect(audioContext.destination);
-
-      // Simular voz
-      const text = utterance.text;
-      const msg = new SpeechSynthesisUtterance(text);
-      const voices = speechSynthesis.getVoices();
-      const voice = voices.find(v => v.lang.startsWith('es')) || voices[0];
-      msg.voice = voice;
-      msg.rate = CONFIG.voiceRate;
-      msg.pitch = CONFIG.voicePitch;
-
-      msg.onstart = () => {
-        if (CONFIG.beepBeforeVoice) {
-          els.beep.currentTime = 0;
-          els.beep.play().catch(() => {});
-        }
+      utter.onend = () => {
+        if (callback) callback();
       };
 
-      msg.onend = utterance.onend;
-      speechSynthesis.speak(msg);
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
     }
 
     // === CARGAR PLAYLISTS ===
@@ -166,36 +165,6 @@
         return `https://www.youtube.com/embed/videoseries?list=${entry.id}&autoplay=1&loop=1&playlist=${entry.id}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
       }
       return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
-    }
-
-    // === SINTETIZAR VOZ (METÁLICA + TEXTO OCULTO) ===
-    function speak(text, callback) {
-      if (!voiceEnabled || !('speechSynthesis' in window)) {
-        if (callback) callback();
-        return;
-      }
-
-      // OCULTAR TEXTO INMEDIATAMENTE
-      els.voiceOutput.textContent = '';
-      els.voiceOutput.style.opacity = 0;
-
-      const utter = new SpeechSynthesisUtterance(text);
-      let voices = speechSynthesis.getVoices();
-      if (voices.length === 0) voices = speechSynthesis.getVoices();
-
-      let selectedVoice = voices.find(v => v.lang.startsWith('es')) || voices[0];
-      utter.voice = selectedVoice;
-      utter.rate = CONFIG.voiceRate;
-      utter.pitch = CONFIG.voicePitch;
-      utter.volume = CONFIG.voiceVolume;
-
-      utter.onend = () => {
-        if (callback) callback();
-      };
-
-      // APLICAR EFECTO METÁLICO
-      speechSynthesis.cancel();
-      applyMetallicEffect(utter);
     }
 
     // === ANUNCIOS ===
@@ -252,6 +221,11 @@
         }
       }, 60000);
 
+      // Iniciar contador de oyentes
+      if (listenerInterval) clearInterval(listenerInterval);
+      listenerInterval = setInterval(updateListeners, 30000); // Cada 30s
+      updateListeners();
+
       isPlaying = true;
     }
 
@@ -262,11 +236,14 @@
       speechSynthesis.cancel();
       els.player.src = '';
       if (checkInterval) clearInterval(checkInterval);
+      if (listenerInterval) clearInterval(listenerInterval);
       checkInterval = null;
+      listenerInterval = null;
 
       els.status.textContent = 'Emisión detenida.';
       els.controls.style.display = 'none';
       els.startBtn.style.display = 'block';
+      els.listenerCount.textContent = '0';
     }
 
     // === BOTONES ===
