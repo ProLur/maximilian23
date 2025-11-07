@@ -126,7 +126,7 @@
     const CONFIG = {
       voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true,
-      listenerTimeout: 15 * 60 * 1000
+      listenerTimeout: 24 * 60 * 60 * 1000 // 24 HORAS
     };
     const els = {
       startBtn: document.getElementById('startBtn'),
@@ -146,10 +146,9 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, titleCheckInterval = null;
     let isMuted = false;
-    let userId = null;
     let activeUsers = {};
 
-    // === IP SIMULADA ===
+    // === ID ÚNICO POR USUARIO ===
     function getUserId() {
       let id = localStorage.getItem('radio_user_id');
       if (!id) {
@@ -159,7 +158,7 @@
       return id;
     }
 
-    // === OYENTES ===
+    // === OYENTES: +1 AL INICIAR, -1 TRAS 24 HORAS ===
     function addListener() {
       const id = getUserId();
       const now = Date.now();
@@ -168,7 +167,7 @@
         saveListeners();
         updateListenerCount();
       } else {
-        activeUsers[id] = now;
+        activeUsers[id] = now; // renueva 24h
       }
     }
 
@@ -195,7 +194,7 @@
       const saved = localStorage.getItem('radio_active_users');
       if (saved) {
         activeUsers = JSON.parse(saved);
-        removeInactive();
+        removeInactive(); // limpia al cargar
       }
     }
 
@@ -203,18 +202,17 @@
       els.listenerCount.textContent = Object.keys(activeUsers).length;
     }
 
-    // === YOUTUBE API ===
+    // === YOUTUBE COMANDOS ===
     function sendCommand(func, args = []) {
       try {
         els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
       } catch(e) { console.warn("Error enviando comando:", func); }
     }
     function playVideo() { sendCommand('playVideo'); }
-    function pauseVideo() { sendCommand('pauseVideo'); }
     function setVolume(volume) { sendCommand('setVolume', [volume]); }
     function unMute() { sendCommand('unMute'); }
 
-    // === CARGAR PRIMERA CANCIÓN (sin autoplay) ===
+    // === CARGAR PRIMERA CANCIÓN ===
     function preloadFirstVideo() {
       if (!items.length) return;
       currentIndex = Math.floor(Math.random() * items.length);
@@ -230,7 +228,7 @@
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
-      addListener();
+      addListener(); // +1 oyente
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
       els.status.textContent = "Iniciando emisión...";
@@ -266,7 +264,6 @@
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
       const { id, title } = items[currentIndex];
-      // AUTOPLAY=1 → SUENA AL CAMBIAR
       const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=1`;
       
       els.player.src = '';
@@ -285,7 +282,6 @@
 
       songCount++;
       playAnnouncement();
-      els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
     }
 
     // === RESTO ===
@@ -417,7 +413,7 @@
       loadListeners();
       await loadPlaylists();
       initOscilloscope();
-      setInterval(removeInactive, 60000);
+      setInterval(removeInactive, 60000); // limpia cada minuto
     });
   </script>
 </body>
