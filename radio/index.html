@@ -179,7 +179,7 @@
   </div>
 
   <p class="note">
-    Emisión 24/7 • Playlist aleatoria al inicio • Voz masculina
+    Emisión 24/7 • Playlist aleatoria • Voz masculina
   </p>
 
   <script>
@@ -226,13 +226,16 @@
       }
     }
 
-    // === CONVERTIR A EMBED CON CANCIÓN ALEATORIA ===
-    function toEmbed(url) {
+    // === GENERAR EMBED CON CANCIÓN ALEATORIA ===
+    function generateEmbedUrl() {
+      if (!playlists.length) return '';
+      const url = playlists[currentIndex];
       try {
         const urlObj = new URL(url);
         const list = urlObj.searchParams.get('list');
-        const index = Math.floor(Math.random() * 50); // Empieza en canción aleatoria (0-49)
-        return `https://www.youtube.com/embed/videoseries?list=${list}&autoplay=1&loop=1&playlist=${list}&index=${index}&mute=0&rel=0&modestbranding=1`;
+        const index = Math.floor(Math.random() * 50);
+        const t = Date.now(); // Evita caché
+        return `https://www.youtube.com/embed/videoseries?list=${list}&autoplay=1&loop=1&playlist=${list}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
       } catch { return ''; }
     }
 
@@ -321,32 +324,51 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === INICIAR RADIO (PLAYLIST ALEATORIA) ===
+    // === CARGAR NUEVA PLAYLIST (FORZAR RECARGA) ===
+    function loadNewPlaylist() {
+      if (!isPlaying) return;
+
+      const url = generateEmbedUrl();
+      if (!url) return;
+
+      // Forzar recarga del iframe
+      els.player.src = '';
+      setTimeout(() => {
+        els.player.src = url;
+      }, 100);
+
+      songCount++;
+      playAnnouncement();
+      els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
+    }
+
+    // === INICIAR RADIO (ALEATORIO) ===
     function startRadio() {
       if (!playlists.length) return;
 
-      // ELIGE PLAYLIST ALEATORIA
       currentIndex = Math.floor(Math.random() * playlists.length);
       songCount = 0;
 
-      const url = toEmbed(playlists[currentIndex]);
-      if (!url) return;
+      // Mostrar controles INMEDIATAMENTE
+      els.startBtn.style.display = 'none';
+      els.controls.style.display = 'flex';
 
-      els.player.src = url;
-      songCount++;
-      playAnnouncement();
-      els.status.textContent = `Bloque aleatorio #${currentIndex + 1} | Canción ${songCount}`;
-      isPlaying = true;
+      // Iniciar voz + reproducción
+      speak("Estás escuchando Radio Maximilian 23. Emisión continua iniciada.", () => {
+        loadNewPlaylist();
+      });
 
-      // Iniciar detección aproximada de canciones
+      // Iniciar detección de canciones
       if (checkInterval) clearInterval(checkInterval);
       checkInterval = setInterval(() => {
-        if (Math.random() < 0.03) {
+        if (Math.random() < 0.03 && isPlaying) {
           songCount++;
           playAnnouncement();
           els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
         }
       }, 60000);
+
+      isPlaying = true;
     }
 
     // === DETENER TODO ===
@@ -372,16 +394,12 @@
       }
 
       voiceEnabled = true;
-      speak("Estás escuchando Radio Maximilian 23. Emisión continua iniciada.", () => {
-        startRadio();
-        els.startBtn.style.display = 'none';
-        els.controls.style.display = 'flex';
-      });
+      startRadio(); // Ahora cambia botones inmediatamente
     });
 
     els.nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % playlists.length;
-      startRadio();
+      loadNewPlaylist();
     });
 
     els.stopBtn.addEventListener('click', () => {
