@@ -10,12 +10,12 @@
   <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, audiciones música, colegio Alicante, emisora infantil, música alumnos, radio online 24/7" />
   <meta name="author" content="Manuel - CEIP Juan XXIII" />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" /> <!-- Cambia por tu URL real -->
+  <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
  
-  <!-- Open Graph (para redes sociales) -->
+  <!-- Open Graph -->
   <meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
-  <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7 con las interpretaciones de nuestros alumnos." />
-  <meta property="og:image" content="https://tudominio.com/max2.png" /> <!-- Cambia por URL absoluta de la imagen -->
+  <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
+  <meta property="og:image" content="https://tudominio.com/max2.png" />
   <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
   <meta property="og:type" content="website" />
  
@@ -144,32 +144,60 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
 
-    // === FORZAR REPRODUCCIÓN EN YOUTUBE ===
-    function playYouTube() {
+    // === CONTROL TOTAL DEL PLAYER ===
+    function playVideo() {
       try {
-        const iframeWin = els.player.contentWindow;
-        if (iframeWin?.postMessage) {
-          iframeWin.postMessage(JSON.stringify({
-            event: 'command',
-            func: 'playVideo'
-          }), '*');
-        }
-      } catch (e) { console.warn('Error forzando play:', e); }
-    }
-
-    function pauseYouTube() {
-      try {
-        const iframeWin = els.player.contentWindow;
-        if (iframeWin?.postMessage) {
-          iframeWin.postMessage(JSON.stringify({
-            event: 'command',
-            func: 'pauseVideo'
-          }), '*');
-        }
+        const win = els.player.contentWindow;
+        win?.postMessage(JSON.stringify({ event: 'command', func: 'playVideo' }), '*');
       } catch (e) {}
     }
 
-    // === EXTRAER ID Y TÍTULO ===
+    function pauseVideo() {
+      try {
+        const win = els.player.contentWindow;
+        win?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo' }), '*');
+      } catch (e) {}
+    }
+
+    function unMuteAndSetVolume() {
+      try {
+        const win = els.player.contentWindow;
+        win?.postMessage(JSON.stringify({ event: 'command', func: 'unMute' }), '*');
+        win?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*');
+      } catch (e) {}
+    }
+
+    // === EMBED SIN AUTOPLAY (para móviles) ===
+    function generateEmbedUrl(id) {
+      const t = Date.now();
+      return `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&mute=1&rel=0&modestbranding=1&enablejsapi=1&t=${t}`;
+    }
+
+    // === CARGAR Y REPRODUCIR CON GESTO ===
+    function loadAndPlay() {
+      if (!isPlaying || !items.length) return;
+      const { id } = items[currentIndex];
+      const url = generateEmbedUrl(id);
+
+      els.player.src = '';
+      setTimeout(() => {
+        els.player.src = url;
+        updateNowPlaying();
+
+        // Reproducir + desmutear DESPUÉS del gesto
+        setTimeout(() => {
+          playVideo();
+          setTimeout(unMuteAndSetVolume, 800);
+        }, 800);
+
+      }, 200);
+
+      songCount++;
+      playAnnouncement();
+      els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
+    }
+
+    // === RESTO DE FUNCIONES (igual) ===
     function parseLine(line) {
       const parts = line.split(' - ');
       const urlPart = parts[0].trim();
@@ -177,11 +205,8 @@
       let id = null;
       try {
         const url = new URL(urlPart);
-        if (url.hostname === 'youtu.be') {
-          id = url.pathname.slice(1).split('?')[0];
-        } else {
-          id = url.searchParams.get('v');
-        }
+        if (url.hostname === 'youtu.be') id = url.pathname.slice(1).split('?')[0];
+        else id = url.searchParams.get('v');
       } catch {
         const match = urlPart.match(/(?:youtu\.be\/|v=)([^?&"'>]+)/);
         id = match ? match[1] : null;
@@ -189,7 +214,6 @@
       return id ? { id, title } : null;
     }
 
-    // === CARGAR playlists.txt ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
@@ -211,31 +235,11 @@
       }
     }
 
-    // === EMBED URL CON AUTOPLAY Y MUTE PARA MOVILES ===
-    function generateEmbedUrl(id) {
-      const t = Date.now();
-      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&t=${t}`;
-    }
-
-    // === MOSTRAR TÍTULO ===
     function updateNowPlaying() {
       if (!items[currentIndex]) return;
       els.nowPlaying.innerHTML = `<strong>${items[currentIndex].title}</strong>`;
     }
 
-    // === VOLUMEN ===
-    function setMusicVolume(volume) {
-      try {
-        const iframeWin = els.player.contentWindow;
-        if (iframeWin?.postMessage) {
-          iframeWin.postMessage(JSON.stringify({
-            event: 'command', func: 'setVolume', args: [volume * 100]
-          }), '*');
-        }
-      } catch (e) {}
-    }
-
-    // === OYENTES: 1, 2 o 3 ===
     function updateListeners() {
       els.listenerCount.textContent = Math.floor(Math.random() * 3) + 1;
     }
@@ -243,13 +247,13 @@
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
-      setMusicVolume(CONFIG.musicVolumeLow);
+      try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [15] }), '*'); } catch(e){}
       const utter = new SpeechSynthesisUtterance(text);
       const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
       utter.voice = voice;
       utter.rate = CONFIG.voiceRate; utter.pitch = CONFIG.voicePitch; utter.volume = CONFIG.voiceVolume;
       if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
-      utter.onend = () => { isSpeaking = false; setTimeout(() => setMusicVolume(CONFIG.musicVolumeHigh), 300); cb?.(); };
+      utter.onend = () => { isSpeaking = false; setTimeout(() => { try { els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*'); } catch(e){} }, 300); cb?.(); };
       speechSynthesis.cancel(); speechSynthesis.speak(utter);
     }
 
@@ -262,35 +266,6 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === CARGAR VIDEO CON AUTOPLAY Y UNMUTE ===
-    function loadNewEntry() {
-      if (!isPlaying || !items.length) return;
-      const { id } = items[currentIndex];
-      const url = generateEmbedUrl(id);
-
-      els.player.src = ''; // Limpiar
-
-      setTimeout(() => {
-        els.player.src = url;
-        updateNowPlaying();
-
-        // Unmute y volumen alto después de cargar (post-gesture)
-        setTimeout(() => {
-          const iframeWin = els.player.contentWindow;
-          if (iframeWin?.postMessage) {
-            iframeWin.postMessage(JSON.stringify({ event: 'command', func: 'unMute' }), '*');
-            setMusicVolume(CONFIG.musicVolumeHigh);
-          }
-        }, 1500); // Esperar a que cargue y autoplay mute
-
-      }, 200);
-
-      songCount++;
-      playAnnouncement();
-      els.status.textContent = `Elemento ${currentIndex + 1}/${items.length} | Canción ${songCount}`;
-    }
-
-    // === INICIAR RADIO ===
     function startRadio() {
       if (!items.length || isPlaying) return;
       currentIndex = Math.floor(Math.random() * items.length);
@@ -299,7 +274,7 @@
       els.controls.style.display = 'flex';
 
       speak(PHRASES.start, () => {
-        loadNewEntry();
+        loadAndPlay();
         if (titleCheckInterval) clearInterval(titleCheckInterval);
         titleCheckInterval = setInterval(updateNowPlaying, 3000);
       });
@@ -313,15 +288,12 @@
       isPlaying = true;
     }
 
-    // === DETENER ===
     function stopRadio() {
       isPlaying = false; voiceEnabled = false;
-      pauseYouTube();
-      speechSynthesis.cancel(); 
+      pauseVideo();
+      speechSynthesis.cancel();
       els.player.src = '';
-      clearInterval(checkInterval); 
-      clearInterval(listenerInterval); 
-      clearInterval(titleCheckInterval);
+      clearInterval(checkInterval); clearInterval(listenerInterval); clearInterval(titleCheckInterval);
       els.status.textContent = 'Emisión detenida.';
       els.nowPlaying.innerHTML = 'Silencio en la frecuencia...';
       els.controls.style.display = 'none';
@@ -331,42 +303,32 @@
 
     // === BOTONES ===
     els.startBtn.addEventListener('click', () => {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      }
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audioContext.resume().then(() => {
         voiceEnabled = true;
         startRadio();
-      }).catch(err => {
-        console.error("Error AudioContext:", err);
+      }).catch(() => {
         els.status.textContent = "Error de audio. Recarga.";
       });
     });
 
     els.nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % items.length;
-      loadNewEntry();
+      loadAndPlay();
     });
 
     els.stopBtn.addEventListener('click', () => {
       speak(PHRASES.pause, stopRadio);
     });
 
-    // === LOGO BRILLO ===
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
-      logo.classList.remove('glow-normal'); 
-      logo.classList.add('glow-intenso');
-      setTimeout(() => { 
-        logo.classList.remove('glow-intenso'); 
-        logo.classList.add('glow-normal'); 
-      }, 3000);
+      logo.classList.remove('glow-normal'); logo.classList.add('glow-intenso');
+      setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
 
-    // === OSCILOGRAMA ===
     function initOscilloscope() {
-      const canvas = els.canvas; 
-      const ctx = canvas.getContext('2d');
+      const canvas = els.canvas; const ctx = canvas.getContext('2d');
       function resize() {
         const dpr = window.devicePixelRatio;
         canvas.width = canvas.offsetWidth * dpr;
@@ -374,14 +336,11 @@
         canvas.style.height = '60px';
         ctx.scale(dpr, dpr);
       }
-      resize(); 
-      window.addEventListener('resize', resize);
+      resize(); window.addEventListener('resize', resize);
       let t = 0;
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'var(--glow)'; 
-        ctx.lineWidth = 2; 
-        ctx.beginPath();
+        ctx.strokeStyle = 'var(--glow)'; ctx.lineWidth = 2; ctx.beginPath();
         const w = canvas.offsetWidth, h = 60;
         t += 0.8;
         for (let x = 0; x <= w; x += 2) {
@@ -395,7 +354,6 @@
       draw();
     }
 
-    // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
       await loadPlaylists();
