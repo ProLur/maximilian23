@@ -112,7 +112,6 @@
       start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
       mute: "Sonido silenciado.",
       unmute: "Volumen restaurado.",
-      next: "Siguiente canción...",
       hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
       ads: [
         "Transmisión en directo desde el ciberespacio.",
@@ -148,7 +147,7 @@
     let isMuted = false;
     let activeUsers = {};
 
-    // === ID ÚNICO POR USUARIO ===
+    // === ID ÚNICO ===
     function getUserId() {
       let id = localStorage.getItem('radio_user_id');
       if (!id) {
@@ -158,7 +157,7 @@
       return id;
     }
 
-    // === OYENTES: +1 AL INICIAR, -1 TRAS 24 HORAS ===
+    // === OYENTES: 24 HORAS ===
     function addListener() {
       const id = getUserId();
       const now = Date.now();
@@ -167,7 +166,7 @@
         saveListeners();
         updateListenerCount();
       } else {
-        activeUsers[id] = now; // renueva 24h
+        activeUsers[id] = now;
       }
     }
 
@@ -194,7 +193,7 @@
       const saved = localStorage.getItem('radio_active_users');
       if (saved) {
         activeUsers = JSON.parse(saved);
-        removeInactive(); // limpia al cargar
+        removeInactive();
       }
     }
 
@@ -202,7 +201,7 @@
       els.listenerCount.textContent = Object.keys(activeUsers).length;
     }
 
-    // === YOUTUBE COMANDOS ===
+    // === YOUTUBE ===
     function sendCommand(func, args = []) {
       try {
         els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
@@ -228,7 +227,7 @@
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
-      addListener(); // +1 oyente
+      addListener();
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
       els.status.textContent = "Iniciando emisión...";
@@ -259,7 +258,7 @@
       updateListenerCount();
     }
 
-    // === SIGUIENTE → SUENA + autoplay=1 ===
+    // === SIGUIENTE → SOLO CAMBIA CANCIÓN, SIN VOZ ===
     function loadAndPlayNext() {
       if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
@@ -275,8 +274,8 @@
           setVolume(100);
           els.muteBtn.textContent = 'Mute';
           isMuted = false;
-          els.status.textContent = "Siguiente canción...";
-    
+          els.status.textContent = ""; // SIN MENSAJE
+          // speak(PHRASES.next); → ELIMINADO
         }, 800);
       }, 200);
 
@@ -413,8 +412,8 @@
       loadListeners();
       await loadPlaylists();
       initOscilloscope();
-      setInterval(removeInactive, 60000); // limpia cada minuto
+      setInterval(removeInactive, 60000);
     });
   </script>
 </body>
-  </html>
+</html>
