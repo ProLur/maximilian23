@@ -5,82 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radio Maximilian 23</title>
   <style>
-    :root { 
-      --glow: #00ff72; 
-      --bg: #001400; 
-      --dark: #001f00; 
+    :root {
+      --glow: #00ff72;
+      --bg: #001400;
+      --dark: #001f00;
     }
     * { box-sizing: border-box; }
-    body { 
-      background: var(--bg); 
-      color: var(--glow); 
-      font-family: "Courier New", monospace; 
-      text-align: center; 
-      margin: 0; 
-      padding: 16px; 
-      min-height: 100vh; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      overflow-x: hidden; 
-      position: relative; 
-    }
-    body::before { 
-      content: ""; 
-      position: fixed; 
-      top: 50%; left: 50%; 
-      width: 200vmax; height: 200vmax; 
-      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%); 
-      transform: translate(-50%, -50%); 
-      animation: radar 12s linear infinite; 
-      opacity: 0.08; 
-      z-index: -1; 
-      pointer-events: none; 
-    }
-    @keyframes radar { 
-      from { transform: translate(-50%, -50%) rotate(0deg); } 
-      to { transform: translate(-50%, -50%) rotate(360deg); } 
-    }
-
-    /* LOGO CON BRILLO ANIMADO */
-    .logo-container {
+    body {
+      background: var(--bg);
+      color: var(--glow);
+      font-family: "Courier New", monospace;
+      text-align: center;
+      margin: 0;
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-x: hidden;
       position: relative;
-      display: inline-block;
-      margin: 0 auto 12px;
     }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 50%; left: 50%;
+      width: 200vmax; height: 200vmax;
+      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
+      transform: translate(-50%, -50%);
+      animation: radar 12s linear infinite;
+      opacity: 0.08;
+      z-index: -1;
+      pointer-events: none;
+    }
+    @keyframes radar {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    .logo-container { position: relative; display: inline-block; margin: 0 auto 12px; }
     .logo {
-      width: 38vw; 
-      max-width: 150px; 
-      height: auto; 
-      display: block;
+      width: 38vw; max-width: 150px; height: auto; display: block;
       filter: drop-shadow(0 0 10px var(--glow));
-      cursor: pointer;
-      transition: transform 0.2s;
-      position: relative;
-      z-index: 1;
+      cursor: pointer; transition: transform 0.2s; position: relative; z-index: 1;
     }
     .logo:hover { transform: scale(1.05); }
-
-    /* BRILLO BASE */
     .glow-normal {
-      filter: drop-shadow(0 0 10px var(--glow)) 
-              drop-shadow(0 0 20px var(--glow));
+      filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow));
       animation: pulse-normal 3s ease-in-out infinite;
     }
-    /* BRILLO INTENSO (al clic) */
     .glow-intenso {
-      filter: drop-shadow(0 0 20px var(--glow)) 
-              drop-shadow(0 0 40px var(--glow)) 
-              drop-shadow(0 0 60px #00ffcc);
+      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc);
       animation: pulse-intenso 1.2s ease-in-out infinite;
     }
-    /* BRILLO SUAVE */
-    .glow-suave {
-      filter: drop-shadow(0 0 6px var(--glow)) 
-              drop-shadow(0 0 12px #00ff7266);
-      animation: pulse-suave 5s ease-in-out infinite;
-    }
-
     @keyframes pulse-normal {
       0%, 100% { filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow)); }
       50% { filter: drop-shadow(0 0 15px var(--glow)) drop-shadow(0 0 30px var(--glow)); }
@@ -89,148 +64,44 @@
       0%, 100% { filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc); }
       50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px #00ffcc); }
     }
-    @keyframes pulse-suave {
-      0%, 100% { filter: drop-shadow(0 0 6px var(--glow)) drop-shadow(0 0 12px #00ff7266); }
-      50% { filter: drop-shadow(0 0 8px var(--glow)) drop-shadow(0 0 16px #00ff7288); }
+    h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin: 0 0 18px 0; text-shadow: 0 0 6px var(--glow); line-height: 1.2; }
+    .terminal-box {
+      border: 1px solid var(--glow); padding: 16px; width: 100%; max-width: 420px; margin: 0 auto;
+      border-radius: 8px; box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
+      background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
     }
-
-    h1 { 
-      font-size: clamp(1.8rem, 6vw, 2.5rem); 
-      margin: 0 0 18px 0; 
-      text-shadow: 0 0 6px var(--glow); 
-      line-height: 1.2; 
+    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; }
+    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+    button {
+      flex: 1; max-width: 130px; background: var(--dark); border: 1px solid var(--glow); color: var(--glow);
+      padding: 12px 0; border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
+      transition: all 0.2s ease; font-weight: bold;
     }
-    .terminal-box { 
-      border: 1px solid var(--glow); 
-      padding: 16px; 
-      width: 100%; 
-      max-width: 420px; 
-      margin: 0 auto; 
-      border-radius: 8px; 
-      box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1); 
-      background: rgba(0, 20, 0, 0.7); 
-      backdrop-filter: blur(2px); 
-    }
-    #oscilograma { 
-      width: 100%; 
-      height: 60px; 
-      display: block; 
-      margin-bottom: 14px; 
-      image-rendering: pixelated; 
-    }
-    .btn-group { 
-      display: flex; 
-      gap: 8px; 
-      justify-content: center; 
-      margin-top: 8px; 
-    }
-    button { 
-      flex: 1; 
-      max-width: 130px; 
-      background: var(--dark); 
-      border: 1px solid var(--glow); 
-      color: var(--glow); 
-      padding: 12px 0; 
-      border-radius: 6px; 
-      font-size: 0.95rem; 
-      font-family: inherit; 
-      cursor: pointer; 
-      transition: all 0.2s ease; 
-      font-weight: bold; 
-    }
-    button:hover { 
-      background: rgba(0, 255, 114, 0.1); 
-      box-shadow: 0 0 8px var(--glow); 
-    }
-    button:active { 
-      background: var(--glow); 
-      color: var(--bg); 
-      transform: scale(0.98); 
-    }
-    #player { 
-      width: 1px; 
-      height: 1px; 
-      opacity: 0; 
-      position: absolute; 
-      pointer-events: none; 
-    }
-    .note { 
-      margin-top: 20px; 
-      font-size: 0.75rem; 
-      opacity: 0.7; 
-      max-width: 420px; 
-      margin-left: auto; 
-      margin-right: auto; 
-      line-height: 1.4; 
-    }
-    .status { 
-      font-size: 0.8rem; 
-      margin-top: 8px; 
-      opacity: 0.8; 
-      min-height: 1.2em; 
-    }
-    .voice-line { 
-      font-size: 0.85rem; 
-      margin: 6px 0; 
-      opacity: 0; 
-      min-height: 1.2em; 
-      transition: opacity 0.3s; 
-    }
-    .listener-counter { 
-      font-size: 0.9rem; 
-      margin: 8px 0; 
-      padding: 8px; 
-      background: rgba(0, 255, 114, 0.1); 
-      border: 1px solid var(--glow); 
-      border-radius: 4px; 
-      text-shadow: 0 0 4px var(--glow); 
-      animation: pulse 2s infinite; 
-    }
-    .now-playing { 
-      font-size: 0.85rem; 
-      margin: 10px 0; 
-      padding: 6px; 
-      background: rgba(0, 20, 0, 0.8); 
-      border: 1px dashed var(--glow); 
-      border-radius: 4px; 
-      min-height: 2.4em; 
-      line-height: 1.3; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
-      white-space: nowrap; 
-    }
-    .now-playing strong { 
-      color: #00ff72; 
-      text-shadow: 0 0 6px; 
-    }
-    @keyframes pulse { 
-      0%, 100% { opacity: 0.8; } 
-      50% { opacity: 1; } 
-    }
-    @media (max-width: 480px) { 
-      .terminal-box { padding: 14px; } 
-      button { font-size: 0.9rem; padding: 10px 0; } 
-      .btn-group { gap: 6px; } 
-      .now-playing { font-size: 0.8rem; } 
-    }
+    button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
+    button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
+    #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
+    .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
+    .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
+    .listener-counter { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
+    .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
+    @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+    @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } .now-playing { font-size: 0.8rem; } }
   </style>
 </head>
 <body>
   <audio id="beep" preload="auto"><source src="beep.mp3" type="audio/mpeg"></audio>
-
-  <!-- LOGO CON BRILLO -->
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
   </div>
-
   <h1>RADIO MAXIMILIAN 23</h1>
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
     <div id="listenerCounter" class="listener-counter">Oyentes online: <span id="listenerCount">0</span></div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
-    <div class="status" id="status">Inicializando frecuencia...</div>
+    <div class="status" id="status">Cargando playlists.txt...</div>
     <div id="voiceOutput" class="voice-line"></div>
-    <button id="startBtn">Iniciar Emisión</button>
+    <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls" style="display:none;">
       <button id="nextBtn">Siguiente</button>
       <button id="stopBtn">STOP</button>
@@ -240,7 +111,6 @@
   <p class="note">Emisión 24/7 • Powered by YouTube • Creado por Manuel</p>
 
   <script>
-    // === FRASES FONÉTICAS ===
     const PHRASES = {
       start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
       pause: "Emisión pausada. Volveremos pronto.",
@@ -260,16 +130,16 @@
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true
     };
     const els = {
-      startBtn: document.getElementById('startBtn'), 
-      nextBtn: document.getElementById('nextBtn'), 
+      startBtn: document.getElementById('startBtn'),
+      nextBtn: document.getElementById('nextBtn'),
       stopBtn: document.getElementById('stopBtn'),
-      controls: document.getElementById('controls'), 
-      player: document.getElementById('player'), 
+      controls: document.getElementById('controls'),
+      player: document.getElementById('player'),
       status: document.getElementById('status'),
-      voiceOutput: document.getElementById('voiceOutput'), 
-      beep: document.getElementById('beep'), 
+      voiceOutput: document.getElementById('voiceOutput'),
+      beep: document.getElementById('beep'),
       canvas: document.getElementById('oscilograma'),
-      listenerCount: document.getElementById('listenerCount'), 
+      listenerCount: document.getElementById('listenerCount'),
       nowPlaying: document.getElementById('nowPlaying'),
       radioLogo: document.getElementById('radioLogo')
     };
@@ -277,7 +147,40 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
 
-    // === CONTROL DE VOLUMEN ===
+    // === RECARGA FORZADA DE playlists.txt (sin caché) ===
+    async function loadPlaylists() {
+      els.status.textContent = 'Actualizando listas...';
+      try {
+        const res = await fetch('playlists.txt?t=' + Date.now(), {
+          cache: 'no-cache',  // Forzar recarga
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        if (!res.ok) throw new Error('No se pudo cargar playlists.txt');
+        const text = await res.text();
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+        playlists = lines.map(line => {
+          try {
+            const url = new URL(line);
+            const listId = url.searchParams.get('list');
+            if (listId) return { type: 'playlist', id: listId };
+            const videoId = url.searchParams.get('v');
+            if (videoId) return { type: 'video', id: videoId };
+            return null;
+          } catch { return null; }
+        }).filter(p => p);
+
+        if (playlists.length === 0) throw new Error('No hay listas válidas');
+        els.status.textContent = `Frecuencia activa: ${playlists.length} bloque${playlists.length > 1 ? 's' : ''}`;
+      } catch (err) {
+        console.warn('Error cargando playlists.txt:', err);
+        els.status.textContent = 'Señal de emergencia (lista fija)';
+        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc' }];
+      } finally {
+        els.startBtn.disabled = false;
+      }
+    }
+
+    // === RESTO DEL CÓDIGO (sin cambios) ===
     function setMusicVolume(volume) {
       try {
         const iframeWin = els.player.contentWindow;
@@ -291,7 +194,6 @@
       } catch (e) {}
     }
 
-    // === OBTENER TÍTULO Y AUTOR DEL IFRAME ===
     function updateNowPlaying() {
       try {
         const iframeDoc = els.player.contentDocument || els.player.contentWindow.document;
@@ -309,13 +211,11 @@
       }
     }
 
-    // === CONTADOR DE OYENTES ===
     function updateListeners() {
       const count = Math.floor(Math.random() * (127 - 47 + 1)) + 47;
       els.listenerCount.textContent = count;
     }
 
-    // === VOZ ULTRA METÁLICA ===
     function speak(text, callback) {
       if (!voiceEnabled || !('speechSynthesis' in window)) {
         if (callback) callback();
@@ -345,32 +245,6 @@
       speechSynthesis.speak(utter);
     }
 
-    // === CARGAR PLAYLISTS ===
-    async function loadPlaylists() {
-      try {
-        const res = await fetch('playlists.txt?t=' + Date.now());
-        if (!res.ok) throw new Error();
-        const text = await res.text();
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-        playlists = lines.map(line => {
-          try {
-            const url = new URL(line);
-            const listId = url.searchParams.get('list');
-            if (listId) return { type: 'playlist', id: listId };
-            const videoId = url.searchParams.get('v');
-            if (videoId) return { type: 'video', id: videoId };
-            return null;
-          } catch { return null; }
-        }).filter(p => p);
-        if (playlists.length === 0) throw new Error();
-        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques`;
-      } catch {
-        els.status.textContent = 'Señal de emergencia';
-        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc' }];
-      }
-    }
-
-    // === GENERAR EMBED ===
     function generateEmbedUrl(entry) {
       if (!entry) return '';
       const t = Date.now();
@@ -381,7 +255,6 @@
       return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
     }
 
-    // === ANUNCIOS ===
     function playAnnouncement() {
       const now = new Date();
       const hour = now.getHours();
@@ -397,7 +270,6 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === CARGAR NUEVA ENTRADA ===
     function loadNewEntry() {
       if (!isPlaying || !playlists.length) return;
       const url = generateEmbedUrl(playlists[currentIndex]);
@@ -413,7 +285,6 @@
       els.status.textContent = `${playlists[currentIndex].type === 'playlist' ? 'Playlist' : 'Video'} #${currentIndex + 1} | Canción ${songCount}`;
     }
 
-    // === INICIAR ===
     function startRadio() {
       if (!playlists.length) return;
       currentIndex = Math.floor(Math.random() * playlists.length);
@@ -439,7 +310,6 @@
       isPlaying = true;
     }
 
-    // === DETENER ===
     function stopRadio() {
       isPlaying = false;
       voiceEnabled = false;
@@ -457,7 +327,6 @@
       isSpeaking = false;
     }
 
-    // === BOTONES ===
     els.startBtn.addEventListener('click', () => {
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audioContext.resume();
@@ -472,19 +341,16 @@
       speak(PHRASES.pause, () => { stopRadio(); });
     });
 
-    // === CLIC EN EL LOGO: BRILLO INTENSO ===
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
-      logo.classList.remove('glow-normal', 'glow-suave');
+      logo.classList.remove('glow-normal');
       logo.classList.add('glow-intenso');
-
       setTimeout(() => {
         logo.classList.remove('glow-intenso');
         logo.classList.add('glow-normal');
       }, 3000);
     });
 
-    // === OSCILOGRAMA ===
     function initOscilloscope() {
       const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
@@ -517,15 +383,14 @@
       draw();
     }
 
-    // === INICIALIZAR ===
+    // === INICIO: CARGAR playlists.txt CADA VEZ ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) {
         speechSynthesis.onvoiceschanged = () => {};
         speechSynthesis.getVoices();
       }
-      await loadPlaylists();
+      await loadPlaylists();  // <-- Recarga forzada
       initOscilloscope();
-      els.startBtn.disabled = false;
     });
   </script>
 </body>
