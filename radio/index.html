@@ -283,7 +283,7 @@
       const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
       utter.voice = voice;
       utter.rate = CONFIG.voiceRate; utter.pitch = CONFIG.voicePitch; utter.volume = CONFIG.voiceVolume;
-      if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().)^catch(() => {}); }
+      if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
       utter.onend = () => { isSpeaking = false; setTimeout(() => setVolume(isMuted ? 0 : 100), 300); cb?.(); };
       speechSynthesis.cancel(); speechSynthesis.speak(utter);
     }
@@ -359,7 +359,7 @@
       let t = 0;
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'var(--glow)'; // VERDE MAXIMILIAN
+        ctx.strokeStyle = 'var(--glow)'; // VERDE MAXIMILIAN #00ff72
         ctx.lineWidth = 2; ctx.beginPath();
         const w = canvas.offsetWidth, h = 60;
         t += 0.8;
@@ -382,4 +382,4 @@
     });
   </script>
 </body>
-</html>
+  </html>
