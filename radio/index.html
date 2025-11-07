@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es"> 
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -134,24 +134,21 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, checkInterval = null, listenerInterval = null, titleCheckInterval = null;
 
-    // === EXTRAER ID DE YOUTUBE (youtu.be o watch?v) ===
+    // === EXTRAER ID DE YOUTUBE ===
     function extractVideoId(urlStr) {
       try {
         const url = new URL(urlStr);
-        // youtu.be/ID
         if (url.hostname === 'youtu.be') {
           return url.pathname.slice(1).split('?')[0];
         }
-        // youtube.com/watch?v=ID
         return url.searchParams.get('v');
       } catch {
-        // Fallback: regex
         const match = urlStr.match(/(?:youtu\.be\/|v=)([^?&"'>]+)/);
         return match ? match[1] : null;
       }
     }
 
-    // === CARGAR playlists.txt (ACEPTA youtu.be + ?si=) ===
+    // === CARGAR playlists.txt (CON "ELEMENTOS") ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
@@ -165,10 +162,11 @@
           return id ? { type: 'video', id } : null;
         }).filter(p => p);
 
-        console.log('Videos cargados:', playlists);
+        console.log('Elementos cargados:', playlists);
 
         if (playlists.length === 0) throw new Error();
-        els.status.textContent = `Frecuencia activa: ${playlists.length} video${playlists.length > 1 ? 's' : ''}`;
+        // "ELEMENTOS" EN LUGAR DE "VIDEOS"
+        els.status.textContent = `Frecuencia activa: ${playlists.length} elemento${playlists.length > 1 ? 's' : ''}`;
       } catch (err) {
         console.warn('Error en playlists.txt, usando fallback');
         els.status.textContent = 'Señal de emergencia';
@@ -181,7 +179,7 @@
       }
     }
 
-    // === EMBED (VIDEO EN BUCLE) ===
+    // === EMBED ===
     function generateEmbedUrl(entry) {
       const t = Date.now();
       return `https://www.youtube.com/embed/${entry.id}?autoplay=1&loop=1&playlist=${entry.id}&mute=0&rel=0&modestbranding=1&t=${t}`;
@@ -238,11 +236,11 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === CARGAR CANCIÓN ===
+    // === CARGAR ELEMENTO ===
     function loadNewEntry() {
       if (!isPlaying || !playlists.length) return;
       const url = generateEmbedUrl(playlists[currentIndex]);
-      console.log('Reproduciendo:', playlists[currentIndex].id, url);
+      console.log('Reproduciendo elemento:', playlists[currentIndex].id);
       els.player.src = '';
       setTimeout(() => {
         els.player.src = url;
@@ -251,6 +249,7 @@
       }, 150);
       songCount++;
       playAnnouncement();
+      // "ELEMENTO" EN LUGAR DE "VIDEO"
       els.status.textContent = `Elemento ${currentIndex + 1}/${playlists.length} | Canción ${songCount}`;
     }
 
