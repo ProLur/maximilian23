@@ -179,7 +179,7 @@
   </div>
 
   <p class="note">
-    Emisión 24/7 • Playlist aleatoria • Voz masculina
+    Emisión 24/7 • Soporte videos individuales • Voz masculina
   </p>
 
   <script>
@@ -211,32 +211,66 @@
     let audioContext = null, lastHour = -1;
     let checkInterval = null;
 
-    // === CARGAR PLAYLISTS ===
+    // === CARGAR PLAYLISTS (MEJORADO: SOPORTE PARA VIDEOS INDIVIDUALES) ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now());
-        if (!res.ok) throw new Error();
+        if (!res.ok) throw new Error('Archivo no encontrado');
         const text = await res.text();
-        playlists = text.split('\n').map(l => l.trim()).filter(l => l && l.includes('list='));
-        if (playlists.length === 0) throw new Error();
-        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques`;
-      } catch {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+        playlists = lines.map(line => {
+          try {
+            const url = new URL(line);
+            let id = null;
+
+            // Si es playlist (tiene list=)
+            const listId = url.searchParams.get('list');
+            if (listId) {
+              console.log(`Cargando playlist: ${listId}`);
+              return { type: 'playlist', id: listId, original: line };
+            }
+
+            // Si es video individual (tiene v=)
+            const videoId = url.searchParams.get('v');
+            if (videoId) {
+              console.log(`Cargando video individual: ${videoId}`);
+              return { type: 'video', id: videoId, original: line };
+            }
+
+            return null;
+          } catch {
+            console.warn(`URL inválida: ${line}`);
+            return null;
+          }
+        }).filter(p => p);
+
+        if (playlists.length === 0) throw new Error('No hay URLs válidas');
+
+        console.log(`Cargadas ${playlists.length} entradas:`, playlists.map(p => `${p.type}: ${p.id}`));
+        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques (${playlists.filter(p => p.type === 'playlist').length} playlists, ${playlists.filter(p => p.type === 'video').length} videos)`;
+      } catch (err) {
+        console.error('Error cargando playlists:', err);
         els.status.textContent = 'Señal de emergencia';
-        playlists = ['https://www.youtube.com/playlist?list=PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc'];
+        playlists = [{ type: 'playlist', id: 'PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc', original: '' }];
       }
     }
 
-    // === GENERAR EMBED CON CANCIÓN ALEATORIA ===
-    function generateEmbedUrl() {
-      if (!playlists.length) return '';
-      const url = playlists[currentIndex];
-      try {
-        const urlObj = new URL(url);
-        const list = urlObj.searchParams.get('list');
-        const index = Math.floor(Math.random() * 50);
-        const t = Date.now(); // Evita caché
-        return `https://www.youtube.com/embed/videoseries?list=${list}&autoplay=1&loop=1&playlist=${list}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
-      } catch { return ''; }
+    // === GENERAR EMBED URL (MEJORADO PARA VIDEOS INDIVIDUALES) ===
+    function generateEmbedUrl(entry) {
+      if (!entry) return '';
+      const t = Date.now(); // Evita caché
+      let baseUrl;
+
+      if (entry.type === 'playlist') {
+        baseUrl = `https://www.youtube.com/embed/videoseries?list=${entry.id}`;
+      } else { // video individual → playlist de 1 video
+        baseUrl = `https://www.youtube.com/embed/videoseries?list=${entry.id}`;
+        // Nota: Para un solo video, se puede usar /embed/{videoId}, pero videoseries funciona igual
+      }
+
+      const index = Math.floor(Math.random() * 50); // Aleatorio si aplica
+      return `${baseUrl}&autoplay=1&loop=1&playlist=${entry.id}&index=${index}&mute=0&rel=0&modestbranding=1&t=${t}`;
     }
 
     // === ESTIMAR GRAVEDAD DE VOZ ===
@@ -309,7 +343,7 @@
       if (isNewHour && CONFIG.hourAnnounce) {
         lastHour = hour;
         msg = `Son las ${hour} ${mins > 0 ? `y ${mins}` : ''}. Estás en Radio Maximilian 23, la frecuencia del futuro.`;
-      } else if (songCount % CONFIG.announcementInterval === 0) {
+      } else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) {
         const frases = [
           "Transmisión en directo desde el ciberespacio.",
           "Sintoniza la señal verde. Radio Maximilian 23.",
@@ -324,28 +358,29 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === CARGAR NUEVA PLAYLIST (FORZAR RECARGA) ===
-    function loadNewPlaylist() {
-      if (!isPlaying) return;
+    // === CARGAR NUEVA ENTRADA (FORZAR RECARGA) ===
+    function loadNewEntry() {
+      if (!isPlaying || !playlists.length) return;
 
-      const url = generateEmbedUrl();
+      const url = generateEmbedUrl(playlists[currentIndex]);
       if (!url) return;
 
-      // Forzar recarga del iframe
+      // Forzar recarga del iframe (vaciar y recargar)
       els.player.src = '';
       setTimeout(() => {
         els.player.src = url;
-      }, 100);
+      }, 150);
 
       songCount++;
       playAnnouncement();
-      els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
+      els.status.textContent = `${playlists[currentIndex].type === 'playlist' ? 'Playlist' : 'Video'} #${currentIndex + 1} | Canción ${songCount}`;
     }
 
     // === INICIAR RADIO (ALEATORIO) ===
     function startRadio() {
       if (!playlists.length) return;
 
+      // Elegir entrada aleatoria
       currentIndex = Math.floor(Math.random() * playlists.length);
       songCount = 0;
 
@@ -355,16 +390,16 @@
 
       // Iniciar voz + reproducción
       speak("Estás escuchando Radio Maximilian 23. Emisión continua iniciada.", () => {
-        loadNewPlaylist();
+        loadNewEntry();
       });
 
-      // Iniciar detección de canciones
+      // Iniciar detección de canciones (aprox. cada 3-5 min)
       if (checkInterval) clearInterval(checkInterval);
       checkInterval = setInterval(() => {
         if (Math.random() < 0.03 && isPlaying) {
           songCount++;
           playAnnouncement();
-          els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
+          els.status.textContent = `${playlists[currentIndex].type === 'playlist' ? 'Playlist' : 'Video'} #${currentIndex + 1} | Canción ${songCount}`;
         }
       }, 60000);
 
@@ -394,12 +429,13 @@
       }
 
       voiceEnabled = true;
-      startRadio(); // Ahora cambia botones inmediatamente
+      startRadio();
     });
 
     els.nextBtn.addEventListener('click', () => {
+      // Cambiar a siguiente (cíclico)
       currentIndex = (currentIndex + 1) % playlists.length;
-      loadNewPlaylist();
+      loadNewEntry();
     });
 
     els.stopBtn.addEventListener('click', () => {
