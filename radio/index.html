@@ -11,9 +11,7 @@
       --dark: #001f00;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       background: var(--bg);
@@ -137,14 +135,16 @@
       min-height: 1.2em;
     }
 
+    .voice-line {
+      font-size: 0.85rem;
+      margin: 6px 0;
+      opacity: 0.9;
+      font-style: italic;
+    }
+
     @media (max-width: 480px) {
-      .terminal-box {
-        padding: 14px;
-      }
-      button {
-        font-size: 0.95rem;
-        padding: 11px 0;
-      }
+      .terminal-box { padding: 14px; }
+      button { font-size: 0.95rem; padding: 11px 0; }
     }
   </style>
 </head>
@@ -152,7 +152,6 @@
 
   <audio id="beep" preload="auto">
     <source src="beep.mp3" type="audio/mpeg">
-    <!-- Fallback silencioso si no hay beep -->
   </audio>
 
   <img src="max2.png" class="logo" alt="Logo Maximilian" onerror="this.style.display='none'">
@@ -161,123 +160,182 @@
 
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-    <div class="status" id="status">Cargando playlists...</div>
-    <button id="startBtn">▶ Iniciar Radio</button>
-    <button id="nextBtn" style="display:none;">⏭ Siguiente Playlist</button>
+    <div class="status" id="status">Inicializando frecuencia...</div>
+    <div id="voiceOutput" class="voice-line"></div>
+    <button id="startBtn">▶ Iniciar Emisión</button>
+    <button id="nextBtn" style="display:none;">⏭ Siguiente</button>
     <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 
   <p class="note">
-    La música proviene de YouTube y se reproduce mediante su reproductor oficial.<br>
-    Requiere interacción para iniciar (política de navegadores).
+    Emisión en directo 24/7 • Voz sintética en tiempo real • YouTube oficial
   </p>
 
   <script>
-    // === Variables globales ===
-    let playlists = [];
-    let currentIndex = 0;
-    let isPlaying = false;
-    let audioContext = null;
+    // === Configuración ===
+    const CONFIG = {
+      voiceRate: 1.1,
+      voicePitch: 1,
+      voiceVolume: 0.9,
+      announcementInterval: 4, // cada X canciones
+      hourAnnounce: true,
+      beepBeforeVoice: true
+    };
 
-    const elements = {
+    // === Elementos ===
+    const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
       player: document.getElementById('player'),
       status: document.getElementById('status'),
+      voiceOutput: document.getElementById('voiceOutput'),
       beep: document.getElementById('beep'),
-      canvas: document.getElementById('oscilograma'),
-      ctx: null
+      canvas: document.getElementById('oscilograma')
     };
 
-    // === Cargar playlists con fallback ===
+    let playlists = [], currentIndex = 0, songCount = 0;
+    let isPlaying = false, voiceEnabled = false;
+    let audioContext = null, lastHour = -1;
+
+    // === Cargar playlists ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now());
-        if (!res.ok) throw new Error('No se pudo cargar playlists.txt');
+        if (!res.ok) throw new Error();
         const text = await res.text();
-        playlists = text
-          .split('\n')
-          .map(l => l.trim())
-          .filter(l => l && l.startsWith('http'));
-        
-        if (playlists.length === 0) throw new Error('No hay playlists válidas');
-        
-        elements.status.textContent = `Listo: ${playlists.length} playlist${playlists.length > 1 ? 's' : ''} cargadas.`;
-        elements.startBtn.disabled = false;
-      } catch (err) {
-        console.warn('Error cargando playlists:', err);
-        elements.status.textContent = '⚠️ Usando playlist de emergencia...';
-        // Playlist de respaldo (puedes cambiarla)
+        playlists = text.split('\n').map(l => l.trim()).filter(l => l && l.includes('list='));
+        if (playlists.length === 0) throw new Error();
+        els.status.textContent = `Frecuencia activa: ${playlists.length} bloques`;
+      } catch {
+        els.status.textContent = 'Señal de emergencia activada';
         playlists = ['https://www.youtube.com/playlist?list=PL4fGSI1pDJn69On1f-8NAvX_CYlx7QyZc'];
       }
     }
 
-    // === Convertir URL a embed ===
-    function playlistToEmbed(url) {
+    // === Convertir a embed ===
+    function toEmbed(url) {
       try {
-        const urlObj = new URL(url);
-        const listId = urlObj.searchParams.get('list');
-        if (!listId) throw new Error('No list ID');
-        return `https://www.youtube.com/embed/videoseries?list=${listId}&autoplay=1&loop=1&playlist=${listId}&mute=0&rel=0&modestbranding=1`;
-      } catch {
-        return '';
+        const list = new URL(url).searchParams.get('list');
+        return `https://www.youtube.com/embed/videoseries?list=${list}&autoplay=1&loop=1&playlist=${list}&mute=0&rel=0&modestbranding=1`;
+      } catch { return ''; }
+    }
+
+    // === Sintetizar voz ===
+    function speak(text, callback) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) {
+        if (callback) callback();
+        return;
+      }
+
+      // Mostrar texto
+      els.voiceOutput.textContent = `"...${text}..."`;
+      els.voiceOutput.style.opacity = 1;
+
+      const utter = new SpeechSynthesisUtterance(text);
+      const voices = speechSynthesis.getVoices();
+      const esVoice = voices.find(v => v.lang.startsWith('es')) || voices[0];
+      
+      utter.voice = esVoice;
+      utter.rate = CONFIG.voiceRate;
+      utter.pitch = CONFIG.voicePitch;
+      utter.volume = CONFIG.voiceVolume;
+
+      utter.onstart = () => {
+        if (CONFIG.beepBeforeVoice) {
+          els.beep.currentTime = 0;
+          els.beep.play().catch(() => {});
+        }
+      };
+
+      utter.onend = () => {
+        els.voiceOutput.style.opacity = 0.6;
+        setTimeout(() => {
+          els.voiceOutput.textContent = '';
+        }, 1000);
+        if (callback) callback();
+      };
+
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    }
+
+    // === Anuncios programados ===
+    function playAnnouncement() {
+      const hour = new Date().getHours();
+      const mins = new Date().getMinutes();
+      const isNewHour = hour !== lastHour && mins < 5;
+
+      let msg = '';
+
+      if (isNewHour && CONFIG.hourAnnounce) {
+        lastHour = hour;
+        msg = `Son las ${hour} ${mins > 0 ? `y ${mins}` : ''}. Estás en Radio Maximilian 23, la frecuencia del futuro.`;
+      } else if (songCount % CONFIG.announcementInterval === 0) {
+        const frases = [
+          "Transmisión en directo desde el ciberespacio.",
+          "Sintoniza la señal verde. Radio Maximilian 23.",
+          "Frecuencia activa. No cambies de canal.",
+          "Aquí solo suena lo que importa.",
+          "Conectado. Escuchando. Transmitiendo."
+        ];
+        msg = frases[Math.floor(Math.random() * frases.length)];
+      }
+
+      if (msg) {
+        setTimeout(() => speak(msg), 800);
       }
     }
 
     // === Iniciar radio ===
     function startRadio() {
       if (!playlists.length) return;
+      const url = toEmbed(playlists[currentIndex]);
+      if (!url) return;
 
-      const embedUrl = playlistToEmbed(playlists[currentIndex]);
-      if (!embedUrl) {
-        elements.status.textContent = 'Error: URL inválida';
-        return;
-      }
+      els.player.src = url;
+      songCount++;
+      playAnnouncement();
 
-      elements.player.src = embedUrl;
-      elements.beep.currentTime = 0;
-      elements.beep.play().catch(() => {}); // Silenciar error si no hay beep
-
-      elements.status.textContent = `Reproduciendo #${currentIndex + 1}`;
+      els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
       isPlaying = true;
     }
 
-    // === Botón Iniciar ===
-    elements.startBtn.addEventListener('click', () => {
-      // Desbloquear audio en móviles
+    // === Botón Play (con voz) ===
+    els.startBtn.addEventListener('click', () => {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         audioContext.resume();
       }
 
-      startRadio();
-      elements.startBtn.style.display = 'none';
-      elements.nextBtn.style.display = 'block';
+      voiceEnabled = true;
+      speak("Estás escuchando Radio Maximilian 23. Emisión continua iniciada.", () => {
+        startRadio();
+        els.startBtn.style.display = 'none';
+        els.nextBtn.style.display = 'block';
+      });
     });
 
-    // === Botón Siguiente ===
-    elements.nextBtn.addEventListener('click', () => {
+    // === Siguiente ===
+    els.nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % playlists.length;
       startRadio();
     });
 
-    // === Oscilograma animado (mejorado) ===
+    // === Oscilograma mejorado ===
     function initOscilloscope() {
-      const canvas = elements.canvas;
+      const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
-      elements.ctx = ctx;
 
-      function resizeCanvas() {
+      function resize() {
         canvas.width = canvas.offsetWidth * window.devicePixelRatio;
         canvas.height = 60 * window.devicePixelRatio;
         canvas.style.height = '60px';
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
       }
+      resize();
+      window.addEventListener('resize', resize);
 
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-
-      let time = 0;
+      let t = 0;
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = 'var(--glow)';
@@ -285,12 +343,12 @@
         ctx.beginPath();
 
         const w = canvas.offsetWidth;
-        const h = canvas.height / window.devicePixelRatio;
+        const h = 60;
 
-        time += 0.8;
+        t += 0.8;
         for (let x = 0; x <= w; x += 2) {
-          const phase = (x / w) * Math.PI * 4 + time * 0.02;
-          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10;
+          const phase = (x / w) * Math.PI * 4 + t * 0.02;
+          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
           const y = h / 2 + amp;
           ctx.lineTo(x, y);
         }
@@ -300,18 +358,32 @@
       draw();
     }
 
-    // === Inicialización ===
-    window.addEventListener('load', async () => {
-      elements.startBtn.disabled = true;
-      await loadPlaylists();
-      initOscilloscope();
+    // === Detectar fin de video (aproximado) ===
+    let checkInterval;
+    els.player.addEventListener('load', () => {
+      if (isPlaying && !checkInterval) {
+        checkInterval = setInterval(() => {
+          // YouTube no da eventos directos, pero podemos aproximar
+          if (Math.random() < 0.03) { // ~cada 3-5 min
+            songCount++;
+            playAnnouncement();
+            els.status.textContent = `Bloque #${currentIndex + 1} | Canción ${songCount}`;
+          }
+        }, 60000);
+      }
     });
 
-    // === Manejo de errores de iframe ===
-    elements.player.addEventListener('load', () => {
-      if (isPlaying) {
-        elements.status.textContent = `En vivo: Playlist #${currentIndex + 1}`;
+    // === Inicializar ===
+    window.addEventListener('load', async () => {
+      // Cargar voces
+      if ('speechSynthesis' in window) {
+        speechSynthesis.onvoiceschanged = () => {};
+        speechSynthesis.getVoices();
       }
+
+      await loadPlaylists();
+      initOscilloscope();
+      els.startBtn.disabled = false;
     });
   </script>
 </body>
