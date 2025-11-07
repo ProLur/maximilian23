@@ -174,23 +174,28 @@
 
     // === REPRODUCIR AL PULSAR INICIAR ===
     function startPlayback() {
-      if (isPlaying) return;
-      isPlaying = true;
-      els.startBtn.style.display = 'none';
-      els.controls.style.display = 'flex';
+  if (isPlaying) return;
+  isPlaying = true;
+  els.startBtn.style.display = 'none';
+  els.controls.style.display = 'flex';
 
-      speak(PHRASES.start, () => {
-        playVideo();
-        setTimeout(unMuteAndSetVolume, 800);
-      });
+  // >>> AÑADIR ESTO <<<
+  els.status.textContent = "";
+  // <<< SOLO ESTO >>>
 
-      titleCheckInterval = setInterval(updateNowPlaying, 3000);
-      checkInterval = setInterval(() => {
-        if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
-      }, 60000);
-      listenerInterval = setInterval(updateListeners, 30000);
-      updateListeners();
-    }
+  speak(PHRASES.start, () => {
+    playVideo();
+    setTimeout(unMuteAndSetVolume, 800);
+  });
+
+  titleCheckInterval = setInterval(updateNowPlaying, 3000);
+  checkInterval = setInterval(() => {
+    if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
+  }, 60000);
+  listenerInterval = setInterval(updateListeners, 30000);
+  updateListeners();
+}
+
 
     // === CARGAR Y REPRODUCIR NUEVO ===
     function loadAndPlayNext() {
