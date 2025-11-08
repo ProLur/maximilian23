@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radio Maximilian 23 - Emisora escolar CEIP Juan XXIII</title>
+  <!-- SEO -->
+  <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII donde podemos oír las audiciones de la asignatura de música. Emisión 24/7 con interpretaciones de los alumnos, clásicos y más, powered by YouTube." />
+  <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, audiciones música, colegio Alicante, emisora infantil, música alumnos, radio online 24/7" />
+  <meta name="author" content="Manuel - CEIP Juan XXIII" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
+  <!-- Open Graph -->
+  <meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
+  <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
+  <meta property="og:image" content="https://tudominio.com/max2.png" />
+  <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
+  <meta property="og:type" content="website" />
+  <style>
+    :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg); color: var(--glow); font-family: "Courier New", monospace;
+      text-align: center; margin: 0; padding: 16px; min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+      overflow-x: hidden; position: relative;
+    }
+    body::before {
+      content: ""; position: fixed; top: 50%; left: 50%;
+      width: 200vmax; height: 200vmax;
+      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
+      transform: translate(-50%, -50%); animation: radar 12s linear infinite;
+      opacity: 0.08; z-index: -1; pointer-events: none;
+    }
+    @keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .logo-container { position: relative; display: inline-block; margin: 0 auto 12px; }
+    .logo {
+      width: 38vw; max-width: 150px; height: auto; display: block;
+      filter: drop-shadow(0 0 10px var(--glow)); cursor: pointer;
+      transition: transform 0.2s; position: relative; z-index: 1;
+    }
+    .logo:hover { transform: scale(1.05); }
+    .glow-normal {
+      filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow));
+      animation: pulse-normal 3s ease-in-out infinite;
+    }
+    .glow-intenso {
+      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc);
+      animation: pulse-intenso 1.2s ease-in-out infinite;
+    }
+    @keyframes pulse-normal {
+      0%, 100% { filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow)); }
+      50% { filter: drop-shadow(0 0 15px var(--glow)) drop-shadow(0 0 30px var(--glow)); }
+    }
+    @keyframes pulse-intenso {
+      0%, 100% { filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc); }
+      50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px #00ffcc); }
+    }
+    h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin: 0 0 18px 0; text-shadow: 0 0 6px var(--glow); line-height: 1.2; }
+    .terminal-box {
+      border: 1px solid var(--glow); padding: 16px; width: 100%; max-width: 420px; margin: 0 auto;
+      border-radius: 8px; box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
+      background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
+    }
+    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; }
+    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+    button {
+      flex: 1; max-width: 130px; background: var(--dark); border: 1px solid var(--glow); color: var(--glow);
+      padding: 12px 0; border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
+      transition: all 0.2s ease; font-weight: bold;
+    }
+    button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
+    button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #startBtn { margin-top: 12px; }
+    #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
+    .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
+    .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
+    .listener-counter { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
+    .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
+    @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+    @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } .now-playing { font-size: 0.8rem; } }
+  </style>
+</head>
+<body>
+  <audio id="beep" preload="auto"><source src="beep.mp3" type="audio/mpeg"></audio>
+  <div class="logo-container">
+    <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
+  </div>
+  <h1>RADIO MAXIMILIAN 23</h1>
+  <div class="terminal-box">
+    <canvas id="oscilograma"></canvas>
+    <div id="listenerCounter" class="listener-counter">Oyentes últimos 30 días: <span id="listenerCount">0</span></div>
+    <div id="nowPlaying" class="now-playing">Cargando señal...</div>
+    <div class="status" id="status">Cargando frecuencia...</div>
+    <div id="voiceOutput" class="voice-line"></div>
+    <button id="startBtn" disabled>Iniciar Emisión</button>
+    <div class="btn-group" id="controls" style="display:none;">
+      <button id="nextBtn">Siguiente</button>
+      <button id="muteBtn">Mute</button>
+    </div>
+    <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+  <p class="note">Emisión 24/7 • Powered by YouTube • Creado por Manuel</p>
+
+  <script>
+    const PHRASES = {
+      start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
+      mute: "Sonido silenciado.",
+      unmute: "Volumen restaurado.",
+      hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
+      ads: [
+        "Transmisión en directo desde el ciberespacio.",
+        "Sintoniza la señal verde. Radio Max-i-mi-lian veintitrés.",
+        "Frecuencia activa. No cambies de canal.",
+        "Aquí solo suena lo que importa.",
+        "Conectado. Escuchando. Transmitiendo.",
+        "Señal clara. Volumen máximo."
+      ]
+    };
+
+    const CONFIG = {
+      voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
+      announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true
+    };
+
+    const els = {
+      startBtn: document.getElementById('startBtn'),
+      nextBtn: document.getElementById('nextBtn'),
+      muteBtn: document.getElementById('muteBtn'),
+      controls: document.getElementById('controls'),
+      player: document.getElementById('player'),
+      status: document.getElementById('status'),
+      voiceOutput: document.getElementById('voiceOutput'),
+      beep: document.getElementById('beep'),
+      canvas: document.getElementById('oscilograma'),
+      listenerCount: document.getElementById('listenerCount'),
+      nowPlaying: document.getElementById('nowPlaying'),
+      radioLogo: document.getElementById('radioLogo')
+    };
+
+    let items = [], currentIndex = 0, songCount = 0;
+    let isPlaying = false, voiceEnabled = false, isSpeaking = false;
+    let audioContext = null, lastHour = -1, titleCheckInterval = null;
+    let isMuted = false;
+    let serverListeners = 0;
+
+    // === ID ÚNICO ===
+    function getUserId() {
+      let id = localStorage.getItem('radio_user_id');
+      if (!id) {
+        id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('radio_user_id', id);
+      }
+      return id;
+    }
+
+    // === OYENTES EN SERVIDOR ===
+    async function registerListener() {
+      const id = getUserId();
+      try {
+        await fetch('listeners.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        updateListenerCountFromServer();
+      } catch (e) {
+        console.warn('Error registrando oyente:', e);
+      }
+    }
+
+    async function updateListenerCountFromServer() {
+      try {
+        const res = await fetch('listeners.php?t=' + Date.now());
+        const data = await res.json();
+        serverListeners = data.count || 0;
+        els.listenerCount.textContent = serverListeners;
+      } catch (e) {
+        console.warn('Error actualizando contador:', e);
+      }
+    }
+
+    function addListener() {
+      registerListener();
+    }
+
+    // === YOUTUBE COMMANDS ===
+    function sendCommand(func, args = []) {
+      try {
+        els.player.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+      } catch(e) { console.warn("Error enviando comando:", func); }
+    }
+
+    function playVideo() { sendCommand('playVideo'); }
+    function setVolume(volume) { sendCommand('setVolume', [volume]); }
+    function unMute() { sendCommand('unMute'); }
+
+    // === CARGAR PRIMERA CANCIÓN ===
+    function preloadFirstVideo() {
+      if (!items.length) return;
+      currentIndex = Math.floor(Math.random() * items.length);
+      const { id, title } = items[currentIndex];
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
+      els.player.src = url;
+      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
+      els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
+      els.startBtn.disabled = false;
+    }
+
+    // === INICIAR EMISIÓN ===
+    function startPlayback() {
+      if (isPlaying) return;
+      isPlaying = true;
+      addListener();
+      els.startBtn.style.display = 'none';
+      els.controls.style.display = 'flex';
+      els.status.textContent = "Iniciando emisión...";
+      isMuted = false;
+      els.muteBtn.textContent = 'Mute';
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioContext.resume().then(() => {
+        setTimeout(() => {
+          playVideo();
+          setTimeout(() => {
+            unMute();
+            setVolume(100);
+            els.status.textContent = "Emisión en directo";
+            speak(PHRASES.start);
+          }, 1000);
+        }, 500);
+      }).catch(err => {
+        els.status.textContent = "Error de audio. Recarga.";
+        console.error(err);
+      });
+      titleCheckInterval = setInterval(updateNowPlaying, 3000);
+      setInterval(() => {
+        if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
+      }, 60000);
+      updateListenerCountFromServer();
+    }
+
+    // === SIGUIENTE CANCIÓN (MANUAL O AUTOMÁTICA) ===
+    function loadAndPlayNext() {
+      if (!items.length) return;
+      currentIndex = (currentIndex + 1) % items.length;
+      const { id, title } = items[currentIndex];
+      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=1`;
+      
+      els.player.src = '';
+      setTimeout(() => {
+        els.player.src = url;
+        updateNowPlaying();
+        setTimeout(() => {
+          unMute();
+          setVolume(100);
+          els.muteBtn.textContent = 'Mute';
+          isMuted = false;
+          els.status.textContent = "";
+        }, 800);
+      }, 200);
+      songCount++;
+      playAnnouncement();
+    }
+
+    // === DETECTAR FIN DE VÍDEO (AUTOMÁTICO) ===
+    function initYouTubePlayer() {
+      window.addEventListener('message', (event) => {
+        if (event.origin !== 'https://www.youtube.com') return;
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'onStateChange' && data.info === 0) {
+            loadAndPlayNext();
+          }
+        } catch (e) {}
+      });
+    }
+
+    // === CARGAR PLAYLIST ===
+    function parseLine(line) {
+      const parts = line.split(' - ');
+      const urlPart = parts[0].trim();
+      const title = parts.slice(1).join(' - ').trim() || 'Título desconocido';
+      let id = null;
+      try {
+        const url = new URL(urlPart);
+        id = url.hostname === 'youtu.be' ? url.pathname.slice(1).split('?')[0] : url.searchParams.get('v');
+      } catch {
+        const match = urlPart.match(/(?:youtu\.be\/|v=)([^?&"'>]+)/);
+        id = match ? match[1] : null;
+      }
+      return id ? { id, title } : null;
+    }
+
+    async function loadPlaylists() {
+      try {
+        const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
+        if (!res.ok) throw new Error();
+        const text = await res.text();
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+        items = lines.map(parseLine).filter(i => i);
+        if (items.length === 0) throw new Error();
+      } catch (err) {
+        console.warn('Error en playlists.txt, usando fallback');
+        items = [
+          { id: 'k1-TrAvp_xs', title: 'Mozart - Lacrimosa' },
+          { id: 'RdUyf6FLLTQ', title: 'Mozart - Pequeña Serenata Nocturna' }
+        ];
+      }
+      preloadFirstVideo();
+    }
+
+    function updateNowPlaying() {
+      if (!items[currentIndex]) return;
+      els.nowPlaying.innerHTML = `<strong>${items[currentIndex].title}</strong>`;
+    }
+
+    function speak(text, cb) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
+      isSpeaking = true;
+      setVolume(15);
+      const utter = new SpeechSynthesisUtterance(text);
+      const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
+      utter.voice = voice;
+      utter.rate = CONFIG.voiceRate; utter.pitch = CONFIG.voicePitch; utter.volume = CONFIG.voiceVolume;
+      if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
+      utter.onend = () => { isSpeaking = false; setTimeout(() => setVolume(isMuted ? 0 : 100), 300); cb?.(); };
+      speechSynthesis.cancel(); speechSynthesis.speak(utter);
+    }
+
+    function playAnnouncement() {
+      const now = new Date();
+      const h = now.getHours(), m = now.getMinutes();
+      let msg = '';
+      if (h !== lastHour && m < 5 && CONFIG.hourAnnounce) { lastHour = h; msg = PHRASES.hour(h, m); }
+      else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) { msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)]; }
+      if (msg) setTimeout(() => speak(msg), 800);
+    }
+
+    // === BOTONES ===
+    els.startBtn.addEventListener('click', () => {
+      voiceEnabled = true;
+      startPlayback();
+    });
+
+    els.muteBtn.addEventListener('click', () => {
+      if (!isPlaying) return;
+      if (isMuted) {
+        unMute();
+        setVolume(100);
+        els.muteBtn.textContent = 'Mute';
+        isMuted = false;
+        els.status.textContent = "Volumen restaurado";
+        speak(PHRASES.unmute);
+      } else {
+        setVolume(0);
+        els.muteBtn.textContent = 'Unmute';
+        isMuted = true;
+        els.status.textContent = "Sonido silenciado";
+        speak(PHRASES.mute);
+      }
+    });
+
+    els.nextBtn.addEventListener('click', loadAndPlayNext);
+
+    els.radioLogo.addEventListener('click', () => {
+      const logo = els.radioLogo;
+      logo.classList.remove('glow-normal'); logo.classList.add('glow-intenso');
+      setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
+    });
+
+    // === OSCILOGRAMA VERDE BRILLANTE ===
+    function initOscilloscope() {
+      const canvas = els.canvas;
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.offsetWidth * dpr;
+        canvas.height = 60 * dpr;
+        canvas.style.height = '60px';
+        ctx.scale(dpr, dpr);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      let t = 0;
+
+      function draw() {
+        const w = canvas.offsetWidth;
+        const h = 60;
+
+        // Fondo oscuro con transparencia
+        ctx.fillStyle = 'rgba(0, 20, 0, 0.6)';
+        ctx.fillRect(0, 0, w, h);
+
+        // Línea verde brillante con glow
+        ctx.strokeStyle = 'var(--glow)';
+        ctx.lineWidth = 2.5;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00ff72';
+        ctx.beginPath();
+
+        t += 0.8;
+
+        for (let x = 0; x <= w; x += 2) {
+          const phase = (x / w) * Math.PI * 4 + t * 0.02;
+          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
+          ctx.lineTo(x, h / 2 + amp);
+        }
+
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    // === INICIO ===
+    window.addEventListener('load', async () => {
+      if ('speechSynthesis' in window) speechSynthesis.getVoices();
+      await loadPlaylists();
+      initOscilloscope();
+      initYouTubePlayer();
+
+      // Registrar oyente al cargar
+      registerListener();
+      updateListenerCountFromServer();
+      setInterval(updateListenerCountFromServer, 30000); // Actualizar cada 30s
+    });
+  </script>
+</body>
+</html>
