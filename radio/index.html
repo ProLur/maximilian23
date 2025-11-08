@@ -94,13 +94,12 @@
     <div id="listenerCounter" class="listener-counter">Oyentes: <span id="listenerCount">0</span></div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
-    <div id="voiceOutput" class="voice-line"></div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls" style="display:none;">
       <button id="nextBtn">Siguiente</button>
       <button id="muteBtn">Mute</button>
     </div>
-    <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin"></iframe>
+    <iframe id="player" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
   </div>
   <p class="note">Emisión 24/7 • Powered by YouTube • Creado por Manuel</p>
 
@@ -144,9 +143,9 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, titleCheckInterval = null;
     let isMuted = false;
-    let serverListeners = 0;
+    let fakeListeners = 0;
 
-    // === ID ÚNICO ===
+    // === ID ÚNICO (para simular oyentes) ===
     function getUserId() {
       let id = localStorage.getItem('radio_user_id');
       if (!id) {
@@ -156,34 +155,10 @@
       return id;
     }
 
-    // === OYENTES EN SERVIDOR ===
-    async function registerListener() {
-      const id = getUserId();
-      try {
-        await fetch('listeners.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        });
-        updateListenerCountFromServer();
-      } catch (e) {
-        console.warn('Error registrando oyente:', e);
-      }
-    }
-
-    async function updateListenerCountFromServer() {
-      try {
-        const res = await fetch('listeners.php?t=' + Date.now());
-        const data = await res.json();
-        serverListeners = data.count || 0;
-        els.listenerCount.textContent = serverListeners;
-      } catch (e) {
-        console.warn('Error actualizando contador:', e);
-      }
-    }
-
-    function addListener() {
-      registerListener();
+    // === OYENTES SIMULADOS (para GitHub Pages) ===
+    function updateFakeListeners() {
+      fakeListeners = Math.floor(Math.random() * 15) + 1; // 1 a 15 oyentes
+      els.listenerCount.textContent = fakeListeners;
     }
 
     // === YOUTUBE COMMANDS ===
@@ -201,76 +176,81 @@
     function preloadFirstVideo() {
       if (!items.length) return;
       currentIndex = Math.floor(Math.random() * items.length);
-      const { id, title } = items[currentIndex];
-      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=0`;
-      els.player.src = url;
-      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
+      loadVideo(currentIndex);
+      els.nowPlaying.innerHTML = `<strong>${items[currentIndex].title}</strong>`;
       els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
       els.startBtn.disabled = false;
+    }
+
+    // === CARGAR VIDEO (sin loop) ===
+    function loadVideo(index) {
+      const { id, title } = items[index];
+      const url = `https://www.youtube.com/embed/${id}?enablejsapi=1&rel=0&modestbranding=1&autoplay=0&playsinline=1`;
+      els.player.src = url;
+      els.nowPlaying.innerHTML = `<strong>${title}</strong>`;
     }
 
     // === INICIAR EMISIÓN ===
     function startPlayback() {
       if (isPlaying) return;
       isPlaying = true;
-      addListener();
+      getUserId(); // Simula registro
+      updateFakeListeners();
+      setInterval(updateFakeListeners, 30000);
+
       els.startBtn.style.display = 'none';
       els.controls.style.display = 'flex';
       els.status.textContent = "Iniciando emisión...";
       isMuted = false;
       els.muteBtn.textContent = 'Mute';
+
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audioContext.resume().then(() => {
         setTimeout(() => {
-          playVideo();
+          loadVideo(currentIndex);
           setTimeout(() => {
-            unMute();
-            setVolume(100);
-            els.status.textContent = "Emisión en directo";
-            speak(PHRASES.start);
-          }, 1000);
+            playVideo();
+            setTimeout(() => {
+              unMute();
+              setVolume(100);
+              els.status.textContent = "Emisión en directo";
+              speak(PHRASES.start);
+            }, 800);
+          }, 300);
         }, 500);
       }).catch(err => {
         els.status.textContent = "Error de audio. Recarga.";
         console.error(err);
       });
-      titleCheckInterval = setInterval(updateNowPlaying, 3000);
+
+      songCount = 0;
       setInterval(() => {
         if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
       }, 60000);
-      updateListenerCountFromServer();
     }
 
-    // === SIGUIENTE CANCIÓN (MANUAL O AUTOMÁTICA) ===
+    // === SIGUIENTE CANCIÓN ===
     function loadAndPlayNext() {
-      if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
-      const { id, title } = items[currentIndex];
-      const url = `https://www.youtube.com/embed/${id}?loop=1&playlist=${id}&rel=0&modestbranding=1&enablejsapi=1&autoplay=1`;
-      
-      els.player.src = '';
+      loadVideo(currentIndex);
       setTimeout(() => {
-        els.player.src = url;
-        updateNowPlaying();
-        setTimeout(() => {
-          unMute();
-          setVolume(100);
-          els.muteBtn.textContent = 'Mute';
-          isMuted = false;
-          els.status.textContent = "";
-        }, 800);
-      }, 200);
-      songCount++;
-      playAnnouncement();
+        playVideo();
+        unMute();
+        setVolume(100);
+        els.muteBtn.textContent = 'Mute';
+        isMuted = false;
+        songCount++;
+        playAnnouncement();
+      }, 600);
     }
 
-    // === DETECTAR FIN DE VÍDEO (AUTOMÁTICO) ===
+    // === DETECTAR FIN DE VÍDEO ===
     function initYouTubePlayer() {
       window.addEventListener('message', (event) => {
         if (event.origin !== 'https://www.youtube.com') return;
         try {
           const data = JSON.parse(event.data);
-          if (data.event === 'onStateChange' && data.info === 0) {
+          if (data.event === 'onStateChange' && data.info === 0) { // Video ended
             loadAndPlayNext();
           }
         } catch (e) {}
@@ -305,15 +285,13 @@
         console.warn('Error en playlists.txt, usando fallback');
         items = [
           { id: 'k1-TrAvp_xs', title: 'Mozart - Lacrimosa' },
-          { id: 'RdUyf6FLLTQ', title: 'Mozart - Pequeña Serenata Nocturna' }
+          { id: 'RdUyf6FLLTQ', title: 'Mozart - Pequeña Serenata Nocturna' },
+          { id: 'JTc1mDieQI8', title: 'Mozart - Sinfonía No. 40' },
+          { id: 'URI-sxdZksc', title: 'Mozart - La flauta Mágica - Obertura' },
+          { id: 'rkw_coO3pl8', title: 'Mozart - Las bodas de Fígaro' }
         ];
       }
       preloadFirstVideo();
-    }
-
-    function updateNowPlaying() {
-      if (!items[currentIndex]) return;
-      els.nowPlaying.innerHTML = `<strong>${items[currentIndex].title}</strong>`;
     }
 
     function speak(text, cb) {
@@ -324,7 +302,7 @@
       const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
       utter.voice = voice;
       utter.rate = CONFIG.voiceRate; utter.pitch = CONFIG.voicePitch; utter.volume = CONFIG.voiceVolume;
-      if (CONFIG.beepBeforeVoice) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
+      if (CONFIG.beepBeforeVoice && els.beep) { els.beep.currentTime = 0; els.beep.play().catch(() => {}); }
       utter.onend = () => { isSpeaking = false; setTimeout(() => setVolume(isMuted ? 0 : 100), 300); cb?.(); };
       speechSynthesis.cancel(); speechSynthesis.speak(utter);
     }
@@ -370,11 +348,10 @@
       setTimeout(() => { logo.classList.remove('glow-intenso'); logo.classList.add('glow-normal'); }, 3000);
     });
 
-    // === OSCILOGRAMA VERDE BRILLANTE ===
+    // === OSCILOGRAMA ===
     function initOscilloscope() {
       const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
-
       function resize() {
         const dpr = window.devicePixelRatio || 1;
         canvas.width = canvas.offsetWidth * dpr;
@@ -386,36 +363,26 @@
       window.addEventListener('resize', resize);
 
       let t = 0;
-
       function draw() {
         const w = canvas.offsetWidth;
         const h = 60;
-
-        // Fondo oscuro con transparencia
         ctx.fillStyle = 'rgba(0, 20, 0, 0.6)';
         ctx.fillRect(0, 0, w, h);
-
-        // Línea verde brillante con glow
         ctx.strokeStyle = 'var(--glow)';
         ctx.lineWidth = 2.5;
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#00ff72';
         ctx.beginPath();
-
         t += 0.8;
-
         for (let x = 0; x <= w; x += 2) {
           const phase = (x / w) * Math.PI * 4 + t * 0.02;
           const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
           ctx.lineTo(x, h / 2 + amp);
         }
-
         ctx.stroke();
         ctx.shadowBlur = 0;
-
         requestAnimationFrame(draw);
       }
-
       draw();
     }
 
@@ -425,11 +392,7 @@
       await loadPlaylists();
       initOscilloscope();
       initYouTubePlayer();
-
-      // Registrar oyente al cargar
-      registerListener();
-      updateListenerCountFromServer();
-      setInterval(updateListenerCountFromServer, 30000); // Actualizar cada 30s
+      updateFakeListeners();
     });
   </script>
 </body>
