@@ -76,7 +76,7 @@
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
     .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
-    .listener-counter { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
+    .listener-status { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
     .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
     @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
@@ -91,7 +91,7 @@
   <h1>RADIO MAXIMILIAN 23</h1>
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-    <div id="listenerCounter" class="listener-counter">Oyentes: <span id="listenerCount">0</span></div>
+    <div class="listener-status">Oyentes Estado: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
@@ -133,7 +133,6 @@
       voiceOutput: document.getElementById('voiceOutput'),
       beep: document.getElementById('beep'),
       canvas: document.getElementById('oscilograma'),
-      listenerCount: document.getElementById('listenerCount'),
       nowPlaying: document.getElementById('nowPlaying'),
       radioLogo: document.getElementById('radioLogo')
     };
@@ -141,45 +140,6 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, lastHour = -1, titleCheckInterval = null;
     let isMuted = false;
-    let serverListeners = 0;
-
-    // === OYENTES CON BACKEND PHP (CORREGIDO) ===
-    async function registerListener() {
-      try {
-        const response = await fetch('listeners.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({})
-        });
-        const data = await response.json();
-        serverListeners = data.count || 0;
-        els.listenerCount.textContent = serverListeners;
-      } catch (e) {
-        console.warn('Error registrando oyente:', e);
-        fallbackListenerCount();
-      }
-    }
-
-    async function updateListenerCountFromServer() {
-      try {
-        const response = await fetch('listeners.php?t=' + Date.now());
-        const data = await response.json();
-        serverListeners = data.count || 0;
-        els.listenerCount.textContent = serverListeners;
-      } catch (e) {
-        console.warn('Error actualizando contador:', e);
-        fallbackListenerCount();
-      }
-    }
-
-    function fallbackListenerCount() {
-      const fake = Math.floor(Math.random() * 8) + 2;
-      els.listenerCount.textContent = fake;
-    }
-
-    // Registrar al cargar
-    registerListener();
-    setInterval(updateListenerCountFromServer, 30000);
 
     // === YOUTUBE COMMANDS ===
     function sendCommand(func, args = []) {
@@ -231,7 +191,6 @@
       setInterval(() => {
         if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
       }, 60000);
-      registerListener(); // ← Registrar al iniciar
     }
 
     // === SIGUIENTE CANCIÓN ===
@@ -247,7 +206,7 @@
         setTimeout(() => {
           unMute();
           setVolume(100);
-          els.muteBtn.textContent | 'Mute';
+          els.muteBtn.textContent = 'Mute';
           isMuted = false;
           els.status.textContent = "";
         }, 800);
