@@ -30,10 +30,11 @@
       color: #00ffcc;
       font-family: "Courier New", monospace;
       position: relative;
+      min-height: 56px;
     }
     header img { height: 40px; width: auto; }
 
-    /* ICONO HAMBURGUESA - SOLO EN MÓVIL */
+    /* HAMBURGUESA - SOLO MÓVIL */
     #menuIcon {
       display: none;
       position: absolute;
@@ -44,10 +45,11 @@
       z-index: 1000;
       transition: transform 0.3s ease;
       user-select: none;
+      line-height: 1;
     }
     #menuIcon:hover { transform: scale(1.1); }
 
-    /* ÍCONO DE CONFIGURACIÓN (RUEDA DENTADA) - SOLO EN MÓVIL */
+    /* RUEDA DENTADA - SOLO MÓVIL */
     #policyIcon {
       display: none;
       position: absolute;
@@ -56,6 +58,7 @@
       color: #00ffcc;
       cursor: pointer;
       transition: transform .3s ease;
+      line-height: 1;
     }
     #policyIcon:hover { transform: rotate(90deg); }
     #policyIcon:active { transform: rotate(90deg) scale(0.9); }
@@ -121,16 +124,11 @@
     }
     #overlay.show { opacity: 1; visibility: visible; }
 
-    /* OCULTAR MENÚ EN ESCRITORIO */
     @media (min-width: 601px) {
       #mobileMenu, #overlay { display: none !important; }
     }
 
-    .container {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
+    .container { flex: 1; display: flex; overflow: hidden; }
     .left-panel {
       display: none;
       flex: 1;
@@ -141,205 +139,67 @@
       position: relative;
       flex-direction: column;
     }
-    .image-container {
-      margin-top: 100px;
-      text-align: center;
-    }
+    .image-container { margin-top: 100px; text-align: center; }
     .left-panel img {
-      max-width: 220px;
-      height: auto;
-      border-radius: 10px;
-      border: 2px solid #00ffcc;
-      box-shadow: 0 0 15px #00ffcc88;
-      cursor: pointer;
-      transition: transform 0.2s;
+      max-width: 220px; height: auto; border-radius: 10px; border: 2px solid #00ffcc;
+      box-shadow: 0 0 15px #00ffcc88; cursor: pointer; transition: transform 0.2s;
     }
     .left-panel img:hover { transform: scale(1.05); }
 
-    /* BOTONES FLOTANTES - SOLO ESCRITORIO */
     #labButton, #radioButton {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,255,204,0.08);
-      color: #00ffcc;
-      font-family: "Courier New", monospace;
-      font-size: 14px;
-      border: 1px solid #00ffcc88;
-      border-radius: 20px;
-      padding: 6px 14px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-shadow: 0 0 6px #00ffcc;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 0 10px #00ffcc55;
-      z-index: 10;
+      position: absolute; left: 50%; transform: translateX(-50%);
+      background: rgba(0,255,204,0.08); color: #00ffcc; font-family: "Courier New", monospace;
+      font-size: 14px; border: 1px solid #00ffcc88; border-radius: 20px; padding: 6px 14px;
+      cursor: pointer; transition: all 0.3s ease; text-shadow: 0 0 6px #00ffcc;
+      backdrop-filter: blur(4px); box-shadow: 0 0 10px #00ffcc55; z-index: 10;
       animation: float 3s ease-in-out infinite;
     }
     #labButton { top: 15px; }
     #radioButton { top: 65px; animation-delay: 0.5s; }
     #labButton:hover, #radioButton:hover {
-      background: rgba(0,255,204,0.2);
-      box-shadow: 0 0 12px #00ffcc;
+      background: rgba(0,255,204,0.2); box-shadow: 0 0 12px #00ffcc;
       transform: translateX(-50%) scale(1.05);
     }
-    @keyframes float {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-3px); }
-    }
+    @keyframes float { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } }
 
-    .chat-panel {
-      flex: 2;
-      display: flex;
-      flex-direction: column;
-      background: rgba(13,17,23,0.9);
-      height: 100%;
-    }
+    .chat-panel { flex: 2; display: flex; flex-direction: column; background: rgba(13,17,23,0.9); height: 100%; }
     @media (min-width:768px) { .left-panel { display: flex; } }
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
-      scroll-behavior: smooth;
-    }
-    .user, .bot {
-      padding: 12px;
-      margin: 10px 12px;
-      border-radius: 10px;
-      max-width: 80%;
-      font-family: "Courier New", monospace;
-      white-space: pre-wrap;
-      font-size: 17px;
-      line-height: 1.5;
-      word-break: break-word;
-    }
-    .user {
-      background: #243b4a;
-      color: #00ffcc;
-      margin-left: auto;
-      border: 1px solid #00ffcc;
-    }
-    .bot {
-      background: #1e2d3d;
-      color: #00ffcc;
-      border: 1px solid #00ffcc;
-    }
-    .bot a {
-      color: #00ffcc;
-      text-decoration: underline;
-      text-shadow: 0 0 6px #00ffccaa;
-      font-weight: bold;
-      transition: all 0.2s ease-in-out;
-    }
-    .bot a:hover {
-      color: #33ffee;
-      text-shadow: 0 0 10px #00fff0, 0 0 20px #00fff066;
-    }
+    #chat { flex: 1; overflow-y: auto; padding: 15px; scroll-behavior: smooth; }
+    .user, .bot { padding: 12px; margin: 10px 12px; border-radius: 10px; max-width: 80%; font-family: "Courier New", monospace; white-space: pre-wrap; font-size: 17px; line-height: 1.5; word-break: break-word; }
+    .user { background: #243b4a; color: #00ffcc; margin-left: auto; border: 1px solid #00ffcc; }
+    .bot { background: #1e2d3d; color: #00ffcc; border: 1px solid #00ffcc; }
+    .bot a { color: #00ffcc; text-decoration: underline; text-shadow: 0 0 6px #00ffccaa; font-weight: bold; transition: all 0.2s ease-in-out; }
+    .bot a:hover { color: #33ffee; text-shadow: 0 0 10px #00fff0, 0 0 20px #00fff066; }
     .typing { display: inline-block; }
-    .typing span {
-      display: inline-block;
-      width: 6px; height: 6px; margin: 0 2px;
-      background: #00ffcc; border-radius: 50%;
-      animation: blink 1.4s infinite both;
-    }
+    .typing span { display: inline-block; width: 6px; height: 6px; margin: 0 2px; background: #00ffcc; border-radius: 50%; animation: blink 1.4s infinite both; }
     .typing span:nth-child(2){animation-delay:.2s;}
     .typing span:nth-child(3){animation-delay:.4s;}
     @keyframes blink{0%{opacity:.2;}20%{opacity:1;}100%{opacity:.2;}}
-    footer {
-      display: flex;
-      padding: 8px;
-      background: rgba(22,27,34,0.95);
-      border-top: 2px solid #00ffcc;
-    }
-    input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      outline: none;
-      background: #fff;
-      color: #000;
-    }
-    button {
-      background: #00ffcc;
-      border: none;
-      padding: 10px 14px;
-      margin-left: 8px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-    }
-    #policyButton {
-      position: fixed;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(0,255,204,.08);
-      border: 1px solid #00ffcc88;
-      color: #00ffcc;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-family: "Courier New", monospace;
-      font-size: 13px;
-      transition: all .3s ease;
-      backdrop-filter: blur(4px);
-      z-index: 900;
-      cursor: pointer;
-    }
-    #policyButton:hover {
-      background: rgba(0,255,204,.2);
-      border-color: #00ffcc;
-      box-shadow: 0 0 6px #00ffcc88;
-    }
+    footer { display: flex; padding: 8px; background: rgba(22,27,34,0.95); border-top: 2px solid #00ffcc; }
+    input { flex: 1; padding: 10px; border: none; border-radius: 5px; font-size: 16px; outline: none; background: #fff; color: #000; }
+    button { background: #00ffcc; border: none; padding: 10px 14px; margin-left: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    #policyButton { position: fixed; bottom: 12px; left: 12px; background: rgba(0,255,204,.08); border: 1px solid #00ffcc88; color: #00ffcc; padding: 6px 12px; border-radius: 6px; font-family: "Courier New", monospace; font-size: 13px; transition: all .3s ease; backdrop-filter: blur(4px); z-index: 900; cursor: pointer; }
+    #policyButton:hover { background: rgba(0,255,204,.2); border-color: #00ffcc; box-shadow: 0 0 6px #00ffcc88; }
     @media (max-width: 767px) { #policyButton { display: none; } }
-    #policyBanner {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(13,17,23,0.97);
-      color: #00ffcc;
-      text-align: center;
-      padding: 18px 10px;
-      border-top: 2px solid #00ffcc;
-      font-family: "Courier New", monospace;
-      font-size: 14px;
-      transform: translateY(100%);
-      transition: transform 0.6s ease;
-      z-index: 999;
-    }
+    #policyBanner { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(13,17,23,0.97); color: #00ffcc; text-align: center; padding: 18px 10px; border-top: 2px solid #00ffcc; font-family: "Courier New", monospace; font-size: 14px; transform: translateY(100%); transition: transform 0.6s ease; z-index: 999; }
     #policyBanner.show { transform: translateY(0); }
-    #policyBanner a {
-      color: #00ffcc;
-      text-decoration: underline;
-      font-weight: bold;
-    }
+    #policyBanner a { color: #00ffcc; text-decoration: underline; font-weight: bold; }
     #policyBanner a:hover { color: #33ffe6; }
-    #acceptPolicies {
-      background: #00ffcc;
-      color: #000;
-      border: none;
-      padding: 6px 12px;
-      margin-left: 8px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 13px;
-    }
+    #acceptPolicies { background: #00ffcc; color: #000; border: none; padding: 6px 12px; margin-left: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
     html, body { height: 100%; min-height: 100%; }
     .container, .chat-panel { height: 100%; }
-    @media (min-width:601px) and (max-height:650px) {
-      footer { padding-bottom: 50px; }
-    }
+    @media (min-width:601px) and (max-height:650px) { footer { padding-bottom: 50px; } }
   </style>
 </head>
 <body>
   <header>
-    <div id="menuIcon" title="Menú">Menu</div>
+    <!-- Hamburguesa -->
+    <div id="menuIcon">☰</div>
+    <!-- Logo + Título centrado -->
     <img src="Cabeza.png" alt="Maximilian">
     Maximilian 23
-    <div id="policyIcon" title="Políticas de uso">Settings</div>
+    <!-- Rueda dentada -->
+    <div id="policyIcon">Settings</div>
   </header>
 
   <!-- MENÚ LATERAL MÓVIL -->
