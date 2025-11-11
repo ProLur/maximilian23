@@ -68,17 +68,16 @@
       .left-panel { display: none !important; }
     }
 
-    /* MENÚ LATERAL - SOLO MÓVIL - RESPONSIVE */
+    /* MENÚ LATERAL - SOLO MÓVIL */
     #mobileMenu {
       position: fixed;
       top: 0;
-      left: -100vw;
-      width: 85vw;
-      max-width: 300px;
+      left: -280px;
+      width: 280px;
       height: 100vh;
       background: rgba(13,17,23,0.98);
       border-right: none;
-      padding: 70px 16px 20px;
+      padding: 70px 20px 20px;
       transition: left 0.4s ease;
       z-index: 999;
       backdrop-filter: blur(8px);
@@ -95,19 +94,17 @@
       background: rgba(0,255,204,0.08);
       color: #00ffcc;
       font-family: "Courier New", monospace;
-      font-size: 15px;
+      font-size: 16px;
       border: 1px solid #00ffcc88;
       border-radius: 12px;
-      padding: 11px 14px;
-      margin-bottom: 11px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
       text-shadow: 0 0 6px #00ffcc;
       backdrop-filter: blur(4px);
       box-shadow: 0 0 10px #00ffcc55;
-      word-wrap: break-word;
-      white-space: normal;
     }
     #mobileMenu .menu-item:hover {
       background: rgba(0,255,204,0.2);
@@ -197,17 +194,17 @@
 <body>
   <header>
     <!-- Hamburguesa -->
-    <div id="menuIcon">Hamburguesa</div>
+    <div id="menuIcon">☰</div>
     <!-- Logo + Título centrado -->
     <img src="Cabeza.png" alt="Maximilian">
     Maximilian 23
     <!-- Rueda dentada -->
-    <div id="policyIcon">Settings</div>
+    <div id="policyIcon">⚙️</div>
   </header>
 
   <!-- MENÚ LATERAL MÓVIL -->
   <div id="mobileMenu">
-    <div id="closeMenu" style="position: absolute; top: 12px; right: 16px; font-size: 26px; color: #00ffcc; cursor: pointer; z-index: 1001; font-weight: bold;">×</div>
+    <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">Cerrar</div>
     <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
     <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
   </div>
