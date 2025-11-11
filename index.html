@@ -57,23 +57,12 @@
       cursor: pointer;
       transition: transform .3s ease;
     }
-    #policyIcon:hover {
-      transform: rotate(90deg);
-    }
-    #policyIcon:active {
-      transform: rotate(90deg) scale(0.9);
-    }
+    #policyIcon:hover { transform: rotate(90deg); }
+    #policyIcon:active { transform: rotate(90deg) scale(0.9); }
 
     @media (max-width: 600px) {
-      #menuIcon {
-        display: block;
-      }
-      #policyIcon {
-        display: block;
-      }
-      .left-panel {
-        display: none !important; /* Ocultar panel izquierdo en móvil */
-      }
+      #menuIcon, #policyIcon { display: block; }
+      .left-panel { display: none !important; }
     }
 
     /* MENÚ LATERAL - SOLO MÓVIL */
@@ -84,15 +73,17 @@
       width: 280px;
       height: 100vh;
       background: rgba(13,17,23,0.98);
-      border-right: 2px solid #00ffcc;
+      border-right: none;
       padding: 70px 20px 20px;
       transition: left 0.4s ease;
       z-index: 999;
       backdrop-filter: blur(8px);
       box-sizing: border-box;
+      overflow: hidden;
     }
     #mobileMenu.open {
       left: 0;
+      border-right: 2px solid #00ffcc;
     }
     #mobileMenu .menu-item {
       display: block;
@@ -111,7 +102,6 @@
       text-shadow: 0 0 6px #00ffcc;
       backdrop-filter: blur(4px);
       box-shadow: 0 0 10px #00ffcc55;
-      text-decoration: none;
     }
     #mobileMenu .menu-item:hover {
       background: rgba(0,255,204,0.2);
@@ -119,22 +109,21 @@
       transform: translateY(-2px);
     }
 
-    /* OVERLAY PARA CERRAR MENÚ */
+    /* OVERLAY */
     #overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7);
       opacity: 0;
       visibility: hidden;
       transition: all 0.4s ease;
       z-index: 998;
     }
-    #overlay.show {
-      opacity: 1;
-      visibility: visible;
+    #overlay.show { opacity: 1; visibility: visible; }
+
+    /* OCULTAR MENÚ EN ESCRITORIO */
+    @media (min-width: 601px) {
+      #mobileMenu, #overlay { display: none !important; }
     }
 
     .container {
@@ -166,10 +155,10 @@
       transition: transform 0.2s;
     }
     .left-panel img:hover { transform: scale(1.05); }
-    /* BOTÓN LABORATORIO MUSICAL */
-    #labButton {
+
+    /* BOTONES FLOTANTES - SOLO ESCRITORIO */
+    #labButton, #radioButton {
       position: absolute;
-      top: 15px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,255,204,0.08);
@@ -187,34 +176,9 @@
       z-index: 10;
       animation: float 3s ease-in-out infinite;
     }
-    #labButton:hover {
-      background: rgba(0,255,204,0.2);
-      box-shadow: 0 0 12px #00ffcc;
-      transform: translateX(-50%) scale(1.05);
-    }
-    /* BOTÓN RADIO MAXIMILIAN 23 */
-    #radioButton {
-      position: absolute;
-      top: 65px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,255,204,0.08);
-      color: #00ffcc;
-      font-family: "Courier New", monospace;
-      font-size: 14px;
-      border: 1px solid #00ffcc88;
-      border-radius: 20px;
-      padding: 6px 14px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-shadow: 0 0 6px #00ffcc;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 0 10px #00ffcc55;
-      z-index: 10;
-      animation: float 3s ease-in-out infinite;
-      animation-delay: 0.5s;
-    }
-    #radioButton:hover {
+    #labButton { top: 15px; }
+    #radioButton { top: 65px; animation-delay: 0.5s; }
+    #labButton:hover, #radioButton:hover {
       background: rgba(0,255,204,0.2);
       box-shadow: 0 0 12px #00ffcc;
       transform: translateX(-50%) scale(1.05);
@@ -223,6 +187,7 @@
       0%, 100% { transform: translateX(-50%) translateY(0); }
       50% { transform: translateX(-50%) translateY(-3px); }
     }
+
     .chat-panel {
       flex: 2;
       display: flex;
@@ -306,7 +271,6 @@
       font-weight: bold;
       font-size: 14px;
     }
-    /* BOTÓN FIJO DE POLÍTICAS - SOLO EN ESCRITORIO */
     #policyButton {
       position: fixed;
       bottom: 12px;
@@ -328,9 +292,7 @@
       border-color: #00ffcc;
       box-shadow: 0 0 6px #00ffcc88;
     }
-    @media (max-width: 767px) {
-      #policyButton { display: none; }
-    }
+    @media (max-width: 767px) { #policyButton { display: none; } }
     #policyBanner {
       position: fixed;
       bottom: 0;
@@ -374,34 +336,24 @@
 </head>
 <body>
   <header>
-    <div id="menuIcon" title="Menú">☰</div>
+    <div id="menuIcon" title="Menú">Menu</div>
     <img src="Cabeza.png" alt="Maximilian">
     Maximilian 23
-    <div id="policyIcon" title="Políticas de uso">⚙️</div>
+    <div id="policyIcon" title="Políticas de uso">Settings</div>
   </header>
 
   <!-- MENÚ LATERAL MÓVIL -->
   <div id="mobileMenu">
-    <div class="menu-item" onclick="openLab()">
-      Laboratorio Musical
-    </div>
-    <div class="menu-item" onclick="openRadio()">
-      Radio Maximilian 23
-    </div>
+    <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">Close</div>
+    <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
+    <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
   </div>
-  <!-- OVERLAY -->
   <div id="overlay"></div>
 
   <div class="container">
     <div class="left-panel">
-      <!-- BOTONES FLOTANTES - SOLO ESCRITORIO -->
-      <div id="labButton" onclick="openLab()" title="Ir al Laboratorio Musical">
-        Laboratorio Musical
-      </div>
-      <div id="radioButton" onclick="openRadio()" title="Escuchar Radio Maximilian 23">
-        Radio Maximilian 23
-      </div>
-      <!-- IMAGEN CON ESPACIO -->
+      <div id="labButton" onclick="openLab()" title="Ir al Laboratorio Musical">Laboratorio Musical</div>
+      <div id="radioButton" onclick="openRadio()" title="Escuchar Radio Maximilian 23">Radio Maximilian 23</div>
       <div class="image-container">
         <img id="maxImage" src="max.png" alt="Maximilian grande">
       </div>
@@ -416,9 +368,7 @@
     </div>
   </div>
 
-  <!-- Botón fijo solo en escritorio -->
   <div id="policyButton" title="Ver políticas de uso">Políticas de privacidad</div>
-  <!-- Banner de aceptación -->
   <div id="policyBanner">
     Al continuar, aceptas nuestras
     <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
@@ -428,39 +378,33 @@
   <script>
     const API_URL = "https://max23.onrender.com/chat";
 
-    // FUNCIONES PARA BOTONES (COMÚN A MÓVIL Y ESCRITORIO)
     function openLab() {
       window.open('https://maximilian23.com/lab23/', '_blank');
-      closeMobileMenu(); // Cierra menú si está abierto
+      closeMobileMenu();
     }
     function openRadio() {
       window.open('https://maximilian23.com/radio/', '_blank');
-      closeMobileMenu(); // Cierra menú si está abierto
+      closeMobileMenu();
     }
 
-    // === CONTROL DE MENÚ HAMBURGUESA ===
     const menuIcon = document.getElementById('menuIcon');
     const mobileMenu = document.getElementById('mobileMenu');
     const overlay = document.getElementById('overlay');
+    const closeMenu = document.getElementById('closeMenu');
 
     function toggleMobileMenu() {
       mobileMenu.classList.toggle('open');
       overlay.classList.toggle('show');
     }
-
     function closeMobileMenu() {
       mobileMenu.classList.remove('open');
       overlay.classList.remove('show');
     }
 
-    if (menuIcon) {
-      menuIcon.addEventListener('click', toggleMobileMenu);
-    }
-    if (overlay) {
-      overlay.addEventListener('click', closeMobileMenu);
-    }
+    menuIcon?.addEventListener('click', toggleMobileMenu);
+    overlay?.addEventListener('click', closeMobileMenu);
+    closeMenu?.addEventListener('click', closeMobileMenu);
 
-    // === Resto del JavaScript ORIGINAL (sin cambios) ===
     function scrollBottom() {
       const chat = document.getElementById("chat");
       chat.scrollTop = chat.scrollHeight;
@@ -539,20 +483,17 @@
         document.getElementById("policyBanner").classList.add("show");
       }
     });
-    // Abrir políticas desde ícono (móvil) o botón (escritorio)
     const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
     opens.forEach(o => {
       if (o) o.addEventListener("click", () => {
         window.open("https://maximilian23.com/politica.html", "_blank");
       });
     });
-    // Efecto al hacer clic en la imagen
     const maxImage = document.getElementById("maxImage");
     maxImage.addEventListener("click", () => {
       maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
       maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
     });
-    // Aceptar políticas
     document.getElementById("acceptPolicies").addEventListener("click", () => {
       localStorage.setItem("policiesAccepted", "true");
       document.getElementById("policyBanner").classList.remove("show");
