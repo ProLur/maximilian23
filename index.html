@@ -78,7 +78,8 @@
       z-index: 999;
       backdrop-filter: blur(8px);
       box-sizing: border-box;
-      overflow-y: auto;
+      overflow: hidden; /* ← CLAVE: evita corte de bordes */
+      border-radius: 0 16px 16px 0; /* ← Elegante redondeado */
     }
     #mobileMenu.open {
       left: 0;
@@ -86,7 +87,10 @@
     }
     #mobileMenu .menu-item {
       display: block;
-      width: 100%;
+      width: calc(100% - 16px); /* ← Ajuste perfecto */
+      margin-left: 8px;
+      margin-right: 8px;
+      margin-bottom: 12px;
       background: rgba(0,255,204,0.08);
       color: #00ffcc;
       font-family: "Courier New", monospace;
@@ -94,20 +98,21 @@
       border: 1px solid #00ffcc88;
       border-radius: 12px;
       padding: 12px 16px;
-      margin-bottom: 12px;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
       text-shadow: 0 0 6px #00ffcc;
       backdrop-filter: blur(4px);
       box-shadow: 0 0 10px #00ffcc55;
+      box-sizing: border-box; /* ← Incluye padding y border */
+      overflow: hidden;
+      position: relative;
     }
     #mobileMenu .menu-item:hover {
       background: rgba(0,255,204,0.2);
-      box-shadow: 0 0 15px #00ffcc;
+      box-shadow: inset 0 0 15px rgba(0,255,204,0.3), 0 0 15px #00ffcc;
       transform: translateY(-2px);
     }
-
     /* IMAGEN EN MENÚ MÓVIL */
     #mobileMenu .menu-image {
       margin-top: 40px;
@@ -134,7 +139,6 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-4px); }
     }
-
     /* OVERLAY */
     #overlay {
       position: fixed;
@@ -213,17 +217,17 @@
 <body>
   <header>
     <!-- Hamburguesa -->
-    <div id="menuIcon">☰</div>
+    <div id="menuIcon">Menu</div>
     <!-- Logo + Título centrado -->
     <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
     Maximilian 23
     <!-- Rueda dentada -->
-    <div id="policyIcon">🛡️</div>
+    <div id="policyIcon">Shield</div>
   </header>
 
   <!-- MENÚ LATERAL MÓVIL -->
   <div id="mobileMenu">
-    <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">✕</div>
+    <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">X</div>
     <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
     <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
     <div class="menu-image">
@@ -259,7 +263,6 @@
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
-
     function openLab() {
       window.open('https://maximilian23.com/lab23/', '_blank');
       closeMobileMenu();
@@ -268,16 +271,13 @@
       window.open('https://maximilian23.com/radio/', '_blank');
       closeMobileMenu();
     }
-
     const menuIcon = document.getElementById('menuIcon');
     const mobileMenu = document.getElementById('mobileMenu');
     const overlay = document.getElementById('overlay');
     const closeMenu = document.getElementById('closeMenu');
-
     function toggleMobileMenu() {
       mobileMenu.classList.toggle('open');
       overlay.classList.toggle('show');
-      // Bloquear scroll del body cuando el menú está abierto
       document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
     }
     function closeMobileMenu() {
@@ -285,7 +285,6 @@
       overlay.classList.remove('show');
       document.body.style.overflow = '';
     }
-
     menuIcon?.addEventListener('click', toggleMobileMenu);
     overlay?.addEventListener('click', closeMobileMenu);
     closeMenu?.addEventListener('click', closeMobileMenu);
@@ -294,7 +293,6 @@
       const chat = document.getElementById("chat");
       chat.scrollTop = chat.scrollHeight;
     }
-
     function linkify(text) {
       if (!text) return "";
       if (text.includes("<a ")) return text;
@@ -305,7 +303,6 @@
         return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
       });
     }
-
     function typeWriterEffect(el, text, delay = 30, done = null) {
       let i = 0;
       el.innerHTML = "";
@@ -322,7 +319,6 @@
       }
       step();
     }
-
     async function sendMessage() {
       const i = document.getElementById("message");
       const b = document.getElementById("sendButton");
@@ -359,7 +355,6 @@
         scrollBottom();
       }
     }
-
     window.addEventListener("DOMContentLoaded", () => {
       const chat = document.getElementById("chat");
       const b = document.createElement("div");
@@ -367,28 +362,22 @@
       chat.appendChild(b);
       typeWriterEffect(b, "Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
       scrollBottom();
-
       const accepted = localStorage.getItem("policiesAccepted");
       if (!accepted) {
         document.getElementById("policyBanner").classList.add("show");
       }
     });
-
     const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
     opens.forEach(o => {
       if (o) o.addEventListener("click", () => {
         window.open("https://maximilian23.com/politica.html", "_blank");
       });
     });
-
-    // Efecto GIF al tocar imagen en escritorio
     const maxImage = document.getElementById("maxImage");
     maxImage.addEventListener("click", () => {
       maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
       maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
     });
-
-    // Efecto GIF al tocar imagen en menú móvil
     const mobileMaxImage = document.getElementById("mobileMaxImage");
     if (mobileMaxImage) {
       mobileMaxImage.addEventListener("click", () => {
@@ -396,7 +385,6 @@
         mobileMaxImage.addEventListener("load", () => setTimeout(() => mobileMaxImage.src = "https://maximilian23.com/max.png", 3000), { once: true });
       });
     }
-
     document.getElementById("acceptPolicies").addEventListener("click", () => {
       localStorage.setItem("policiesAccepted", "true");
       document.getElementById("policyBanner").classList.remove("show");
