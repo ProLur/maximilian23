@@ -4,21 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Radio Maximilian 23 - CEIP Juan XXIII</title>
-
   <!-- SEO -->
   <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII. Emisión 24/7 con MP3 locales." />
   <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, música alumnos, radio online 24/7" />
   <meta name="author" content="Manuel - CEIP Juan XXIII" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
-
   <!-- Open Graph -->
   <meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
   <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
   <meta property="og:image" content="https://tudominio.com/max2.png" />
   <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
   <meta property="og:type" content="website" />
-
   <style>
     :root {
       --glow: #00ff72;
@@ -27,13 +24,11 @@
       --metal: #0a3d0a;
       --leather: #0f2a0f;
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     html, body {
       height: 100%;
       font-family: "Courier New", monospace;
@@ -41,8 +36,8 @@
       -webkit-user-select: none;
       user-select: none;
       overscroll-behavior-y: contain;
+      overflow-x: hidden;
     }
-
     body {
       background: var(--bg);
       color: var(--glow);
@@ -51,14 +46,14 @@
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
-      padding: 8px 16px;
+      padding: 8px 12px;
+      gap: 8px;
       min-height: 100vh;
-      overflow-y: auto; /* ¡AHORA PERMITE SCROLL! */
+      overflow-y: auto;
       position: relative;
       touch-action: pan-y pinch-zoom;
       transition: transform 0.4s ease;
     }
-
     body::before {
       content: "";
       position: fixed;
@@ -73,19 +68,17 @@
       z-index: -1;
       pointer-events: none;
     }
-
     @keyframes radar {
       from { transform: translate(-50%, -50%) rotate(0deg); }
       to { transform: translate(-50%, -50%) rotate(360deg); }
     }
-
-    .logo-container { 
-      margin: 12px 0 8px;
+    .logo-container {
+      margin: 8px 0 4px;
       width: 100%;
       display: flex;
       justify-content: center;
+      flex-shrink: 0;
     }
-
     .logo {
       width: 38vw;
       max-width: 120px;
@@ -97,76 +90,69 @@
       position: relative;
       z-index: 1;
     }
-
-    .logo:hover, .logo:active { 
-      transform: scale(1.08); 
+    .logo:hover, .logo:active {
+      transform: scale(1.08);
     }
-
     .glow-normal {
       filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow));
       animation: pulse-normal 3s ease-in-out infinite;
     }
-
     .glow-intenso {
       filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc);
       animation: pulse-intenso 1.2s ease-in-out infinite;
     }
-
     @keyframes pulse-normal {
       0%, 100% { filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow)); }
       50% { filter: drop-shadow(0 0 18px var(--glow)) drop-shadow(0 0 36px var(--glow)); }
     }
-
     @keyframes pulse-intenso {
       0%, 100% { filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc); }
       50% { filter: drop-shadow(0 0 36px var(--glow)) drop-shadow(0 0 72px var(--glow)) drop-shadow(0 0 108px #00ffcc); }
     }
-
     h1 {
-      font-size: clamp(1.8rem, 7vw, 2.4rem);
-      margin: 8px 0 14px;
+      font-size: clamp(1.7rem, 6.5vw, 2.3rem);
+      margin: 4px 0 8px;
       text-shadow: 0 0 8px var(--glow);
       line-height: 1.1;
+      flex-shrink: 0;
     }
-
     .terminal-box {
-      border: 2px solid var(--glow);
-      padding: 18px;
+      flex: 1;
       width: 100%;
       max-width: 360px;
       margin: 0 auto;
+      padding: 14px;
+      border: 2px solid var(--glow);
       border-radius: 12px;
       box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15);
       background: rgba(0, 20, 0, 0.8);
       backdrop-filter: blur(4px);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      flex-grow: 0; /* No crece más de lo necesario */
+      gap: 10px;
+      justify-content: flex-start;
     }
-
     #oscilograma {
       width: 100%;
-      height: 70px;
+      height: 60px;
       display: block;
       image-rendering: pixelated;
       background: rgba(0,20,0,0.7);
       border-radius: 6px;
+      flex-shrink: 0;
     }
-
     /* === VOLUMEN TIPO HEBILLA === */
     .volume-horizontal {
       width: 100%;
       max-width: 300px;
-      height: 50px;
+      height: 46px;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 10px;
       position: relative;
+      flex-shrink: 0;
     }
-
     .volume-track-h {
       width: 100%;
       height: 18px;
@@ -185,7 +171,6 @@
           rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px
         );
     }
-
     .volume-fill-h {
       height: 100%;
       background: linear-gradient(90deg, #004d00, #00ff72, #004d00);
@@ -196,10 +181,9 @@
       box-shadow: 0 0 15px var(--glow);
       transition: width 0.15s ease;
     }
-
     .volume-knob-h {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00);
       border: 3px solid #00ff72;
       border-radius: 50%;
@@ -215,21 +199,19 @@
       transition: transform 0.15s ease, box-shadow 0.2s;
       z-index: 10;
     }
-
     .volume-knob-h::before {
       content: '';
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       background: #001400;
       border: 2px solid #004d00;
       border-radius: 50%;
       transform: translate(-50%, -50%);
       box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
     }
-
     .volume-knob-h::after {
       content: '';
       position: absolute;
@@ -239,119 +221,104 @@
       box-shadow: 0 0 0 0 transparent;
       transition: box-shadow 0.2s ease;
     }
-
     .volume-knob-h:active {
       cursor: grabbing;
       transform: translate(-50%, -50%) scale(1.2);
       box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72;
     }
-
     .volume-knob-h:active::after {
       box-shadow: 0 0 20px #00ffcc, 0 0 30px #00ff72;
     }
-
-    .listener-status {
-      font-size: 0.95rem;
-      padding: 10px 14px;
-      background: rgba(0, 255, 114, 0.15);
-      border: 1.5px solid var(--glow);
-      border-radius: 8px;
-      text-shadow: 0 0 5px var(--glow);
-      animation: pulse 2s infinite;
+    .listener-status, .now-playing, .status {
       width: 100%;
       max-width: 320px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      flex-shrink: 0;
     }
-
+    .listener-status {
+      background: rgba(0, 255, 114, 0.15);
+      border: 1.5px solid var(--glow);
+      text-shadow: 0 0 5px var(--glow);
+      animation: pulse 2s infinite;
+    }
     .now-playing {
-      font-size: 0.92rem;
-      padding: 10px 14px;
       background: rgba(0, 20, 0, 0.9);
       border: 1.5px dashed var(--glow);
-      border-radius: 8px;
-      min-height: 2.4em;
+      min-height: 2.2em;
       line-height: 1.3;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      width: 100%;
-      max-width: 320px;
     }
-
     .now-playing strong {
       color: #00ff72;
       text-shadow: 0 0 6px;
     }
-
     .status {
-      font-size: 0.85rem;
       opacity: 0.9;
-      min-height: 1.3em;
+      min-height: 1.2em;
+      font-size: 0.8rem;
     }
-
     @keyframes pulse {
       0%, 100% { opacity: 0.85; }
       50% { opacity: 1; }
     }
-
     button {
       background: var(--dark);
       border: 1.5px solid var(--glow);
       color: var(--glow);
-      padding: 14px 16px;
+      padding: 12px 14px;
       border-radius: 10px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s ease;
       flex: 1;
-      min-height: 48px;
+      min-height: 46px;
       touch-action: manipulation;
     }
-
     button:hover, button:active {
       background: rgba(0, 255, 114, 0.15);
       box-shadow: 0 0 10px var(--glow);
     }
-
     button:active {
       background: var(--glow);
       color: var(--bg);
       transform: scale(0.96);
     }
-
     button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-
     #startBtn {
-      margin-top: 6px;
-      padding: 14px 20px;
-      font-size: 1.05rem;
+      margin-top: 4px;
+      padding: 12px 18px;
+      font-size: 1rem;
       width: 100%;
-      max-width: 260px;
-      min-height: 52px;
+      max-width: 240px;
+      min-height: 48px;
     }
-
     .btn-group {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
-      margin-top: 8px;
+      margin-top: 6px;
       width: 100%;
-      max-width: 320px;
+      max-width: 300px;
     }
-
     .note {
-      margin: 16px 0 12px;
-      font-size: 0.78rem;
+      margin: 0;
+      padding: 8px 0 4px;
+      font-size: 0.75rem;
       opacity: 0.8;
+      width: 100%;
       max-width: 360px;
-      line-height: 1.4;
+      text-align: center;
       flex-shrink: 0;
-      margin-top: auto; /* ¡EMPuja al final! */
+      line-height: 1.3;
     }
-
     .pull-indicator {
       position: fixed;
       top: 0;
@@ -369,49 +336,41 @@
       pointer-events: none;
       background: rgba(0, 20, 0, 0.3);
     }
-
     .pull-indicator.show {
       opacity: 1;
     }
-
     /* === RESPONSIVE === */
     @media (max-width: 480px) {
-      body { padding: 6px 12px; }
-      .logo-container { margin: 10px 0 6px; }
+      body { padding: 6px 10px; gap: 6px; }
+      .logo-container { margin: 6px 0 4px; }
       .logo { width: 36vw; max-width: 110px; }
-      h1 { font-size: clamp(1.7rem, 6.5vw, 2.2rem); margin: 6px 0 12px; }
-      .terminal-box { padding: 16px; max-width: 340px; gap: 12px; }
-      #oscilograma { height: 65px; }
-      .volume-horizontal { max-width: 280px; height: 46px; }
-      .volume-knob-h { width: 32px; height: 32px; }
-      .volume-knob-h::before { width: 10px; height: 10px; }
-      button { font-size: 0.95rem; padding: 13px 15px; }
-      .btn-group { gap: 10px; max-width: 300px; }
-      #startBtn { max-width: 240px; font-size: 1rem; }
-      .listener-status, .now-playing { max-width: 300px; font-size: 0.88rem; padding: 9px 12px; }
-      .status { font-size: 0.8rem; }
-      .note { margin: 14px 0 10px; font-size: 0.74rem; }
+      h1 { font-size: clamp(1.6rem, 6vw, 2.1rem); margin: 4px 0 6px; }
+      .terminal-box { padding: 12px; gap: 8px; }
+      #oscilograma { height: 55px; }
+      .volume-horizontal { max-width: 280px; height: 44px; }
+      .volume-knob-h { width: 30px; height: 30px; }
+      .volume-knob-h::before { width: 9px; height: 9px; }
+      button { font-size: 0.9rem; padding: 11px 13px; }
+      .btn-group { gap: 8px; max-width: 280px; }
+      #startBtn { max-width: 220px; font-size: 0.95rem; }
+      .listener-status, .now-playing { max-width: 280px; font-size: 0.84rem; padding: 7px 10px; }
+      .status { font-size: 0.76rem; }
+      .note { font-size: 0.72rem; padding: 6px 0; }
     }
   </style>
 </head>
 <body>
-
   <div class="pull-indicator" id="pullIndicator">Desliza para recargar</div>
-
   <!-- Audio principal -->
   <audio id="audioPlayer" preload="metadata"></audio>
-
   <!-- Logo con antena -->
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
   </div>
-
   <h1>RADIO MAXIMILIAN 23</h1>
-
   <!-- Caja principal -->
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-
     <!-- VOLUMEN -->
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
@@ -419,20 +378,16 @@
         <div class="volume-knob-h" id="volumeKnob"></div>
       </div>
     </div>
-
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
-
     <button id="startBtn" disabled>Iniciar Emisión</button>
-
     <div class="btn-group" id="controls" style="display:none;">
       <button id="nextBtn">Siguiente</button>
       <button id="pauseBtn">Pausar</button>
       <button id="muteBtn">Mute</button>
     </div>
   </div>
-
   <!-- Footer SIEMPRE VISIBLE -->
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
 
@@ -440,7 +395,6 @@
     const CONFIG = {
       mp3Folder: 'canciones/'
     };
-
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
@@ -457,7 +411,6 @@
       volumeKnob: document.getElementById('volumeKnob'),
       pullIndicator: document.getElementById('pullIndicator')
     };
-
     let items = [], currentIndex = 0;
     let isPlaying = false;
     let audioContext = null, analyser = null, source = null;
@@ -472,7 +425,6 @@
         isPulling = true;
       }
     });
-
     window.addEventListener('touchmove', (e) => {
       if (!isPulling || isPlaying) return;
       const touchY = e.touches[0].clientY;
@@ -484,7 +436,6 @@
         els.pullIndicator.classList.toggle('show', progress > 0.3);
       }
     });
-
     window.addEventListener('touchend', () => {
       if (isPulling && !isPlaying) {
         const wasPulled = parseInt(document.body.style.transform?.match(/-?\d+/)?.[0] || 0) > 100;
@@ -516,7 +467,6 @@
       }
       preloadFirstSong();
     }
-
     function preloadFirstSong() {
       if (!items.length) {
         els.status.textContent = "Error: No hay canciones";
@@ -529,7 +479,6 @@
       els.startBtn.style.opacity = '1';
       els.startBtn.style.cursor = 'pointer';
     }
-
     async function safePlay() {
       if (!audioContext) return;
       if (audioContext.state === 'suspended') await audioContext.resume();
@@ -541,7 +490,6 @@
         });
       }
     }
-
     function playCurrent() {
       const song = items[currentIndex];
       const path = CONFIG.mp3Folder + song.file;
@@ -556,19 +504,16 @@
         connectAudioToOscilloscope();
       });
     }
-
     function loadAndPlayNext() {
       if (!items.length || !isPlaying) return;
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
       playCurrent();
     }
-
     function updateNowPlaying() {
       const song = items[currentIndex];
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
-
     function startPlayback() {
       if (isPlaying) return;
       els.startBtn.style.display = 'none';
@@ -590,42 +535,35 @@
       const percent = (isMuted ? 0 : currentVolume) * 100;
       els.volumeFill.style.width = percent + '%';
       els.volumeKnob.style.left = percent + '%';
-
       const baseGlow = 20;
       const extraGlow = Math.round(currentVolume * 40);
       const baseInner = 30;
       const extraInner = Math.round(currentVolume * 30);
       const glowColor = currentVolume > 0.7 ? '#00ffcc' : '#00ff72';
-
       els.volumeKnob.style.boxShadow = `
         0 0 ${baseGlow + extraGlow}px var(--glow),
         0 0 ${baseInner + extraInner}px ${glowColor},
         inset 0 0 8px rgba(0,0,0,0.8)
       `.replace(/\s+/g, ' ').trim();
     }
-
     function setVolume(value) {
       currentVolume = value;
       if (!isMuted) els.audio.volume = value;
       updateVolumeUI();
     }
-
     function getVolumeFromEvent(e) {
       const rect = els.volumeTrack.getBoundingClientRect();
       const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
       const width = rect.width;
       return Math.max(0, Math.min(1, x / width));
     }
-
     els.volumeTrack.addEventListener('click', (e) => {
       const percent = getVolumeFromEvent(e);
       setVolume(percent);
     });
-
     let isDragging = false;
     els.volumeKnob.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; });
     els.volumeKnob.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
-
     const moveHandler = (e) => {
       if (!isDragging) return;
       const percent = getVolumeFromEvent(e);
@@ -633,7 +571,6 @@
     };
     document.addEventListener('mousemove', moveHandler);
     document.addEventListener('touchmove', moveHandler);
-
     const endHandler = () => { isDragging = false; };
     document.addEventListener('mouseup', endHandler);
     document.addEventListener('touchend', endHandler);
@@ -652,7 +589,6 @@
         els.status.textContent = "Pausado";
       }
     });
-
     els.muteBtn.addEventListener('click', () => {
       if (!isPlaying) return;
       if (isMuted) {
@@ -680,7 +616,6 @@
         console.warn("Oscilograma no conectado");
       }
     }
-
     function drawOscilloscope() {
       if (!analyser) return;
       const bufferLength = analyser.frequencyBinCount;
@@ -688,8 +623,7 @@
       const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
       const w = canvas.offsetWidth;
-      const h = 70;
-
+      const h = 60;
       function draw() {
         requestAnimationFrame(draw);
         analyser.getByteTimeDomainData(dataArray);
@@ -723,7 +657,6 @@
       els.pullIndicator.classList.remove('show');
     });
     els.nextBtn.addEventListener('click', loadAndPlayNext);
-
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
       logo.classList.remove('glow-normal');
