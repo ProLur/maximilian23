@@ -655,16 +655,21 @@
       const ctx = canvas.getContext('2d');
       const w = canvas.offsetWidth;
       const h = 60;
+
       function draw() {
         requestAnimationFrame(draw);
         analyser.getByteTimeDomainData(dataArray);
-        ctx.fillStyle = 'rgba(0, 20, 0, 0.7)';
+
+        // LIMPIEZA TOTAL + FONDO OPACO
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(0, 20, 0, 1)';
         ctx.fillRect(0, 0, w, h);
+
         ctx.lineWidth = 2.5;
         ctx.strokeStyle = '#00ff72';
         ctx.shadowBlur = 16;
         ctx.shadowColor = '#00ff72';
-        ctx.globalCompositeOperation = 'screen';
+
         ctx.beginPath();
         const sliceWidth = w / bufferLength;
         let x = 0;
@@ -678,7 +683,6 @@
         }
         ctx.lineTo(w, h / 2);
         ctx.stroke();
-        ctx.globalCompositeOperation = 'source-over';
         ctx.shadowBlur = 0;
       }
       draw();
