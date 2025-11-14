@@ -17,7 +17,7 @@
   <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
   <meta property="og:type" content="website" />
   <style>
-    :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; }
+    :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; --metal: #0a3d0a; --leather: #0f2a0f; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       height: 100%; font-family: "Courier New", monospace;
@@ -76,24 +76,57 @@
       width: 100%; height: 70px; display: block; image-rendering: pixelated;
       background: rgba(0,20,0,0.7); border-radius: 6px;
     }
+
+    /* === VOLUMEN TIPO HEBILLA DE CINTURÓN === */
     .volume-horizontal {
-      width: 100%; max-width: 300px; height: 32px; display: flex; align-items: center; justify-content: center;
+      width: 100%; max-width: 300px; height: 50px; display: flex; align-items: center; justify-content: center;
+      padding: 0 10px;
     }
     .volume-track-h {
-      width: 100%; height: 7px; background: rgba(0,255,114,0.25); border-radius: 3.5px;
+      width: 100%; height: 18px; background: var(--leather);
+      border: 2px solid #0a3d0a; border-radius: 9px;
       position: relative; overflow: hidden; cursor: pointer;
+      box-shadow: 
+        inset 0 0 8px rgba(0,0,0,0.6),
+        0 0 12px rgba(0,255,114,0.3);
+      background-image: 
+        repeating-linear-gradient(90deg, 
+          transparent, transparent 8px, 
+          rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px
+        );
     }
     .volume-fill-h {
-      height: 100%; background: var(--glow); position: absolute; left: 0; top: 0;
-      border-radius: 3.5px; box-shadow: 0 0 10px var(--glow); transition: width 0.1s ease;
+      height: 100%; background: linear-gradient(90deg, #004d00, #00ff72, #004d00);
+      position: absolute; left: 0; top: 0;
+      border-radius: 7px; box-shadow: 0 0 15px var(--glow);
+      transition: width 0.15s ease;
     }
     .volume-knob-h {
-      width: 20px; height: 20px; background: var(--glow); border: 3px solid #001400;
-      border-radius: 50%; position: 50%; transform: translateY(-50%);
-      left: 100%; margin-left: -10px; box-shadow: 0 0 14px var(--glow), 0 0 24px #00ffcc;
-      cursor: grab; transition: transform 0.1s ease;
+      width: 36px; height: 36px; 
+      background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00);
+      border: 3px solid #00ff72;
+      border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);
+      left: 100%; margin-left: -18px;
+      box-shadow: 
+        0 0 20px var(--glow), 
+        0 0 30px #00ffcc,
+        inset 0 0 8px rgba(0,0,0,0.8);
+      cursor: grab;
+      transition: transform 0.15s ease, box-shadow 0.2s;
+      z-index: 10;
     }
-    .volume-knob-h:active { cursor: grabbing; transform: translateY(-50%) scale(1.3); }
+    .volume-knob-h::before {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      width: 12px; height: 12px; background: #001400;
+      border: 2px solid #004d00; border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+    }
+    .volume-knob-h:active {
+      cursor: grabbing; transform: translateY(-50%) scale(1.2);
+      box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72;
+    }
+
     .listener-status {
       font-size: 0.95rem; padding: 10px 14px; background: rgba(0, 255, 114, 0.15);
       border: 1.5px solid var(--glow); border-radius: 8px; text-shadow: 0 0 5px var(--glow);
@@ -143,9 +176,9 @@
       .logo { width: 36vw; max-width: 110px; }
       h1 { font-size: clamp(1.7rem, 6.5vw, 2.2rem); margin-bottom: 16px; }
       #oscilograma { height: 65px; }
-      .volume-horizontal { max-width: 280px; height: 30px; }
-      .volume-track-h { height: 6px; }
-      .volume-knob-h { width: 18px; height: 18px; margin-left: -9px; }
+      .volume-horizontal { max-width: 280px; height: 46px; }
+      .volume-knob-h { width: 32px; height: 32px; margin-left: -16px; }
+      .volume-knob-h::before { width: 10px; height: 10px; }
       button { font-size: 0.95rem; padding: 13px 15px; }
       .btn-group { gap: 10px; max-width: 300px; }
       #startBtn { max-width: 240px; font-size: 1rem; }
@@ -165,12 +198,15 @@
   <h1>RADIO MAXIMILIAN 23</h1>
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
+    
+    <!-- VOLUMEN CON HEBILLA -->
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
         <div class="volume-knob-h" id="volumeKnob"></div>
       </div>
     </div>
+
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
@@ -292,7 +328,6 @@
       els.startBtn.style.cursor = 'pointer';
     }
 
-    // === REPRODUCCIÓN CON RESUME DE AUDIOCONTEXT ===
     async function safePlay() {
       if (!audioContext) return;
       if (audioContext.state === 'suspended') {
@@ -372,7 +407,7 @@
       updateVolumeUI();
     }
 
-    // === VOLUMEN ===
+    // === VOLUMEN TÁCTIL ===
     els.volumeTrack.addEventListener('click', (e) => {
       const rect = els.volumeTrack.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -382,7 +417,7 @@
     });
 
     let isDragging = false;
-    els.volumeKnob.addEventListener('mousedown', () => { isDragging = true; });
+    els.volumeKnob.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; });
     els.volumeKnob.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
@@ -404,7 +439,6 @@
     document.addEventListener('mouseup', () => { isDragging = false; });
     document.addEventListener('touchend', () => { isDragging = false; });
 
-    // === CONTROLES ===
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
       if (isPaused) {
@@ -438,7 +472,6 @@
       updateVolumeUI();
     });
 
-    // === OSCILOGRAMA ===
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
       try {
@@ -483,7 +516,6 @@
       draw();
     }
 
-    // === VOZ ===
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
@@ -515,7 +547,6 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === EVENTOS ===
     els.audio.addEventListener('ended', loadAndPlayNext);
     els.startBtn.addEventListener('click', () => { 
       voiceEnabled = true; 
