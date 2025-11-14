@@ -23,7 +23,8 @@
     body {
       background: var(--bg); color: var(--glow); text-align: center;
       display: flex; flex-direction: column; justify-content: center;
-      padding: 12px; overflow: hidden; position: relative;
+      padding: 16px; overflow: hidden; position: relative;
+      touch-action: pan-y; /* Permite scroll vertical */
     }
     body::before {
       content: ""; position: fixed; top: 50%; left: 50%;
@@ -34,7 +35,7 @@
     }
     @keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    .logo-container { margin-bottom: 8px; }
+    .logo-container { margin-bottom: 12px; }
     .logo {
       width: 34vw; max-width: 130px; height: auto; display: block; margin: 0 auto;
       filter: drop-shadow(0 0 10px var(--glow)); cursor: pointer;
@@ -58,14 +59,13 @@
       50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px #00ffcc); }
     }
 
-    h1 { font-size: clamp(1.6rem, 5.5vw, 2.2rem); margin: 0 0 10px; text-shadow: 0 0 6px var(--glow); line-height: 1.1; }
+    h1 { font-size: clamp(1.6rem, 5.5vw, 2.2rem); margin: 0 0 14px; text-shadow: 0 0 6px var(--glow); line-height: 1.1; }
 
     .terminal-box {
-      border: 1px solid var(--glow); padding: 12px; width: 100%; max-width: 380px; margin: 0 auto;
+      border: 1px solid var(--glow); padding: 14px; width: 100%; max-width: 380px; margin: 0 auto;
       border-radius: 8px; box-shadow: 0 0 10px var(--glow), inset 0 0 6px rgba(0,255,114,0.1);
       background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      flex: 1; max-height: calc(100vh - 180px); overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
 
     #oscilograma { width: 100%; height: 50px; display: block; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
@@ -88,10 +88,19 @@
     }
     .volume-knob-h:active { cursor: grabbing; transform: translateY(-50%) scale(1.2); }
 
-    .listener-status { font-size: 0.82rem; padding: 6px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
-    .now-playing { font-size: 0.8rem; padding: 5px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2em; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .listener-status { 
+      font-size: 0.82rem; padding: 6px 10px; background: rgba(0, 255, 114, 0.1); 
+      border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); 
+      animation: pulse 2s infinite; width: 100%; max-width: 300px;
+    }
+    .now-playing { 
+      font-size: 0.8rem; padding: 6px 10px; background: rgba(0, 20, 0, 0.8); 
+      border: 1px dashed var(--glow); border-radius: 4px; min-height: 2em; line-height: 1.2; 
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; max-width: 300px;
+    }
     .now-playing strong { color: #00ff72; text-shadow: 0 0 5px; }
     .status { font-size: 0.75rem; opacity: 0.8; min-height: 1.1em; }
+
     @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
 
     button {
@@ -103,29 +112,34 @@
     button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    #startBtn { margin-top: 8px; padding: 10px 16px; font-size: 0.9rem; }
-    .btn-group { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+    /* BOTÓN INICIAR: TAMAÑO FIJO */
+    #startBtn { 
+      margin-top: 4px; padding: 10px 16px; font-size: 0.9rem; 
+      width: 100%; max-width: 220px; 
+    }
+
+    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 6px; width: 100%; max-width: 300px; }
 
     .note {
-      margin-top: auto; padding-top: 12px; font-size: 0.7rem; opacity: 0.7;
+      margin-top: 16px; font-size: 0.7rem; opacity: 0.7;
       max-width: 380px; margin-left: auto; margin-right: auto; line-height: 1.3;
     }
 
     @media (max-width: 480px) {
-      body { padding: 8px; }
-      .terminal-box { padding: 10px; max-width: 340px; gap: 5px; }
+      body { padding: 12px; }
+      .terminal-box { padding: 12px; max-width: 340px; gap: 8px; }
       .logo { width: 32vw; max-width: 110px; }
-      h1 { font-size: clamp(1.4rem, 5vw, 1.9rem); margin-bottom: 8px; }
+      h1 { font-size: clamp(1.4rem, 5vw, 1.9rem); margin-bottom: 12px; }
       #oscilograma { height: 45px; }
-      button { font-size: 0.82rem; padding: 9px 10px; }
-      .btn-group { gap: 5px; }
-      .now-playing { font-size: 0.75rem; padding: 4px; }
-      .listener-status { font-size: 0.78rem; padding: 5px; }
-      .status { font-size: 0.7rem; }
       .volume-horizontal { max-width: 240px; height: 24px; }
       .volume-track-h { height: 4px; }
       .volume-knob-h { width: 13px; height: 13px; margin-left: -6.5px; }
-      .note { margin-top: auto; padding-top: 10px; font-size: 0.65rem; }
+      button { font-size: 0.82rem; padding: 9px 10px; }
+      .btn-group { gap: 6px; max-width: 260px; }
+      #startBtn { max-width: 200px; }
+      .listener-status, .now-playing { max-width: 260px; font-size: 0.76rem; padding: 5px 8px; }
+      .status { font-size: 0.7rem; }
+      .note { margin-top: 14px; font-size: 0.65rem; }
     }
   </style>
 </head>
@@ -152,6 +166,7 @@
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
+
     <button id="startBtn" disabled>Iniciar Emisión</button>
     
     <div class="btn-group" id="controls" style="display:none;">
@@ -209,6 +224,42 @@
     let isPaused = false, isMuted = false;
     let currentVolume = 1.0;
 
+    // === REFRESH AL DESLIZAR HACIA ABAJO (Pull to Refresh) ===
+    let touchStartY = 0;
+    let isPulling = false;
+
+    window.addEventListener('touchstart', (e) => {
+      if (window.scrollY === 0) {
+        touchStartY = e.touches[0].clientY;
+        isPulling = true;
+      }
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isPulling) return;
+      const touchY = e.touches[0].clientY;
+      const pullDistance = touchY - touchStartY;
+
+      if (pullDistance > 120 && window.scrollY === 0) {
+        document.body.style.transition = 'transform 0.3s ease';
+        document.body.style.transform = `translateY(${pullDistance / 3}px)`;
+      }
+    });
+
+    window.addEventListener('touchend', () => {
+      if (isPulling && document.body.style.transform) {
+        const wasPulled = parseInt(document.body.style.transform.match(/-?\d+/)[0]) > 100;
+        document.body.style.transition = 'transform 0.3s ease';
+        document.body.style.transform = 'translateY(0)';
+
+        if (wasPulled) {
+          setTimeout(() => location.reload(), 300);
+        }
+      }
+      isPulling = false;
+    });
+
+    // === CARGAR PLAYLIST ===
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
