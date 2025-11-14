@@ -633,7 +633,7 @@
         }
         els.pauseBtn.textContent = 'Pausar';
         isPaused = false;
-when (isMuted ? "Silenciado" : "Emisión en directo");
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
       } else {
         els.audio.pause();
         els.pauseBtn.textContent = 'Play';
@@ -653,26 +653,30 @@ when (isMuted ? "Silenciado" : "Emisión en directo");
 
     els.startBtn.addEventListener('click', startPlayback);
 
-    // "Siguiente" cambia canción INMEDIATAMENTE
+    // "SIGUIENTE" = STOP + SIGUIENTE + PLAY
     els.nextBtn.addEventListener('click', async () => {
       els.nextBtn.style.transform = 'scale(0.92)';
       setTimeout(() => els.nextBtn.style.transform = '', 150);
 
       if (!items.length || !isPlaying) return;
 
+      // 1. STOP: Detener actual
+      els.audio.pause();
+      els.audio.currentTime = 0;
+
+      // 2. SIGUIENTE: Cambiar canción
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
-
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-
       const song = items[currentIndex];
       const path = CONFIG.mp3Folder + song.file;
       els.audio.src = path;
       els.audio.volume = isMuted ? 0 : currentVolume;
 
+      // 3. PLAY: Reproducir inmediatamente
       try {
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
         await els.audio.play();
         isPaused = false;
         els.pauseBtn.textContent = 'Pausar';
