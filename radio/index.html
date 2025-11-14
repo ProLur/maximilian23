@@ -294,7 +294,7 @@
       opacity: 0.9;
       min-height: 1.2em;
       font-size: 0.8rem;
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, color 0.3s ease;
     }
     .status.warning {
       background: rgba(255, 100, 0, 0.2);
@@ -561,33 +561,27 @@
       }
     }
 
+    // SOLUCIÓN MÓVIL: Siguiente NO reproduce automáticamente
     function loadAndPlayNext() {
       if (!items.length || !isPlaying) return;
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
 
       const song = items[currentIndex];
-      const path = CONFIG.mp3Folder + song.file;
-      els.audio.src = path;
+      els.audio.src = CONFIG.mp3Folder + song.file;
       els.audio.load();
+      els.audio.pause(); // Forzar pausa
 
-      const playPromise = els.audio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-            isPaused = false;
-            els.pauseBtn.textContent = 'Pausar';
-            connectAudioToOscilloscope();
-          })
-          .catch(() => {
-            els.status.textContent = "Toca 'Play' para continuar";
-            els.status.className = 'status warning';
-            els.pauseBtn.textContent = 'Play';
-            isPaused = true;
-            setTimeout(() => els.status.className = 'status', 3000);
-          });
-      }
+      els.pauseBtn.textContent = 'Play';
+      isPaused = true;
+      els.status.textContent = "Toca Play para continuar";
+      els.status.className = 'status warning';
+
+      setTimeout(() => {
+        if (isPaused && els.status.textContent.includes('continuar')) {
+          els.status.className = 'status';
+        }
+      }, 4000);
     }
 
     function connectAudioToOscilloscope() {
@@ -616,7 +610,6 @@
         requestAnimationFrame(draw);
         analyser.getByteTimeDomainData(dataArray);
 
-        // FONDO 100% OPACO → SIN RESIDUOS
         ctx.fillStyle = '#001400';
         ctx.fillRect(0, 0, w, h);
 
@@ -643,10 +636,7 @@
 
       draw();
 
-      // Redibujar al cambiar tamaño
-      const resize = () => {
-        w = canvas.width = canvas.offsetWidth;
-      };
+      const resize = () => { w = canvas.width = canvas.offsetWidth; };
       window.addEventListener('resize', resize);
     }
 
@@ -689,21 +679,34 @@
     document.addEventListener('mouseup', () => isDragging = false);
     document.addEventListener('touchend', () => isDragging = false);
 
+    // BOTÓN PLAY/PAUSE MEJORADO
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
 
       if (isPaused) {
+        const resumeAndPlay = () => {
+          const playPromise = els.audio.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+                els.status.className = 'status';
+                isPaused = false;
+                els.pauseBtn.textContent = 'Pausar';
+                connectAudioToOscilloscope();
+              })
+              .catch(() => {
+                els.status.textContent = "Toca de nuevo";
+                els.status.className = 'status warning';
+              });
+          }
+        };
+
         if (audioContext.state === 'suspended') {
-          audioContext.resume().then(() => els.audio.play());
+          audioContext.resume().then(resumeAndPlay);
         } else {
-          els.audio.play().catch(() => {
-            els.status.textContent = "Toca de nuevo para reproducir";
-          });
+          resumeAndPlay();
         }
-        els.pauseBtn.textContent = 'Pausar';
-        isPaused = false;
-        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-        els.status.className = 'status';
       } else {
         els.audio.pause();
         els.pauseBtn.textContent = 'Play';
@@ -728,7 +731,7 @@
       updateVolumeUI();
     });
 
-    els.audio.addEventListener('ended', loadAndPlayNext);
+    // EVENTOS
     els.startBtn.addEventListener('click', startPlayback);
     els.nextBtn.addEventListener('click', loadAndPlayNext);
 
