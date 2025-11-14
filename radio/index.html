@@ -63,11 +63,8 @@
       background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
       display: flex; flex-direction: column; align-items: center;
     }
-    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
-    .controls-row {
-      display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; margin-top: 8px;
-    }
-    .btn-group { display: flex; gap: 8px; flex: 1; max-width: 300px; }
+    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 12px; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
+    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
     button {
       flex: 1; max-width: 130px; background: var(--dark); border: 1px solid var(--glow); color: var(--glow);
       padding: 12px 0; border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
@@ -84,28 +81,27 @@
     .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
     @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
 
-    /* === VOLUMEN DESLIZADOR === */
-    .volume-container {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      width: 30px; height: 120px; position: relative;
+    /* === VOLUMEN HORIZONTAL === */
+    .volume-horizontal {
+      width: 100%; max-width: 300px; height: 30px; margin: 8px 0; display: flex; align-items: center; justify-content: center;
     }
-    .volume-track {
-      width: 4px; height: 100px; background: rgba(0,255,114,0.2); border-radius: 2px;
-      position: relative; overflow: hidden; cursor: pointer;
+    .volume-track-h {
+      width: 100%; height: 6px; background: rgba(0,255,114,0.2); border-radius: 3px; position: relative; overflow: hidden; cursor: pointer;
     }
-    .volume-fill {
-      width: 100%; background: var(--glow); position: absolute; bottom: 0; left: 0;
-      border-radius: 2px; box-shadow: 0 0 8px var(--glow); transition: height 0.1s ease;
+    .volume-fill-h {
+      height: 100%; background: var(--glow); position: absolute; left: 0; top: 0;
+      border-radius: 3px; box-shadow: 0 0 8px var(--glow); transition: width 0.1s ease;
     }
-    .volume-knob {
-      width: 16px; height: 16px; background: var(--glow); border: 2px solid #001400;
-      border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%);
-      box-shadow: 0 0 12px var(--glow), 0 0 20px #00ffcc; cursor: grab;
-      transition: transform 0.1s ease;
+    .volume-knob-h {
+      width: 18px; height: 18px; background: var(--glow); border: 2px solid #001400;
+      border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);
+      left: 100%; margin-left: -9px; box-shadow: 0 0 12px var(--glow), 0 0 20px #00ffcc;
+      cursor: grab; transition: transform 0.1s ease;
     }
-    .volume-knob:active { cursor: grabbing; transform: translateX(-50%) scale(1.2); }
-    .volume-label {
-      font-size: 0.7rem; margin-top: 4px; opacity: 0.7;
+    .volume-knob-h:active { cursor: grabbing; transform: translateY(-50%) scale(1.2); }
+    .volume-label-h {
+      position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
+      font-size: 0.75rem; opacity: 0.8; white-space: nowrap;
     }
 
     @media (max-width: 480px) {
@@ -113,8 +109,8 @@
       button { font-size: 0.9rem; padding: 10px 0; }
       .btn-group { gap: 6px; }
       .now-playing { font-size: 0.8rem; }
-      .volume-container { height: 100px; }
-      .volume-track { height: 80px; }
+      .volume-horizontal { max-width: 260px; }
+      .volume-label-h { right: -35px; font-size: 0.7rem; }
     }
   </style>
 </head>
@@ -128,26 +124,26 @@
   <h1>RADIO MAXIMILIAN 23</h1>
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
+
+    <!-- BARRA DE VOLUMEN HORIZONTAL -->
+    <div class="volume-horizontal">
+      <div class="volume-track-h" id="volumeTrack">
+        <div class="volume-fill-h" id="volumeFill"></div>
+        <div class="volume-knob-h" id="volumeKnob"></div>
+      </div>
+      <div class="volume-label-h" id="volumeLabel">100%</div>
+    </div>
+
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
     
-    <div class="controls-row" id="controls" style="display:none;">
-      <div class="btn-group">
-        <button id="nextBtn">Siguiente</button>
-        <button id="pauseBtn">Pausar</button>
-        <button id="muteBtn">Mute</button>
-      </div>
-      <!-- DESLIZADOR DE VOLUMEN -->
-      <div class="volume-container">
-        <div class="volume-track" id="volumeTrack">
-          <div class="volume-fill" id="volumeFill"></div>
-          <div class="volume-knob" id="volumeKnob"></div>
-        </div>
-        <div class="volume-label" id="volumeLabel">100%</div>
-      </div>
+    <div class="btn-group" id="controls" style="display:none;">
+      <button id="nextBtn">Siguiente</button>
+      <button id="pauseBtn">Pausar</button>
+      <button id="muteBtn">Mute</button>
     </div>
   </div>
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
@@ -294,11 +290,11 @@
       }, 60000);
     }
 
-    // === VOLUMEN DESLIZADOR ===
+    // === VOLUMEN HORIZONTAL ===
     function updateVolumeUI() {
       const percent = isMuted ? 0 : currentVolume * 100;
-      els.volumeFill.style.height = percent + '%';
-      els.volumeKnob.style.bottom = (percent - 8) + '%';
+      els.volumeFill.style.width = percent + '%';
+      els.volumeKnob.style.left = percent + '%';
       els.volumeLabel.textContent = Math.round(percent) + '%';
     }
 
@@ -312,9 +308,9 @@
 
     els.volumeTrack.addEventListener('click', (e) => {
       const rect = els.volumeTrack.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-      const height = rect.height;
-      const percent = Math.max(0, Math.min(1, 1 - (y / height)));
+      const x = e.clientX - rect.left;
+      const width = rect.width;
+      const percent = Math.max(0, Math.min(1, x / width));
       setVolume(percent);
     });
 
@@ -323,9 +319,9 @@
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       const rect = els.volumeTrack.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-      const height = rect.height;
-      const percent = Math.max(0, Math.min(1, 1 - (y / height)));
+      const x = e.clientX - rect.left;
+      const width = rect.width;
+      const percent = Math.max(0, Math.min(1, x / width));
       setVolume(percent);
     });
     document.addEventListener('mouseup', () => { isDragging = false; });
@@ -336,9 +332,9 @@
       if (!isDragging) return;
       const touch = e.touches[0];
       const rect = els.volumeTrack.getBoundingClientRect();
-      const y = touch.clientY - rect.top;
-      const height = rect.height;
-      const percent = Math.max(0, Math.min(1, 1 - (y / height)));
+      const x = touch.clientX - rect.left;
+      const width = rect.width;
+      const percent = Math.max(0, Math.min(1, x / width));
       setVolume(percent);
     });
     document.addEventListener('touchend', () => { isDragging = false; });
