@@ -555,7 +555,7 @@
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
+        analyser.fftSize = 2048;
       }
       audioContext.resume().then(() => {
         playCurrent();
