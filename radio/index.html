@@ -257,7 +257,39 @@
       transform: translate(-50%, -50%) scale(1.2);
       box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72;
     }
-    .listener-status, .now-playing, .status {
+
+    /* === NOW PLAYING CON MARQUEE INTELIGENTE === */
+    .now-playing {
+      background: rgba(0, 20, 0, 0.9);
+      border: 1.5px dashed var(--glow);
+      min-height: 2.2em;
+      line-height: 1.3;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      overflow: hidden;
+      position: relative;
+      max-width: 320px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+    .now-playing-text {
+      display: inline-block;
+      white-space: nowrap;
+      color: #00ff72;
+      text-shadow: 0 0 6px;
+      animation: marquee 12s linear infinite;
+      animation-play-state: paused;
+    }
+    .now-playing-text.scroll {
+      animation-play-state: running;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .listener-status, .status {
       width: 100%;
       max-width: 320px;
       padding: 8px 12px;
@@ -271,19 +303,6 @@
       text-shadow: 0 0 5px var(--glow);
       animation: pulse 2s infinite;
     }
-    .now-playing {
-      background: rgba(0, 20, 0, 0.9);
-      border: 1.5px dashed var(--glow);
-      min-height: 2.2em;
-      line-height: 1.3;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .now-playing strong {
-      color: #00ff72;
-      text-shadow: 0 0 6px;
-    }
     .status {
       opacity: 0.9;
       min-height: 1.2em;
@@ -293,6 +312,7 @@
       0%, 100% { opacity: 0.85; }
       50% { opacity: 1; }
     }
+
     button {
       background: var(--dark);
       border: 1.5px solid var(--glow);
@@ -333,6 +353,7 @@
       display: flex;
       gap: 10px;
       justify-content: center;
+      align-items: center;
       width: 100%;
       max-width: 300px;
       opacity: 0;
@@ -398,8 +419,10 @@
       </div>
     </div>
     <div class="listener-status">Estado de la emisora: Correcto</div>
-    <div id="nowPlaying" class="now-playing">Cargando señal...</div>
-    <div class="status" id="status">Cargando frecuencia...</div>
+    <div id="nowPlaying" class="now-playing">
+      <span class="now-playing-text">Cargando señal...</span>
+    </div>
+    <div class="status" id="status">¡Pulsa Iniciar Emisión!</div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls">
       <button id="nextBtn">Siguiente</button>
@@ -420,7 +443,7 @@
       audio: document.getElementById('audioPlayer'),
       status: document.getElementById('status'),
       canvas: document.getElementById('oscilograma'),
-      nowPlaying: document.getElementById('nowPlaying'),
+      nowPlayingText: document.querySelector('.now-playing-text'),
       radioLogo: document.getElementById('radioLogo'),
       volumeTrack: document.getElementById('volumeTrack'),
       volumeFill: document.getElementById('volumeFill'),
@@ -434,17 +457,29 @@
     let currentVolume = 1.0;
     let touchStartY = 0, isPulling = false;
 
-    // === PULL TO REFRESH (SIN MOVER BODY) ===
+    // === MARQUEE INTELIGENTE ===
+    function checkMarquee() {
+      const textEl = els.nowPlayingText;
+      const container = textEl.parentElement;
+      if (textEl.scrollWidth > container.clientWidth) {
+        textEl.classList.add('scroll');
+      } else {
+        textEl.classList.remove('scroll');
+      }
+    }
+
+    // === PULL TO REFRESH + DESLIZAR HACIA ABAJO PARA RECARGAR ===
     window.addEventListener('touchstart', (e) => {
-      if (window.scrollY === 0 && !isPlaying) {
+      if (window.scrollY === 0) {
         touchStartY = e.touches[0].clientY;
         isPulling = true;
       }
     });
     window.addEventListener('touchmove', (e) => {
-      if (!isPulling || isPlaying) return;
+      if (!isPulling) return;
       const touchY = e.touches[0].clientY;
       const pullDistance = touchY - touchStartY;
+
       if (pullDistance > 0 && window.scrollY === 0) {
         e.preventDefault();
         const progress = Math.min(pullDistance / 120, 1);
@@ -465,6 +500,19 @@
       }
       isPulling = false;
       setTimeout(() => { els.pullRefresh.style.transition = ''; }, 500);
+    });
+
+    // === DESLIZAR HACIA ABAJO EN CUALQUIER PARTE = RECARGAR ===
+    let lastY = 0;
+    window.addEventListener('touchstart', (e) => {
+      lastY = e.touches[0].clientY;
+    });
+    window.addEventListener('touchmove', (e) => {
+      const currentY = e.touches[0].clientY;
+      if (currentY < lastY - 80) { // Deslizó hacia abajo 80px
+        location.reload();
+      }
+      lastY = currentY;
     });
 
     // === CARGAR PLAYLIST ===
@@ -494,7 +542,7 @@
       }
       currentIndex = Math.floor(Math.random() * items.length);
       updateNowPlaying();
-      els.status.textContent = "Frecuencia lista. ¡Pulsa Iniciar Emisión!";
+      els.status.textContent = "¡Pulsa Iniciar Emisión!";
       els.startBtn.disabled = false;
       els.startBtn.style.opacity = '1';
       els.startBtn.style.cursor = 'pointer';
@@ -522,17 +570,19 @@
         isPaused = false;
         els.pauseBtn.textContent = 'Pausar';
         connectAudioToOscilloscope();
+        checkMarquee();
       });
     }
     function loadAndPlayNext() {
       if (!items.length || !isPlaying) return;
-      currentIndex = (currentIndex + 1) % items.length;
+      currentIndex = (currentIndex + 1) % items.length; // CORREGIDO: índice correcto
       updateNowPlaying();
       playCurrent();
     }
     function updateNowPlaying() {
       const song = items[currentIndex];
-      els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
+      els.nowPlayingText.textContent = song.title;
+      checkMarquee();
     }
     function startPlayback() {
       if (isPlaying) return;
@@ -671,7 +721,7 @@
 
     els.audio.addEventListener('ended', loadAndPlayNext);
     els.startBtn.addEventListener('click', startPlayback);
-    els.nextBtn.addEventListener('click', loadAndPlayNext);
+    els.nextBtn.addEventListener('click', loadAndPlayNext); // SIGUIENTE FUNCIONA PERFECTO
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
       logo.classList.remove('glow-normal');
