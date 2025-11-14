@@ -13,7 +13,7 @@
   <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
+  <meta property="og:title" content="Radio Maximilian 23 - Emisera del CEIP Juan XXIII" />
   <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
   <meta property="og:image" content="https://tudominio.com/max2.png" />
   <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
@@ -44,7 +44,7 @@
     }
 
     body {
-      background:  var(--bg);
+      background: var(--bg);
       color: var(--glow);
       text-align: center;
       display: flex;
@@ -80,8 +80,7 @@
     }
 
     .logo-container { 
-      margin-top: 12px;
-      margin-bottom: 8px;
+      margin: 12px 0 8px;
       width: 100%;
       display: flex;
       justify-content: center;
@@ -144,7 +143,7 @@
       flex-direction: column;
       align-items: center;
       gap: 14px;
-      flex: 1;
+      /* QUITADO flex: 1 → ahora el footer no se pierde */
     }
 
     #oscilograma {
@@ -310,7 +309,7 @@
     }
 
     button:hover, button:active {
-      background: rgba(0, 255, 114, 0.15);
+     组成部分: rgba(0, 255, 114, 0.15);
       box-shadow: 0 0 10px var(--glow);
     }
 
@@ -344,12 +343,12 @@
     }
 
     .note {
-      margin-top: 16px;
-      margin-bottom: 8px;
+      margin: 16px 0 8px;
       font-size: 0.78rem;
       opacity: 0.8;
       max-width: 360px;
       line-height: 1.4;
+      flex-shrink: 0; /* Evita que se comprima */
     }
 
     .pull-indicator {
@@ -374,9 +373,10 @@
       opacity: 1;
     }
 
+    /* === RESPONSIVE === */
     @media (max-width: 480px) {
       body { padding: 6px 12px; }
-      .logo-container { margin-top: 10px; margin-bottom: 6px; }
+      .logo-container { margin: 10px 0 6px; }
       .logo { width: 36vw; max-width: 110px; }
       h1 { font-size: clamp(1.7rem, 6.5vw, 2.2rem); margin: 6px 0 12px; }
       .terminal-box { padding: 16px; max-width: 340px; gap: 12px; }
@@ -389,7 +389,7 @@
       #startBtn { max-width: 240px; font-size: 1rem; }
       .listener-status, .now-playing { max-width: 300px; font-size: 0.88rem; padding: 9px 12px; }
       .status { font-size: 0.8rem; }
-      .note { margin-top: 14px; font-size: 0.74rem; }
+      .note { margin: 14px 0 6px; font-size: 0.74rem; }
     }
   </style>
 </head>
@@ -407,10 +407,11 @@
 
   <h1>RADIO MAXIMILIAN 23</h1>
 
+  <!-- Caja principal -->
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
 
-    <!-- VOLUMEN CON HEBILLA -->
+    <!-- VOLUMEN -->
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
@@ -431,6 +432,7 @@
     </div>
   </div>
 
+  <!-- Footer siempre visible -->
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
 
   <script>
