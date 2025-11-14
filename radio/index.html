@@ -436,7 +436,6 @@
     let audioContext = null, analyser = null, source = null;
     let isPaused = false, isMuted = false;
     let currentVolume = 1.0;
-    let nextSongPending = false; // <-- NUEVA VARIABLE
     let touchStartY = 0, isPulling = false;
 
     // Pull to refresh
@@ -532,10 +531,6 @@
       const path = CONFIG.mp3Folder + song.file;
       els.audio.src = path;
       els.audio.volume = isMuted ? 0 : currentVolume;
-
-      // Limpiar evento anterior
-      els.audio.onended = null;
-
       const playPromise = els.audio.play();
       if (playPromise !== undefined) {
         playPromise
@@ -545,30 +540,6 @@
             els.pauseBtn.textContent = 'Pausar';
             els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
             connectAudioToOscilloscope();
-
-            // EVENTO FINAL: cuando termine la canción
-            els.audio.onended = () => {
-              let nextIndex = currentIndex;
-
-              if (nextSongPending) {
-                nextSongPending = false;
-                nextIndex = (currentIndex + 1) % items.length;
-              } else {
-                nextIndex = (currentIndex + 1) % items.length;
-              }
-
-              currentIndex = nextIndex;
-              updateNowPlaying();
-
-              const nextPath = CONFIG.mp3Folder + items[currentIndex].file;
-              els.audio.src = nextPath;
-              els.audio.volume = isMuted ? 0 : currentVolume;
-              els.audio.play().catch(() => {
-                els.status.textContent = "Error al reproducir siguiente";
-              });
-              els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-              connectAudioToOscilloscope();
-            };
           })
           .catch(err => {
             console.warn("Play bloqueado:", err);
@@ -662,7 +633,7 @@
         }
         els.pauseBtn.textContent = 'Pausar';
         isPaused = false;
-        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+when (isMuted ? "Silenciado" : "Emisión en directo");
       } else {
         els.audio.pause();
         els.pauseBtn.textContent = 'Play';
@@ -682,8 +653,8 @@
 
     els.startBtn.addEventListener('click', startPlayback);
 
-    // "SIGUIENTE" → Solo marca la siguiente canción
-    els.nextBtn.addEventListener('click', () => {
+    // "Siguiente" cambia canción INMEDIATAMENTE
+    els.nextBtn.addEventListener('click', async () => {
       els.nextBtn.style.transform = 'scale(0.92)';
       setTimeout(() => els.nextBtn.style.transform = '', 150);
 
@@ -691,15 +662,26 @@
 
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
-      nextSongPending = true;
 
-      if (isPaused) {
-        els.audio.play().catch(() => {});
-        isPaused = false;
-        els.pauseBtn.textContent = 'Pausar';
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
       }
 
-      els.status.textContent = isMuted ? "Silenciado" : "Siguiente en cola...";
+      const song = items[currentIndex];
+      const path = CONFIG.mp3Folder + song.file;
+      els.audio.src = path;
+      els.audio.volume = isMuted ? 0 : currentVolume;
+
+      try {
+        await els.audio.play();
+        isPaused = false;
+        els.pauseBtn.textContent = 'Pausar';
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        connectAudioToOscilloscope();
+      } catch (err) {
+        console.warn("Play falló:", err);
+        els.status.textContent = "Toca 'Siguiente' otra vez";
+      }
     });
 
     els.radioLogo.addEventListener('click', () => {
