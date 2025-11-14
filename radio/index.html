@@ -63,11 +63,12 @@
       background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
       display: flex; flex-direction: column; align-items: center;
     }
-    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 12px; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
-    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+    #oscilogram { width: 100%; height: 60px; display: block; margin-bottom: 12px; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
+    .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
     button {
       flex: 1; max-width: 130px; background: var(--dark); border: 1px solid var(--glow); color: var(--glow);
-      padding: 12px 0; border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
+      padding: 14px 16px; /* ← ESPACIO INTERNO: arriba/abajo 14px, lados 16px */
+      border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
       transition: all 0.2s ease; font-weight: bold;
     }
     button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
@@ -81,7 +82,7 @@
     .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
     @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
 
-    /* === VOLUMEN HORIZONTAL === */
+    /* === VOLUMEN HORIZONTAL (SIN TEXTO) === */
     .volume-horizontal {
       width: 100%; max-width: 300px; height: 30px; margin: 8px 0; display: flex; align-items: center; justify-content: center;
     }
@@ -99,18 +100,13 @@
       cursor: grab; transition: transform 0.1s ease;
     }
     .volume-knob-h:active { cursor: grabbing; transform: translateY(-50%) scale(1.2); }
-    .volume-label-h {
-      position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
-      font-size: 0.75rem; opacity: 0.8; white-space: nowrap;
-    }
 
     @media (max-width: 480px) {
       .terminal-box { padding: 14px; }
-      button { font-size: 0.9rem; padding: 10px 0; }
-      .btn-group { gap: 6px; }
+      button { font-size: 0.9rem; padding: 12px 14px; }
+      .btn-group { gap: 8px; }
       .now-playing { font-size: 0.8rem; }
       .volume-horizontal { max-width: 260px; }
-      .volume-label-h { right: -35px; font-size: 0.7rem; }
     }
   </style>
 </head>
@@ -125,13 +121,12 @@
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
 
-    <!-- BARRA DE VOLUMEN HORIZONTAL -->
+    <!-- BARRA DE VOLUMEN HORIZONTAL (SIN TEXTO) -->
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
         <div class="volume-knob-h" id="volumeKnob"></div>
       </div>
-      <div class="volume-label-h" id="volumeLabel">100%</div>
     </div>
 
     <div class="listener-status">Estado de la emisora: Correcto</div>
@@ -185,8 +180,7 @@
       radioLogo: document.getElementById('radioLogo'),
       volumeTrack: document.getElementById('volumeTrack'),
       volumeFill: document.getElementById('volumeFill'),
-      volumeKnob: document.getElementById('volumeKnob'),
-      volumeLabel: document.getElementById('volumeLabel')
+      volumeKnob: document.getElementById('volumeKnob')
     };
 
     let items = [], currentIndex = 0, songCount = 0;
@@ -290,12 +284,11 @@
       }, 60000);
     }
 
-    // === VOLUMEN HORIZONTAL ===
+    // === VOLUMEN HORIZONTAL (SIN TEXTO) ===
     function updateVolumeUI() {
       const percent = isMuted ? 0 : currentVolume * 100;
       els.volumeFill.style.width = percent + '%';
       els.volumeKnob.style.left = percent + '%';
-      els.volumeLabel.textContent = Math.round(percent) + '%';
     }
 
     function setVolume(value) {
