@@ -140,7 +140,7 @@
       border-radius: 6px;
     }
 
-    /* === VOLUMEN TIPO HEBILLA DE CINTURÓN === */
+    /* === VOLUMEN TIPO HEBILLA === */
     .volume-horizontal {
       width: 100%;
       max-width: 300px;
@@ -380,7 +380,7 @@
 
   <div class="pull-indicator" id="pullIndicator">Desliza para recargar</div>
 
-  <audio id="beep" preload="metadata"><source src="beep.mp3" type="audio/mpeg"></audio>
+  <!-- Audio principal -->
   <audio id="audioPlayer" preload="metadata"></audio>
 
   <div class="logo-container">
@@ -403,7 +403,6 @@
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
-    <div id="voiceOutput" class="voice-line"></div>
 
     <button id="startBtn" disabled>Iniciar Emisión</button>
 
@@ -414,31 +413,10 @@
     </div>
   </div>
 
-  <p class="note">Emisión 24/7 • Proyecto Maximilian 23 • Creado por Manuel</p>
+  <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
 
   <script>
-    const PHRASES = {
-      start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
-      mute: "Sonido silenciado.",
-      unmute: "Volumen restaurado.",
-      hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
-      ads: [
-        "Transmisión en directo desde el ciberespacio.",
-        "Sintoniza la señal verde. Radio Max-i-mi-lian veintitrés.",
-        "Frecuencia activa. No cambies de canal.",
-        "Aquí solo suena lo que importa.",
-        "Conectado. Escuchando. Transmitiendo.",
-        "Señal clara. Volumen máximo."
-      ]
-    };
-
     const CONFIG = {
-      voiceRate: 0.75,
-      voicePitch: 0.3,
-      voiceVolume: 1.0,
-      announcementInterval: 4,
-      hourAnnounce: true,
-      beepBeforeVoice: true,
       mp3Folder: 'canciones/'
     };
 
@@ -450,8 +428,6 @@
       controls: document.getElementById('controls'),
       audio: document.getElementById('audioPlayer'),
       status: document.getElementById('status'),
-      voiceOutput: document.getElementById('voiceOutput'),
-      beep: document.getElementById('beep'),
       canvas: document.getElementById('oscilograma'),
       nowPlaying: document.getElementById('nowPlaying'),
       radioLogo: document.getElementById('radioLogo'),
@@ -461,14 +437,14 @@
       pullIndicator: document.getElementById('pullIndicator')
     };
 
-    let items = [], currentIndex = 0, songCount = 0;
-    let isPlaying = false, voiceEnabled = false, isSpeaking = false;
-    let audioContext = null, analyser = null, source = null, lastHour = -1;
+    let items = [], currentIndex = 0;
+    let isPlaying = false;
+    let audioContext = null, analyser = null, source = null;
     let isPaused = false, isMuted = false;
     let currentVolume = 1.0;
     let touchStartY = 0, isPulling = false;
 
-    // === PULL TO REFRESH (solo si NO está reproduciendo) ===
+    // === PULL TO REFRESH ===
     window.addEventListener('touchstart', (e) => {
       if (window.scrollY === 0 && !isPlaying) {
         touchStartY = e.touches[0].clientY;
@@ -535,9 +511,7 @@
 
     async function safePlay() {
       if (!audioContext) return;
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
+      if (audioContext.state === 'suspended') await audioContext.resume();
       const playPromise = els.audio.play();
       if (playPromise !== undefined) {
         await playPromise.catch(err => {
@@ -567,8 +541,6 @@
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
       playCurrent();
-      songCount++;
-      setTimeout(playAnnouncement, 1000);
     }
 
     function updateNowPlaying() {
@@ -588,18 +560,11 @@
       }
       audioContext.resume().then(() => {
         playCurrent();
-        speak(PHRASES.start);
         updateVolumeUI();
       });
-      setInterval(() => {
-        if (Math.random() < 0.03) {
-          songCount++;
-          playAnnouncement();
-        }
-      }, 60000);
     }
 
-    // === VOLUMEN CON BRILLO DINÁMICO ===
+    // === VOLUMEN ===
     function updateVolumeUI() {
       const percent = (isMuted ? 0 : currentVolume) * 100;
       els.volumeFill.style.width = percent + '%';
@@ -616,9 +581,6 @@
         0 0 ${baseInner + extraInner}px ${glowColor},
         inset 0 0 8px rgba(0,0,0,0.8)
       `.replace(/\s+/g, ' ').trim();
-
-      els.volumeKnob.style.setProperty('--knob-glow', `${baseGlow + extraGlow}px`);
-      els.volumeKnob.style.setProperty('--knob-inner', `${baseInner + extraInner}px`);
     }
 
     function setVolume(value) {
@@ -677,13 +639,11 @@
         els.muteBtn.textContent = 'Mute';
         isMuted = false;
         els.status.textContent = isPaused ? "Pausado" : "Emisión en directo";
-        speak(PHRASES.unmute);
       } else {
         els.audio.volume = 0;
         els.muteBtn.textContent = 'Unmute';
         isMuted = true;
         els.status.textContent = "Silenciado";
-        speak(PHRASES.mute);
       }
       updateVolumeUI();
     });
@@ -734,40 +694,8 @@
       draw();
     }
 
-    function speak(text, cb) {
-      if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
-      isSpeaking = true;
-      const utter = new SpeechSynthesisUtterance(text);
-      const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
-      utter.voice = voice;
-      utter.rate = CONFIG.voiceRate;
-      utter.pitch = CONFIG.voicePitch;
-      utter.volume = CONFIG.voiceVolume;
-      if (CONFIG.beepBeforeVoice) {
-        els.beep.currentTime = 0;
-        els.beep.play().catch(() => {});
-      }
-      utter.onend = () => { isSpeaking = false; cb?.(); };
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utter);
-    }
-
-    function playAnnouncement() {
-      const now = new Date();
-      const h = now.getHours(), m = now.getMinutes();
-      let msg = '';
-      if (h !== lastHour && m < 5 && CONFIG.hourAnnounce) {
-        lastHour = h;
-        msg = PHRASES.hour(h, m);
-      } else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) {
-        msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)];
-      }
-      if (msg) setTimeout(() => speak(msg), 800);
-    }
-
     els.audio.addEventListener('ended', loadAndPlayNext);
     els.startBtn.addEventListener('click', () => {
-      voiceEnabled = true;
       startPlayback();
       isPulling = false;
       document.body.style.transform = 'translateY(0)';
@@ -786,10 +714,6 @@
     });
 
     window.addEventListener('load', async () => {
-      if ('speechSynthesis' in window) {
-        speechSynthesis.onvoiceschanged = () => {};
-        speechSynthesis.getVoices();
-      }
       await loadPlaylists();
       updateVolumeUI();
     });
