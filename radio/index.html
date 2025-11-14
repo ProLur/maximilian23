@@ -1,562 +1,798 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-&nbsp;&nbsp;<meta charset="UTF-8" />
-&nbsp;&nbsp;<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-&nbsp;&nbsp;<title>Radio Maximilian 23 - CEIP Juan XXIII</title>
-&nbsp;&nbsp;<!-- SEO -->
-&nbsp;&nbsp;<meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII. Emisión 24/7 con MP3 locales." />
-&nbsp;&nbsp;<meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, música alumnos, radio online 24/7" />
-&nbsp;&nbsp;<meta name="author" content="Manuel - CEIP Juan XXIII" />
-&nbsp;&nbsp;<meta name="robots" content="index, follow" />
-&nbsp;&nbsp;<link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
-&nbsp;&nbsp;<!-- Open Graph -->
-&nbsp;&nbsp;<meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
-&nbsp;&nbsp;<meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
-&nbsp;&nbsp;<meta property="og:image" content="https://tudominio.com/max2.png" />
-&nbsp;&nbsp;<meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
-&nbsp;&nbsp;<meta property="og:type" content="website" />
-&nbsp;&nbsp;<style>
-&nbsp;&nbsp;&nbsp;&nbsp;:root { --glow: #00ff72; --bg: #001400; --dark: #001f00; --metal: #0a3d0a; --leather: #0f2a0f; }
-&nbsp;&nbsp;&nbsp;&nbsp;* { box-sizing: border-box; margin: 0; padding: 0; }
-&nbsp;&nbsp;&nbsp;&nbsp;html, body {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height: 100%; font-family: "Courier New", monospace;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overscroll-behavior-y: contain;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;body {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: var(--bg); color: var(--glow); text-align: center;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;display: flex; flex-direction: column; justify-content: center;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;padding: 16px; overflow: hidden; position: relative;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;touch-action: pan-y pinch-zoom;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transition: transform 0.4s ease;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;body::before {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;content: ""; position: fixed; top: 50%; left: 50%;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 200vmax; height: 200vmax;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: translate(-50%, -50%); animation: radar 12s linear infinite;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;opacity: 0.08; z-index: -1; pointer-events: none;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;@keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-&nbsp;&nbsp;&nbsp;&nbsp;.logo-container { margin-bottom: 16px; }
-&nbsp;&nbsp;&nbsp;&nbsp;.logo {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 38vw; max-width: 120px; height: auto; display: block; margin: 0 auto;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filter: drop-shadow(0 0 12px var(--glow)); cursor: pointer;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transition: transform 0.2s;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.logo:hover, .logo:active { transform: scale(1.08); }
-&nbsp;&nbsp;&nbsp;&nbsp;.glow-normal {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow));
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;animation: pulse-normal 3s ease-in-out infinite;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.glow-intenso {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;animation: pulse-intenso 1.2s ease-in-out infinite;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;@keyframes pulse-normal {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0%, 100% { filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow)); }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50% { filter: drop-shadow(0 0 18px var(--glow)) drop-shadow(0 0 36px var(--glow)); }
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;@keyframes pulse-intenso {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0%, 100% { filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc); }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50% { filter: drop-shadow(0 0 36px var(--glow)) drop-shadow(0 0 72px var(--glow)) drop-shadow(0 0 108px #00ffcc); }
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;h1 {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font-size: clamp(1.8rem, 7vw, 2.4rem); margin: 0 0 18px;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;text-shadow: 0 0 8px var(--glow); line-height: 1.1;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.terminal-box {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border: 2px solid var(--glow); padding: 18px; width: 100%; max-width: 360px; margin: 0 auto;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border-radius: 12px; box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: rgba(0, 20, 0, 0.8); backdrop-filter: blur(4px);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;display: flex; flex-direction: column; align-items: center; gap: 14px;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;#oscilograma {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 100%; height: 70px; display: block; image-rendering: pixelated;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: rgba(0,20,0,0.7); border-radius: 6px;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;/* === VOLUMEN TIPO HEBILLA DE CINTURÓN (MEJORADA) === */
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-horizontal {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 100%; max-width: 300px; height: 50px; display: flex; align-items: center; justify-content: center;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;padding: 0 10px; position: relative;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-track-h {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 100%; height: 18px; background: var(--leather);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border: 2px solid #0a3d0a; border-radius: 9px;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;position: relative; overflow: visible; cursor: pointer;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;box-shadow:
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inset 0 0 8px rgba(0,0,0,0.6),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0 12px rgba(0,255,114,0.3);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background-image:
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;repeating-linear-gradient(90deg,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transparent, transparent 8px,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-fill-h {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height: 100%; background: linear-gradient(90deg, #004d00, #00ff72, #004d00);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;position: absolute; left: 0; top: 0;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border-radius: 7px; box-shadow: 0 0 15px var(--glow);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transition: width 0.15s ease;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-knob-h {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 36px; height: 36px;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border: 3px solid #00ff72;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left: 100%; /* se ajusta con JS */
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;box-shadow:
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0 20px var(--glow),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0 30px #00ffcc,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inset 0 0 8px rgba(0,0,0,0.8);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cursor: grab;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transition: transform 0.15s ease, box-shadow 0.2s;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z-index: 10;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-knob-h::before {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;content: ''; position: absolute; top: 50%; left: 50%;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 12px; height: 12px; background: #001400;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border: 2px solid #004d00; border-radius: 50%;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: translate(-50%, -50%);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-knob-h::after {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;content: ''; position: absolute; inset: -6px;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border: 2px solid transparent; border-radius: 50%;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;box-shadow: 0 0 0 0 transparent;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transition: box-shadow 0.2s ease;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-knob-h:active {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cursor: grabbing; transform: translate(-50%, -50%) scale(1.2);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.volume-knob-h:active::after {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;box-shadow: 0 0 20px #00ffcc, 0 0 30px #00ff72;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.listener-status {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font-size: 0.95rem; padding: 10px 14px; background: rgba(0, 255, 114, 0.15);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border: 1.5px solid var(--glow); border-radius: 8px; text-shadow: 0 0 5px var(--glow);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;animation: pulse 2s infinite; width: 100%; max-width: 320px;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.now-playing {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font-size: 0.92rem; padding: 10px 14px; background: rgba(0, 20, 0, 0.9);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border: 1.5px dashed var(--glow); border-radius: 8px; min-height: 2.4em; line-height: 1.3;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; max-width: 320px;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
-&nbsp;&nbsp;&nbsp;&nbsp;.status { font-size: 0.85rem; opacity: 0.9; min-height: 1.3em; }
-&nbsp;&nbsp;&nbsp;&nbsp;@keyframes pulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
-&nbsp;&nbsp;&nbsp;&nbsp;button {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: var(--dark); border: 1.5px solid var(--glow); color: var(--glow);
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;padding: 14px 16px; border-radius: 10px; font-size: 1rem; font-weight: bold;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cursor: pointer; transition: all 0.2s ease; flex: 1; min-height: 48px;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;touch-action: manipulation;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;button:hover, button:active {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: rgba(0, 255, 114, 0.15); box-shadow: 0 0 10px var(--glow);
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;button:active { background: var(--glow); color: var(--bg); transform: scale(0.96); }
-&nbsp;&nbsp;&nbsp;&nbsp;button:disabled { opacity: 0.6; cursor: not-allowed; }
-&nbsp;&nbsp;&nbsp;&nbsp;#startBtn {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;margin-top: 6px; padding: 14px 20px; font-size: 1.05rem;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 100%; max-width: 260px; min-height: 52px;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.btn-group {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;display: flex; gap: 12px; justify-content: center; margin-top: 8px;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 100%; max-width: 320px;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.note {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;margin-top: 20px; font-size: 0.78rem; opacity: 0.8;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max-width: 360px; margin-left: auto; margin-right: auto; line-height: 1.4;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.pull-indicator {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;display: flex; align-items: center; justify-content: center;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color: var(--glow); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z-index: 1000; pointer-events: none;
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;.pull-indicator.show { opacity: 1; }
-&nbsp;&nbsp;&nbsp;&nbsp;@media (max-width: 480px) {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;body { padding: 12px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.terminal-box { padding: 16px; max-width: 340px; gap: 12px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.logo { width: 36vw; max-width: 110px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 { font-size: clamp(1.7rem, 6.5vw, 2.2rem); margin-bottom: 16px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#oscilograma { height: 65px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.volume-horizontal { max-width: 280px; height: 46px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.volume-knob-h { width: 32px; height: 32px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.volume-knob-h::before { width: 10px; height: 10px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;button { font-size: 0.95rem; padding: 13px 15px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.btn-group { gap: 10px; max-width: 300px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#startBtn { max-width: 240px; font-size: 1rem; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.listener-status, .now-playing { max-width: 300px; font-size: 0.88rem; padding: 9px 12px; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.status { font-size: 0.8rem; }
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.note { margin-top: 18px; font-size: 0.74rem; }
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Radio Maximilian 23 - CEIP Juan XXIII</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII. Emisión 24/7 con MP3 locales." />
+  <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, música alumnos, radio online 24/7" />
+  <meta name="author" content="Manuel - CEIP Juan XXIII" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
+  <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
+  <meta property="og:image" content="https://tudominio.com/max2.png" />
+  <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    :root {
+      --glow: #00ff72;
+      --bg: #001400;
+      --dark: #001f00;
+      --metal: #0a3d0a;
+      --leather: #0f2a0f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: "Courier New", monospace;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      overscroll-behavior-y: contain;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--glow);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 16px;
+      overflow: hidden;
+      position: relative;
+      touch-action: pan-y pinch-zoom;
+      transition: transform 0.4s ease;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 200vmax;
+      height: 200vmax;
+      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
+      transform: translate(-50%, -50%);
+      animation: radar 12s linear infinite;
+      opacity: 0.08;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes radar {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .logo-container { margin-bottom: 16px; }
+    .logo {
+      width: 38vw;
+      max-width: 120px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 0 12px var(--glow));
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .logo:hover, .logo:active { transform: scale(1.08); }
+
+    .glow-normal {
+      filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow));
+      animation: pulse-normal 3s ease-in-out infinite;
+    }
+    .glow-intenso {
+      filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc);
+      animation: pulse-intenso 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-normal {
+      0%, 100% { filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow)); }
+      50% { filter: drop-shadow(0 0 18px var(--glow)) drop-shadow(0 0 36px var(--glow)); }
+    }
+    @keyframes pulse-intenso {
+      0%, 100% { filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc); }
+      50% { filter: drop-shadow(0 0 36px var(--glow)) drop-shadow(0 0 72px var(--glow)) drop-shadow(0 0 108px #00ffcc); }
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 7vw, 2.4rem);
+      margin: 0 0 18px;
+      text-shadow: 0 0 8px var(--glow);
+      line-height: 1.1;
+    }
+
+    .terminal-box {
+      border: 2px solid var(--glow);
+      padding: 18px;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      border-radius: 12px;
+      box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15);
+      background: rgba(0, 20, 0, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #oscilograma {
+      width: 100%;
+      height: 70px;
+      display: block;
+      image-rendering: pixelated;
+      background: rgba(0,20,0,0.7);
+      border-radius: 6px;
+    }
+
+    /* === VOLUMEN TIPO HEBILLA DE CINTURÓN === */
+    .volume-horizontal {
+      width: 100%;
+      max-width: 300px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      position: relative;
+    }
+
+    .volume-track-h {
+      width: 100%;
+      height: 18px;
+      background: var(--leather);
+      border: 2px solid #0a3d0a;
+      border-radius: 9px;
+      position: relative;
+      overflow: visible;
+      cursor: pointer;
+      box-shadow:
+        inset 0 0 8px rgba(0,0,0,0.6),
+        0 0 12px rgba(0,255,114,0.3);
+      background-image:
+        repeating-linear-gradient(90deg,
+          transparent, transparent 8px,
+          rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px
+        );
+    }
+
+    .volume-fill-h {
+      height: 100%;
+      background: linear-gradient(90deg, #004d00, #00ff72, #004d00);
+      position: absolute;
+      left: 0;
+      top: 0;
+      border-radius: 7px;
+      box-shadow: 0 0 15px var(--glow);
+      transition: width 0.15s ease;
+    }
+
+    .volume-knob-h {
+      width: 36px;
+      height: 36px;
+      background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00);
+      border: 3px solid #00ff72;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      left: 100%;
+      box-shadow:
+        0 0 20px var(--glow),
+        0 0 30px #00ffcc,
+        inset 0 0 8px rgba(0,0,0,0.8);
+      cursor: grab;
+      transition: transform 0.15s ease, box-shadow 0.2s;
+      z-index: 10;
+    }
+
+    .volume-knob-h::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      background: #001400;
+      border: 2px solid #004d00;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+    }
+
+    .volume-knob-h::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 transparent;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .volume-knob-h:active {
+      cursor: grabbing;
+      transform: translate(-50%, -50%) scale(1.2);
+      box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72;
+    }
+
+    .volume-knob-h:active::after {
+      box-shadow: 0 0 20px #00ffcc, 0 0 30px #00ff72;
+    }
+
+    .listener-status {
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      background: rgba(0, 255, 114, 0.15);
+      border: 1.5px solid var(--glow);
+      border-radius: 8px;
+      text-shadow: 0 0 5px var(--glow);
+      animation: pulse 2s infinite;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .now-playing {
+      font-size: 0.92rem;
+      padding: 10px 14px;
+      background: rgba(0, 20, 0, 0.9);
+      border: 1.5px dashed var(--glow);
+      border-radius: 8px;
+      min-height: 2.4em;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .now-playing strong {
+      color: #00ff72;
+      text-shadow: 0 0 6px;
+    }
+
+    .status {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      min-height: 1.3em;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.85; }
+      50% { opacity: 1; }
+    }
+
+    button {
+      background: var(--dark);
+      border: 1.5px solid var(--glow);
+      color: var(--glow);
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+      min-height: 48px;
+      touch-action: manipulation;
+    }
+
+    button:hover, button:active {
+      background: rgba(0, 255, 114, 0.15);
+      box-shadow: 0 0 10px var(--glow);
+    }
+
+    button:active {
+      background: var(--glow);
+      color: var(--bg);
+      transform: scale(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #startBtn {
+      margin-top: 6px;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      width: 100%;
+      max-width: 260px;
+      min-height: 52px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 8px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .note {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      opacity: 0.8;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.4;
+    }
+
+    .pull-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--glow);
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .pull-indicator.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .terminal-box { padding: 16px; max-width: 340px; gap: 12px; }
+      .logo { width: 36vw; max-width: 110px; }
+      h1 { font-size: clamp(1.7rem, 6.5vw, 2.2rem); margin-bottom: 16px; }
+      #oscilograma { height: 65px; }
+      .volume-horizontal { max-width: 280px; height: 46px; }
+      .volume-knob-h { width: 32px; height: 32px; }
+      .volume-knob-h::before { width: 10px; height: 10px; }
+      button { font-size: 0.95rem; padding: 13px 15px; }
+      .btn-group { gap: 10px; max-width: 300px; }
+      #startBtn { max-width: 240px; font-size: 1rem; }
+      .listener-status, .now-playing { max-width: 300px; font-size: 0.88rem; padding: 9px 12px; }
+      .status { font-size: 0.8rem; }
+      .note { margin-top: 18px; font-size: 0.74rem; }
+    }
+  </style>
 </head>
 <body>
-&nbsp;&nbsp;<div class="pull-indicator" id="pullIndicator">Desliza para recargar</div>
-&nbsp;&nbsp;<audio id="beep" preload="auto"><source src="beep.mp3" type="audio/mpeg"></audio>
-&nbsp;&nbsp;<audio id="audioPlayer" preload="auto"></audio>
-&nbsp;&nbsp;<div class="logo-container">
-&nbsp;&nbsp;&nbsp;&nbsp;<img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
-&nbsp;&nbsp;</div>
-&nbsp;&nbsp;<h1>RADIO MAXIMILIAN 23</h1>
-&nbsp;&nbsp;<div class="terminal-box">
-&nbsp;&nbsp;&nbsp;&nbsp;<canvas id="oscilograma"></canvas>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;<!-- VOLUMEN CON HEBILLA -->
-&nbsp;&nbsp;&nbsp;&nbsp;<div class="volume-horizontal">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="volume-track-h" id="volumeTrack">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="volume-fill-h" id="volumeFill"></div>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="volume-knob-h" id="volumeKnob"></div>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-&nbsp;&nbsp;&nbsp;&nbsp;</div>
-&nbsp;&nbsp;&nbsp;&nbsp;<div class="listener-status">Estado de la emisora: Correcto</div>
-&nbsp;&nbsp;&nbsp;&nbsp;<div id="nowPlaying" class="now-playing">Cargando señal...</div>
-&nbsp;&nbsp;&nbsp;&nbsp;<div class="status" id="status">Cargando frecuencia...</div>
-&nbsp;&nbsp;&nbsp;&nbsp;<div id="voiceOutput" class="voice-line"></div>
-&nbsp;&nbsp;&nbsp;&nbsp;<button id="startBtn" disabled>Iniciar Emisión</button>
-&nbsp;&nbsp;&nbsp;&nbsp;<div class="btn-group" id="controls" style="display:none;">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="nextBtn">Siguiente</button>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="pauseBtn">Pausar</button>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="muteBtn">Mute</button>
-&nbsp;&nbsp;&nbsp;&nbsp;</div>
-&nbsp;&nbsp;</div>
-&nbsp;&nbsp;<p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
-&nbsp;&nbsp;<script>
-&nbsp;&nbsp;&nbsp;&nbsp;const PHRASES = {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mute: "Sonido silenciado.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unmute: "Volumen restaurado.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ads: [
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Transmisión en directo desde el ciberespacio.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Sintoniza la señal verde. Radio Max-i-mi-lian veintitrés.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Frecuencia activa. No cambies de canal.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Aquí solo suena lo que importa.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Conectado. Escuchando. Transmitiendo.",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Señal clara. Volumen máximo."
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-&nbsp;&nbsp;&nbsp;&nbsp;};
-&nbsp;&nbsp;&nbsp;&nbsp;const CONFIG = {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mp3Folder: 'canciones/'
-&nbsp;&nbsp;&nbsp;&nbsp;};
-&nbsp;&nbsp;&nbsp;&nbsp;const els = {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;startBtn: document.getElementById('startBtn'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nextBtn: document.getElementById('nextBtn'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pauseBtn: document.getElementById('pauseBtn'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;muteBtn: document.getElementById('muteBtn'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controls: document.getElementById('controls'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audio: document.getElementById('audioPlayer'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status: document.getElementById('status'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voiceOutput: document.getElementById('voiceOutput'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beep: document.getElementById('beep'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;canvas: document.getElementById('oscilograma'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nowPlaying: document.getElementById('nowPlaying'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radioLogo: document.getElementById('radioLogo'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volumeTrack: document.getElementById('volumeTrack'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volumeFill: document.getElementById('volumeFill'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volumeKnob: document.getElementById('volumeKnob'),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pullIndicator: document.getElementById('pullIndicator')
-&nbsp;&nbsp;&nbsp;&nbsp;};
-&nbsp;&nbsp;&nbsp;&nbsp;let items = [], currentIndex = 0, songCount = 0;
-&nbsp;&nbsp;&nbsp;&nbsp;let isPlaying = false, voiceEnabled = false, isSpeaking = false;
-&nbsp;&nbsp;&nbsp;&nbsp;let audioContext = null, analyser = null, source = null, lastHour = -1;
-&nbsp;&nbsp;&nbsp;&nbsp;let isPaused = false, isMuted = false;
-&nbsp;&nbsp;&nbsp;&nbsp;let currentVolume = 1.0;
-&nbsp;&nbsp;&nbsp;&nbsp;let touchStartY = 0, isPulling = false;
-    // === PULL TO REFRESH (solo si NO está reproduciendo) ===
-    window.addEventListener('touchstart', (e) => {
-      if (window.scrollY === 0 && !isPlaying) {
-        touchStartY = e.touches[0].clientY;
-        isPulling = true;
-      }
-    });
-    window.addEventListener('touchmove', (e) => {
-      if (!isPulling || isPlaying) return;
-      const touchY = e.touches[0].clientY;
-      const pullDistance = touchY - touchStartY;
-      if (pullDistance > 0 && window.scrollY === 0) {
-        e.preventDefault();
-        const progress = Math.min(pullDistance / 150, 1);
-        document.body.style.transform = translateY(${pullDistance / 3}px);
-        els.pullIndicator.classList.toggle('show', progress > 0.3);
-      }
-    });
-    window.addEventListener('touchend', () => {
-      if (isPulling && !isPlaying) {
-        const wasPulled = parseInt(document.body.style.transform?.match(/-?\d+/)?.[0] || 0) > 100;
-        document.body.style.transition = 'transform 0.4s ease';
-        document.body.style.transform = 'translateY(0)';
-        els.pullIndicator.classList.remove('show');
-        if (wasPulled) setTimeout(() => location.reload(), 400);
-      }
-      isPulling = false;
-    });
-    // === CARGAR PLAYLIST ===
-    async function loadPlaylists() {
-      try {
-        const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
-        if (!res.ok) throw new Error(HTTP ${res.status});
-        const text = await res.text();
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-        items = lines.map(line => {
-          const parts = line.split(' - ');
-          const file = parts[0].trim();
-          const title = parts.slice(1).join(' - ').trim() || file;
-          return { file, title };
-        }).filter(i => i.file.endsWith('.mp3'));
-        if (items.length === 0) throw new Error('No hay MP3 válidos');
-      } catch (err) {
-        console.error(err);
-        items = [{ file: 'test.mp3', title: 'Canción de prueba' }];
-      }
-      preloadFirstSong();
-    }
-    function preloadFirstSong() {
-      if (!items.length) {
-        els.status.textContent = "Error: No hay canciones";
-        return;
-      }
-      currentIndex = Math.floor(Math.random() * items.length);
-      updateNowPlaying();
-      els.status.textContent = "Frecuencia lista. ¡Pulsa Iniciar Emisión!";
-      els.startBtn.disabled = false;
-      els.startBtn.style.opacity = '1';
-      els.startBtn.style.cursor = 'pointer';
-    }
-    async function safePlay() {
-      if (!audioContext) return;
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      const playPromise = els.audio.play();
-      if (playPromise !== undefined) {
-        await playPromise.catch(err => {
-          console.warn("Autoplay bloqueado:", err);
-          els.status.textContent = "Toca para activar sonido";
-        });
-      }
-    }
-    function playCurrent() {
-      const song = items[currentIndex];
-      const path = CONFIG.mp3Folder + song.file;
-      els.audio.src = path;
-      els.audio.load();
-      els.audio.volume = isMuted ? 0 : currentVolume;
-      safePlay().then(() => {
-        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-        isPlaying = true;
-        isPaused = false;
-        els.pauseBtn.textContent = 'Pausar';
-        connectAudioToOscilloscope();
-      });
-    }
-    function loadAndPlayNext() {
-      if (!items.length || !isPlaying) return;
-      currentIndex = (currentIndex + 1) % items.length;
-      updateNowPlaying();
-      playCurrent();
-      songCount++;
-      setTimeout(playAnnouncement, 1000);
-    }
-    function updateNowPlaying() {
-      const song = items[currentIndex];
-      els.nowPlaying.innerHTML = <strong>${song.title}</strong>;
-    }
-    function startPlayback() {
-      if (isPlaying) return;
-      els.startBtn.style.display = 'none';
-      els.controls.style.display = 'flex';
-      els.status.textContent = "Iniciando emisión...";
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-      }
-      audioContext.resume().then(() => {
-        playCurrent();
-        speak(PHRASES.start);
-        updateVolumeUI();
-      });
-      setInterval(() => {
-        if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
-      }, 60000);
-    }
-    // === VOLUMEN CON BRILLO DINÁMICO EN LA HEBILLA ===
-    function updateVolumeUI() {
-      const percent = (isMuted ? 0 : currentVolume) * 100;
-      els.volumeFill.style.width = percent + '%';
-      els.volumeKnob.style.left = percent + '%';
-      // Brillo de la cabeza (knob) acorde al volumen
-      const baseGlow = 20;
-      const extraGlow = Math.round(currentVolume * 40); // 0-40px extra
-      const baseInner = 30;
-      const extraInner = Math.round(currentVolume * 30); // 0-30px extra
-      const glowColor = currentVolume > 0.7 ? '#00ffcc' : (currentVolume > 0.3 ? '#00ff72' : '#00ff72');
-      els.volumeKnob.style.boxShadow =  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0 ${baseGlow + extraGlow}px var(--glow), &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0 ${baseInner + extraInner}px ${glowColor}, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inset 0 0 8px rgba(0,0,0,0.8) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;
-      // Brillo adicional en el ::after (hebilla exterior)
-      els.volumeKnob.style.cssText += ; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--knob-glow: ${baseGlow + extraGlow}px; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--knob-inner: ${baseInner + extraInner}px; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;
-      els.volumeKnob.style.setProperty('--knob-glow', ${baseGlow + extraGlow}px);
-      els.volumeKnob.style.setProperty('--knob-inner', ${baseInner + extraInner}px);
-    }
-    function setVolume(value) {
-      currentVolume = value;
-      if (!isMuted) els.audio.volume = value;
-      updateVolumeUI();
-    }
-    // === VOLUMEN TÁCTIL (MEJORADO) ===
-    function getVolumeFromEvent(e) {
-      const rect = els.volumeTrack.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const width = rect.width;
-      return Math.max(0, Math.min(1, x / width));
-    }
-    els.volumeTrack.addEventListener('click', (e) => {
-      const percent = getVolumeFromEvent(e);
-      setVolume(percent);
-    });
-    let isDragging = false;
-    els.volumeKnob.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; });
-    els.volumeKnob.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
-    const moveHandler = (e) => {
-      if (!isDragging) return;
-      const percent = getVolumeFromEvent(e);
-      setVolume(percent);
-    };
-    document.addEventListener('mousemove', moveHandler);
-    document.addEventListener('touchmove', moveHandler);
-    const endHandler = () => { isDragging = false; };
-    document.addEventListener('mouseup', endHandler);
-    document.addEventListener('touchend', endHandler);
-    els.pauseBtn.addEventListener('click', () => {
-      if (!isPlaying) return;
-      if (isPaused) {
-        safePlay();
-        els.pauseBtn.textContent = 'Pausar';
-        isPaused = false;
-        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-      } else {
-        els.audio.pause();
-        els.pauseBtn.textContent = 'Play';
-        isPaused = true;
-        els.status.textContent = "Pausado";
-      }
-    });
-    els.muteBtn.addEventListener('click', () => {
-      if (!isPlaying) return;
-      if (isMuted) {
-        els.audio.volume = currentVolume;
-        els.muteBtn.textContent = 'Mute';
-        isMuted = false;
-        els.status.textContent = isPaused ? "Pausado" : "Emisión en directo";
-        speak(PHRASES.unmute);
-      } else {
-        els.audio.volume = 0;
-        els.muteBtn.textContent = 'Unmute';
-        isMuted = true;
-        els.status.textContent = "Silenciado";
-        speak(PHRASES.mute);
-      }
-      updateVolumeUI();
-    });
-    function connectAudioToOscilloscope() {
-      if (source) source.disconnect();
-      try {
-        source = audioContext.createMediaElementSource(els.audio);
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
-        drawOscilloscope();
-      } catch (e) { console.warn("Oscilograma no conectado"); }
-    }
-    function drawOscilloscope() {
-      if (!analyser) return;
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      const canvas = els.canvas;
-      const ctx = canvas.getContext('2d');
-      const w = canvas.offsetWidth;
-      const h = 70;
-      function draw() {
-        requestAnimationFrame(draw);
-        analyser.getByteTimeDomainData(dataArray);
-        ctx.fillStyle = 'rgba(0, 20, 0, 0.7)';
-        ctx.fillRect(0, 0, w, h);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'var(--glow)';
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = '#00ff72';
-        ctx.beginPath();
-        const sliceWidth = w / bufferLength;
-        let x = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = v * h / 2;
-          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-          x += sliceWidth;
-        }
-        ctx.lineTo(w, h / 2);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
-      draw();
-    }
-    function speak(text, cb) {
-      if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
-      isSpeaking = true;
-      const utter = new SpeechSynthesisUtterance(text);
-      const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
-      utter.voice = voice;
-      utter.rate = CONFIG.voiceRate;
-      utter.pitch = CONFIG.voicePitch;
-      utter.volume = CONFIG.voiceVolume;
-      if (CONFIG.beepBeforeVoice) {
-        els.beep.currentTime = 0;
-        els.beep.play().catch(() => {});
-      }
-      utter.onend = () => { isSpeaking = false; cb?.(); };
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utter);
-    }
-    function playAnnouncement() {
-      const now = new Date();
-      const h = now.getHours(), m = now.getMinutes();
-      let msg = '';
-      if (h !== lastHour && m < 5 && CONFIG.hourAnnounce) {
-        lastHour = h;
-        msg = PHRASES.hour(h, m);
-      } else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) {
-        msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)];
-      }
-      if (msg) setTimeout(() => speak(msg), 800);
-    }
-    els.audio.addEventListener('ended', loadAndPlayNext);
-    els.startBtn.addEventListener('click', () => {
-      voiceEnabled = true;
-      startPlayback();
-      isPulling = false;
-      document.body.style.transform = 'translateY(0)';
-      els.pullIndicator.classList.remove('show');
-    });
-    els.nextBtn.addEventListener('click', loadAndPlayNext);
-    els.radioLogo.addEventListener('click', () => {
-      const logo = els.radioLogo;
-      logo.classList.remove('glow-normal');
-      logo.classList.add('glow-intenso');
-      setTimeout(() => {
-        logo.classList.remove('glow-intenso');
-        logo.classList.add('glow-normal');
-      }, 3000);
-    });
-    window.addEventListener('load', async () => {
-      if ('speechSynthesis' in window) speechSynthesis.getVoices();
-      await loadPlaylists();
-      updateVolumeUI(); // inicializa brillo
-    });
-  </script>
+
+  <div class="pull-indicator" id="pullIndicator">Desliza para recargar</div>
+
+  <audio id="beep" preload="metadata"><source src="beep.mp3" type="audio/mpeg"></audio>
+  <audio id="audioPlayer" preload="metadata"></audio>
+
+  <div class="logo-container">
+    <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
+  </div>
+
+  <h1>RADIO MAXIMILIAN 23</h1>
+
+  <div class="terminal-box">
+    <canvas id="oscilograma"></canvas>
+
+    <!-- VOLUMEN CON HEBILLA -->
+    <div class="volume-horizontal">
+      <div class="volume-track-h" id="volumeTrack">
+        <div class="volume-fill-h" id="volumeFill"></div>
+        <div class="volume-knob-h" id="volumeKnob"></div>
+      </div>
+    </div>
+
+    <div class="listener-status">Estado de la emisora: Correcto</div>
+    <div id="nowPlaying" class="now-playing">Cargando señal...</div>
+    <div class="status" id="status">Cargando frecuencia...</div>
+    <div id="voiceOutput" class="voice-line"></div>
+
+    <button id="startBtn" disabled>Iniciar Emisión</button>
+
+    <div class="btn-group" id="controls" style="display:none;">
+      <button id="nextBtn">Siguiente</button>
+      <button id="pauseBtn">Pausar</button>
+      <button id="muteBtn">Mute</button>
+    </div>
+  </div>
+
+  <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
+
+  <script>
+    const PHRASES = {
+      start: "Estás escuchando Radio Max-i-mi-lian veintitrés. Emisión continua iniciada.",
+      mute: "Sonido silenciado.",
+      unmute: "Volumen restaurado.",
+      hour: (h, m) => `Son las ${h} ${m > 0 ? `y ${m}` : ''}. Estás en Radio Max-i-mi-lian veintitrés, la frecuencia del futuro.`,
+      ads: [
+        "Transmisión en directo desde el ciberespacio.",
+        "Sintoniza la señal verde. Radio Max-i-mi-lian veintitrés.",
+        "Frecuencia activa. No cambies de canal.",
+        "Aquí solo suena lo que importa.",
+        "Conectado. Escuchando. Transmitiendo.",
+        "Señal clara. Volumen máximo."
+      ]
+    };
+
+    const CONFIG = {
+      voiceRate: 0.75,
+      voicePitch: 0.3,
+      voiceVolume: 1.0,
+      announcementInterval: 4,
+      hourAnnounce: true,
+      beepBeforeVoice: true,
+      mp3Folder: 'canciones/'
+    };
+
+    const els = {
+      startBtn: document.getElementById('startBtn'),
+      nextBtn: document.getElementById('nextBtn'),
+      pauseBtn: document.getElementById('pauseBtn'),
+      muteBtn: document.getElementById('muteBtn'),
+      controls: document.getElementById('controls'),
+      audio: document.getElementById('audioPlayer'),
+      status: document.getElementById('status'),
+      voiceOutput: document.getElementById('voiceOutput'),
+      beep: document.getElementById('beep'),
+      canvas: document.getElementById('oscilograma'),
+      nowPlaying: document.getElementById('nowPlaying'),
+      radioLogo: document.getElementById('radioLogo'),
+      volumeTrack: document.getElementById('volumeTrack'),
+      volumeFill: document.getElementById('volumeFill'),
+      volumeKnob: document.getElementById('volumeKnob'),
+      pullIndicator: document.getElementById('pullIndicator')
+    };
+
+    let items = [], currentIndex = 0, songCount = 0;
+    let isPlaying = false, voiceEnabled = false, isSpeaking = false;
+    let audioContext = null, analyser = null, source = null, lastHour = -1;
+    let isPaused = false, isMuted = false;
+    let currentVolume = 1.0;
+    let touchStartY = 0, isPulling = false;
+
+    // === PULL TO REFRESH (solo si NO está reproduciendo) ===
+    window.addEventListener('touchstart', (e) => {
+      if (window.scrollY === 0 && !isPlaying) {
+        touchStartY = e.touches[0].clientY;
+        isPulling = true;
+      }
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isPulling || isPlaying) return;
+      const touchY = e.touches[0].clientY;
+      const pullDistance = touchY - touchStartY;
+      if (pullDistance > 0 && window.scrollY === 0) {
+        e.preventDefault();
+        const progress = Math.min(pullDistance / 150, 1);
+        document.body.style.transform = `translateY(${pullDistance / 3}px)`;
+        els.pullIndicator.classList.toggle('show', progress > 0.3);
+      }
+    });
+
+    window.addEventListener('touchend', () => {
+      if (isPulling && !isPlaying) {
+        const wasPulled = parseInt(document.body.style.transform?.match(/-?\d+/)?.[0] || 0) > 100;
+        document.body.style.transition = 'transform 0.4s ease';
+        document.body.style.transform = 'translateY(0)';
+        els.pullIndicator.classList.remove('show');
+        if (wasPulled) setTimeout(() => location.reload(), 400);
+      }
+      isPulling = false;
+    });
+
+    // === CARGAR PLAYLIST ===
+    async function loadPlaylists() {
+      try {
+        const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+        items = lines.map(line => {
+          const parts = line.split(' - ');
+          const file = parts[0].trim();
+          const title = parts.slice(1).join(' - ').trim() || file;
+          return { file, title };
+        }).filter(i => i.file.endsWith('.mp3'));
+        if (items.length === 0) throw new Error('No hay MP3 válidos');
+      } catch (err) {
+        console.error(err);
+        items = [{ file: 'test.mp3', title: 'Canción de prueba' }];
+      }
+      preloadFirstSong();
+    }
+
+    function preloadFirstSong() {
+      if (!items.length) {
+        els.status.textContent = "Error: No hay canciones";
+        return;
+      }
+      currentIndex = Math.floor(Math.random() * items.length);
+      updateNowPlaying();
+      els.status.textContent = "Frecuencia lista. ¡Pulsa Iniciar Emisión!";
+      els.startBtn.disabled = false;
+      els.startBtn.style.opacity = '1';
+      els.startBtn.style.cursor = 'pointer';
+    }
+
+    async function safePlay() {
+      if (!audioContext) return;
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      const playPromise = els.audio.play();
+      if (playPromise !== undefined) {
+        await playPromise.catch(err => {
+          console.warn("Autoplay bloqueado:", err);
+          els.status.textContent = "Toca para activar sonido";
+        });
+      }
+    }
+
+    function playCurrent() {
+      const song = items[currentIndex];
+      const path = CONFIG.mp3Folder + song.file;
+      els.audio.src = path;
+      els.audio.load();
+      els.audio.volume = isMuted ? 0 : currentVolume;
+      safePlay().then(() => {
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        isPlaying = true;
+        isPaused = false;
+        els.pauseBtn.textContent = 'Pausar';
+        connectAudioToOscilloscope();
+      });
+    }
+
+    function loadAndPlayNext() {
+      if (!items.length || !isPlaying) return;
+      currentIndex = (currentIndex + 1) % items.length;
+      updateNowPlaying();
+      playCurrent();
+      songCount++;
+      setTimeout(playAnnouncement, 1000);
+    }
+
+    function updateNowPlaying() {
+      const song = items[currentIndex];
+      els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
+    }
+
+    function startPlayback() {
+      if (isPlaying) return;
+      els.startBtn.style.display = 'none';
+      els.controls.style.display = 'flex';
+      els.status.textContent = "Iniciando emisión...";
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+      }
+      audioContext.resume().then(() => {
+        playCurrent();
+        speak(PHRASES.start);
+        updateVolumeUI();
+      });
+      setInterval(() => {
+        if (Math.random() < 0.03) {
+          songCount++;
+          playAnnouncement();
+        }
+      }, 60000);
+    }
+
+    // === VOLUMEN CON BRILLO DINÁMICO ===
+    function updateVolumeUI() {
+      const percent = (isMuted ? 0 : currentVolume) * 100;
+      els.volumeFill.style.width = percent + '%';
+      els.volumeKnob.style.left = percent + '%';
+
+      const baseGlow = 20;
+      const extraGlow = Math.round(currentVolume * 40);
+      const baseInner = 30;
+      const extraInner = Math.round(currentVolume * 30);
+      const glowColor = currentVolume > 0.7 ? '#00ffcc' : '#00ff72';
+
+      els.volumeKnob.style.boxShadow = `
+        0 0 ${baseGlow + extraGlow}px var(--glow),
+        0 0 ${baseInner + extraInner}px ${glowColor},
+        inset 0 0 8px rgba(0,0,0,0.8)
+      `.replace(/\s+/g, ' ').trim();
+
+      els.volumeKnob.style.setProperty('--knob-glow', `${baseGlow + extraGlow}px`);
+      els.volumeKnob.style.setProperty('--knob-inner', `${baseInner + extraInner}px`);
+    }
+
+    function setVolume(value) {
+      currentVolume = value;
+      if (!isMuted) els.audio.volume = value;
+      updateVolumeUI();
+    }
+
+    function getVolumeFromEvent(e) {
+      const rect = els.volumeTrack.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const width = rect.width;
+      return Math.max(0, Math.min(1, x / width));
+    }
+
+    els.volumeTrack.addEventListener('click', (e) => {
+      const percent = getVolumeFromEvent(e);
+      setVolume(percent);
+    });
+
+    let isDragging = false;
+    els.volumeKnob.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; });
+    els.volumeKnob.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
+
+    const moveHandler = (e) => {
+      if (!isDragging) return;
+      const percent = getVolumeFromEvent(e);
+      setVolume(percent);
+    };
+    document.addEventListener('mousemove', moveHandler);
+    document.addEventListener('touchmove', moveHandler);
+
+    const endHandler = () => { isDragging = false; };
+    document.addEventListener('mouseup', endHandler);
+    document.addEventListener('touchend', endHandler);
+
+    els.pauseBtn.addEventListener('click', () => {
+      if (!isPlaying) return;
+      if (isPaused) {
+        safePlay();
+        els.pauseBtn.textContent = 'Pausar';
+        isPaused = false;
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+      } else {
+        els.audio.pause();
+        els.pauseBtn.textContent = 'Play';
+        isPaused = true;
+        els.status.textContent = "Pausado";
+      }
+    });
+
+    els.muteBtn.addEventListener('click', () => {
+      if (!isPlaying) return;
+      if (isMuted) {
+        els.audio.volume = currentVolume;
+        els.muteBtn.textContent = 'Mute';
+        isMuted = false;
+        els.status.textContent = isPaused ? "Pausado" : "Emisión en directo";
+        speak(PHRASES.unmute);
+      } else {
+        els.audio.volume = 0;
+        els.muteBtn.textContent = 'Unmute';
+        isMuted = true;
+        els.status.textContent = "Silenciado";
+        speak(PHRASES.mute);
+      }
+      updateVolumeUI();
+    });
+
+    function connectAudioToOscilloscope() {
+      if (source) source.disconnect();
+      try {
+        source = audioContext.createMediaElementSource(els.audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        drawOscilloscope();
+      } catch (e) {
+        console.warn("Oscilograma no conectado");
+      }
+    }
+
+    function drawOscilloscope() {
+      if (!analyser) return;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      const canvas = els.canvas;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.offsetWidth;
+      const h = 70;
+
+      function draw() {
+        requestAnimationFrame(draw);
+        analyser.getByteTimeDomainData(dataArray);
+        ctx.fillStyle = 'rgba(0, 20, 0, 0.7)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'var(--glow)';
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#00ff72';
+        ctx.beginPath();
+        const sliceWidth = w / bufferLength;
+        let x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = v * h / 2;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          x += sliceWidth;
+        }
+        ctx.lineTo(w, h / 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+      draw();
+    }
+
+    function speak(text, cb) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
+      isSpeaking = true;
+      const utter = new SpeechSynthesisUtterance(text);
+      const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
+      utter.voice = voice;
+      utter.rate = CONFIG.voiceRate;
+      utter.pitch = CONFIG.voicePitch;
+      utter.volume = CONFIG.voiceVolume;
+      if (CONFIG.beepBeforeVoice) {
+        els.beep.currentTime = 0;
+        els.beep.play().catch(() => {});
+      }
+      utter.onend = () => { isSpeaking = false; cb?.(); };
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    }
+
+    function playAnnouncement() {
+      const now = new Date();
+      const h = now.getHours(), m = now.getMinutes();
+      let msg = '';
+      if (h !== lastHour && m < 5 && CONFIG.hourAnnounce) {
+        lastHour = h;
+        msg = PHRASES.hour(h, m);
+      } else if (songCount % CONFIG.announcementInterval === 0 && songCount > 0) {
+        msg = PHRASES.ads[Math.floor(Math.random() * PHRASES.ads.length)];
+      }
+      if (msg) setTimeout(() => speak(msg), 800);
+    }
+
+    els.audio.addEventListener('ended', loadAndPlayNext);
+    els.startBtn.addEventListener('click', () => {
+      voiceEnabled = true;
+      startPlayback();
+      isPulling = false;
+      document.body.style.transform = 'translateY(0)';
+      els.pullIndicator.classList.remove('show');
+    });
+    els.nextBtn.addEventListener('click', loadAndPlayNext);
+
+    els.radioLogo.addEventListener('click', () => {
+      const logo = els.radioLogo;
+      logo.classList.remove('glow-normal');
+      logo.classList.add('glow-intenso');
+      setTimeout(() => {
+        logo.classList.remove('glow-intenso');
+        logo.classList.add('glow-normal');
+      }, 3000);
+    });
+
+    window.addEventListener('load', async () => {
+      if ('speechSynthesis' in window) {
+        speechSynthesis.onvoiceschanged = () => {};
+        speechSynthesis.getVoices();
+      }
+      await loadPlaylists();
+      updateVolumeUI();
+    });
+  </script>
 </body>
 </html>
