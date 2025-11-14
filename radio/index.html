@@ -99,13 +99,11 @@
     <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls" style="display:none;">
       <button id="nextBtn">Siguiente</button>
+      <button id="pauseBtn">Pausar</button>
       <button id="muteBtn">Mute</button>
     </div>
   </div>
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
-
-  <!-- DEBUG EN VIVO -->
-  <div id="debug" style="position:fixed; bottom:10px; left:10px; background:#000; color:#0f0; padding:8px; font-size:11px; border:1px solid #0f0; max-width:400px; z-index:999; display:none;"></div>
 
   <script>
     const PHRASES = {
@@ -126,12 +124,13 @@
     const CONFIG = {
       voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true,
-      mp3Folder: 'canciones/'  // Asegúrate de que exista esta carpeta
+      mp3Folder: 'canciones/'
     };
 
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
+      pauseBtn: document.getElementById('pauseBtn'),
       muteBtn: document.getElementById('muteBtn'),
       controls: document.getElementById('controls'),
       audio: document.getElementById('audioPlayer'),
@@ -140,21 +139,16 @@
       beep: document.getElementById('beep'),
       canvas: document.getElementById('oscilograma'),
       nowPlaying: document.getElementById('nowPlaying'),
-      radioLogo: document.getElementById('radioLogo'),
-      debug: document.getElementById('debug')
+      radioLogo: document.getElementById('radioLogo')
     };
 
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, analyser = null, source = null, lastHour = -1;
-
-    // === DEBUG EN VIVO ===
-    els.debug.style.display = 'block';
-    els.debug.innerHTML = 'Iniciando...';
+    let isPaused = false;
 
     // === CARGAR PLAYLIST ===
     async function loadPlaylists() {
-      els.debug.innerHTML = 'Cargando playlists.txt...';
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -166,11 +160,8 @@
           const title = parts.slice(1).join(' - ').trim() || file;
           return { file, title };
         }).filter(i => i.file.endsWith('.mp3'));
-
-        els.debug.innerHTML = `OK: ${items.length} canciones cargadas`;
         if (items.length === 0) throw new Error('No hay MP3 válidos');
       } catch (err) {
-        els.debug.innerHTML = `<span style="color:#f00;">ERROR: ${err.message}</span>`;
         console.error(err);
         items = [{ file: 'test.mp3', title: 'Canción de prueba' }];
       }
@@ -185,14 +176,9 @@
       currentIndex = Math.floor(Math.random() * items.length);
       updateNowPlaying();
       els.status.textContent = "Frecuencia lista. ¡Pulsa Iniciar Emisión!";
-
-      // ACTIVAR BOTÓN SIEMPRE
       els.startBtn.disabled = false;
       els.startBtn.style.opacity = '1';
       els.startBtn.style.cursor = 'pointer';
-      els.startBtn.style.pointerEvents = 'auto';
-
-      els.debug.innerHTML += `<br>Canción lista: <strong>${items[currentIndex].title}</strong>`;
     }
 
     function playCurrent() {
@@ -201,19 +187,19 @@
       els.audio.src = path;
       els.audio.load();
 
-      els.debug.innerHTML = `Reproduciendo:<br><a href="${path}" target="_blank" style="color:#0f0;">${path}</a>`;
-
       const playPromise = els.audio.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             els.status.textContent = "Emisión en directo";
             isPlaying = true;
+            isPaused = false;
+            els.pauseBtn.textContent = 'Pausar';
             connectAudioToOscilloscope();
           })
           .catch(err => {
             els.status.textContent = "Pulsa 'Iniciar Emisión' para activar sonido";
-            els.debug.innerHTML += `<br><span style="color:#f00;">Bloqueado: ${err.message}</span>`;
+            console.warn("Autoplay bloqueado:", err);
           });
       }
     }
@@ -244,7 +230,6 @@
         analyser.fftSize = 256;
       }
 
-      // Desbloquear audio con interacción
       audioContext.resume().then(() => {
         playCurrent();
         speak(PHRASES.start);
@@ -255,6 +240,23 @@
       }, 60000);
     }
 
+    // === PAUSE / PLAY ===
+    els.pauseBtn.addEventListener('click', () => {
+      if (!isPlaying) return;
+
+      if (isPaused) {
+        els.audio.play();
+        els.pauseBtn.textContent = 'Pausar';
+        isPaused = false;
+        els.status.textContent = "Emisión en directo";
+      } else {
+        els.audio.pause();
+        els.pauseBtn.textContent = 'Play';
+        isPaused = true;
+        els.status.textContent = "Pausado";
+      }
+    });
+
     // === OSCILOGRAMA REAL ===
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
@@ -263,7 +265,7 @@
         source.connect(analyser);
         analyser.connect(audioContext.destination);
         drawOscilloscope();
-      } catch (e) { console.warn("No se pudo conectar oscilograma"); }
+      } catch (e) { console.warn("Oscilograma no conectado"); }
     }
 
     function drawOscilloscope() {
@@ -340,9 +342,6 @@
 
     // === EVENTOS ===
     els.audio.addEventListener('ended', loadAndPlayNext);
-    els.audio.addEventListener('error', () => {
-      els.debug.innerHTML += `<br><span style="color:#f00;">ERROR: MP3 no encontrado o corrupto</span>`;
-    });
 
     els.startBtn.addEventListener('click', () => {
       voiceEnabled = true;
