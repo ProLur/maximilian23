@@ -344,46 +344,60 @@
         await playPromise.catch(err => {
           console.warn("Autoplay bloqueado:", err);
           els.status.textContent = "Toca para activar sonido";
+          throw err;
         });
       }
     }
 
-    function playCurrent() {
+    // Función para limpiar eventos del audio
+    function clearAudioEvents() {
+      els.audio.removeEventListener('loadedmetadata', els.audio._tempLoaded);
+      els.audio.removeEventListener('error', els.audio._tempError);
+      els.audio.onloadedmetadata = null;
+      els.audio.onerror = null;
+    }
+
+    // Promesa para esperar carga del audio
+    function waitForLoad() {
+      return new Promise((resolve, reject) => {
+        clearAudioEvents();
+        els.audio._tempLoaded = () => resolve();
+        els.audio._tempError = () => reject(new Error('Error de carga'));
+        els.audio.addEventListener('loadedmetadata', els.audio._tempLoaded);
+        els.audio.addEventListener('error', els.audio._tempError);
+        els.audio.load();
+      });
+    }
+
+    async function playCurrent() {
       const song = items[currentIndex];
       const path = CONFIG.mp3Folder + song.file;
       els.audio.src = path;
       els.audio.volume = isMuted ? 0 : currentVolume;
+      els.status.textContent = "Cargando canción...";
 
-      els.audio.load();
-
-      els.audio.oncanplay = () => {
-        safePlay().then(() => {
-          isPlaying = true;
-          isPaused = false;
-          els.pauseBtn.textContent = 'Pausar';
-          els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-          connectAudioToOscilloscope();
-          els.audio.oncanplay = null;
-        }).catch(err => {
-          console.error("Error al reproducir:", err);
-          els.status.textContent = "Error al reproducir";
-        });
-      };
-
-      els.audio.onerror = () => {
-        console.error("Error cargando:", path);
-        els.status.textContent = "Canción no encontrada";
-        els.audio.oncanplay = null;
+      try {
+        await waitForLoad();  // Espera a que se cargue
+        await safePlay();     // Ahora reproduce
+        isPlaying = true;
+        isPaused = false;
+        els.pauseBtn.textContent = 'Pausar';
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        connectAudioToOscilloscope();  // Conecta después del play
+      } catch (err) {
+        console.error("Error en playCurrent:", err);
+        els.status.textContent = "Error: saltando canción...";
+        // Salta a la siguiente automáticamente
         setTimeout(() => {
           currentIndex = (currentIndex + 1) % items.length;
           updateNowPlaying();
           playCurrent();
-        }, 1000);
-      };
+        }, 500);
+      }
     }
 
     function loadAndPlayNext() {
-      if (!items.length || !isPlaying) return;
+      if (!items.length) return;
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
       playCurrent();
@@ -437,7 +451,7 @@
 
     function setVolume(value) {
       currentVolume = value;
-      if (!isMuted) els.audio.volume = value;
+      if (!isMuted && isPlaying) els.audio.volume = value;
       updateVolumeUI();
     }
 
@@ -462,22 +476,4 @@
       const percent = getVolumeFromEvent(e);
       setVolume(percent);
     };
-    document.addEventListener('mousemove', moveHandler);
-    document.addEventListener('touchmove', moveHandler);
-
-    const endHandler = () => { isDragging = false; };
-    document.addEventListener('mouseup', endHandler);
-    document.addEventListener('touchend', endHandler);
-
-    els.pauseBtn.addEventListener('click', () => {
-      if (!isPlaying) return;
-      if (isPaused) {
-        safePlay();
-        els.pauseBtn.textContent = 'Pausar';
-        isPaused = false;
-        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-      } else {
-        els.audio.pause();
-        els.pauseBtn.textContent = 'Play';
-        isPaused = true;
-        els.status.textContent = "Pausa
+    
