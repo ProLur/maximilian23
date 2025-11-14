@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Radio Maximilian 23 - Emisora escolar CEIP Juan XXIII</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Radio Maximilian 23 - CEIP Juan XXIII</title>
   <!-- SEO -->
   <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII. Emisión 24/7 con MP3 locales." />
   <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, música alumnos, radio online 24/7" />
@@ -19,12 +19,15 @@
   <style>
     :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: "Courier New", monospace; }
+    html, body { 
+      height: 100%; font-family: "Courier New", monospace; 
+      -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+    }
     body {
       background: var(--bg); color: var(--glow); text-align: center;
       display: flex; flex-direction: column; justify-content: center;
       padding: 16px; overflow: hidden; position: relative;
-      touch-action: pan-y; /* Permite scroll vertical */
+      touch-action: pan-y;
     }
     body::before {
       content: ""; position: fixed; top: 50%; left: 50%;
@@ -35,115 +38,139 @@
     }
     @keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    .logo-container { margin-bottom: 12px; }
+    .logo-container { margin-bottom: 16px; }
     .logo {
-      width: 34vw; max-width: 130px; height: auto; display: block; margin: 0 auto;
-      filter: drop-shadow(0 0 10px var(--glow)); cursor: pointer;
+      width: 38vw; max-width: 120px; height: auto; display: block; margin: 0 auto;
+      filter: drop-shadow(0 0 12px var(--glow)); cursor: pointer;
       transition: transform 0.2s;
     }
-    .logo:hover { transform: scale(1.05); }
+    .logo:hover, .logo:active { transform: scale(1.08); }
     .glow-normal {
-      filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow));
+      filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow));
       animation: pulse-normal 3s ease-in-out infinite;
     }
     .glow-intenso {
-      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc);
+      filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc);
       animation: pulse-intenso 1.2s ease-in-out infinite;
     }
     @keyframes pulse-normal {
-      0%, 100% { filter: drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 20px var(--glow)); }
-      50% { filter: drop-shadow(0 0 15px var(--glow)) drop-shadow(0 0 30px var(--glow)); }
+      0%, 100% { filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow)); }
+      50% { filter: drop-shadow(0 0 18px var(--glow)) drop-shadow(0 0 36px var(--glow)); }
     }
     @keyframes pulse-intenso {
-      0%, 100% { filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc); }
-      50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px #00ffcc); }
+      0%, 100% { filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc); }
+      50% { filter: drop-shadow(0 0 36px var(--glow)) drop-shadow(0 0 72px var(--glow)) drop-shadow(0 0 108px #00ffcc); }
     }
 
-    h1 { font-size: clamp(1.6rem, 5.5vw, 2.2rem); margin: 0 0 14px; text-shadow: 0 0 6px var(--glow); line-height: 1.1; }
+    h1 { 
+      font-size: clamp(1.8rem, 7vw, 2.4rem); margin: 0 0 18px; 
+      text-shadow: 0 0 8px var(--glow); line-height: 1.1; 
+    }
 
     .terminal-box {
-      border: 1px solid var(--glow); padding: 14px; width: 100%; max-width: 380px; margin: 0 auto;
-      border-radius: 8px; box-shadow: 0 0 10px var(--glow), inset 0 0 6px rgba(0,255,114,0.1);
-      background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      border: 2px solid var(--glow); padding: 18px; width: 100%; max-width: 360px; margin: 0 auto;
+      border-radius: 12px; box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15);
+      background: rgba(0, 20, 0, 0.8); backdrop-filter: blur(4px);
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
     }
 
-    #oscilograma { width: 100%; height: 50px; display: block; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
+    #oscilograma { 
+      width: 100%; height: 70px; display: block; image-rendering: pixelated; 
+      background: rgba(0,20,0,0.7); border-radius: 6px; 
+    }
 
     .volume-horizontal {
-      width: 100%; max-width: 280px; height: 26px; display: flex; align-items: center; justify-content: center;
+      width: 100%; max-width: 300px; height: 32px; display: flex; align-items: center; justify-content: center;
     }
     .volume-track-h {
-      width: 100%; height: 5px; background: rgba(0,255,114,0.2); border-radius: 2.5px; position: relative; overflow: hidden; cursor: pointer;
+      width: 100%; height: 7px; background: rgba(0,255,114,0.25); border-radius: 3.5px; 
+      position: relative; overflow: hidden; cursor: pointer;
     }
     .volume-fill-h {
       height: 100%; background: var(--glow); position: absolute; left: 0; top: 0;
-      border-radius: 2.5px; box-shadow: 0 0 6px var(--glow); transition: width 0.1s ease;
+      border-radius: 3.5px; box-shadow: 0 0 10px var(--glow); transition: width 0.1s ease;
     }
     .volume-knob-h {
-      width: 15px; height: 15px; background: var(--glow); border: 2px solid #001400;
+      width: 20px; height: 20px; background: var(--glow); border: 3px solid #001400;
       border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);
-      left: 100%; margin-left: -7.5px; box-shadow: 0 0 10px var(--glow), 0 0 16px #00ffcc;
+      left: 100%; margin-left: -10px; box-shadow: 0 0 14px var(--glow), 0 0 24px #00ffcc;
       cursor: grab; transition: transform 0.1s ease;
     }
-    .volume-knob-h:active { cursor: grabbing; transform: translateY(-50%) scale(1.2); }
+    .volume-knob-h:active { cursor: grabbing; transform: translateY(-50%) scale(1.3); }
 
     .listener-status { 
-      font-size: 0.82rem; padding: 6px 10px; background: rgba(0, 255, 114, 0.1); 
-      border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); 
-      animation: pulse 2s infinite; width: 100%; max-width: 300px;
+      font-size: 0.95rem; padding: 10px 14px; background: rgba(0, 255, 114, 0.15); 
+      border: 1.5px solid var(--glow); border-radius: 8px; text-shadow: 0 0 5px var(--glow); 
+      animation: pulse 2s infinite; width: 100%; max-width: 320px;
     }
     .now-playing { 
-      font-size: 0.8rem; padding: 6px 10px; background: rgba(0, 20, 0, 0.8); 
-      border: 1px dashed var(--glow); border-radius: 4px; min-height: 2em; line-height: 1.2; 
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; max-width: 300px;
+      font-size: 0.92rem; padding: 10px 14px; background: rgba(0, 20, 0, 0.9); 
+      border: 1.5px dashed var(--glow); border-radius: 8px; min-height: 2.4em; line-height: 1.3; 
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; max-width: 320px;
     }
-    .now-playing strong { color: #00ff72; text-shadow: 0 0 5px; }
-    .status { font-size: 0.75rem; opacity: 0.8; min-height: 1.1em; }
+    .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
+    .status { font-size: 0.85rem; opacity: 0.9; min-height: 1.3em; }
 
-    @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+    @keyframes pulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
 
     button {
-      background: var(--dark); border: 1px solid var(--glow); color: var(--glow);
-      padding: 10px 12px; border-radius: 6px; font-size: 0.88rem; font-weight: bold;
-      cursor: pointer; transition: all 0.2s ease; flex: 1; max-width: 110px;
+      background: var(--dark); border: 1.5px solid var(--glow); color: var(--glow);
+      padding: 14px 16px; border-radius: 10px; font-size: 1rem; font-weight: bold;
+      cursor: pointer; transition: all 0.2s ease; flex: 1; min-height: 48px;
+      touch-action: manipulation;
     }
-    button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 6px var(--glow); }
-    button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:hover, button:active { 
+      background: rgba(0, 255, 114, 0.15); box-shadow: 0 0 10px var(--glow); 
+    }
+    button:active { background: var(--glow); color: var(--bg); transform: scale(0.96); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* BOTÓN INICIAR: TAMAÑO FIJO */
+    /* BOTÓN INICIAR: TAMAÑO FIJO Y GRANDE */
     #startBtn { 
-      margin-top: 4px; padding: 10px 16px; font-size: 0.9rem; 
-      width: 100%; max-width: 220px; 
+      margin-top: 6px; padding: 14px 20px; font-size: 1.05rem; 
+      width: 100%; max-width: 260px; min-height: 52px;
     }
 
-    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 6px; width: 100%; max-width: 300px; }
+    .btn-group { 
+      display: flex; gap: 12px; justify-content: center; margin-top: 8px; 
+      width: 100%; max-width: 320px;
+    }
 
     .note {
-      margin-top: 16px; font-size: 0.7rem; opacity: 0.7;
-      max-width: 380px; margin-left: auto; margin-right: auto; line-height: 1.3;
+      margin-top: 20px; font-size: 0.78rem; opacity: 0.8;
+      max-width: 360px; margin-left: auto; margin-right: auto; line-height: 1.4;
     }
+
+    /* PULL TO REFRESH INDICATOR */
+    .pull-indicator {
+      position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--glow); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
+      z-index: 1000; pointer-events: none;
+    }
+    .pull-indicator.show { opacity: 1; }
 
     @media (max-width: 480px) {
       body { padding: 12px; }
-      .terminal-box { padding: 12px; max-width: 340px; gap: 8px; }
-      .logo { width: 32vw; max-width: 110px; }
-      h1 { font-size: clamp(1.4rem, 5vw, 1.9rem); margin-bottom: 12px; }
-      #oscilograma { height: 45px; }
-      .volume-horizontal { max-width: 240px; height: 24px; }
-      .volume-track-h { height: 4px; }
-      .volume-knob-h { width: 13px; height: 13px; margin-left: -6.5px; }
-      button { font-size: 0.82rem; padding: 9px 10px; }
-      .btn-group { gap: 6px; max-width: 260px; }
-      #startBtn { max-width: 200px; }
-      .listener-status, .now-playing { max-width: 260px; font-size: 0.76rem; padding: 5px 8px; }
-      .status { font-size: 0.7rem; }
-      .note { margin-top: 14px; font-size: 0.65rem; }
+      .terminal-box { padding: 16px; max-width: 340px; gap: 12px; }
+      .logo { width: 36vw; max-width: 110px; }
+      h1 { font-size: clamp(1.7rem, 6.5vw, 2.2rem); margin-bottom: 16px; }
+      #oscilograma { height: 65px; }
+      .volume-horizontal { max-width: 280px; height: 30px; }
+      .volume-track-h { height: 6px; }
+      .volume-knob-h { width: 18px; height: 18px; margin-left: -9px; }
+      button { font-size: 0.95rem; padding: 13px 15px; }
+      .btn-group { gap: 10px; max-width: 300px; }
+      #start высокойBtn { max-width: 240px; font-size: 1rem; }
+      .listener-status, .now-playing { max-width: 300px; font-size: 0.88rem; padding: 9px 12px; }
+      .status { font-size: 0.8rem; }
+      .note { margin-top: 18px; font-size: 0.74rem; }
     }
   </style>
 </head>
 <body>
+  <div class="pull-indicator" id="pullIndicator">Desliza para recargar</div>
+
   <audio id="beep" preload="auto"><source src="beep.mp3" type="audio/mpeg"></audio>
   <audio id="audioPlayer" preload="auto"></audio>
 
@@ -215,7 +242,8 @@
       radioLogo: document.getElementById('radioLogo'),
       volumeTrack: document.getElementById('volumeTrack'),
       volumeFill: document.getElementById('volumeFill'),
-      volumeKnob: document.getElementById('volumeKnob')
+      volumeKnob: document.getElementById('volumeKnob'),
+      pullIndicator: document.getElementById('pullIndicator')
     };
 
     let items = [], currentIndex = 0, songCount = 0;
@@ -224,7 +252,7 @@
     let isPaused = false, isMuted = false;
     let currentVolume = 1.0;
 
-    // === REFRESH AL DESLIZAR HACIA ABAJO (Pull to Refresh) ===
+    // === PULL TO REFRESH CON INDICADOR ===
     let touchStartY = 0;
     let isPulling = false;
 
@@ -240,20 +268,23 @@
       const touchY = e.touches[0].clientY;
       const pullDistance = touchY - touchStartY;
 
-      if (pullDistance > 120 && window.scrollY === 0) {
-        document.body.style.transition = 'transform 0.3s ease';
+      if (pullDistance > 0 && window.scrollY === 0) {
+        e.preventDefault();
+        const progress = Math.min(pullDistance / 150, 1);
         document.body.style.transform = `translateY(${pullDistance / 3}px)`;
+        els.pullIndicator.classList.toggle('show', progress > 0.3);
       }
     });
 
     window.addEventListener('touchend', () => {
-      if (isPulling && document.body.style.transform) {
-        const wasPulled = parseInt(document.body.style.transform.match(/-?\d+/)[0]) > 100;
-        document.body.style.transition = 'transform 0.3s ease';
+      if (isPulling) {
+        const wasPulled = parseInt(document.body.style.transform?.match(/-?\d+/)?.[0] || 0) > 100;
+        document.body.style.transition = 'transform 0.4s ease';
         document.body.style.transform = 'translateY(0)';
+        els.pullIndicator.classList.remove('show');
 
         if (wasPulled) {
-          setTimeout(() => location.reload(), 300);
+          setTimeout(() => location.reload(), 400);
         }
       }
       isPulling = false;
@@ -376,6 +407,8 @@
 
     let isDragging = false;
     els.volumeKnob.addEventListener('mousedown', () => { isDragging = true; });
+    els.volumeKnob.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
+
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       const rect = els.volumeTrack.getBoundingClientRect();
@@ -384,9 +417,7 @@
       const percent = Math.max(0, Math.min(1, x / width));
       setVolume(percent);
     });
-    document.addEventListener('mouseup', () => { isDragging = false; });
 
-    els.volumeTrack.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
     document.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       const touch = e.touches[0];
@@ -396,6 +427,8 @@
       const percent = Math.max(0, Math.min(1, x / width));
       setVolume(percent);
     });
+
+    document.addEventListener('mouseup', () => { isDragging = false; });
     document.addEventListener('touchend', () => { isDragging = false; });
 
     els.pauseBtn.addEventListener('click', () => {
@@ -448,16 +481,16 @@
       const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
       const w = canvas.offsetWidth;
-      const h = 50;
+      const h = 70;
 
       function draw() {
         requestAnimationFrame(draw);
         analyser.getByteTimeDomainData(dataArray);
-        ctx.fillStyle = 'rgba(0, 20, 0, 0.6)';
+        ctx.fillStyle = 'rgba(0, 20, 0, 0.7)';
         ctx.fillRect(0, 0, w, h);
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
         ctx.strokeStyle = 'var(--glow)';
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 12;
         ctx.shadowColor = '#00ff72';
         ctx.beginPath();
 
