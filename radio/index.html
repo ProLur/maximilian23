@@ -667,8 +667,11 @@
         const sliceWidth = w / bufferLength;
         let x = 0;
         for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = v * h / 2;
+          // AMPLIFICACIÓN + SUAVIZADO + SENSIBILIDAD
+      const raw = dataArray[i] / 128.0;
+      const amplified = raw > 1 ? (raw - 1) * 2 + 1 : raw; // amplifica picos
+      const v = (amplified - 1) * 2.5 + 1; // centrado + ganancia
+      const y = (v * h) / 2;
           i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
           x += sliceWidth;
         }
