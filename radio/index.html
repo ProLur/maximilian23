@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radio Maximilian 23 - Emisora escolar CEIP Juan XXIII</title>
   <!-- SEO -->
-  <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII donde podemos oír las audiciones de la asignatura de música. Emisión 24/7 con interpretaciones de los alumnos, clásicos y más, ahora con MP3 locales." />
-  <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, audiciones música, colegio Alicante, emisora infantil, música alumnos, radio online 24/7" />
+  <meta name="description" content="Radio Maximilian 23 es la emisora del colegio CEIP Juan XXIII. Emisión 24/7 con MP3 locales." />
+  <meta name="keywords" content="radio escolar, CEIP Juan XXIII, Radio Maximilian 23, música alumnos, radio online 24/7" />
   <meta name="author" content="Manuel - CEIP Juan XXIII" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
@@ -70,7 +70,7 @@
       transition: all 0.2s ease; font-weight: bold;
     }
     button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
-    button:active {OBILE background: var(--glow); color: var(--bg); transform: scale(0.98); }
+    button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     #startBtn { margin-top: 12px; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
@@ -94,7 +94,7 @@
     <canvas id="oscilograma"></canvas>
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
-    <div class="status" id="error">Cargando frecuencia...</div>
+    <div class="status" id="status">Cargando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
     <div class="btn-group" id="controls" style="display:none;">
@@ -103,6 +103,9 @@
     </div>
   </div>
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
+
+  <!-- DEBUG EN VIVO -->
+  <div id="debug" style="position:fixed; bottom:10px; left:10px; background:#000; color:#0f0; padding:8px; font-size:11px; border:1px solid #0f0; max-width:400px; z-index:999; display:none;"></div>
 
   <script>
     const PHRASES = {
@@ -123,7 +126,7 @@
     const CONFIG = {
       voiceRate: 0.75, voicePitch: 0.3, voiceVolume: 1.0,
       announcementInterval: 4, hourAnnounce: true, beepBeforeVoice: true,
-      mp3Folder: 'canciones/'  // ← CARPETA DE TUS MP3
+      mp3Folder: 'canciones/'  // Asegúrate de que exista esta carpeta
     };
 
     const els = {
@@ -137,18 +140,24 @@
       beep: document.getElementById('beep'),
       canvas: document.getElementById('oscilograma'),
       nowPlaying: document.getElementById('nowPlaying'),
-      radioLogo: document.getElementById('radioLogo')
+      radioLogo: document.getElementById('radioLogo'),
+      debug: document.getElementById('debug')
     };
 
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, analyser = null, source = null, lastHour = -1;
 
+    // === DEBUG EN VIVO ===
+    els.debug.style.display = 'block';
+    els.debug.innerHTML = 'Iniciando...';
+
     // === CARGAR PLAYLIST ===
     async function loadPlaylists() {
+      els.debug.innerHTML = 'Cargando playlists.txt...';
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
-        if (!res.ok) throw new Error('No se pudo cargar playlists.txt');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const text = await res.text();
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
         items = lines.map(line => {
@@ -157,12 +166,13 @@
           const title = parts.slice(1).join(' - ').trim() || file;
           return { file, title };
         }).filter(i => i.file.endsWith('.mp3'));
-        if (items.length === 0) throw new Error('No hay canciones válidas');
+
+        els.debug.innerHTML = `OK: ${items.length} canciones cargadas`;
+        if (items.length === 0) throw new Error('No hay MP3 válidos');
       } catch (err) {
-        console.warn('Error en playlists.txt:', err);
-        items = [
-          { file: 'ejemplo.mp3', title: 'Canción de ejemplo' }
-        ];
+        els.debug.innerHTML = `<span style="color:#f00;">ERROR: ${err.message}</span>`;
+        console.error(err);
+        items = [{ file: 'test.mp3', title: 'Canción de prueba' }];
       }
       preloadFirstSong();
     }
@@ -174,8 +184,15 @@
       }
       currentIndex = Math.floor(Math.random() * items.length);
       updateNowPlaying();
-      els.status.textContent = "Frecuencia lista. Pulsa Iniciar Emisión.";
+      els.status.textContent = "Frecuencia lista. ¡Pulsa Iniciar Emisión!";
+
+      // ACTIVAR BOTÓN SIEMPRE
       els.startBtn.disabled = false;
+      els.startBtn.style.opacity = '1';
+      els.startBtn.style.cursor = 'pointer';
+      els.startBtn.style.pointerEvents = 'auto';
+
+      els.debug.innerHTML += `<br>Canción lista: <strong>${items[currentIndex].title}</strong>`;
     }
 
     function playCurrent() {
@@ -183,15 +200,22 @@
       const path = CONFIG.mp3Folder + song.file;
       els.audio.src = path;
       els.audio.load();
-      els.audio.play().then(() => {
-        els.status.textContent = "Emisión en directo";
-        isPlaying = true;
-        connectAudioToOscilloscope();
-      }).catch(err => {
-        els.status.textContent = "Error: MP3 no encontrado";
-        console.error("Error reproduciendo:", path, err);
-        setTimeout(loadAndPlayNext, 2000);
-      });
+
+      els.debug.innerHTML = `Reproduciendo:<br><a href="${path}" target="_blank" style="color:#0f0;">${path}</a>`;
+
+      const playPromise = els.audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            els.status.textContent = "Emisión en directo";
+            isPlaying = true;
+            connectAudioToOscilloscope();
+          })
+          .catch(err => {
+            els.status.textContent = "Pulsa 'Iniciar Emisión' para activar sonido";
+            els.debug.innerHTML += `<br><span style="color:#f00;">Bloqueado: ${err.message}</span>`;
+          });
+      }
     }
 
     function loadAndPlayNext() {
@@ -220,8 +244,11 @@
         analyser.fftSize = 256;
       }
 
-      playCurrent();
-      speak(PHRASES.start);
+      // Desbloquear audio con interacción
+      audioContext.resume().then(() => {
+        playCurrent();
+        speak(PHRASES.start);
+      });
 
       setInterval(() => {
         if (Math.random() < 0.03) { songCount++; playAnnouncement(); }
@@ -236,9 +263,7 @@
         source.connect(analyser);
         analyser.connect(audioContext.destination);
         drawOscilloscope();
-      } catch (e) {
-        console.warn("No se pudo conectar audio al oscilograma");
-      }
+      } catch (e) { console.warn("No se pudo conectar oscilograma"); }
     }
 
     function drawOscilloscope() {
@@ -315,6 +340,9 @@
 
     // === EVENTOS ===
     els.audio.addEventListener('ended', loadAndPlayNext);
+    els.audio.addEventListener('error', () => {
+      els.debug.innerHTML += `<br><span style="color:#f00;">ERROR: MP3 no encontrado o corrupto</span>`;
+    });
 
     els.startBtn.addEventListener('click', () => {
       voiceEnabled = true;
@@ -347,7 +375,7 @@
       }, 3000);
     });
 
-    // === OSCILOGRAMA DE RESPALDO (si no hay audio) ===
+    // === OSCILOGRAMA DE FONDO ===
     function initOscilloscopeFallback() {
       const canvas = els.canvas;
       const ctx = canvas.getContext('2d');
@@ -387,7 +415,7 @@
     // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
-      initOscilloscopeFallback(); // Animación de fondo
+      initOscilloscopeFallback();
       await loadPlaylists();
     });
   </script>
