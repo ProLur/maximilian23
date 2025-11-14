@@ -62,7 +62,7 @@
       border-radius: 8px; box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
       background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
     }
-    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; }
+    #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
     .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
     button {
       flex: 1; max-width: 130px; background: var(--dark); border: 1px solid var(--glow); color: var(--glow);
@@ -146,6 +146,7 @@
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, analyser = null, source = null, lastHour = -1;
     let isPaused = false;
+    let isMuted = false; // <-- Estado del mute
 
     // === CARGAR PLAYLIST ===
     async function loadPlaylists() {
@@ -194,6 +195,8 @@
             els.status.textContent = "Emisión en directo";
             isPlaying = true;
             isPaused = false;
+            isMuted = false;
+            els.muteBtn.textContent = 'Mute';
             els.pauseBtn.textContent = 'Pausar';
             connectAudioToOscilloscope();
           })
@@ -248,7 +251,7 @@
         els.audio.play();
         els.pauseBtn.textContent = 'Pausar';
         isPaused = false;
-        els.status.textContent = "Emisión en directo";
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
       } else {
         els.audio.pause();
         els.pauseBtn.textContent = 'Play';
@@ -257,7 +260,26 @@
       }
     });
 
-    // === OSCILOGRAMA REAL ===
+    // === MUTE / UNMUTE (100% CORREGIDO) ===
+    els.muteBtn.addEventListener('click', () => {
+      if (!isPlaying) return;
+
+      if (isMuted) {
+        els.audio.volume = 1.0;
+        els.muteBtn.textContent = 'Mute';
+        isMuted = false;
+        els.status.textContent = isPaused ? "Pausado" : "Emisión en directo";
+        speak(PHRASES.unmute);
+      } else {
+        els.audio.volume = 0;
+        els.muteBtn.textContent = 'Unmute';
+        isMuted = true;
+        els.status.textContent = "Silenciado";
+        speak(PHRASES.mute);
+      }
+    });
+
+    // === OSCILOGRAMA REAL (SOLO CUANDO HAY AUDIO) ===
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
       try {
@@ -307,7 +329,6 @@
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
-      els.audio.volume = 0.15;
       const utter = new SpeechSynthesisUtterance(text);
       const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('es')) || speechSynthesis.getVoices()[0];
       utter.voice = voice;
@@ -320,7 +341,6 @@
       }
       utter.onend = () => {
         isSpeaking = false;
-        els.audio.volume = 1.0;
         cb?.();
       };
       speechSynthesis.cancel();
@@ -348,20 +368,6 @@
       startPlayback();
     });
 
-    els.muteBtn.addEventListener('click', () => {
-      if (els.audio.volume > 0) {
-        els.audio.volume = 0;
-        els.muteBtn.textContent = 'Unmute';
-        els.status.textContent = "Sonido silenciado";
-        speak(PHRASES.mute);
-      } else {
-        els.audio.volume = 1.0;
-        els.muteBtn.textContent = 'Mute';
-        els.status.textContent = "Volumen restaurado";
-        speak(PHRASES.unmute);
-      }
-    });
-
     els.nextBtn.addEventListener('click', loadAndPlayNext);
 
     els.radioLogo.addEventListener('click', () => {
@@ -374,48 +380,11 @@
       }, 3000);
     });
 
-    // === OSCILOGRAMA DE FONDO ===
-    function initOscilloscopeFallback() {
-      const canvas = els.canvas;
-      const ctx = canvas.getContext('2d');
-      function resize() {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.offsetWidth * dpr;
-        canvas.height = 60 * dpr;
-        canvas.style.height = '60px';
-        ctx.scale(dpr, dpr);
-      }
-      resize();
-      window.addEventListener('resize', resize);
-      let t = 0;
-      function draw() {
-        const w = canvas.offsetWidth;
-        const h = 60;
-        ctx.fillStyle = 'rgba(0, 20, 0, 0.6)';
-        ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = 'var(--glow)';
-        ctx.lineWidth = 2.5;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#00ff72';
-        ctx.beginPath();
-        t += 0.8;
-        for (let x = 0; x <= w; x += 2) {
-          const phase = (x / w) * Math.PI * 4 + t * 0.02;
-          const amp = Math.sin(phase) * 18 + Math.sin(phase * 1.7) * 10 + Math.sin(t * 0.05) * 5;
-          ctx.lineTo(x, h / 2 + amp);
-        }
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        requestAnimationFrame(draw);
-      }
-      draw();
-    }
-
-    // === INICIO ===
+    // === INICIO (SIN OSCILOGRAMA DE FONDO) ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
-      initOscilloscopeFallback();
       await loadPlaylists();
+      // NO LLAMAR A initOscilloscopeFallback() → ¡ELIMINADO!
     });
   </script>
 </body>
