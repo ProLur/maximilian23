@@ -13,7 +13,7 @@
   <link rel="canonical" href="https://tudominio.com/radio-maximilian-23" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Radio Maximilian 23 - Emisera del CEIP Juan XXIII" />
+  <meta property="og:title" content="Radio Maximilian 23 - Emisora del CEIP Juan XXIII" />
   <meta property="og:description" content="Escucha las audiciones de música del colegio CEIP Juan XXIII en Radio Maximilian 23. Emisión continua 24/7." />
   <meta property="og:image" content="https://tudominio.com/max2.png" />
   <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
@@ -53,7 +53,7 @@
       align-items: center;
       padding: 8px 16px;
       min-height: 100vh;
-      overflow: hidden;
+      overflow-y: auto; /* ¡AHORA PERMITE SCROLL! */
       position: relative;
       touch-action: pan-y pinch-zoom;
       transition: transform 0.4s ease;
@@ -143,7 +143,7 @@
       flex-direction: column;
       align-items: center;
       gap: 14px;
-      /* QUITADO flex: 1 → ahora el footer no se pierde */
+      flex-grow: 0; /* No crece más de lo necesario */
     }
 
     #oscilograma {
@@ -309,7 +309,7 @@
     }
 
     button:hover, button:active {
-     组成部分: rgba(0, 255, 114, 0.15);
+      background: rgba(0, 255, 114, 0.15);
       box-shadow: 0 0 10px var(--glow);
     }
 
@@ -343,12 +343,13 @@
     }
 
     .note {
-      margin: 16px 0 8px;
+      margin: 16px 0 12px;
       font-size: 0.78rem;
       opacity: 0.8;
       max-width: 360px;
       line-height: 1.4;
-      flex-shrink: 0; /* Evita que se comprima */
+      flex-shrink: 0;
+      margin-top: auto; /* ¡EMPuja al final! */
     }
 
     .pull-indicator {
@@ -389,7 +390,7 @@
       #startBtn { max-width: 240px; font-size: 1rem; }
       .listener-status, .now-playing { max-width: 300px; font-size: 0.88rem; padding: 9px 12px; }
       .status { font-size: 0.8rem; }
-      .note { margin: 14px 0 6px; font-size: 0.74rem; }
+      .note { margin: 14px 0 10px; font-size: 0.74rem; }
     }
   </style>
 </head>
@@ -400,7 +401,7 @@
   <!-- Audio principal -->
   <audio id="audioPlayer" preload="metadata"></audio>
 
-  <!-- Logo con espacio para antena -->
+  <!-- Logo con antena -->
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
   </div>
@@ -432,7 +433,7 @@
     </div>
   </div>
 
-  <!-- Footer siempre visible -->
+  <!-- Footer SIEMPRE VISIBLE -->
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
 
   <script>
