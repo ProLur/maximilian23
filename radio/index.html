@@ -43,14 +43,17 @@
     .logo {
       width: 38vw; max-width: 120px; height: auto; display: block; margin: 0 auto;
       filter: drop-shadow(0 0 12px var(--glow)); cursor: pointer;
-      transition: filter 0.3s ease, transform 0.2s;
+      transition: transform 0.2s;
     }
     .logo:hover, .logo:active { transform: scale(1.08); }
-
-    /* === BRILLO DINÁMICO DEL LOGO === */
-    .glow-normal { filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow)); }
-    .glow-intenso { filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc); }
-
+    .glow-normal {
+      filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow));
+      animation: pulse-normal 3s ease-in-out infinite;
+    }
+    .glow-intenso {
+      filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc);
+      animation: pulse-intenso 1.2s ease-in-out infinite;
+    }
     @keyframes pulse-normal {
       0%, 100% { filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow)); }
       50% { filter: drop-shadow(0 0 18px var(--glow)) drop-shadow(0 0 36px var(--glow)); }
@@ -59,7 +62,6 @@
       0%, 100% { filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc); }
       50% { filter: drop-shadow(0 0 36px var(--glow)) drop-shadow(0 0 72px var(--glow)) drop-shadow(0 0 108px #00ffcc); }
     }
-
     h1 {
       font-size: clamp(1.8rem, 7vw, 2.4rem); margin: 0 0 18px;
       text-shadow: 0 0 8px var(--glow); line-height: 1.1;
@@ -75,10 +77,10 @@
       background: rgba(0,20,0,0.7); border-radius: 6px;
     }
 
-    /* === VOLUMEN: HEBILLA POR FUERA === */
+    /* === VOLUMEN TIPO HEBILLA DE CINTURÓN === */
     .volume-horizontal {
       width: 100%; max-width: 300px; height: 50px; display: flex; align-items: center; justify-content: center;
-      padding: 0 18px; position: relative;
+      padding: 0 10px;
     }
     .volume-track-h {
       width: 100%; height: 18px; background: var(--leather);
@@ -100,30 +102,29 @@
       transition: width 0.15s ease;
     }
     .volume-knob-h {
-      width: 40px; height: 40px; 
+      width: 36px; height: 36px; 
       background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00);
       border: 3px solid #00ff72;
-      border-radius: 50%; 
-      position: absolute; top: 50%; left: 0;
-      transform: translate(-50%, -50%);
+      border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);
+      left: 100%; margin-left: -18px;
       box-shadow: 
         0 0 20px var(--glow), 
         0 0 30px #00ffcc,
         inset 0 0 8px rgba(0,0,0,0.8);
       cursor: grab;
-      transition: left 0.15s ease, transform 0.15s ease, box-shadow 0.2s;
-      z-index: 20;
+      transition: transform 0.15s ease, box-shadow 0.2s;
+      z-index: 10;
     }
     .volume-knob-h::before {
       content: ''; position: absolute; top: 50%; left: 50%;
-      width: 14px; height: 14px; background: #001400;
+      width: 12px; height: 12px; background: #001400;
       border: 2px solid #004d00; border-radius: 50%;
       transform: translate(-50%, -50%);
       box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
     }
     .volume-knob-h:active {
-      cursor: grabbing; transform: translate(-50%, -50%) scale(1.2);
-      box-shadow: 0 0 35px #00ffcc, 0 0 45px #00ff72;
+      cursor: grabbing; transform: translateY(-50%) scale(1.2);
+      box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72;
     }
 
     .listener-status {
@@ -175,9 +176,9 @@
       .logo { width: 36vw; max-width: 110px; }
       h1 { font-size: clamp(1.7rem, 6.5vw, 2.2rem); margin-bottom: 16px; }
       #oscilograma { height: 65px; }
-      .volume-horizontal { max-width: 280px; height: 46px; padding: 0 16px; }
-      .volume-knob-h { width: 36px; height: 36px; }
-      .volume-knob-h::before { width: 12px; height: 12px; }
+      .volume-horizontal { max-width: 280px; height: 46px; }
+      .volume-knob-h { width: 32px; height: 32px; margin-left: -16px; }
+      .volume-knob-h::before { width: 10px; height: 10px; }
       button { font-size: 0.95rem; padding: 13px 15px; }
       .btn-group { gap: 10px; max-width: 300px; }
       #startBtn { max-width: 240px; font-size: 1rem; }
@@ -198,12 +199,12 @@
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
     
-    <!-- VOLUMEN: HEBILLA POR FUERA -->
+    <!-- VOLUMEN CON HEBILLA -->
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
+        <div class="volume-knob-h" id="volumeKnob"></div>
       </div>
-      <div class="volume-knob-h" id="volumeKnob"></div>
     </div>
 
     <div class="listener-status">Estado de la emisora: Correcto</div>
@@ -394,36 +395,10 @@
       }, 60000);
     }
 
-    // === VOLUMEN + BRILLO DEL LOGO ===
     function updateVolumeUI() {
       const percent = isMuted ? 0 : currentVolume * 100;
       els.volumeFill.style.width = percent + '%';
-      
-      // Posicionar la hebilla POR FUERA
-      const trackRect = els.volumeTrack.getBoundingClientRect();
-      const knobSize = 40;
-      const leftPos = (percent / 100) * trackRect.width;
-      els.volumeKnob.style.left = `${leftPos}px`;
-
-      // === BRILLO DEL LOGO SEGÚN VOLUMEN ===
-      const intensity = isMuted ? 0 : currentVolume;
-      const baseGlow = 8 + (intensity * 16);    // 8px → 24px
-      const outerGlow = 16 + (intensity * 56);  // 16px → 72px
-      const color = intensity > 0.7 ? '#00ffcc' : var(--glow);
-
-      els.radioLogo.style.filter = `
-        drop-shadow(0 0 ${baseGlow}px var(--glow))
-        drop-shadow(0 0 ${outerGlow}px ${color})
-      `;
-
-      // Animación de pulso más intensa con volumen alto
-      if (intensity > 0.6) {
-        els.radioLogo.classList.add('glow-intenso');
-        els.radioLogo.style.animation = 'pulse-intenso 1.2s ease-in-out infinite';
-      } else {
-        els.radioLogo.classList.remove('glow-intenso');
-        els.radioLogo.style.animation = 'pulse-normal 3s ease-in-out infinite';
-      }
+      els.volumeKnob.style.left = percent + '%';
     }
 
     function setVolume(value) {
@@ -444,7 +419,6 @@
     let isDragging = false;
     els.volumeKnob.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; });
     els.volumeKnob.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
-
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       const rect = els.volumeTrack.getBoundingClientRect();
@@ -453,7 +427,6 @@
       const percent = Math.max(0, Math.min(1, x / width));
       setVolume(percent);
     });
-
     document.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       const touch = e.touches[0];
@@ -463,11 +436,9 @@
       const percent = Math.max(0, Math.min(1, x / width));
       setVolume(percent);
     });
-
     document.addEventListener('mouseup', () => { isDragging = false; });
     document.addEventListener('touchend', () => { isDragging = false; });
 
-    // === CONTROLES ===
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
       if (isPaused) {
@@ -501,7 +472,6 @@
       updateVolumeUI();
     });
 
-    // === OSCILOGRAMA ===
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
       try {
@@ -546,7 +516,6 @@
       draw();
     }
 
-    // === VOZ ===
     function speak(text, cb) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return cb?.();
       isSpeaking = true;
@@ -578,7 +547,6 @@
       if (msg) setTimeout(() => speak(msg), 800);
     }
 
-    // === EVENTOS ===
     els.audio.addEventListener('ended', loadAndPlayNext);
     els.startBtn.addEventListener('click', () => { 
       voiceEnabled = true; 
@@ -590,14 +558,17 @@
     els.nextBtn.addEventListener('click', loadAndPlayNext);
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
-      logo.style.filter = 'drop-shadow(0 0 40px #00ffcc) drop-shadow(0 0 80px #00ff72)';
-      setTimeout(() => updateVolumeUI(), 3000);
+      logo.classList.remove('glow-normal');
+      logo.classList.add('glow-intenso');
+      setTimeout(() => {
+        logo.classList.remove('glow-intenso');
+        logo.classList.add('glow-normal');
+      }, 3000);
     });
 
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
       await loadPlaylists();
-      updateVolumeUI(); // Inicializar brillo
     });
   </script>
 </body>
