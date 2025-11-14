@@ -175,7 +175,7 @@
       height: 60px;
       display: block;
       image-rendering: pixelated;
-      background: rgba(0,20,0,0.7);
+      background: var(--bg);
       border-radius: 6px;
       flex-shrink: 0;
     }
@@ -294,6 +294,12 @@
       opacity: 0.9;
       min-height: 1.2em;
       font-size: 0.8rem;
+      transition: background 0.3s ease;
+    }
+    .status.warning {
+      background: rgba(255, 100, 0, 0.2);
+      border-color: #ff8800;
+      color: #ffcc00;
     }
     @keyframes pulse {
       0%, 100% { opacity: 0.85; }
@@ -412,6 +418,7 @@
     </div>
   </div>
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
+
   <script>
     const CONFIG = { mp3Folder: 'canciones/' };
     const els = {
@@ -437,6 +444,7 @@
     let currentVolume = 1.0;
     let touchStartY = 0, isPulling = false;
 
+    // Pull to refresh
     window.addEventListener('touchstart', (e) => {
       if (window.scrollY === 0) {
         touchStartY = e.touches[0].clientY;
@@ -469,18 +477,7 @@
       setTimeout(() => { els.pullRefresh.style.transition = ''; }, 500);
     });
 
-    let lastY = 0;
-    window.addEventListener('touchstart', (e) => {
-      lastY = e.touches[0].clientY;
-    });
-    window.addEventListener('touchmove', (e) => {
-      const currentY = e.touches[0].clientY;
-      if (currentY < lastY - 80) {
-        location.reload();
-      }
-      lastY = currentY;
-    });
-
+    // Cargar playlist
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
@@ -500,6 +497,7 @@
       }
       preloadFirstSong();
     }
+
     function preloadFirstSong() {
       if (!items.length) {
         els.status.textContent = "Error: No hay canciones";
@@ -512,56 +510,144 @@
       els.startBtn.style.opacity = '1';
       els.startBtn.style.cursor = 'pointer';
     }
-    async function safePlay() {
-      if (!audioContext) return;
-      if (audioContext.state === 'suspended') await audioContext.resume();
-      const playPromise = els.audio.play();
-      if (playPromise !== undefined) {
-        await playPromise.catch(err => {
-          console.warn("Autoplay bloqueado:", err);
-          els.status.textContent = "Toca para activar sonido";
-        });
-      }
-    }
-    function playCurrent() {
-      const song = items[currentIndex];
-      const path = CONFIG.mp3Folder + song.file;
-      els.audio.src = path;
-      els.audio.load();
-      els.audio.volume = isMuted ? 0 : currentVolume;
-      safePlay().then(() => {
-        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-        isPlaying = true;
-        isPaused = false;
-        els.pauseBtn.textContent = 'Pausar';
-        connectAudioToOscilloscope();
-      });
-    }
-    function loadAndPlayNext() {
-      if (!items.length || !isPlaying) return;
-      currentIndex = (currentIndex + 1) % items.length;
-      updateNowPlaying();
-      playCurrent();
-    }
+
     function updateNowPlaying() {
       const song = items[currentIndex];
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
+
     function startPlayback() {
       if (isPlaying) return;
       els.startBtn.style.display = 'none';
       els.controls.classList.add('visible');
       els.status.textContent = "Iniciando emisión...";
+
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.85;
       }
+
       audioContext.resume().then(() => {
         playCurrent();
         updateVolumeUI();
+      }).catch(() => {
+        els.status.textContent = "Toca para activar sonido";
       });
+    }
+
+    function playCurrent() {
+      const song = items[currentIndex];
+      const path = CONFIG.mp3Folder + song.file;
+      els.audio.src = path;
+      els.audio.load();
+      els.audio.volume = isMuted ? 0 : currentVolume;
+
+      const playPromise = els.audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+            isPlaying = true;
+            isPaused = false;
+            els.pauseBtn.textContent = 'Pausar';
+            connectAudioToOscilloscope();
+          })
+          .catch(err => {
+            console.warn("Reproducción bloqueada:", err);
+            els.status.textContent = "Toca para activar sonido";
+          });
+      }
+    }
+
+    function loadAndPlayNext() {
+      if (!items.length || !isPlaying) return;
+      currentIndex = (currentIndex + 1) % items.length;
+      updateNowPlaying();
+
+      const song = items[currentIndex];
+      const path = CONFIG.mp3Folder + song.file;
+      els.audio.src = path;
+      els.audio.load();
+
+      const playPromise = els.audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+            isPaused = false;
+            els.pauseBtn.textContent = 'Pausar';
+            connectAudioToOscilloscope();
+          })
+          .catch(() => {
+            els.status.textContent = "Toca 'Play' para continuar";
+            els.status.className = 'status warning';
+            els.pauseBtn.textContent = 'Play';
+            isPaused = true;
+            setTimeout(() => els.status.className = 'status', 3000);
+          });
+      }
+    }
+
+    function connectAudioToOscilloscope() {
+      if (source) source.disconnect();
+      try {
+        source = audioContext.createMediaElementSource(els.audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        drawOscilloscope();
+      } catch (e) {
+        console.warn("Oscilograma no conectado");
+      }
+    }
+
+    function drawOscilloscope() {
+      if (!analyser) return;
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      const canvas = els.canvas;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = canvas.offsetWidth;
+      const h = canvas.height = 60;
+
+      function draw() {
+        requestAnimationFrame(draw);
+        analyser.getByteTimeDomainData(dataArray);
+
+        // FONDO 100% OPACO → SIN RESIDUOS
+        ctx.fillStyle = '#001400';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#00ff72';
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = '#00ff72';
+        ctx.beginPath();
+
+        const sliceWidth = w / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * h) / 2;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          x += sliceWidth;
+        }
+
+        ctx.lineTo(w, h / 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      draw();
+
+      // Redibujar al cambiar tamaño
+      const resize = () => {
+        w = canvas.width = canvas.offsetWidth;
+      };
+      window.addEventListener('resize', resize);
     }
 
     function updateVolumeUI() {
@@ -570,50 +656,54 @@
       els.volumeKnob.style.left = percent + '%';
       const baseGlow = 20;
       const extraGlow = Math.round(currentVolume * 40);
-      const baseInner = 30;
-      const extraInner = Math.round(currentVolume * 30);
       const glowColor = currentVolume > 0.7 ? '#00ffcc' : '#00ff72';
       els.volumeKnob.style.boxShadow = `
         0 0 ${baseGlow + extraGlow}px var(--glow),
-        0 0 ${baseInner + extraInner}px ${glowColor},
+        0 0 ${baseGlow + extraGlow + 10}px ${glowColor},
         inset 0 0 8px rgba(0,0,0,0.8)
-      `.replace(/\s+/g, ' ').trim();
+      `.trim();
     }
+
     function setVolume(value) {
       currentVolume = value;
       if (!isMuted) els.audio.volume = value;
       updateVolumeUI();
     }
+
     function getVolumeFromEvent(e) {
       const rect = els.volumeTrack.getBoundingClientRect();
       const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
       const width = rect.width;
       return Math.max(0, Math.min(1, x / width));
     }
-    els.volumeTrack.addEventListener('click', (e) => {
-      const percent = getVolumeFromEvent(e);
-      setVolume(percent);
-    });
+
+    els.volumeTrack.addEventListener('click', (e) => setVolume(getVolumeFromEvent(e)));
+
     let isDragging = false;
     els.volumeKnob.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; });
     els.volumeKnob.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
-    const moveHandler = (e) => {
-      if (!isDragging) return;
-      const percent = getVolumeFromEvent(e);
-      setVolume(percent);
-    };
+
+    const moveHandler = (e) => { if (isDragging) setVolume(getVolumeFromEvent(e)); };
     document.addEventListener('mousemove', moveHandler);
     document.addEventListener('touchmove', moveHandler);
-    const endHandler = () => { isDragging = false; };
-    document.addEventListener('mouseup', endHandler);
-    document.addEventListener('touchend', endHandler);
+    document.addEventListener('mouseup', () => isDragging = false);
+    document.addEventListener('touchend', () => isDragging = false);
+
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
+
       if (isPaused) {
-        safePlay();
+        if (audioContext.state === 'suspended') {
+          audioContext.resume().then(() => els.audio.play());
+        } else {
+          els.audio.play().catch(() => {
+            els.status.textContent = "Toca de nuevo para reproducir";
+          });
+        }
         els.pauseBtn.textContent = 'Pausar';
         isPaused = false;
         els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        els.status.className = 'status';
       } else {
         els.audio.pause();
         els.pauseBtn.textContent = 'Play';
@@ -621,6 +711,7 @@
         els.status.textContent = "Pausado";
       }
     });
+
     els.muteBtn.addEventListener('click', () => {
       if (!isPlaying) return;
       if (isMuted) {
@@ -636,60 +727,11 @@
       }
       updateVolumeUI();
     });
-    function connectAudioToOscilloscope() {
-      if (source) source.disconnect();
-      try {
-        source = audioContext.createMediaElementSource(els.audio);
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
-        drawOscilloscope();
-      } catch (e) {
-        console.warn("Oscilograma no conectado");
-      }
-    }
-    function drawOscilloscope() {
-      if (!analyser) return;
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      const canvas = els.canvas;
-      const ctx = canvas.getContext('2d');
-      const w = canvas.offsetWidth;
-      const h = 60;
 
-      function draw() {
-        requestAnimationFrame(draw);
-        analyser.getByteTimeDomainData(dataArray);
-
-        // LIMPIEZA TOTAL + FONDO OPACO
-        ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = 'rgba(0, 20, 0, 1)';
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#00ff72';
-        ctx.shadowBlur = 16;
-        ctx.shadowColor = '#00ff72';
-
-        ctx.beginPath();
-        const sliceWidth = w / bufferLength;
-        let x = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const raw = dataArray[i] / 128.0;
-          const amplified = raw > 1 ? (raw - 1) * 2 + 1 : raw;
-          const v = (amplified - 1) * 2.5 + 1;
-          const y = (v * h) / 2;
-          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-          x += sliceWidth;
-        }
-        ctx.lineTo(w, h / 2);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
-      draw();
-    }
     els.audio.addEventListener('ended', loadAndPlayNext);
     els.startBtn.addEventListener('click', startPlayback);
     els.nextBtn.addEventListener('click', loadAndPlayNext);
+
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
       logo.classList.remove('glow-normal');
@@ -699,6 +741,7 @@
         logo.classList.add('glow-normal');
       }, 3000);
     });
+
     window.addEventListener('load', async () => {
       await loadPlaylists();
       updateVolumeUI();
