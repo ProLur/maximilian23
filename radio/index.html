@@ -117,7 +117,6 @@
       flex-shrink: 0;
     }
     .terminal-box {
-      flex: 1;
       width: 100%;
       max-width: 360px;
       margin: 0 auto;
@@ -131,6 +130,7 @@
       flex-direction: column;
       gap: 10px;
       justify-content: flex-start;
+      flex-grow: 0; /* ¡NO CRECE MÁS DE LO NECESARIO! */
     }
     #oscilograma {
       width: 100%;
@@ -141,7 +141,7 @@
       border-radius: 6px;
       flex-shrink: 0;
     }
-    /* === VOLUMEN TIPO HEBILLA === */
+    /* === VOLUMEN === */
     .volume-horizontal {
       width: 100%;
       max-width: 300px;
@@ -212,22 +212,10 @@
       transform: translate(-50%, -50%);
       box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
     }
-    .volume-knob-h::after {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border: 2px solid transparent;
-      border-radius: 50%;
-      box-shadow: 0 0 0 0 transparent;
-      transition: box-shadow 0.2s ease;
-    }
     .volume-knob-h:active {
       cursor: grabbing;
       transform: translate(-50%, -50%) scale(1.2);
       box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72;
-    }
-    .volume-knob-h:active::after {
-      box-shadow: 0 0 20px #00ffcc, 0 0 30px #00ff72;
     }
     .listener-status, .now-playing, .status {
       width: 100%;
@@ -292,22 +280,36 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+
+    /* BOTÓN INICIAR CENTRADO PERFECTO */
     #startBtn {
-      margin-top: 4px;
+      display: block;
+      margin: 6px auto 0; /* ¡CENTRADO PERFECTO! */
       padding: 12px 18px;
       font-size: 1rem;
       width: 100%;
       max-width: 240px;
       min-height: 48px;
     }
+
+    /* GRUPO DE BOTONES: OCULTO SIN AFECTAR LAYOUT */
     .btn-group {
       display: flex;
       gap: 10px;
       justify-content: center;
-      margin-top: 6px;
       width: 100%;
       max-width: 300px;
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      transition: opacity 0.3s ease, height 0.3s ease;
     }
+    .btn-group.visible {
+      opacity: 1;
+      height: auto;
+      margin-top: 6px;
+    }
+
     .note {
       margin: 0;
       padding: 8px 0 4px;
@@ -339,6 +341,7 @@
     .pull-indicator.show {
       opacity: 1;
     }
+
     /* === RESPONSIVE === */
     @media (max-width: 480px) {
       body { padding: 6px 10px; gap: 6px; }
@@ -361,17 +364,13 @@
 </head>
 <body>
   <div class="pull-indicator" id="pullIndicator">Desliza para recargar</div>
-  <!-- Audio principal -->
   <audio id="audioPlayer" preload="metadata"></audio>
-  <!-- Logo con antena -->
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
   </div>
   <h1>RADIO MAXIMILIAN 23</h1>
-  <!-- Caja principal -->
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-    <!-- VOLUMEN -->
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
@@ -382,19 +381,16 @@
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">Cargando frecuencia...</div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
-    <div class="btn-group" id="controls" style="display:none;">
+    <div class="btn-group" id="controls">
       <button id="nextBtn">Siguiente</button>
       <button id="pauseBtn">Pausar</button>
       <button id="muteBtn">Mute</button>
     </div>
   </div>
-  <!-- Footer SIEMPRE VISIBLE -->
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
 
   <script>
-    const CONFIG = {
-      mp3Folder: 'canciones/'
-    };
+    const CONFIG = { mp3Folder: 'canciones/' };
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
@@ -517,7 +513,7 @@
     function startPlayback() {
       if (isPlaying) return;
       els.startBtn.style.display = 'none';
-      els.controls.style.display = 'flex';
+      els.controls.classList.add('visible'); // ¡TRANSICIÓN SUAVE!
       els.status.textContent = "Iniciando emisión...";
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
