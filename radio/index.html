@@ -52,7 +52,6 @@
       overflow-y: auto;
       position: relative;
       touch-action: pan-y pinch-zoom;
-      transition: transform 0.4s ease;
     }
     body::before {
       content: "";
@@ -72,6 +71,48 @@
       from { transform: translate(-50%, -50%) rotate(0deg); }
       to { transform: translate(-50%, -50%) rotate(360deg); }
     }
+
+    /* === PULL TO REFRESH ANIMADO (SIN MOVER BODY) === */
+    .pull-refresh {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--glow);
+      font-size: 0.9rem;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(-100%);
+      background: rgba(0, 20, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .pull-refresh.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .pull-arrow {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--glow);
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translateY(-6px);
+      margin-bottom: 6px;
+      animation: bounce 1.5s infinite;
+      box-shadow: 0 0 12px var(--glow);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(-6px); }
+      50% { transform: rotate(45deg) translateY(-12px); }
+    }
+
     .logo-container {
       margin: 8px 0 4px;
       width: 100%;
@@ -130,7 +171,7 @@
       flex-direction: column;
       gap: 10px;
       justify-content: flex-start;
-      flex-grow: 0; /* ¡NO CRECE MÁS DE LO NECESARIO! */
+      flex-grow: 0;
     }
     #oscilograma {
       width: 100%;
@@ -141,7 +182,6 @@
       border-radius: 6px;
       flex-shrink: 0;
     }
-    /* === VOLUMEN === */
     .volume-horizontal {
       width: 100%;
       max-width: 300px;
@@ -280,19 +320,15 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
-
-    /* BOTÓN INICIAR CENTRADO PERFECTO */
     #startBtn {
       display: block;
-      margin: 6px auto 0; /* ¡CENTRADO PERFECTO! */
+      margin: 6px auto 0;
       padding: 12px 18px;
       font-size: 1rem;
       width: 100%;
       max-width: 240px;
       min-height: 48px;
     }
-
-    /* GRUPO DE BOTONES: OCULTO SIN AFECTAR LAYOUT */
     .btn-group {
       display: flex;
       gap: 10px;
@@ -302,14 +338,13 @@
       opacity: 0;
       height: 0;
       overflow: hidden;
-      transition: opacity 0.3s ease, height 0.3s ease;
+      transition: opacity 0.3s ease, height 0.3s ease, margin-top 0.3s ease;
     }
     .btn-group.visible {
       opacity: 1;
       height: auto;
       margin-top: 6px;
     }
-
     .note {
       margin: 0;
       padding: 8px 0 4px;
@@ -321,28 +356,7 @@
       flex-shrink: 0;
       line-height: 1.3;
     }
-    .pull-indicator {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--glow);
-      font-size: 0.9rem;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 1000;
-      pointer-events: none;
-      background: rgba(0, 20, 0, 0.3);
-    }
-    .pull-indicator.show {
-      opacity: 1;
-    }
 
-    /* === RESPONSIVE === */
     @media (max-width: 480px) {
       body { padding: 6px 10px; gap: 6px; }
       .logo-container { margin: 6px 0 4px; }
@@ -363,7 +377,13 @@
   </style>
 </head>
 <body>
-  <div class="pull-indicator" id="pullIndicator">Desliza para recargar</div>
+
+  <!-- PULL TO REFRESH ANIMADO -->
+  <div class="pull-refresh" id="pullRefresh">
+    <div class="pull-arrow"></div>
+    <span>Desliza para recargar</span>
+  </div>
+
   <audio id="audioPlayer" preload="metadata"></audio>
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
@@ -405,7 +425,7 @@
       volumeTrack: document.getElementById('volumeTrack'),
       volumeFill: document.getElementById('volumeFill'),
       volumeKnob: document.getElementById('volumeKnob'),
-      pullIndicator: document.getElementById('pullIndicator')
+      pullRefresh: document.getElementById('pullRefresh')
     };
     let items = [], currentIndex = 0;
     let isPlaying = false;
@@ -414,7 +434,7 @@
     let currentVolume = 1.0;
     let touchStartY = 0, isPulling = false;
 
-    // === PULL TO REFRESH ===
+    // === PULL TO REFRESH (SIN MOVER BODY) ===
     window.addEventListener('touchstart', (e) => {
       if (window.scrollY === 0 && !isPlaying) {
         touchStartY = e.touches[0].clientY;
@@ -427,20 +447,24 @@
       const pullDistance = touchY - touchStartY;
       if (pullDistance > 0 && window.scrollY === 0) {
         e.preventDefault();
-        const progress = Math.min(pullDistance / 150, 1);
-        document.body.style.transform = `translateY(${pullDistance / 3}px)`;
-        els.pullIndicator.classList.toggle('show', progress > 0.3);
+        const progress = Math.min(pullDistance / 120, 1);
+        els.pullRefresh.style.transform = `translateY(${Math.min(pullDistance - 80, 0)}px)`;
+        els.pullRefresh.classList.toggle('active', progress > 0.3);
       }
     });
     window.addEventListener('touchend', () => {
-      if (isPulling && !isPlaying) {
-        const wasPulled = parseInt(document.body.style.transform?.match(/-?\d+/)?.[0] || 0) > 100;
-        document.body.style.transition = 'transform 0.4s ease';
-        document.body.style.transform = 'translateY(0)';
-        els.pullIndicator.classList.remove('show');
-        if (wasPulled) setTimeout(() => location.reload(), 400);
+      if (isPulling && els.pullRefresh.classList.contains('active')) {
+        els.pullRefresh.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+        els.pullRefresh.style.transform = 'translateY(-100%)';
+        els.pullRefresh.classList.remove('active');
+        setTimeout(() => location.reload(), 500);
+      } else if (isPulling) {
+        els.pullRefresh.style.transition = 'transform 0.3s ease';
+        els.pullRefresh.style.transform = 'translateY(-100%)';
+        els.pullRefresh.classList.remove('active');
       }
       isPulling = false;
+      setTimeout(() => { els.pullRefresh.style.transition = ''; }, 500);
     });
 
     // === CARGAR PLAYLIST ===
@@ -513,7 +537,7 @@
     function startPlayback() {
       if (isPlaying) return;
       els.startBtn.style.display = 'none';
-      els.controls.classList.add('visible'); // ¡TRANSICIÓN SUAVE!
+      els.controls.classList.add('visible');
       els.status.textContent = "Iniciando emisión...";
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -646,12 +670,7 @@
     }
 
     els.audio.addEventListener('ended', loadAndPlayNext);
-    els.startBtn.addEventListener('click', () => {
-      startPlayback();
-      isPulling = false;
-      document.body.style.transform = 'translateY(0)';
-      els.pullIndicator.classList.remove('show');
-    });
+    els.startBtn.addEventListener('click', startPlayback);
     els.nextBtn.addEventListener('click', loadAndPlayNext);
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
