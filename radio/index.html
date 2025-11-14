@@ -61,9 +61,13 @@
       border: 1px solid var(--glow); padding: 16px; width: 100%; max-width: 420px; margin: 0 auto;
       border-radius: 8px; box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
       background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
+      display: flex; flex-direction: column; align-items: center;
     }
     #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; background: rgba(0,20,0,0.6); }
-    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+    .controls-row {
+      display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; margin-top: 8px;
+    }
+    .btn-group { display: flex; gap: 8px; flex: 1; max-width: 300px; }
     button {
       flex: 1; max-width: 130px; background: var(--dark); border: 1px solid var(--glow); color: var(--glow);
       padding: 12px 0; border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
@@ -79,7 +83,39 @@
     .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
     @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
-    @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } .now-playing { font-size: 0.8rem; } }
+
+    /* === VOLUMEN DESLIZADOR === */
+    .volume-container {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 30px; height: 120px; position: relative;
+    }
+    .volume-track {
+      width: 4px; height: 100px; background: rgba(0,255,114,0.2); border-radius: 2px;
+      position: relative; overflow: hidden; cursor: pointer;
+    }
+    .volume-fill {
+      width: 100%; background: var(--glow); position: absolute; bottom: 0; left: 0;
+      border-radius: 2px; box-shadow: 0 0 8px var(--glow); transition: height 0.1s ease;
+    }
+    .volume-knob {
+      width: 16px; height: 16px; background: var(--glow); border: 2px solid #001400;
+      border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%);
+      box-shadow: 0 0 12px var(--glow), 0 0 20px #00ffcc; cursor: grab;
+      transition: transform 0.1s ease;
+    }
+    .volume-knob:active { cursor: grabbing; transform: translateX(-50%) scale(1.2); }
+    .volume-label {
+      font-size: 0.7rem; margin-top: 4px; opacity: 0.7;
+    }
+
+    @media (max-width: 480px) {
+      .terminal-box { padding: 14px; }
+      button { font-size: 0.9rem; padding: 10px 0; }
+      .btn-group { gap: 6px; }
+      .now-playing { font-size: 0.8rem; }
+      .volume-container { height: 100px; }
+      .volume-track { height: 80px; }
+    }
   </style>
 </head>
 <body>
@@ -97,10 +133,21 @@
     <div class="status" id="status">Cargando frecuencia...</div>
     <div id="voiceOutput" class="voice-line"></div>
     <button id="startBtn" disabled>Iniciar Emisión</button>
-    <div class="btn-group" id="controls" style="display:none;">
-      <button id="nextBtn">Siguiente</button>
-      <button id="pauseBtn">Pausar</button>
-      <button id="muteBtn">Mute</button>
+    
+    <div class="controls-row" id="controls" style="display:none;">
+      <div class="btn-group">
+        <button id="nextBtn">Siguiente</button>
+        <button id="pauseBtn">Pausar</button>
+        <button id="muteBtn">Mute</button>
+      </div>
+      <!-- DESLIZADOR DE VOLUMEN -->
+      <div class="volume-container">
+        <div class="volume-track" id="volumeTrack">
+          <div class="volume-fill" id="volumeFill"></div>
+          <div class="volume-knob" id="volumeKnob"></div>
+        </div>
+        <div class="volume-label" id="volumeLabel">100%</div>
+      </div>
     </div>
   </div>
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
@@ -139,14 +186,18 @@
       beep: document.getElementById('beep'),
       canvas: document.getElementById('oscilograma'),
       nowPlaying: document.getElementById('nowPlaying'),
-      radioLogo: document.getElementById('radioLogo')
+      radioLogo: document.getElementById('radioLogo'),
+      volumeTrack: document.getElementById('volumeTrack'),
+      volumeFill: document.getElementById('volumeFill'),
+      volumeKnob: document.getElementById('volumeKnob'),
+      volumeLabel: document.getElementById('volumeLabel')
     };
 
     let items = [], currentIndex = 0, songCount = 0;
     let isPlaying = false, voiceEnabled = false, isSpeaking = false;
     let audioContext = null, analyser = null, source = null, lastHour = -1;
-    let isPaused = false;
-    let isMuted = false; // <-- Estado del mute
+    let isPaused = false, isMuted = false;
+    let currentVolume = 1.0;
 
     // === CARGAR PLAYLIST ===
     async function loadPlaylists() {
@@ -187,16 +238,15 @@
       const path = CONFIG.mp3Folder + song.file;
       els.audio.src = path;
       els.audio.load();
+      els.audio.volume = isMuted ? 0 : currentVolume;
 
       const playPromise = els.audio.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            els.status.textContent = "Emisión en directo";
+            els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
             isPlaying = true;
             isPaused = false;
-            isMuted = false;
-            els.muteBtn.textContent = 'Mute';
             els.pauseBtn.textContent = 'Pausar';
             connectAudioToOscilloscope();
           })
@@ -236,6 +286,7 @@
       audioContext.resume().then(() => {
         playCurrent();
         speak(PHRASES.start);
+        updateVolumeUI();
       });
 
       setInterval(() => {
@@ -243,10 +294,58 @@
       }, 60000);
     }
 
+    // === VOLUMEN DESLIZADOR ===
+    function updateVolumeUI() {
+      const percent = isMuted ? 0 : currentVolume * 100;
+      els.volumeFill.style.height = percent + '%';
+      els.volumeKnob.style.bottom = (percent - 8) + '%';
+      els.volumeLabel.textContent = Math.round(percent) + '%';
+    }
+
+    function setVolume(value) {
+      currentVolume = value;
+      if (!isMuted) {
+        els.audio.volume = value;
+      }
+      updateVolumeUI();
+    }
+
+    els.volumeTrack.addEventListener('click', (e) => {
+      const rect = els.volumeTrack.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const height = rect.height;
+      const percent = Math.max(0, Math.min(1, 1 - (y / height)));
+      setVolume(percent);
+    });
+
+    let isDragging = false;
+    els.volumeKnob.addEventListener('mousedown', () => { isDragging = true; });
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const rect = els.volumeTrack.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const height = rect.height;
+      const percent = Math.max(0, Math.min(1, 1 - (y / height)));
+      setVolume(percent);
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+
+    // Soporte táctil
+    els.volumeTrack.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; });
+    document.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      const rect = els.volumeTrack.getBoundingClientRect();
+      const y = touch.clientY - rect.top;
+      const height = rect.height;
+      const percent = Math.max(0, Math.min(1, 1 - (y / height)));
+      setVolume(percent);
+    });
+    document.addEventListener('touchend', () => { isDragging = false; });
+
     // === PAUSE / PLAY ===
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
-
       if (isPaused) {
         els.audio.play();
         els.pauseBtn.textContent = 'Pausar';
@@ -260,12 +359,11 @@
       }
     });
 
-    // === MUTE / UNMUTE (100% CORREGIDO) ===
+    // === MUTE / UNMUTE ===
     els.muteBtn.addEventListener('click', () => {
       if (!isPlaying) return;
-
       if (isMuted) {
-        els.audio.volume = 1.0;
+        els.audio.volume = currentVolume;
         els.muteBtn.textContent = 'Mute';
         isMuted = false;
         els.status.textContent = isPaused ? "Pausado" : "Emisión en directo";
@@ -277,9 +375,10 @@
         els.status.textContent = "Silenciado";
         speak(PHRASES.mute);
       }
+      updateVolumeUI();
     });
 
-    // === OSCILOGRAMA REAL (SOLO CUANDO HAY AUDIO) ===
+    // === OSCILOGRAMA REAL ===
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
       try {
@@ -380,11 +479,10 @@
       }, 3000);
     });
 
-    // === INICIO (SIN OSCILOGRAMA DE FONDO) ===
+    // === INICIO ===
     window.addEventListener('load', async () => {
       if ('speechSynthesis' in window) speechSynthesis.getVoices();
       await loadPlaylists();
-      // NO LLAMAR A initOscilloscopeFallback() → ¡ELIMINADO!
     });
   </script>
 </body>
