@@ -679,11 +679,38 @@
     });
 
     els.startBtn.addEventListener('click', startPlayback);
-    els.nextBtn.addEventListener('click', () => {
-      els.nextBtn.style.transform = 'scale(0.92)';
-      setTimeout(() => els.nextBtn.style.transform = '', 150);
-      loadAndPlayNext();
-    });
+    els.nextBtn.addEventListener('click', async () => {
+  // Animación de botón
+  els.nextBtn.style.transform = 'scale(0.92)';
+  setTimeout(() => els.nextBtn.style.transform = '', 150);
+
+  if (!items.length || !isPlaying) return;
+
+  // 1. Cambiar canción
+  currentIndex = (currentIndex + 1) % items.length;
+  updateNowPlaying();
+  const song = items[currentIndex];
+  const path = CONFIG.mp3Folder + song.file;
+
+  // 2. Forzar carga inmediata
+  els.audio.src = path;
+  els.audio.load();
+
+  // 3. Reanudar contexto + play en el MISMO hilo
+  try {
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+    await els.audio.play();
+    isPaused = false;
+    els.pauseBtn.textContent = 'Pausar';
+    els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+    connectAudioToOscilloscope();
+  } catch (err) {
+    console.warn("Play falló en móvil:", err);
+    els.status.textContent = "Toca 'Siguiente' otra vez";
+  }
+});
 
     els.radioLogo.addEventListener('click', () => {
       const logo = els.radioLogo;
