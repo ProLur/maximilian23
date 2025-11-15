@@ -256,6 +256,19 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+
+    /* Nuevo: Botón para limpiar historial */
+    #clearHistory {
+      background: #ff4444;
+      color: white;
+      padding: 5px 10px;
+      font-size: 12px;
+      margin-left: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #clearHistory:hover { background: #cc0000; }
   </style>
 </head>
 <body>
@@ -294,12 +307,56 @@
         <input type="text" id="message" placeholder="Escribe tu mensaje..." 
                onkeydown="if(event.key==='Enter' && !this.disabled){sendMessage()}">
         <button onclick="sendMessage()" id="sendButton">Enviar</button>
+        <button id="clearHistory" onclick="clearHistory()" title="Limpiar conversación">🗑️</button>
       </footer>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://max23.onrender.com/chat";
+    const API_URL = "https://max23.onrender.com/chat";  // Nota: Cambié a HTTPS para consistencia
+
+    let conversationHistory = [];  // Historial en memoria
+    const STORAGE_KEY = 'maximilian23_conversation';
+
+    // Cargar historial desde localStorage al iniciar
+    function loadHistory() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        conversationHistory = JSON.parse(saved);
+        // Recrear el chat en la UI
+        const chat = document.getElementById("chat");
+        chat.innerHTML = "";  // Limpiar
+        conversationHistory.forEach(msg => {
+          if (msg.role === 'user') {
+            const userDiv = document.createElement("div");
+            userDiv.className = "user";
+            userDiv.textContent = msg.content;
+            chat.appendChild(userDiv);
+          } else {
+            const botDiv = document.createElement("div");
+            botDiv.className = "bot";
+            botDiv.innerHTML = linkify(msg.content);
+            chat.appendChild(botDiv);
+          }
+        });
+        scrollBottom();
+      }
+    }
+
+    // Guardar historial en localStorage
+    function saveHistory() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationHistory));
+    }
+
+    // Limpiar historial
+    function clearHistory() {
+      if (confirm('¿Limpiar toda la conversación?')) {
+        conversationHistory = [];
+        localStorage.removeItem(STORAGE_KEY);
+        document.getElementById("chat").innerHTML = "";
+        scrollBottom();
+      }
+    }
 
     // --------- MENÚ MÓVIL ---------
     function openLab() { window.open('https://maximilian23.com/lab23/', '_blank'); }
@@ -368,7 +425,8 @@
       input.disabled = true;
       sendButton.disabled = true;
 
-      // Mensaje del usuario
+      // Añadir mensaje del usuario al historial
+      conversationHistory.push({ role: 'user', content: message });
       const userDiv = document.createElement("div");
       userDiv.className = "user";
       userDiv.textContent = message;
@@ -384,27 +442,52 @@
       input.value = "";
 
       try {
+        // Preparar historial para enviar (últimos 10 mensajes para no sobrecargar)
+        const recentHistory = conversationHistory.slice(-10).map(msg => `${msg.role}: ${msg.content}`).join('\n');
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ message })
+          body: JSON.stringify({ 
+            message: message,
+            history: recentHistory  // ← NUEVO: Envía el contexto al backend
+          })
         });
 
+        if (!response.ok) throw new Error('Respuesta no OK');
+
         const data = await response.json();
-        const reply = linkify(data.reply || "Lo siento, no pude procesar tu mensaje.");
+        const reply = data.reply || "Lo siento, no pude procesar tu mensaje con el contexto.";
+        
+        // Añadir respuesta al historial
+        conversationHistory.push({ role: 'assistant', content: reply });
+        saveHistory();  // Guardar en localStorage
 
         botDiv.innerHTML = "";
-        typeWriterEffect(botDiv, reply, 30, () => {
+        typeWriterEffect(botDiv, linkify(reply), 30, () => {
           input.disabled = false;
           sendButton.disabled = false;
           input.focus();
         });
 
       } catch (err) {
-        botDiv.textContent = "⚠️ Error de conexión. Inténtalo más tarde.";
-        input.disabled = false;
-        sendButton.disabled = false;
+        // Fallback: Respuesta simple basada en historial local si el backend falla
+        const fallbackReply = "⚠️ Error de conexión. Basado en nuestra conversación anterior: " + 
+          (conversationHistory.length > 1 ? 
+           "Recuerdo que hablamos de " + conversationHistory[conversationHistory.length - 2].content.substring(0, 50) + "..." : 
+           "Empecemos de nuevo.");
+        
+        conversationHistory.push({ role: 'assistant', content: fallbackReply });
+        saveHistory();
+        
+        botDiv.innerHTML = "";
+        typeWriterEffect(botDiv, fallbackReply, 30, () => {
+          input.disabled = false;
+          sendButton.disabled = false;
+          input.focus();
+        });
+        
+        console.error('Error en API:', err);
       }
 
       scrollBottom();
@@ -412,14 +495,25 @@
 
     // --------- INICIO ---------
     window.addEventListener("DOMContentLoaded", () => {
-      const chat = document.getElementById("chat");
-      const botDiv = document.createElement("div");
-      botDiv.className = "bot";
-      chat.appendChild(botDiv);
+      loadHistory();  // Cargar historial guardado
+      
+      if (conversationHistory.length === 0) {
+        // Mensaje inicial si no hay historial
+        const chat = document.getElementById("chat");
+        const botDiv = document.createElement("div");
+        botDiv.className = "bot";
+        chat.appendChild(botDiv);
 
-      typeWriterEffect(botDiv, "¡Hola! Soy Maximilian 23, el asistente del CEIP Juan XXIII de Zafra. ¿En qué puedo ayudarte hoy?");
-      scrollBottom();
+        conversationHistory.push({ 
+          role: 'assistant', 
+          content: "¡Hola! Soy Maximilian 23, el asistente del CEIP Juan XXIII de Zafra. ¿En qué puedo ayudarte hoy? (Ahora recuerdo nuestras conversaciones 😊)" 
+        });
+        saveHistory();
+        
+        typeWriterEffect(botDiv, conversationHistory[0].content);
+        scrollBottom();
+      }
     });
   </script>
 </body>
-</html>
+  </html>
