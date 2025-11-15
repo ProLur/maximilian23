@@ -137,7 +137,7 @@
     }
     #overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0; left: 0; width:100%; height: 100%;
       background: rgba(0,0,0,0.7);
       opacity: 0;
       visibility: hidden;
@@ -227,7 +227,7 @@
     <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
     <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
     <div class="menu-image">
-      <img id="mobileMaxImage" src="https://maximilian23.com/max.png" alt="Maximilian">
+      <img id="mobileMenuImage" src="https://maximilian23.com/max.png" alt="Maximilian">
     </div>
   </div>
   <div id="overlay"></div>
@@ -294,7 +294,7 @@
       }
     }
 
-    // --- MENÚ MÓVIL ---
+    // --- MENÚ ---
     function openLab() { window.open('https://maximilian23.com/lab23/', '_blank'); closeMobileMenu(); }
     function openRadio() { window.open('https://maximilian23.com/radio/', '_blank'); closeMobileMenu(); }
 
@@ -318,7 +318,7 @@
     overlay?.addEventListener('click', closeMobileMenu);
     closeMenu?.addEventListener('click', closeMobileMenu);
 
-    // --- CHAT UTILS ---
+    // --- CHAT ---
     function scrollBottom() {
       const chat = document.getElementById("chat");
       chat.scrollTop = chat.scrollHeight;
@@ -351,7 +351,6 @@
       step();
     }
 
-    // --- ENVÍO DE MENSAJE ---
     async function sendMessage() {
       const input = document.getElementById("message");
       const sendBtn = document.getElementById("sendButton");
@@ -361,14 +360,14 @@
 
       input.disabled = sendBtn.disabled = true;
 
-      // Añadir mensaje usuario
+      // Usuario
       conversationHistory.push({ role: 'user', content: msg });
       const userDiv = document.createElement("div");
       userDiv.className = "user";
       userDiv.textContent = msg;
       chat.appendChild(userDiv);
 
-      // Indicador de escritura
+      // Bot escribiendo
       const botDiv = document.createElement("div");
       botDiv.className = "bot";
       botDiv.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
@@ -377,11 +376,11 @@
       input.value = "";
 
       try {
-        const recent = conversationHistory.slice(-10).map(m => `${m.role}: ${m.content}`).join('\n');
+        const recentHistory = conversationHistory.slice(-10).map(m => `${m.role}: ${m.content}`).join('\n');
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg, history: recent })
+          body: JSON.stringify({ message: msg, history: recentHistory })
         });
 
         if (!res.ok) throw new Error("API error");
@@ -400,8 +399,8 @@
 
       } catch (err) {
         const fallback = conversationHistory.length > 1
-          ? `⚠️ Sin conexión. Recuerdo que hablabas de "${conversationHistory[conversationHistory.length-2].content.substring(0,40)}..."`
-          : "⚠️ Sin conexión. ¡Empecemos de nuevo!";
+          ? `Sin conexión. Recuerdo que hablabas de "${conversationHistory[conversationHistory.length-2].content.substring(0,40)}..."`
+          : "Sin conexión. ¡Empecemos de nuevo!";
         
         conversationHistory.push({ role: 'assistant', content: fallback });
         saveHistory();
@@ -415,13 +414,12 @@
       scrollBottom();
     }
 
-    // --- MENSAJE DE BIENVENIDA ---
     function showWelcomeMessage() {
       const chat = document.getElementById("chat");
       const botDiv = document.createElement("div");
       botDiv.className = "bot";
       chat.appendChild(botDiv);
-      const welcome = "¡Hola! Soy Maximilian 23, el asistente del CEIP Juan XXIII de Zafra. ¿En qué puedo ayudarte hoy? 😊";
+      const welcome = "¡Hola! Soy Maximilian 23, el asistente del CEIP Juan XXIII de Zafra. ¿En qué puedo ayudarte hoy? (Ahora recuerdo nuestras conversaciones)";
       conversationHistory.push({ role: 'assistant', content: welcome });
       saveHistory();
       typeWriterEffect(botDiv, welcome);
@@ -436,19 +434,17 @@
         showWelcomeMessage();
       }
 
-      // Políticas
       if (!localStorage.getItem("policiesAccepted")) {
         document.getElementById("policyBanner").classList.add("show");
       }
 
-      // Imagen interactiva
       const maxImage = document.getElementById("maxImage");
       maxImage.addEventListener("click", () => {
         maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
         maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
       });
 
-      const mobileMaxImage = document.getElementById("mobileMaxImage");
+      const mobileMaxImage = document.getElementById("mobileMenuImage");
       if (mobileMaxImage) {
         mobileMaxImage.addEventListener("click", () => {
           mobileMaxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
