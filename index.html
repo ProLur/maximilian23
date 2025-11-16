@@ -33,7 +33,6 @@
       min-height: 56px;
     }
     header img { height: 40px; width: auto; }
-    /* HAMBURGUESA - SOLO MÓVIL */
     #menuIcon {
       display: none;
       position: absolute;
@@ -47,7 +46,6 @@
       line-height: 1;
     }
     #menuIcon:hover { transform: scale(1.1); }
-    /* RUEDA DENTADA - SOLO MÓVIL */
     #policyIcon {
       display: none;
       position: absolute;
@@ -64,7 +62,6 @@
       #menuIcon, #policyIcon { display: block; }
       .left-panel { display: none !important; }
     }
-    /* MENÚ LATERAL - SOLO MÓVIL */
     #mobileMenu {
       position: fixed;
       top: 0;
@@ -78,8 +75,8 @@
       z-index: 999;
       backdrop-filter: blur(8px);
       box-sizing: border-box;
-      overflow: hidden; /* ← CLAVE: evita corte de bordes */
-      border-radius: 0 16px 16px 0; /* ← Elegante redondeado */
+      overflow: hidden;
+      border-radius: 0 16px 16px 0;
     }
     #mobileMenu.open {
       left: 0;
@@ -87,7 +84,7 @@
     }
     #mobileMenu .menu-item {
       display: block;
-      width: calc(100% - 16px); /* ← Ajuste perfecto */
+      width: calc(100% - 16px);
       margin-left: 8px;
       margin-right: 8px;
       margin-bottom: 12px;
@@ -104,7 +101,7 @@
       text-shadow: 0 0 6px #00ffcc;
       backdrop-filter: blur(4px);
       box-shadow: 0 0 10px #00ffcc55;
-      box-sizing: border-box; /* ← Incluye padding y border */
+      box-sizing: border-box;
       overflow: hidden;
       position: relative;
     }
@@ -113,7 +110,6 @@
       box-shadow: inset 0 0 15px rgba(0,255,204,0.3), 0 0 15px #00ffcc;
       transform: translateY(-2px);
     }
-    /* IMAGEN EN MENÚ MÓVIL */
     #mobileMenu .menu-image {
       margin-top: 40px;
       display: flex;
@@ -139,7 +135,6 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-4px); }
     }
-    /* OVERLAY */
     #overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -216,16 +211,12 @@
 </head>
 <body>
   <header>
-    <!-- Hamburguesa -->
-    <div id="menuIcon">☰</div>
-    <!-- Logo + Título centrado -->
+    <div id="menuIcon">Menu</div>
     <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
     Maximilian 23
-    <!-- Rueda dentada -->
-    <div id="policyIcon">🛡️</div>
+    <div id="policyIcon">Shield</div>
   </header>
 
-  <!-- MENÚ LATERAL MÓVIL -->
   <div id="mobileMenu">
     <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">X</div>
     <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
@@ -339,6 +330,7 @@
       try {
         const r = await fetch(API_URL, {
           method: "POST",
+          credentials: "include",  // ENVÍA LA COOKIE
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: msg })
         });
