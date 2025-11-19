@@ -120,29 +120,38 @@
     <div class="pull-arrow"></div>
     <span>Desliza para recargar</span>
   </div>
+
   <audio id="audioPlayer" preload="metadata"></audio>
+
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
   </div>
+
   <h1>RADIO MAXIMILIAN 23</h1>
+
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
+
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
         <div class="volume-knob-h" id="volumeKnob"></div>
       </div>
     </div>
+
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">¡Pulsa Iniciar Emisión!</div>
+
     <button id="startBtn" disabled>Iniciar Emisión</button>
+
     <div class="btn-group" id="controls">
       <button id="nextBtn">Siguiente</button>
       <button id="pauseBtn">Pausar</button>
       <button id="muteBtn">Mute</button>
     </div>
   </div>
+
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
 
   <script>
@@ -163,41 +172,14 @@
       volumeKnob: document.getElementById('volumeKnob'),
       pullRefresh: document.getElementById('pullRefresh')
     };
+
     let items = [], currentIndex = 0;
     let isPlaying = false, isPaused = false, isMuted = false;
     let currentVolume = 1.0;
     let audioContext = null, analyser = null, source = null;
     let touchStartY = 0, isPulling = false;
 
-    // ====================== FUNCIÓN QUE ARREGLA TODO EN MÓVIL ======================
-    function playSong(index) {
-      currentIndex = index;
-      updateNowPlaying();
-      const song = items[currentIndex];
-      els.audio.src = CONFIG.mp3Folder + song.file;
-      els.audio.volume = isMuted ? 0 : currentVolume;
-
-      const playPromise = els.audio.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          isPlaying = true;
-          isPaused = false;
-          els.pauseBtn.textContent = 'Pausar';
-          els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-          connectAudioToOscilloscope();
-        }).catch(err => {
-          console.warn("Reproducción bloqueada (móvil):", err);
-          els.status.textContent = "Toca Siguiente otra vez";
-        });
-      }
-    }
-
-    function playNext() {
-      if (items.length === 0) return;
-      playSong((currentIndex + 1) % items.length);
-    }
-
-    // ====================== TU CÓDIGO ORIGINAL (sin cambios) ======================
+    // ====================== PULL TO REFRESH ======================
     window.addEventListener('touchstart', e => { if (window.scrollY === 0) { touchStartY = e.touches[0].clientY; isPulling = true; } });
     window.addEventListener('touchmove', e => {
       if (!isPulling) return;
@@ -224,6 +206,7 @@
       setTimeout(() => { els.pullRefresh.style.transition = ''; }, 500);
     });
 
+    // ====================== CARGAR PLAYLIST ======================
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
@@ -236,6 +219,7 @@
           const title = parts.slice(1).join(' - ').trim() || file;
           return { file, title };
         }).filter(i => i.file.endsWith('.mp3'));
+
         if (items.length === 0) throw new Error('No hay MP3 válidos');
       } catch (err) {
         console.error(err);
@@ -243,6 +227,7 @@
       }
       preloadFirstSong();
     }
+
     function preloadFirstSong() {
       if (!items.length) { els.status.textContent = "Error: No hay canciones"; return; }
       currentIndex = Math.floor(Math.random() * items.length);
@@ -250,29 +235,57 @@
       els.status.textContent = "¡Pulsa Iniciar Emisión!";
       els.startBtn.disabled = false;
     }
+
     function updateNowPlaying() {
       const song = items[currentIndex];
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
+
+    // ====================== INICIAR ======================
     function startPlayback() {
       if (isPlaying) return;
       els.startBtn.style.display = 'none';
       els.controls.classList.add('visible');
       els.status.textContent = "Iniciando emisión...";
+
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.85;
       }
-      audioContext.resume().then(() => playSong(currentIndex));
+
+      audioContext.resume().then(() => playCurrentSong());
     }
 
-    // ===== AHORA USAMOS LA FUNCIÓN SEGURA =====
-    els.audio.addEventListener('ended', playNext);
-    els.nextBtn.addEventListener('click', playNext);
-    els.startBtn.addEventListener('click', startPlayback);
+    // ====================== REPRODUCIR CANCIÓN ACTUAL ======================
+    function playCurrentSong() {
+      const song = items[currentIndex];
+      els.audio.src = CONFIG.mp3Folder + song.file;
+      els.audio.volume = isMuted ? 0 : currentVolume;
 
+      els.audio.play().then(() => {
+        isPlaying = true;
+        isPaused = false;
+        els.pauseBtn.textContent = 'Pausar';
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        connectAudioToOscilloscope();
+      }).catch(err => {
+        console.warn("Reproducción bloqueada:", err);
+        els.status.textContent = "Toca para activar sonido";
+      });
+    }
+
+    // ====================== EVENTO CUANDO TERMINA UNA CANCIÓN ======================
+    els.audio.addEventListener('ended', () => {
+      if (!isPlaying || isPaused) return;
+
+      currentIndex = (currentIndex + 1) % items.length;
+      updateNowPlaying();
+      playCurrentSong(); // ← Aquí está la magia: pasa automáticamente a la siguiente
+    });
+
+    // ====================== OSCILOSCOPIO ======================
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
       try {
@@ -282,6 +295,7 @@
         drawOscilloscope();
       } catch (e) { console.warn("Oscilograma no conectado"); }
     }
+
     function drawOscilloscope() {
       if (!analyser) return;
       const bufferLength = analyser.frequencyBinCount;
@@ -290,6 +304,7 @@
       const ctx = canvas.getContext('2d');
       let w = canvas.width = canvas.offsetWidth;
       const h = canvas.height = 60;
+
       function draw() {
         requestAnimationFrame(draw);
         analyser.getByteTimeDomainData(dataArray);
@@ -315,6 +330,8 @@
       draw();
       window.addEventListener('resize', () => { w = canvas.width = canvas.offsetWidth; });
     }
+
+    // ====================== VOLUMEN ======================
     function updateVolumeUI() {
       const percent = (isMuted ? 0 : currentVolume) * 100;
       els.volumeFill.style.width = percent + '%';
@@ -340,6 +357,7 @@
     document.addEventListener('mouseup', () => isDragging = false);
     document.addEventListener('touchend', () => isDragging = false);
 
+    // ====================== BOTONES ======================
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
       if (isPaused) {
@@ -354,6 +372,7 @@
         els.status.textContent = "Pausado";
       }
     });
+
     els.muteBtn.addEventListener('click', () => {
       isMuted = !isMuted;
       els.audio.volume = isMuted ? 0 : currentVolume;
@@ -361,6 +380,16 @@
       els.status.textContent = isMuted ? "Silenciado" : (isPaused ? "Pausado" : "Emisión en directo");
       updateVolumeUI();
     });
+
+    els.nextBtn.addEventListener('click', () => {
+      if (!items.length || !isPlaying) return;
+      currentIndex = (currentIndex + 1) % items.length;
+      updateNowPlaying();
+      playCurrentSong();
+    });
+
+    els.startBtn.addEventListener('click', startPlayback);
+
     els.radioLogo.addEventListener('click', () => {
       els.radioLogo.classList.remove('glow-normal');
       els.radioLogo.classList.add('glow-intenso');
@@ -370,6 +399,7 @@
       }, 3000);
     });
 
+    // ====================== INICIO ======================
     window.addEventListener('load', async () => {
       await loadPlaylists();
       updateVolumeUI();
