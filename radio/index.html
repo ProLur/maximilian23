@@ -67,7 +67,7 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       color: var(--glow); font-size: 0.9rem; opacity: 0; pointer-events: none; z-index: 1000;
       transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(-100%);
-      background: rgba(0, 20, 0, 0.6); backdrop-filter: blur(4px);
+      background: rgba(0, 20, 0,0.6); backdrop-filter: blur(4px);
     }
     .pull-refresh.active { opacity: 1; transform: translateY(0); }
     .pull-arrow {
@@ -88,9 +88,9 @@
     .terminal-box { width: 100%; max-width: 360px; margin: 0 auto; padding: 14px; border: 2px solid var(--glow); border-radius: 12px; box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15); background: rgba(0, 20, 0, 0.8); backdrop-filter: blur(4px); display: flex; flex-direction: column; gap: 10px; }
     #oscilograma { width: 100%; height: 60px; display: block; image-rendering: pixelated; background: var(--bg); border-radius: 6px; }
     .volume-horizontal { width: 100%; max-width: 320px; height: 46px; display: flex; align-items: center; justify-content: center; padding: 0 10px; position: relative; margin: 0 auto; }
-    .volume-track-h { width: 100%; height: 18px; background: var(--leather); border: 2px solid #0a3d0a; border-radius: 9px; position: relative; overflow: visible; cursor: pointer; box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 0 12px rgba(0,255,114,0.3); background-image: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px); }
+    .volume-track-h { width: 100%; height: 18px; background: var(--leather); border: 2px solid #0a3d0a; border-radius: 9px; position: relative; overflow: visible; cursor: pointer; box-shadow: inset 0 0 0 8px rgba(0,0,0,0.6), 0 0 12px rgba(0,255,114,0.3); background-image: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px); }
     .volume-fill-h { height: 100%; background: linear-gradient(90deg, #004d00, #00ff72, #004d00); position: absolute; left: 0; top: 0; border-radius: 7px; box-shadow: 0 0 15px var(--glow); transition: width 0.15s ease; }
-    .volume-knob-h { width: 32px; height: 32px; background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00); border: 3px solid #00ff72; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 100%; box-shadow: 0 0 20px var(--glow), 0 0 30px #00ffcc, inset 0 0 8px rgba(0,0,0,0.8); cursor: grab; transition: transform 0.15s ease, box-shadow 0.2s; z-index: 10; }
+    .volume-knob-h { width: 32px; height: 32px; background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00); border: 3px solid #00ff72; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 100%; box-shadow: 0 0 0 20px var(--glow), 0 0 30px #00ffcc, inset 0 0 8px rgba(0,0,0,0.8); cursor: grab; transition: transform 0.15s ease, box-shadow 0.2s; z-index: 10; }
     .volume-knob-h::before { content: ''; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #001400; border: 2px solid #004d00; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: inset 0 0 6px rgba(0,0,0,0.8); }
     .volume-knob-h:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.2); box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72; }
     .now-playing { background: rgba(0, 20, 0, 0.9); border: 1.5px dashed var(--glow); min-height: 2.2em; line-height: 1.3; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; width: 100%; margin: 0 auto; }
@@ -120,33 +120,43 @@
     <div class="pull-arrow"></div>
     <span>Desliza para recargar</span>
   </div>
+
   <audio id="audioPlayer" preload="metadata"></audio>
+
   <div class="logo-container">
     <img src="max2.png" class="logo glow-normal" id="radioLogo" alt="Logo Maximilian" onerror="this.style.display='none'">
   </div>
+
   <h1>RADIO MAXIMILIAN 23</h1>
+
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
+
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
         <div class="volume-knob-h" id="volumeKnob"></div>
       </div>
     </div>
+
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">¡Pulsa Iniciar Emisión!</div>
+
     <button id="startBtn" disabled>Iniciar Emisión</button>
+
     <div class="btn-group" id="controls">
       <button id="nextBtn">Siguiente</button>
       <button id="pauseBtn">Pausar</button>
       <button id="muteBtn">Mute</button>
     </div>
   </div>
+
   <p class="note">Emisión 24/7 • MP3 locales • Creado por Manuel</p>
 
   <script>
     const CONFIG = { mp3Folder: 'canciones/' };
+
     const els = {
       startBtn: document.getElementById('startBtn'),
       nextBtn: document.getElementById('nextBtn'),
@@ -166,9 +176,10 @@
 
     let items = [], currentIndex = 0;
     let isPlaying = false, isPaused = false, isMuted = false;
-    let currentVolume = 1.0;
+    let currentVolume =  = 1.0;
     let audioContext = null, analyser = null, source = null;
     let touchStartY = 0, isPulling = false;
+    let watchdogTimer = null;   // <-- nuevo: seguridad para móviles
 
     // ====================== PULL TO REFRESH ======================
     window.addEventListener('touchstart', e => { if (window.scrollY === 0) { touchStartY = e.touches[0].clientY; isPulling = true; } });
@@ -231,6 +242,50 @@
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
 
+    // ====================== REPRODUCCIÓN MEJORADA ======================
+    function playCurrentSong() {
+      const song = items[currentIndex];
+      els.audio.src = CONFIG.mp3Folder + song.file;
+      els.audio.load();                                     // <-- imprescindible en iOS
+      els.audio.volume = isMuted ? 0 : currentVolume;
+
+      // limpiar watchdog anterior
+      if (watchdogTimer) clearTimeout(watchdogTimer);
+
+      els.audio.play().then(() => {
+        isPlaying = true;
+        isPaused = false;
+        els.pauseBtn.textContent = 'Pausar';
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        connectAudioToOscilloscope();
+
+        // Watchdog por si el evento "ended" falla en móvil
+        const remaining = els.audio.duration ? (els.audio.duration - els.audio.currentTime + 2) * 1000 : 5000;
+        watchdogTimer = setTimeout(() => {
+          if (isPlaying && !isPaused && els.audio.currentTime > 0 && els.audio.currentTime >= els.audio.duration - 2) {
+            nextSong();
+          }
+        }, remaining);
+
+      }).catch(err => {
+        console.warn("Reproducción bloqueada:", err);
+        els.status.textContent = "Toca para activar sonido";
+      });
+    }
+
+    function nextSong() {
+      if (!items.length || !isPlaying) return;
+      if (watchdogTimer) clearTimeout(watchdogTimer);
+
+      currentIndex = (currentIndex + 1) % items.length;
+      updateNowPlaying();
+
+      setTimeout(() => {
+        if (audioContext && audioContext.state === 'suspended') audioContext.resume();
+        playCurrentSong();
+      }, 100);    // pequeño delay para que móviles acepten el play()
+    }
+
     // ====================== INICIAR ======================
     function startPlayback() {
       if (isPlaying) return;
@@ -245,50 +300,20 @@
         analyser.smoothingTimeConstant = 0.85;
       }
 
-      audioContext.resume().then(() => playCurrentSong());
-    }
-
-    // ====================== REPRODUCIR CANCIÓN ======================
-    function playCurrentSong() {
-      const song = items[currentIndex];
-      els.audio.src = CONFIG.mp3Folder + song.file;
-      els.audio.volume = isMuted ? 0 : currentVolume;
-
-      els.audio.play().then(() => {
-        isPlaying = true;
-        isPaused = false;
-        els.pauseBtn.textContent = 'Pausar';
-        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-        connectAudioToOscilloscope();
-      }).catch(err => {
-        console.warn("Reproducción bloqueada:", err);
-        els.status.textContent = "Toca para activar sonido";
+      audioContext.resume().then(() => {
+        playCurrentSong();
       });
     }
 
-    // ====================== BOTÓN SIGUIENTE (CORREGIDO) ======================
-    els.nextBtn.addEventListener('click', () => {
-      if (!items.length || !isPlaying) return;
-
-      els.audio.pause();
-      els.audio.currentTime = 0;
-
-      currentIndex = (currentIndex + 1) % items.length;
-      updateNowPlaying();
-
-      // Pequeño timeout + resume del contexto para que los móviles permitan el play()
-      setTimeout(() => {
-        if (audioContext.state === 'suspended') audioContext.resume();
-        playCurrentSong();
-      }, 80);
+    // ====================== EVENTOS DE AUDIO ======================
+    els.audio.addEventListener('ended', () => {
+      if (watchdogTimer) clearTimeout(watchdogTimer);
+      nextSong();
     });
 
-    // ====================== FIN DE CANCIÓN ======================
-    els.audio.addEventListener('ended', () => {
-      if (!isPlaying || isPaused) return;
-      currentIndex = (currentIndex + 1) % items.length;
-      updateNowPlaying();
-      playCurrentSong();
+    els.nextBtn.addEventListener('click', () => {
+      if (watchdogTimer) clearTimeout(watchdogTimer);
+      nextSong();
     });
 
     // ====================== OSCILOSCOPIO ======================
@@ -326,7 +351,8 @@
         for (let i = 0; i < bufferLength; i++) {
           const v = dataArray[i] / 128.0;
           const y = (v * h) / 2;
-          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
           x += sliceWidth;
         }
         ctx.lineTo(w, h / 2);
@@ -334,6 +360,7 @@
         ctx.shadowBlur = 0;
       }
       draw();
+
       window.addEventListener('resize', () => { w = canvas.width = canvas.offsetWidth; });
     }
 
@@ -357,9 +384,11 @@
     }
 
     els.volumeTrack.addEventListener('click', e => setVolume(getVolumeFromEvent(e)));
+
     let isDragging = false;
     els.volumeKnob.addEventListener('mousedown', e => { e.preventDefault(); isDragging = true; });
     els.volumeKnob.addEventListener('touchstart', e => { e.preventDefault(); isDragging = true; });
+
     const moveHandler = e => { if (isDragging) setVolume(getVolumeFromEvent(e)); };
     document.addEventListener('mousemove', moveHandler);
     document.addEventListener('touchmove', moveHandler);
