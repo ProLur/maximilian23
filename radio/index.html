@@ -80,17 +80,16 @@
     }
     @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(-6px);} 50%{transform:rotate(45deg) translateY(-12px);} }
 
-    /* Botón modo - esquina superior DERECHA, pegado al cuadro */
     .floating-mode-btn {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 12px;
+      right: 12px;
       z-index: 100;
       width: 56px;
       height: 56px;
       border-radius: 50%;
       border: 2px solid var(--glow);
-      background: rgba(0, 20, 0, 0.85);
+      background: rgba(0, 20, 0, 0.88);
       backdrop-filter: blur(5px);
       color: var(--glow);
       font-size: 0.8rem;
@@ -174,13 +173,13 @@
       .volume-horizontal { max-width: 280px; }
       .listener-status, .now-playing, .status { max-width: 280px; }
       .floating-mode-btn { 
-        top: 12px; 
-        right: 12px; 
+        top: 10px; 
+        right: 10px; 
         width: 50px; 
         height: 50px; 
-        font-size: 0.76rem; 
+        font-size: 0.74rem; 
       }
-      .terminal-box { margin-top: 14px; }
+      .terminal-box { margin-top: 14px; padding: 12px; }
     }
   </style>
 </head>
@@ -200,7 +199,6 @@
   <h1>RADIO MAXIMILIAN 23</h1>
 
   <div class="terminal-box">
-    <!-- Botón dentro del cuadro, esquina superior derecha -->
     <div class="floating-mode-btn" id="modeBtn">TODO</div>
 
     <canvas id="oscilograma"></canvas>
@@ -265,7 +263,7 @@
     let touchStartY = 0, isPulling = false;
     let watchdogTimer = null;
 
-    // Pull to refresh ......................................................
+    // Pull to refresh
     window.addEventListener('touchstart', e => { 
       if (window.scrollY === 0) { touchStartY = e.touches[0].clientY; isPulling = true; } 
     });
@@ -294,7 +292,7 @@
       setTimeout(() => { els.pullRefresh.style.transition = ''; }, 500);
     });
 
-    // Modos .................................................................
+    // Modos
     function updateFilteredPlaylist() {
       if (mode === "all") {
         items = [...allItems];
@@ -321,7 +319,7 @@
       }
 
       if (items.length > 0) {
-        const currentFile = allItems[currentIndex]?.file;
+        const currentFile = allItems[currentIndex]?.file || "";
         const newIndex = items.findIndex(i => i.file === currentFile);
         currentIndex = newIndex >= 0 ? newIndex : Math.min(currentIndex, items.length - 1);
         if (currentIndex < 0) currentIndex = 0;
@@ -349,7 +347,7 @@
       }
     });
 
-    // Playlist ..............................................................
+    // Playlist
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
@@ -402,7 +400,7 @@
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
 
-    // Reproducción ..........................................................
+    // Reproducción
     function playCurrentSong() {
       if (!items.length) return;
 
@@ -468,7 +466,7 @@
       nextSong();
     });
 
-    // Osciloscopio ..........................................................
+    // Osciloscopio
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
       try {
@@ -515,7 +513,7 @@
       window.addEventListener('resize', () => { w = canvas.width = canvas.offsetWidth; });
     }
 
-    // Volumen ...............................................................
+    // Volumen
     function updateVolumeUI() {
       const percent = (isMuted ? 0 : currentVolume) * 100;
       els.volumeFill.style.width = percent + '%';
@@ -545,7 +543,7 @@
     document.addEventListener('mouseup', () => isDragging = false);
     document.addEventListener('touchend', () => isDragging = false);
 
-    // Botones ...............................................................
+    // Botones
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
       if (isPaused) {
@@ -580,7 +578,7 @@
       }, 3000);
     });
 
-    // Inicio .................................................................
+    // Inicio
     window.addEventListener('load', async () => {
       await loadPlaylists();
       updateVolumeUI();
