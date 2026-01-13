@@ -127,6 +127,7 @@
       color: #a0c0ff;
       font-size: 0.97rem;
       opacity: 0.92;
+      line-height: 1.4;
     }
 
     /* MODAL */
@@ -214,26 +215,26 @@
     <div class="intro">
       <h2>Creaciones de Plástica</h2>
       <p>Estos son los trabajos que hemos realizado (y estamos realizando) en clase durante el curso.</p>
-      <p>Ya tenemos el primer proyecto con <strong>David</strong> y ahora, en la <strong>segunda evaluación</strong>, empezamos a poner los dibujos que vamos a trabajar.</p>
+      <p>Ya tenemos el primer proyecto con <strong>David el gnomo</strong> y ahora, en la <strong>segunda evaluación</strong>, empezamos a poner los dibujos que vamos a trabajar.</p>
       
       <button class="close-btn" onclick="window.close()">Cerrar</button>
     </div>
 
     <div class="gallery">
 
-      <div class="card" onclick="openModal('david.jpg', 'David - Primer proyecto')">
-        <img src="david.jpg" alt="David - Primer proyecto de Plástica">
+      <div class="card" onclick="openModal('david.jpg', 'David el gnomo - Primer proyecto')">
+        <img src="david.jpg" alt="David el gnomo - Primer proyecto de Plástica">
         <div class="card-info">
-          <h3>David</h3>
-          <p>Primer proyecto • Curso 2025/2026</p>
+          <h3>David el gnomo</h3>
+          <p>Primer proyecto del curso. Nuestro gnomo guardián del bosque, con mucho detalle y personalidad.</p>
         </div>
       </div>
 
-      <div class="card" onclick="openModal('paisajecera.jpg', 'Paisajecera - Segunda evaluación')">
-        <img src="paisajecera.jpg" alt="Paisajecera - Segunda evaluación">
+      <div class="card" onclick="openModal('paisajecera.jpg', 'Paisaje con cera - Segunda evaluación')">
+        <img src="paisajecera.jpg" alt="Paisaje con cera - Segunda evaluación">
         <div class="card-info">
-          <h3>Paisajecera</h3>
-          <p>Segunda evaluación • En proceso</p>
+          <h3>Paisaje con cera</h3>
+          <p>Segunda evaluación. Dibujo donde practicamos la técnica de la cera para crear texturas y efectos de luz.</p>
         </div>
       </div>
 
@@ -267,18 +268,12 @@
       document.body.style.overflow = '';
     }
 
-    // Cerrar con clic fuera de la imagen
     modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        closeModal();
-      }
+      if (e.target === modal) closeModal();
     });
 
-    // Cerrar con tecla ESC
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeModal();
-      }
+      if (e.key === 'Escape') closeModal();
     });
   </script>
 
