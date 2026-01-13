@@ -4,9 +4,9 @@ sinfonia.mp3 - Mozart - Sinfonía No. 40
 flauta.mp3 - Mozart - La flauta Mágica - Obertura
 bodas.mp3 - Mozart - Las bodas de Fígaro
 
-primavera.mp3 - Vivaldi - Las cuatro estaciones: La Primavera
-verano.mp3 - Vivaldi - Las cuatro estaciones: El Verano
-otono.mp3 - Vivaldi - Las cuatro estaciones: El Otoño
-invierno.mp3 - Vivaldi - Las cuatro estaciones: El Invierno
+primavera.mp3 - Vivaldi - L4E: La Primavera
+verano.mp3 - Vivaldi - L4E: El Verano
+otono.mp3 - Vivaldi - L4E: El Otoño
+invierno.mp3 - Vivaldi - L4E: El Invierno
 
 
