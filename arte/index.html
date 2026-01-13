@@ -92,6 +92,9 @@
       backdrop-filter: blur(5px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.45);
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      height: 100%; /* Para que todas las tarjetas tengan la misma altura en la fila */
     }
 
     .card:hover {
@@ -100,21 +103,33 @@
       border-color: #00ffccaa;
     }
 
+    .image-container {
+      width: 100%;
+      height: 280px;          /* Altura fija - puedes cambiar este valor */
+      overflow: hidden;
+      position: relative;
+    }
+
     .card img {
       width: 100%;
-      height: auto;
-      display: block;
+      height: 100%;
+      object-fit: cover;      /* Recorta manteniendo proporciones, llena el espacio */
+      object-position: center;
       transition: transform 0.45s ease;
     }
 
     .card:hover img {
-      transform: scale(1.09);
+      transform: scale(1.12);
     }
 
     .card-info {
       padding: 1.3rem;
       text-align: center;
       background: rgba(0,0,0,0.45);
+      flex-grow: 1;           /* Empuja el texto hacia abajo si hay poco */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .card-info h3 {
@@ -199,6 +214,7 @@
       header h1 { font-size: 1.7rem; }
       .intro h2 { font-size: 1.9rem; }
       .gallery { grid-template-columns: 1fr; gap: 1.6rem; }
+      .image-container { height: 240px; } /* Altura menor en móviles */
       #modal-close { top: 15px; right: 20px; font-size: 2.5rem; }
     }
   </style>
@@ -223,7 +239,9 @@
     <div class="gallery">
 
       <div class="card" onclick="openModal('david.jpg', 'David el gnomo - Primer proyecto')">
-        <img src="david.jpg" alt="David el gnomo - Primer proyecto de Plástica">
+        <div class="image-container">
+          <img src="david.jpg" alt="David el gnomo - Primer proyecto de Plástica">
+        </div>
         <div class="card-info">
           <h3>David el gnomo</h3>
           <p>Primer proyecto del curso. Nuestro gnomo guardián del bosque, con mucho detalle y personalidad.</p>
@@ -231,7 +249,9 @@
       </div>
 
       <div class="card" onclick="openModal('paisajecera.jpg', 'Paisaje con cera - Segunda evaluación')">
-        <img src="paisajecera.jpg" alt="Paisaje con cera - Segunda evaluación">
+        <div class="image-container">
+          <img src="paisajecera.jpg" alt="Paisaje con cera - Segunda evaluación">
+        </div>
         <div class="card-info">
           <h3>Paisaje con cera</h3>
           <p>Segunda evaluación. Dibujo donde practicamos la técnica de la cera para crear texturas y efectos de luz.</p>
@@ -242,7 +262,7 @@
 
   </div>
 
-  <!-- Modal para ver imagen grande -->
+  <!-- Modal -->
   <div id="modal">
     <span id="modal-close" onclick="closeModal()">×</span>
     <img id="modal-image" src="" alt="Imagen ampliada">
@@ -268,11 +288,11 @@
       document.body.style.overflow = '';
     }
 
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', e => {
       if (e.target === modal) closeModal();
     });
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeModal();
     });
   </script>
