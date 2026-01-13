@@ -138,7 +138,7 @@
       margin-top: 5rem;
     }
 
-    .back-btn {
+    .close-btn {
       display: inline-block;
       margin-top: 2rem;
       padding: 0.8rem 1.8rem;
@@ -149,9 +149,10 @@
       text-decoration: none;
       font-weight: bold;
       transition: all 0.3s;
+      cursor: pointer;
     }
 
-    .back-btn:hover {
+    .close-btn:hover {
       background: rgba(0,255,204,0.28);
       transform: translateY(-3px);
       box-shadow: 0 0 18px #00ffcc77;
@@ -176,22 +177,22 @@
     <div class="intro">
       <h2>Creaciones de Plástica</h2>
       <p>Estos son los trabajos que hemos realizado en clase durante el curso.</p>
-      <p>¡Empezamos con fuerza con nuestro primer gran proyecto... el Gnomo!</p>
+      <p>¡Primer trabajo del curso... David!</p>
       
-      <a href="https://maximilian23.com" class="back-btn">← Volver con Maximilian</a>
+      <button class="close-btn" onclick="window.close()">Cerrar</button>
     </div>
 
     <div class="gallery">
-      <!-- Primer trabajo: el gnomo -->
+      <!-- Primer trabajo: david.jpg -->
       <div class="card">
-        <img src="gnomo.jpg" alt="El Gnomo - Trabajo realizado en clase">
+        <img src="david.jpg" alt="David - Trabajo realizado en clase">
         <div class="card-info">
-          <h3>El Gnomo Guardián</h3>
+          <h3>David</h3>
           <p>Primer proyecto • Curso 2025/2026</p>
         </div>
       </div>
 
-      <!-- Espacio para próximos trabajos -->
+      <!-- Espacio reservado para próximos trabajos -->
       <!-- 
       <div class="card">
         <img src="trabajo2.jpg" alt="Segundo trabajo">
