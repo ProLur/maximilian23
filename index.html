@@ -56,7 +56,7 @@
       transition: transform .3s ease;
       line-height: 1;
     }
-    
+   
     @media (max-width: 600px) {
       #menuIcon, #policyIcon { display: block; }
       .left-panel { display: none !important; }
@@ -164,7 +164,7 @@
       box-shadow: 0 0 15px #00ffcc88; cursor: pointer; transition: transform 0.2s;
     }
     .left-panel img:hover { transform: scale(1.05); }
-    #labButton, #radioButton {
+    #labButton, #radioButton, #plasticaButton {
       position: absolute; left: 50%; transform: translateX(-50%);
       background: rgba(0,255,204,0.08); color: #00ffcc; font-family: "Courier New", monospace;
       font-size: 14px; border: 1px solid #00ffcc88; border-radius: 20px; padding: 6px 14px;
@@ -172,9 +172,10 @@
       backdrop-filter: blur(4px); box-shadow: 0 0 10px #00ffcc55; z-index: 10;
       animation: float 3s ease-in-out infinite;
     }
-    #labButton { top: 15px; }
-    #radioButton { top: 65px; animation-delay: 0.5s; }
-    #labButton:hover, #radioButton:hover {
+    #labButton     { top: 15px; }
+    #radioButton   { top: 65px; animation-delay: 0.5s; }
+    #plasticaButton { top: 115px; animation-delay: 1s; }
+    #labButton:hover, #radioButton:hover, #plasticaButton:hover {
       background: rgba(0,255,204,0.2); box-shadow: 0 0 12px #00ffcc;
       transform: translateX(-50%) scale(1.05);
     }
@@ -215,21 +216,21 @@
     Maximilian 23
     <div id="policyIcon">🛡️</div>
   </header>
-
   <div id="mobileMenu">
     <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">X</div>
     <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
     <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
+    <div class="menu-item" onclick="openArte()">Plástica</div>
     <div class="menu-image">
       <img id="mobileMaxImage" src="https://maximilian23.com/max.png" alt="Maximilian">
     </div>
   </div>
   <div id="overlay"></div>
-
   <div class="container">
     <div class="left-panel">
       <div id="labButton" onclick="openLab()" title="Ir al Laboratorio Musical">Laboratorio Musical</div>
       <div id="radioButton" onclick="openRadio()" title="Escuchar Radio Maximilian 23">Radio Maximilian 23</div>
+      <div id="plasticaButton" onclick="openArte()" title="Ir a Plástica / Arte">Plástica</div>
       <div class="image-container">
         <img id="maxImage" src="max.png" alt="Maximilian grande">
       </div>
@@ -243,7 +244,6 @@
       </footer>
     </div>
   </div>
-
   <div id="policyButton" title="Ver políticas de uso">Políticas de privacidad</div>
   <div id="policyBanner">
     Al continuar, aceptas nuestras
@@ -253,28 +253,39 @@
 
   <script>
     const API_URL = "https://max23.onrender.com/chat";
+
     function openLab() {
       window.open('https://maximilian23.com/lab23/', '_blank');
       closeMobileMenu();
     }
+
     function openRadio() {
       window.open('https://maximilian23.com/radio/', '_blank');
       closeMobileMenu();
     }
+
+    function openArte() {
+      window.open('https://maximilian23.com/arte', '_blank');
+      closeMobileMenu();
+    }
+
     const menuIcon = document.getElementById('menuIcon');
     const mobileMenu = document.getElementById('mobileMenu');
     const overlay = document.getElementById('overlay');
     const closeMenu = document.getElementById('closeMenu');
+
     function toggleMobileMenu() {
       mobileMenu.classList.toggle('open');
       overlay.classList.toggle('show');
       document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
     }
+
     function closeMobileMenu() {
       mobileMenu.classList.remove('open');
       overlay.classList.remove('show');
       document.body.style.overflow = '';
     }
+
     menuIcon?.addEventListener('click', toggleMobileMenu);
     overlay?.addEventListener('click', closeMobileMenu);
     closeMenu?.addEventListener('click', closeMobileMenu);
@@ -283,6 +294,7 @@
       const chat = document.getElementById("chat");
       chat.scrollTop = chat.scrollHeight;
     }
+
     function linkify(text) {
       if (!text) return "";
       if (text.includes("<a ")) return text;
@@ -293,6 +305,7 @@
         return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${clean}</a>`;
       });
     }
+
     function typeWriterEffect(el, text, delay = 30, done = null) {
       let i = 0;
       el.innerHTML = "";
@@ -309,6 +322,7 @@
       }
       step();
     }
+
     async function sendMessage() {
       const i = document.getElementById("message");
       const b = document.getElementById("sendButton");
@@ -329,7 +343,7 @@
       try {
         const r = await fetch(API_URL, {
           method: "POST",
-          credentials: "include",  // ENVÍA LA COOKIE
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: msg })
         });
@@ -346,6 +360,7 @@
         scrollBottom();
       }
     }
+
     window.addEventListener("DOMContentLoaded", () => {
       const chat = document.getElementById("chat");
       const b = document.createElement("div");
@@ -358,17 +373,20 @@
         document.getElementById("policyBanner").classList.add("show");
       }
     });
+
     const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
     opens.forEach(o => {
       if (o) o.addEventListener("click", () => {
         window.open("https://maximilian23.com/politica.html", "_blank");
       });
     });
+
     const maxImage = document.getElementById("maxImage");
     maxImage.addEventListener("click", () => {
       maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
       maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
     });
+
     const mobileMaxImage = document.getElementById("mobileMaxImage");
     if (mobileMaxImage) {
       mobileMaxImage.addEventListener("click", () => {
@@ -376,6 +394,7 @@
         mobileMaxImage.addEventListener("load", () => setTimeout(() => mobileMaxImage.src = "https://maximilian23.com/max.png", 3000), { once: true });
       });
     }
+
     document.getElementById("acceptPolicies").addEventListener("click", () => {
       localStorage.setItem("policiesAccepted", "true");
       document.getElementById("policyBanner").classList.remove("show");
