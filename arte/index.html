@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trabajado en clase • Plástica & Arte</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <meta name="description" content="Trabajos realizados en clase de Plástica y Arte - CEIP Juan XXIII Zafra">
+  <meta name="theme-color" content="#00ffcc">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image: 
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    header {
+      background: rgba(22,27,34,0.92);
+      backdrop-filter: blur(8px);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header img {
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc88;
+      box-shadow: 0 0 14px #00ffcc66;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffccaa;
+      letter-spacing: 1.5px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      padding: 2.2rem;
+      background: rgba(30,45,61,0.38);
+      border: 1px solid #00ffcc44;
+      border-radius: 16px;
+      backdrop-filter: blur(6px);
+    }
+
+    .intro h2 {
+      color: #00ffcc;
+      margin-bottom: 1.2rem;
+      font-size: 2.3rem;
+      text-shadow: 0 0 8px #00ffcc77;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      padding: 1rem 0;
+    }
+
+    .card {
+      background: rgba(30,45,61,0.35);
+      border: 1px solid #00ffcc55;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-14px);
+      box-shadow: 0 18px 44px rgba(0,255,204,0.20);
+      border-color: #00ffccaa;
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.45s ease;
+    }
+
+    .card:hover img {
+      transform: scale(1.09);
+    }
+
+    .card-info {
+      padding: 1.3rem;
+      text-align: center;
+      background: rgba(0,0,0,0.45);
+    }
+
+    .card-info h3 {
+      color: #00ffcc;
+      margin-bottom: 0.5rem;
+      font-size: 1.35rem;
+    }
+
+    .card-info p {
+      color: #a0c0ff;
+      font-size: 0.97rem;
+      opacity: 0.92;
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      color: #00ffcc88;
+      font-size: 0.95rem;
+      border-top: 1px solid #00ffcc33;
+      margin-top: 5rem;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 0.8rem 1.8rem;
+      background: rgba(0,255,204,0.12);
+      color: #00ffcc;
+      border: 1px solid #00ffcc77;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .back-btn:hover {
+      background: rgba(0,255,204,0.28);
+      transform: translateY(-3px);
+      box-shadow: 0 0 18px #00ffcc77;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.7rem; }
+      .intro h2 { font-size: 1.9rem; }
+      .gallery { grid-template-columns: 1fr; gap: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
+    <h1>Trabajado en clase</h1>
+  </header>
+
+  <div class="container">
+
+    <div class="intro">
+      <h2>Creaciones de Plástica</h2>
+      <p>Estos son los trabajos que hemos realizado en clase durante el curso.</p>
+      <p>¡Empezamos con fuerza con nuestro primer gran proyecto... el Gnomo!</p>
+      
+      <a href="https://maximilian23.com" class="back-btn">← Volver con Maximilian</a>
+    </div>
+
+    <div class="gallery">
+      <!-- Primer trabajo: el gnomo -->
+      <div class="card">
+        <img src="gnomo.jpg" alt="El Gnomo - Trabajo realizado en clase">
+        <div class="card-info">
+          <h3>El Gnomo Guardián</h3>
+          <p>Primer proyecto • Curso 2025/2026</p>
+        </div>
+      </div>
+
+      <!-- Espacio para próximos trabajos -->
+      <!-- 
+      <div class="card">
+        <img src="trabajo2.jpg" alt="Segundo trabajo">
+        <div class="card-info">
+          <h3>Nombre del trabajo</h3>
+          <p>Segundo proyecto • Técnica utilizada</p>
+        </div>
+      </div>
+      -->
+    </div>
+
+  </div>
+
+  <footer>
+    CEIP Juan XXIII • Zafra • Trabajos de Plástica • Curso 2025/2026
+  </footer>
+
+</body>
+</html>
