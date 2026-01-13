@@ -91,7 +91,7 @@
       transition: all 0.4s ease;
       backdrop-filter: blur(5px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-      position: relative;
+      cursor: pointer;
     }
 
     .card:hover {
@@ -129,6 +129,43 @@
       opacity: 0.92;
     }
 
+    /* MODAL */
+    #modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    #modal img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(0,255,204,0.35);
+      object-fit: contain;
+    }
+
+    #modal-close {
+      position: absolute;
+      top: 25px;
+      right: 35px;
+      font-size: 3rem;
+      color: #00ffcc;
+      cursor: pointer;
+      text-shadow: 0 0 10px #00ffcc88;
+      transition: transform 0.2s;
+    }
+
+    #modal-close:hover {
+      transform: scale(1.2);
+    }
+
     footer {
       text-align: center;
       padding: 3rem 1rem 2rem;
@@ -144,13 +181,11 @@
       padding: 0.8rem 1.8rem;
       background: rgba(0,255,204,0.12);
       color: #00ffcc;
-      border: 1px solid #00ffcc77;
+      border: none;
       border-radius: 30px;
-      text-decoration: none;
       font-weight: bold;
       transition: all 0.3s;
       cursor: pointer;
-      border: none;
     }
 
     .close-btn:hover {
@@ -163,6 +198,7 @@
       header h1 { font-size: 1.7rem; }
       .intro h2 { font-size: 1.9rem; }
       .gallery { grid-template-columns: 1fr; gap: 1.6rem; }
+      #modal-close { top: 15px; right: 20px; font-size: 2.5rem; }
     }
   </style>
 </head>
@@ -185,8 +221,7 @@
 
     <div class="gallery">
 
-      <!-- Primer proyecto -->
-      <div class="card">
+      <div class="card" onclick="openModal('david.jpg', 'David - Primer proyecto')">
         <img src="david.jpg" alt="David - Primer proyecto de Plástica">
         <div class="card-info">
           <h3>David</h3>
@@ -194,8 +229,7 @@
         </div>
       </div>
 
-      <!-- Segunda evaluación - Nuevo dibujo -->
-      <div class="card">
+      <div class="card" onclick="openModal('paisajecera.jpg', 'Paisajecera - Segunda evaluación')">
         <img src="paisajecera.jpg" alt="Paisajecera - Segunda evaluación">
         <div class="card-info">
           <h3>Paisajecera</h3>
@@ -203,15 +237,50 @@
         </div>
       </div>
 
-      <!-- Puedes seguir añadiendo más tarjetas conforme avancen los trabajos -->
-
     </div>
 
+  </div>
+
+  <!-- Modal para ver imagen grande -->
+  <div id="modal">
+    <span id="modal-close" onclick="closeModal()">×</span>
+    <img id="modal-image" src="" alt="Imagen ampliada">
   </div>
 
   <footer>
     CEIP Juan XXIII • Zafra • Trabajos de Plástica • Curso 2025/2026
   </footer>
+
+  <script>
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-image');
+
+    function openModal(src, altText) {
+      modalImg.src = src;
+      modalImg.alt = altText;
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    // Cerrar con clic fuera de la imagen
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Cerrar con tecla ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
 
 </body>
 </html>
