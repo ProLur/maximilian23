@@ -16,6 +16,7 @@
   <meta property="og:image" content="https://tudominio.com/max2.png" />
   <meta property="og:url" content="https://tudominio.com/radio-maximilian-23" />
   <meta property="og:type" content="website" />
+
   <style>
     :root {
       --glow: #00ff72;
@@ -62,6 +63,8 @@
       pointer-events: none;
     }
     @keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* Pull to refresh */
     .pull-refresh {
       position: fixed; top: 0; left: 0; width: 100%; height: 80px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -77,42 +80,93 @@
       animation: bounce 1.5s infinite; box-shadow: 0 0 12px var(--glow);
     }
     @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(-6px);} 50%{transform:rotate(45deg) translateY(-12px);} }
+
+    /* Botón flotante de modo */
+    .floating-mode-btn {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 100;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 2px solid var(--glow);
+      background: rgba(0, 20, 0, 0.75);
+      backdrop-filter: blur(4px);
+      color: var(--glow);
+      font-size: 0.82rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 14px var(--glow);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.25s ease;
+      text-align: center;
+      line-height: 1.1;
+      padding: 4px;
+    }
+    .floating-mode-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 22px var(--glow);
+    }
+
     .logo-container { margin: 8px 0 4px; width: 100%; display: flex; justify-content: center; flex-shrink: 0; }
     .logo { width: 38vw; max-width: 120px; height: auto; filter: drop-shadow(0 0 12px var(--glow)); cursor: pointer; transition: transform 0.2s; }
     .logo:hover, .logo:active { transform: scale(1.08); }
+
     .glow-normal { filter: drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow)); animation: pulse-normal 3s ease-in-out infinite; }
     .glow-intenso { filter: drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc); animation: pulse-intenso 1.2s ease-in-out infinite; }
     @keyframes pulse-normal { 0%,100%{filter:drop-shadow(0 0 12px var(--glow)) drop-shadow(0 0 24px var(--glow));} 50%{filter:drop-shadow(0 0 18px var(--glow)) drop-shadow(0 0 36px var(--glow));} }
     @keyframes pulse-intenso { 0%,100%{filter:drop-shadow(0 0 24px var(--glow)) drop-shadow(0 0 48px var(--glow)) drop-shadow(0 0 72px #00ffcc);} 50%{filter:drop-shadow(0 0 36px var(--glow)) drop-shadow(0 0 72px var(--glow)) drop-shadow(0 0 108px #00ffcc);} }
+
     h1 { font-size: clamp(1.7rem, 6.5vw, 2.3rem); margin: 4px 0 8px; text-shadow: 0 0 8px var(--glow); line-height: 1.1; flex-shrink: 0; }
-    .terminal-box { width: 100%; max-width: 360px; margin: 0 auto; padding: 14px; border: 2px solid var(--glow); border-radius: 12px; box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15); background: rgba(0, 20, 0, 0.8); backdrop-filter: blur(4px); display: flex; flex-direction: column; gap: 10px; }
+
+    .terminal-box { 
+      width: 100%; max-width: 360px; margin: 0 auto; padding: 14px; 
+      border: 2px solid var(--glow); border-radius: 12px; 
+      box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15); 
+      background: rgba(0, 20, 0, 0.8); backdrop-filter: blur(4px); 
+      display: flex; flex-direction: column; gap: 10px; 
+    }
+
     #oscilograma { width: 100%; height: 60px; display: block; image-rendering: pixelated; background: var(--bg); border-radius: 6px; }
+
     .volume-horizontal { width: 100%; max-width: 320px; height: 46px; display: flex; align-items: center; justify-content: center; padding: 0 10px; position: relative; margin: 0 auto; }
     .volume-track-h { width: 100%; height: 18px; background: var(--leather); border: 2px solid #0a3d0a; border-radius: 9px; position: relative; overflow: visible; cursor: pointer; box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 0 12px rgba(0,255,114,0.3); background-image: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px); }
     .volume-fill-h { height: 100%; background: linear-gradient(90deg, #004d00, #00ff72, #004d00); position: absolute; left: 0; top: 0; border-radius: 7px; box-shadow: 0 0 15px var(--glow); transition: width 0.15s ease; }
     .volume-knob-h { width: 32px; height: 32px; background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00); border: 3px solid #00ff72; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 100%; box-shadow: 0 0 20px var(--glow), 0 0 30px #00ffcc, inset 0 0 8px rgba(0,0,0,0.8); cursor: grab; transition: transform 0.15s ease, box-shadow 0.2s; z-index: 10; }
     .volume-knob-h::before { content: ''; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #001400; border: 2px solid #004d00; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: inset 0 0 6px rgba(0,0,0,0.8); }
     .volume-knob-h:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.2); box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72; }
-    }
+
     .now-playing { background: rgba(0, 20, 0, 0.9); border: 1.5px dashed var(--glow); min-height: 2.2em; line-height: 1.3; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; width: 100%; margin: 0 auto; }
     .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
+
     .listener-status, .status { width: 100%; max-width: 320px; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; margin: 0 auto; }
     .listener-status { background: rgba(0, 255, 114, 0.15); border: 1.5px solid var(--glow); text-shadow: 0 0 5px var(--glow); animation: pulse 2s infinite; }
     .status { opacity: 0.9; min-height: 1.2em; font-size: 0.8rem; }
+
     @keyframes pulse { 0%,100%{opacity:0.85;} 50%{opacity:1;} }
+
     button { background: var(--dark); border: 1.5px solid var(--glow); color: var(--glow); padding: 12px 14px; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; flex: 1; min-height: 46px; touch-action: manipulation; }
     button:hover, button:active { background: rgba(0, 255, 114, 0.15); box-shadow: 0 0 10px var(--glow); }
     button:active { background: var(--glow); color: var(--bg); transform: scale(0.96); }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
+
     #startBtn { display: block; margin: 6px auto 0; padding: 12px 18px; font-size: 1rem; width: 100%; max-width: 240px; min-height: 48px; }
+
     .btn-group { display: flex; gap: 10px; justify-content: center; width: 100%; max-width: 320px; margin: 0 auto; opacity: 0; height: 0; overflow: hidden; transition: opacity 0.3s ease, height 0.3s ease, margin-top 0.3s ease; }
     .btn-group.visible { opacity: 1; height: auto; margin-top: 6px; }
+
     .note { margin: 0; padding: 8px 0 4px; font-size: 0.75rem; opacity: 0.8; width: 100%; max-width: 360px; text-align: center; line-height: 1.3; }
+
     @media (max-width: 480px) {
       body { padding: 6px 10px; gap: 6px; }
       .logo { width: 36vw; max-width: 110px; }
       .volume-horizontal { max-width: 280px; }
       .listener-status, .now-playing, .status { max-width: 280px; }
+      .floating-mode-btn { top: 10px; left: 10px; width: 48px; height: 48px; font-size: 0.78rem; }
     }
   </style>
 </head>
@@ -121,6 +175,9 @@
     <div class="pull-arrow"></div>
     <span>Desliza para recargar</span>
   </div>
+
+  <!-- Botón selector de modo -->
+  <div class="floating-mode-btn" id="modeBtn">TODO</div>
 
   <audio id="audioPlayer" preload="metadata"></audio>
 
@@ -132,7 +189,7 @@
 
   <div class="terminal-box">
     <canvas id="oscilograma"></canvas>
-
+    
     <div class="volume-horizontal">
       <div class="volume-track-h" id="volumeTrack">
         <div class="volume-fill-h" id="volumeFill"></div>
@@ -143,7 +200,6 @@
     <div class="listener-status">Estado de la emisora: Correcto</div>
     <div id="nowPlaying" class="now-playing">Cargando señal...</div>
     <div class="status" id="status">¡Pulsa Iniciar Emisión!</div>
-
     <button id="startBtn" disabled>Iniciar Emisión</button>
 
     <div class="btn-group" id="controls">
@@ -172,10 +228,23 @@
       volumeTrack: document.getElementById('volumeTrack'),
       volumeFill: document.getElementById('volumeFill'),
       volumeKnob: document.getElementById('volumeKnob'),
-      pullRefresh: document.getElementById('pullRefresh')
+      pullRefresh: document.getElementById('pullRefresh'),
+      modeBtn: document.getElementById('modeBtn')
     };
 
-    let items = [], currentIndex = 0;
+    // Variables de modo
+    let mode = "all"; // "all" | "vivaldi" | "mozart"
+    const modeOrder = ["all", "vivaldi", "mozart"];
+    const modeLabels = {
+      all:     "TODO",
+      vivaldi: "VIVALDI",
+      mozart:  "MOZART"
+    };
+
+    let allItems = [];     // Lista completa (original)
+    let items = [];        // Lista filtrada según modo
+    let currentIndex = 0;
+
     let isPlaying = false, isPaused = false, isMuted = false;
     let currentVolume = 1.0;
     let audioContext = null, analyser = null, source = null;
@@ -183,7 +252,9 @@
     let watchdogTimer = null;
 
     // ====================== PULL TO REFRESH ======================
-    window.addEventListener('touchstart', e => { if (window.scrollY === 0) { touchStartY = e.touches[0].clientY; isPulling = true; } });
+    window.addEventListener('touchstart', e => { 
+      if (window.scrollY === 0) { touchStartY = e.touches[0].clientY; isPulling = true; } 
+    });
     window.addEventListener('touchmove', e => {
       if (!isPulling) return;
       const pullDistance = e.touches[0].clientY - touchStartY;
@@ -209,6 +280,64 @@
       setTimeout(() => { els.pullRefresh.style.transition = ''; }, 500);
     });
 
+    // ====================== GESTIÓN DE MODOS ======================
+    function updateFilteredPlaylist() {
+      if (mode === "all") {
+        items = [...allItems];
+      } else if (mode === "vivaldi") {
+        items = allItems.filter(item => 
+          item.file.includes("invierno") || 
+          item.file.includes("verano") || 
+          item.file.includes("otono") || 
+          item.file.includes("primavera")
+        );
+      } else if (mode === "mozart") {
+        items = allItems.filter(item => 
+          !item.file.includes("invierno") && 
+          !item.file.includes("verano") && 
+          !item.file.includes("otono") && 
+          !item.file.includes("primavera")
+        );
+      }
+
+      // Seguridad: si no hay canciones en el modo seleccionado → volvemos a "all"
+      if (items.length === 0 && mode !== "all") {
+        mode = "all";
+        items = [...allItems];
+        els.modeBtn.textContent = modeLabels.all;
+      }
+
+      // Intentamos mantener canción similar
+      if (items.length > 0) {
+        const currentFile = allItems[currentIndex]?.file;
+        const newIndex = items.findIndex(i => i.file === currentFile);
+        currentIndex = newIndex >= 0 ? newIndex : Math.min(currentIndex, items.length - 1);
+        if (currentIndex < 0) currentIndex = 0;
+      }
+
+      updateNowPlaying();
+    }
+
+    // Cambiar modo al pulsar botón
+    els.modeBtn.addEventListener('click', () => {
+      const currentIdx = modeOrder.indexOf(mode);
+      const nextIdx = (currentIdx + 1) % modeOrder.length;
+      mode = modeOrder[nextIdx];
+      
+      els.modeBtn.textContent = modeLabels[mode];
+
+      const wasPlaying = isPlaying && !isPaused;
+
+      updateFilteredPlaylist();
+
+      if (wasPlaying && items.length > 0) {
+        if (watchdogTimer) clearTimeout(watchdogTimer);
+        playCurrentSong();
+      } else if (items.length === 0) {
+        els.status.textContent = "No hay canciones en este modo";
+      }
+    });
+
     // ====================== CARGAR PLAYLIST ======================
     async function loadPlaylists() {
       try {
@@ -216,37 +345,60 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const text = await res.text();
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-        items = lines.map(line => {
+        
+        allItems = lines.map(line => {
           const parts = line.split(' - ');
           const file = parts[0].trim();
           const title = parts.slice(1).join(' - ').trim() || file;
           return { file, title };
         }).filter(i => i.file.endsWith('.mp3'));
-        if (items.length === 0) throw new Error('No hay MP3 válidos');
+
+        if (allItems.length === 0) throw new Error('No hay MP3 válidos');
+
+        updateFilteredPlaylist();
+
       } catch (err) {
         console.error(err);
-        items = [{ file: 'test.mp3', title: 'Canción de prueba' }];
+        allItems = [{ file: 'test.mp3', title: 'Canción de prueba' }];
+        updateFilteredPlaylist();
       }
+
       preloadFirstSong();
     }
+
     function preloadFirstSong() {
-      if (!items.length) { els.status.textContent = "Error: No hay canciones"; return; }
-      currentIndex = Math.floor(Math.random() * items.length);
+      if (!items.length) {
+        els.status.textContent = "Error: No hay canciones";
+        els.startBtn.disabled = true;
+        return;
+      }
+
+      // Solo aleatorio la primera vez real
+      if (currentIndex === 0 && !isPlaying) {
+        currentIndex = Math.floor(Math.random() * items.length);
+      }
+
       updateNowPlaying();
       els.status.textContent = "¡Pulsa Iniciar Emisión!";
       els.startBtn.disabled = false;
     }
 
     function updateNowPlaying() {
+      if (!items.length) {
+        els.nowPlaying.innerHTML = "<strong>—</strong>";
+        return;
+      }
       const song = items[currentIndex];
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
 
-    // ====================== REPRODUCCIÓN SEGURA PARA MÓVILES ======================
+    // ====================== REPRODUCCIÓN ======================
     function playCurrentSong() {
+      if (!items.length) return;
+
       const song = items[currentIndex];
       els.audio.src = CONFIG.mp3Folder + song.file;
-      els.audio.load();  // Crucial en iOS
+      els.audio.load();
       els.audio.volume = isMuted ? 0 : currentVolume;
 
       if (watchdogTimer) clearTimeout(watchdogTimer);
@@ -258,16 +410,14 @@
         els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
         connectAudioToOscilloscope();
 
-        // Watchdog de seguridad
         const remaining = els.audio.duration ? (els.audio.duration - els.audio.currentTime + 3) * 1000 : 6000;
         watchdogTimer = setTimeout(() => {
           if (isPlaying && !isPaused && els.audio.currentTime >= els.audio.duration - 2) {
             nextSong();
           }
         }, remaining);
-
       }).catch(err => {
-        console.warn("Necesario interacción", err);
+        console.warn("Necesaria interacción", err);
         els.status.textContent = "Toca para activar sonido";
       });
     }
@@ -275,10 +425,8 @@
     function nextSong() {
       if (!items.length || !isPlaying) return;
       if (watchdogTimer) clearTimeout(watchdogTimer);
-
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
-
       setTimeout(() => {
         if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         playCurrentSong();
@@ -290,17 +438,17 @@
       els.startBtn.style.display = 'none';
       els.controls.classList.add('visible');
       els.status.textContent = "Iniciando emisión...";
-
+      
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.85;
       }
-
       audioContext.resume().then(() => playCurrentSong());
     }
 
+    // ====================== EVENTOS AUDIO ======================
     els.audio.addEventListener('ended', () => {
       if (watchdogTimer) clearTimeout(watchdogTimer);
       nextSong();
@@ -323,8 +471,6 @@
     }
 
     function drawOscilloscope() {
-      // ... (igual que tenías, sin cambios) ...
-      // código completo del osciloscopio (lo dejo tal cual estaba en tu versión original)
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       const canvas = els.canvas;
@@ -356,6 +502,7 @@
         ctx.shadowBlur = 0;
       }
       draw();
+
       window.addEventListener('resize', () => { w = canvas.width = canvas.offsetWidth; });
     }
 
@@ -367,8 +514,8 @@
     }
 
     function setVolume(value) {
-      currentVolume = value;
-      if (!isMuted) els.audio.volume = value;
+      currentVolume = Math.max(0, Math.min(1, value));
+      if (!isMuted) els.audio.volume = currentVolume;
       updateVolumeUI();
     }
 
@@ -383,7 +530,6 @@
     let isDragging = false;
     els.volumeKnob.addEventListener('mousedown', e => { e.preventDefault(); isDragging = true; });
     els.volumeKnob.addEventListener('touchstart', e => { e.preventDefault(); isDragging = true; });
-
     const moveHandler = e => { if (isDragging) setVolume(getVolumeFromEvent(e)); };
     document.addEventListener('mousemove', moveHandler);
     document.addEventListener('touchmove', moveHandler);
