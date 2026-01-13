@@ -64,7 +64,6 @@
     }
     @keyframes radar { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    /* Pull to refresh */
     .pull-refresh {
       position: fixed; top: 0; left: 0; width: 100%; height: 80px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -81,20 +80,20 @@
     }
     @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(-6px);} 50%{transform:rotate(45deg) translateY(-12px);} }
 
-    /* Botón flotante de modo */
+    /* Botón modo - esquina superior DERECHA, pegado al cuadro */
     .floating-mode-btn {
-      position: fixed;
-      top: 12px;
-      left: 12px;
+      position: absolute;
+      top: 16px;
+      right: 16px;
       z-index: 100;
-      width: 54px;
-      height: 54px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       border: 2px solid var(--glow);
-      background: rgba(0, 20, 0, 0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 20, 0, 0.85);
+      backdrop-filter: blur(5px);
       color: var(--glow);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -109,7 +108,7 @@
     }
     .floating-mode-btn:hover {
       transform: scale(1.08);
-      box-shadow: 0 0 22px var(--glow);
+      box-shadow: 0 0 24px var(--glow);
     }
 
     .logo-container { margin: 8px 0 4px; width: 100%; display: flex; justify-content: center; flex-shrink: 0; }
@@ -124,11 +123,19 @@
     h1 { font-size: clamp(1.7rem, 6.5vw, 2.3rem); margin: 4px 0 8px; text-shadow: 0 0 8px var(--glow); line-height: 1.1; flex-shrink: 0; }
 
     .terminal-box { 
-      width: 100%; max-width: 360px; margin: 0 auto; padding: 14px; 
-      border: 2px solid var(--glow); border-radius: 12px; 
+      width: 100%; 
+      max-width: 360px; 
+      margin: 16px auto 0; 
+      padding: 14px; 
+      border: 2px solid var(--glow); 
+      border-radius: 12px; 
       box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15); 
-      background: rgba(0, 20, 0, 0.8); backdrop-filter: blur(4px); 
-      display: flex; flex-direction: column; gap: 10px; 
+      background: rgba(0, 20, 0, 0.8); 
+      backdrop-filter: blur(4px); 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      position: relative;
     }
 
     #oscilograma { width: 100%; height: 60px; display: block; image-rendering: pixelated; background: var(--bg); border-radius: 6px; }
@@ -166,18 +173,23 @@
       .logo { width: 36vw; max-width: 110px; }
       .volume-horizontal { max-width: 280px; }
       .listener-status, .now-playing, .status { max-width: 280px; }
-      .floating-mode-btn { top: 10px; left: 10px; width: 48px; height: 48px; font-size: 0.78rem; }
+      .floating-mode-btn { 
+        top: 12px; 
+        right: 12px; 
+        width: 50px; 
+        height: 50px; 
+        font-size: 0.76rem; 
+      }
+      .terminal-box { margin-top: 14px; }
     }
   </style>
 </head>
 <body>
+
   <div class="pull-refresh" id="pullRefresh">
     <div class="pull-arrow"></div>
     <span>Desliza para recargar</span>
   </div>
-
-  <!-- Botón selector de modo -->
-  <div class="floating-mode-btn" id="modeBtn">TODO</div>
 
   <audio id="audioPlayer" preload="metadata"></audio>
 
@@ -188,6 +200,9 @@
   <h1>RADIO MAXIMILIAN 23</h1>
 
   <div class="terminal-box">
+    <!-- Botón dentro del cuadro, esquina superior derecha -->
+    <div class="floating-mode-btn" id="modeBtn">TODO</div>
+
     <canvas id="oscilograma"></canvas>
     
     <div class="volume-horizontal">
@@ -232,7 +247,6 @@
       modeBtn: document.getElementById('modeBtn')
     };
 
-    // Variables de modo
     let mode = "all"; // "all" | "vivaldi" | "mozart"
     const modeOrder = ["all", "vivaldi", "mozart"];
     const modeLabels = {
@@ -241,8 +255,8 @@
       mozart:  "MOZART"
     };
 
-    let allItems = [];     // Lista completa (original)
-    let items = [];        // Lista filtrada según modo
+    let allItems = [];
+    let items = [];
     let currentIndex = 0;
 
     let isPlaying = false, isPaused = false, isMuted = false;
@@ -251,7 +265,7 @@
     let touchStartY = 0, isPulling = false;
     let watchdogTimer = null;
 
-    // ====================== PULL TO REFRESH ======================
+    // Pull to refresh ......................................................
     window.addEventListener('touchstart', e => { 
       if (window.scrollY === 0) { touchStartY = e.touches[0].clientY; isPulling = true; } 
     });
@@ -280,7 +294,7 @@
       setTimeout(() => { els.pullRefresh.style.transition = ''; }, 500);
     });
 
-    // ====================== GESTIÓN DE MODOS ======================
+    // Modos .................................................................
     function updateFilteredPlaylist() {
       if (mode === "all") {
         items = [...allItems];
@@ -300,14 +314,12 @@
         );
       }
 
-      // Seguridad: si no hay canciones en el modo seleccionado → volvemos a "all"
       if (items.length === 0 && mode !== "all") {
         mode = "all";
         items = [...allItems];
         els.modeBtn.textContent = modeLabels.all;
       }
 
-      // Intentamos mantener canción similar
       if (items.length > 0) {
         const currentFile = allItems[currentIndex]?.file;
         const newIndex = items.findIndex(i => i.file === currentFile);
@@ -318,7 +330,6 @@
       updateNowPlaying();
     }
 
-    // Cambiar modo al pulsar botón
     els.modeBtn.addEventListener('click', () => {
       const currentIdx = modeOrder.indexOf(mode);
       const nextIdx = (currentIdx + 1) % modeOrder.length;
@@ -338,7 +349,7 @@
       }
     });
 
-    // ====================== CARGAR PLAYLIST ======================
+    // Playlist ..............................................................
     async function loadPlaylists() {
       try {
         const res = await fetch('playlists.txt?t=' + Date.now(), { cache: 'no-cache' });
@@ -373,7 +384,6 @@
         return;
       }
 
-      // Solo aleatorio la primera vez real
       if (currentIndex === 0 && !isPlaying) {
         currentIndex = Math.floor(Math.random() * items.length);
       }
@@ -392,7 +402,7 @@
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
 
-    // ====================== REPRODUCCIÓN ======================
+    // Reproducción ..........................................................
     function playCurrentSong() {
       if (!items.length) return;
 
@@ -448,7 +458,6 @@
       audioContext.resume().then(() => playCurrentSong());
     }
 
-    // ====================== EVENTOS AUDIO ======================
     els.audio.addEventListener('ended', () => {
       if (watchdogTimer) clearTimeout(watchdogTimer);
       nextSong();
@@ -459,7 +468,7 @@
       nextSong();
     });
 
-    // ====================== OSCILOSCOPIO ======================
+    // Osciloscopio ..........................................................
     function connectAudioToOscilloscope() {
       if (source) source.disconnect();
       try {
@@ -506,7 +515,7 @@
       window.addEventListener('resize', () => { w = canvas.width = canvas.offsetWidth; });
     }
 
-    // ====================== VOLUMEN ======================
+    // Volumen ...............................................................
     function updateVolumeUI() {
       const percent = (isMuted ? 0 : currentVolume) * 100;
       els.volumeFill.style.width = percent + '%';
@@ -536,7 +545,7 @@
     document.addEventListener('mouseup', () => isDragging = false);
     document.addEventListener('touchend', () => isDragging = false);
 
-    // ====================== BOTONES ======================
+    // Botones ...............................................................
     els.pauseBtn.addEventListener('click', () => {
       if (!isPlaying) return;
       if (isPaused) {
@@ -571,7 +580,7 @@
       }, 3000);
     });
 
-    // ====================== INICIO ======================
+    // Inicio .................................................................
     window.addEventListener('load', async () => {
       await loadPlaylists();
       updateVolumeUI();
