@@ -94,7 +94,7 @@
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      height: 100%; /* Para que todas las tarjetas tengan la misma altura en la fila */
+      height: 100%;
     }
 
     .card:hover {
@@ -105,7 +105,7 @@
 
     .image-container {
       width: 100%;
-      height: 280px;          /* Altura fija - puedes cambiar este valor */
+      height: 280px;
       overflow: hidden;
       position: relative;
     }
@@ -113,7 +113,7 @@
     .card img {
       width: 100%;
       height: 100%;
-      object-fit: cover;      /* Recorta manteniendo proporciones, llena el espacio */
+      object-fit: cover;
       object-position: center;
       transition: transform 0.45s ease;
     }
@@ -126,7 +126,7 @@
       padding: 1.3rem;
       text-align: center;
       background: rgba(0,0,0,0.45);
-      flex-grow: 1;           /* Empuja el texto hacia abajo si hay poco */
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -214,7 +214,7 @@
       header h1 { font-size: 1.7rem; }
       .intro h2 { font-size: 1.9rem; }
       .gallery { grid-template-columns: 1fr; gap: 1.6rem; }
-      .image-container { height: 240px; } /* Altura menor en móviles */
+      .image-container { height: 240px; }
       #modal-close { top: 15px; right: 20px; font-size: 2.5rem; }
     }
   </style>
@@ -230,31 +230,61 @@
 
     <div class="intro">
       <h2>Creaciones de Plástica</h2>
-      <p>Estos son los trabajos que hemos realizado (y estamos realizando) en clase durante el curso.</p>
-      <p>Ya tenemos el primer proyecto con <strong>David el gnomo</strong> y ahora, en la <strong>segunda evaluación</strong>, empezamos a poner los dibujos que vamos a trabajar.</p>
+      <p>Estos son algunos de los trabajos que hemos realizado en clase.</p>
+      <p>¡Seguimos añadiendo más dibujos y creaciones!</p>
       
       <button class="close-btn" onclick="window.close()">Cerrar</button>
     </div>
 
     <div class="gallery">
 
-      <div class="card" onclick="openModal('david.jpg', 'David el gnomo - Primer proyecto')">
+      <div class="card" onclick="openModal('david.jpg', 'David el gnomo')">
         <div class="image-container">
-          <img src="david.jpg" alt="David el gnomo - Primer proyecto de Plástica">
+          <img src="david.jpg" alt="David el gnomo">
         </div>
         <div class="card-info">
           <h3>David el gnomo</h3>
-          <p>Primer proyecto del curso. Nuestro gnomo guardián del bosque, con mucho detalle y personalidad.</p>
+          <p>Nuestro gnomo guardián del bosque, con mucho detalle y personalidad.</p>
         </div>
       </div>
 
-      <div class="card" onclick="openModal('paisajecera.jpg', 'Paisaje con cera - Segunda evaluación')">
+      <div class="card" onclick="openModal('paisajecera.jpg', 'Paisaje con cera')">
         <div class="image-container">
-          <img src="paisajecera.jpg" alt="Paisaje con cera - Segunda evaluación">
+          <img src="paisajecera.jpg" alt="Paisaje con cera">
         </div>
         <div class="card-info">
           <h3>Paisaje con cera</h3>
-          <p>Segunda evaluación. Dibujo donde practicamos la técnica de la cera para crear texturas y efectos de luz.</p>
+          <p>Dibujo donde practicamos la técnica de la cera para crear texturas y efectos de luz.</p>
+        </div>
+      </div>
+
+      <div class="card" onclick="openModal('carretera.jpg', 'Carretera')">
+        <div class="image-container">
+          <img src="carretera.jpg" alt="Carretera">
+        </div>
+        <div class="card-info">
+          <h3>Carretera</h3>
+          <p>Trabajamos el punto de fuga para crear profundidad y perspectiva.</p>
+        </div>
+      </div>
+
+      <div class="card" onclick="openModal('zup.jpg', 'Zup, el amigo de Maximilian 23')">
+        <div class="image-container">
+          <img src="zup.jpg" alt="Zup, el amigo de Maximilian 23">
+        </div>
+        <div class="card-info">
+          <h3>Zup, el amigo de Maximilian 23</h3>
+          <p>Personaje compañero y fiel amigo de nuestro asistente Maximilian.</p>
+        </div>
+      </div>
+
+      <div class="card" onclick="openModal('maximilian23.jpg', 'Maximilian 23')">
+        <div class="image-container">
+          <img src="maximilian23.jpg" alt="Maximilian 23">
+        </div>
+        <div class="card-info">
+          <h3>Maximilian 23</h3>
+          <p>El propio Maximilian 23, nuestro asistente de inteligencia artificial.</p>
         </div>
       </div>
 
@@ -269,7 +299,7 @@
   </div>
 
   <footer>
-    CEIP Juan XXIII • Zafra • Trabajos de Plástica • Curso 2025/2026
+    CEIP Juan XXIII • Zafra • Trabajos de Plástica
   </footer>
 
   <script>
