@@ -61,17 +61,11 @@
     .intro {
       text-align: center;
       margin-bottom: 2.5rem;
-      padding: 1.8rem;
+      padding: 1.5rem;
       background: rgba(30,45,61,0.38);
       border: 1px solid #00ffcc44;
       border-radius: 14px;
       backdrop-filter: blur(6px);
-    }
-
-    .intro h2 {
-      color: #00ffcc;
-      margin-bottom: 1rem;
-      font-size: 2rem;
     }
 
     .gallery {
@@ -103,7 +97,7 @@
 
     .image-container {
       width: 100%;
-      height: 200px;           /* ← más pequeña */
+      height: 200px;
       overflow: hidden;
     }
 
@@ -142,7 +136,7 @@
       line-height: 1.35;
     }
 
-    /* MODAL - sigue igual de grande */
+    /* MODAL */
     #modal {
       display: none;
       position: fixed;
@@ -196,7 +190,6 @@
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
-      margin-top: 1.5rem;
     }
 
     .close-btn:hover {
@@ -206,7 +199,6 @@
 
     @media (max-width: 600px) {
       header h1 { font-size: 1.5rem; }
-      .intro h2 { font-size: 1.8rem; }
       .gallery { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; }
       .image-container { height: 180px; }
       .card-info h3 { font-size: 1.1rem; }
@@ -225,10 +217,6 @@
   <div class="container">
 
     <div class="intro">
-      <h2>Creaciones de Plástica</h2>
-      <p>Estos son algunos de los trabajos que hemos realizado en clase.</p>
-      <p>¡Seguimos añadiendo más dibujos y creaciones!</p>
-      
       <button class="close-btn" onclick="window.close()">Cerrar</button>
     </div>
 
