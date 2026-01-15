@@ -7,25 +7,22 @@
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <meta name="description" content="Trabajos realizados en clase de Plástica y Arte - CEIP Juan XXIII Zafra">
   <meta name="theme-color" content="#00ffcc">
-
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     body {
       font-family: "Courier New", Courier, monospace;
       background: #0d1117;
       color: #e6edf3;
       min-height: 100dvh;
-      background-image: 
+      background-image:
         radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
         radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
       background-attachment: fixed;
     }
-
     header {
       background: rgba(22,27,34,0.92);
       backdrop-filter: blur(8px);
@@ -38,26 +35,22 @@
       top: 0;
       z-index: 100;
     }
-
     header img {
       height: 45px;
       border-radius: 50%;
       border: 2px solid #00ffcc88;
       box-shadow: 0 0 12px #00ffcc55;
     }
-
     header h1 {
       font-size: 1.7rem;
       color: #00ffcc;
       text-shadow: 0 0 8px #00ffccaa;
     }
-
     .container {
       max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1rem;
     }
-
     .intro {
       text-align: center;
       margin-bottom: 2.5rem;
@@ -67,14 +60,12 @@
       border-radius: 14px;
       backdrop-filter: blur(6px);
     }
-
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 1.4rem;
       padding: 1rem 0;
     }
-
     .card {
       background: rgba(30,45,61,0.35);
       border: 1px solid #00ffcc55;
@@ -88,19 +79,16 @@
       flex-direction: column;
       height: 100%;
     }
-
     .card:hover {
       transform: translateY(-10px);
       box-shadow: 0 14px 34px rgba(0,255,204,0.18);
       border-color: #00ffcc99;
     }
-
     .image-container {
       width: 100%;
       height: 200px;
       overflow: hidden;
     }
-
     .card img {
       width: 100%;
       height: 100%;
@@ -108,11 +96,9 @@
       object-position: center;
       transition: transform 0.4s ease;
     }
-
     .card:hover img {
       transform: scale(1.1);
     }
-
     .card-info {
       padding: 1rem;
       text-align: center;
@@ -122,20 +108,17 @@
       flex-direction: column;
       justify-content: center;
     }
-
     .card-info h3 {
       color: #00ffcc;
       margin-bottom: 0.4rem;
       font-size: 1.2rem;
     }
-
     .card-info p {
       color: #a0c0ff;
       font-size: 0.88rem;
       opacity: 0.9;
       line-height: 1.35;
     }
-
     /* MODAL */
     #modal {
       display: none;
@@ -148,7 +131,6 @@
       justify-content: center;
       padding: 1.5rem;
     }
-
     #modal img {
       max-width: 92vw;
       max-height: 92vh;
@@ -157,7 +139,6 @@
       box-shadow: 0 0 40px rgba(0,255,204,0.35);
       object-fit: contain;
     }
-
     #modal-close {
       position: absolute;
       top: 20px;
@@ -167,11 +148,9 @@
       cursor: pointer;
       text-shadow: 0 0 10px #00ffcc88;
     }
-
     #modal-close:hover {
       transform: scale(1.15);
     }
-
     footer {
       text-align: center;
       padding: 2.5rem 1rem 1.5rem;
@@ -180,7 +159,6 @@
       border-top: 1px solid #00ffcc33;
       margin-top: 4rem;
     }
-
     .close-btn {
       padding: 0.7rem 1.5rem;
       background: rgba(0,255,204,0.12);
@@ -191,12 +169,10 @@
       cursor: pointer;
       transition: all 0.3s;
     }
-
     .close-btn:hover {
       background: rgba(0,255,204,0.25);
       transform: translateY(-3px);
     }
-
     @media (max-width: 600px) {
       header h1 { font-size: 1.5rem; }
       .gallery { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; }
@@ -208,20 +184,15 @@
   </style>
 </head>
 <body>
-
   <header>
     <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
     <h1>Trabajado en clase</h1>
   </header>
-
   <div class="container">
-
     <div class="intro">
       <button class="close-btn" onclick="window.close()">Cerrar</button>
     </div>
-
     <div class="gallery">
-
       <div class="card" onclick="openModal('david.jpg', 'David el gnomo')">
         <div class="image-container">
           <img src="david.jpg" alt="David el gnomo">
@@ -231,7 +202,6 @@
           <p>Nuestro gnomo guardián del bosque, con mucho detalle y personalidad.</p>
         </div>
       </div>
-
       <div class="card" onclick="openModal('paisajecera.jpg', 'Paisaje con cera')">
         <div class="image-container">
           <img src="paisajecera.jpg" alt="Paisaje con cera">
@@ -241,7 +211,6 @@
           <p>Dibujo donde practicamos la técnica de la cera para crear texturas y efectos de luz.</p>
         </div>
       </div>
-
       <div class="card" onclick="openModal('carretera.jpg', 'Carretera')">
         <div class="image-container">
           <img src="carretera.jpg" alt="Carretera">
@@ -251,7 +220,6 @@
           <p>Trabajamos el punto de fuga para crear profundidad y perspectiva.</p>
         </div>
       </div>
-
       <div class="card" onclick="openModal('zup.jpg', 'Zup, el amigo de Maximilian 23')">
         <div class="image-container">
           <img src="zup.jpg" alt="Zup, el amigo de Maximilian 23">
@@ -261,7 +229,6 @@
           <p>Personaje compañero y fiel amigo de nuestro asistente Maximilian.</p>
         </div>
       </div>
-
       <div class="card" onclick="openModal('maximilian23.jpg', 'Maximilian 23')">
         <div class="image-container">
           <img src="maximilian23.jpg" alt="Maximilian 23">
@@ -271,9 +238,17 @@
           <p>El propio Maximilian 23, nuestro asistente de inteligencia artificial.</p>
         </div>
       </div>
-
+      <!-- NUEVA FICHA AÑADIDA -->
+      <div class="card" onclick="openModal('retratos.jpg', 'Retratos feroces')">
+        <div class="image-container">
+          <img src="retratos.jpg" alt="Retratos feroces">
+        </div>
+        <div class="card-info">
+          <h3>Retratos feroces</h3>
+          <p>Retratos con carácter intenso y expresivo. ¡Muestran mucha personalidad y fuerza!</p>
+        </div>
+      </div>
     </div>
-
   </div>
 
   <!-- Modal -->
@@ -289,27 +264,26 @@
   <script>
     const modal = document.getElementById('modal');
     const modalImg = document.getElementById('modal-image');
-
+    
     function openModal(src, altText) {
       modalImg.src = src;
       modalImg.alt = altText;
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
-
+    
     function closeModal() {
       modal.style.display = 'none';
       document.body.style.overflow = '';
     }
-
+    
     modal.addEventListener('click', e => {
       if (e.target === modal) closeModal();
     });
-
+    
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeModal();
     });
   </script>
-
 </body>
 </html>
