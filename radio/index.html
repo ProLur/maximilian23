@@ -261,7 +261,7 @@
     let currentVolume = 1.0;
     let audioContext = null, analyser = null, source = null;
     let touchStartY = 0, isPulling = false;
-    let watchdogTimer = null;
+    let progressCheckInterval = null;
 
     // Pull to refresh
     window.addEventListener('touchstart', e => { 
@@ -340,7 +340,6 @@
       updateFilteredPlaylist();
 
       if (wasPlaying && items.length > 0) {
-        if (watchdogTimer) clearTimeout(watchdogTimer);
         playCurrentSong();
       } else if (items.length === 0) {
         els.status.textContent = "No hay canciones en este modo";
@@ -400,6 +399,31 @@
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
 
+    // Comprobación de progreso (respaldo para móviles)
+    function startProgressCheck() {
+      if (progressCheckInterval) clearInterval(progressCheckInterval);
+      
+      progressCheckInterval = setInterval(() => {
+        if (!isPlaying || isPaused || !els.audio.duration) return;
+        
+        const remaining = els.audio.duration - els.audio.currentTime;
+        
+        // Si quedan menos de 1 segundo y está cerca del final
+        if (remaining < 1 && els.audio.currentTime > 0) {
+          console.log('Forzando siguiente canción (respaldo móvil)');
+          clearInterval(progressCheckInterval);
+          nextSong();
+        }
+      }, 2000); // Comprobación cada 2 segundos
+    }
+
+    function stopProgressCheck() {
+      if (progressCheckInterval) {
+        clearInterval(progressCheckInterval);
+        progressCheckInterval = null;
+      }
+    }
+
     // Reproducción
     function playCurrentSong() {
       if (!items.length) return;
@@ -409,21 +433,13 @@
       els.audio.load();
       els.audio.volume = isMuted ? 0 : currentVolume;
 
-      if (watchdogTimer) clearTimeout(watchdogTimer);
-
       els.audio.play().then(() => {
         isPlaying = true;
         isPaused = false;
         els.pauseBtn.textContent = 'Pausar';
         els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
         connectAudioToOscilloscope();
-
-        const remaining = els.audio.duration ? (els.audio.duration - els.audio.currentTime + 3) * 1000 : 6000;
-        watchdogTimer = setTimeout(() => {
-          if (isPlaying && !isPaused && els.audio.currentTime >= els.audio.duration - 2) {
-            nextSong();
-          }
-        }, remaining);
+        startProgressCheck(); // Iniciar comprobación de respaldo
       }).catch(err => {
         console.warn("Necesaria interacción", err);
         els.status.textContent = "Toca para activar sonido";
@@ -432,7 +448,7 @@
 
     function nextSong() {
       if (!items.length || !isPlaying) return;
-      if (watchdogTimer) clearTimeout(watchdogTimer);
+      stopProgressCheck();
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
       setTimeout(() => {
@@ -456,13 +472,35 @@
       audioContext.resume().then(() => playCurrentSong());
     }
 
+    // Eventos de audio mejorados para móvil
     els.audio.addEventListener('ended', () => {
-      if (watchdogTimer) clearTimeout(watchdogTimer);
+      console.log('Evento ended disparado');
+      stopProgressCheck();
       nextSong();
     });
 
+    // Eventos adicionales para detectar problemas en móvil
+    els.audio.addEventListener('error', (e) => {
+      console.error('Error en audio:', e);
+      els.status.textContent = "Error de reproducción";
+      stopProgressCheck();
+      setTimeout(() => nextSong(), 1000);
+    });
+
+    els.audio.addEventListener('stalled', () => {
+      console.warn('Audio estancado');
+    });
+
+    els.audio.addEventListener('waiting', () => {
+      console.log('Audio esperando datos');
+    });
+
+    els.audio.addEventListener('canplay', () => {
+      console.log('Audio puede reproducirse');
+    });
+
     els.nextBtn.addEventListener('click', () => {
-      if (watchdogTimer) clearTimeout(watchdogTimer);
+      stopProgressCheck();
       nextSong();
     });
 
@@ -551,11 +589,13 @@
         els.pauseBtn.textContent = 'Pausar';
         isPaused = false;
         els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        startProgressCheck();
       } else {
         els.audio.pause();
         els.pauseBtn.textContent = 'Play';
         isPaused = true;
         els.status.textContent = "Pausado";
+        stopProgressCheck();
       }
     });
 
@@ -582,6 +622,11 @@
     window.addEventListener('load', async () => {
       await loadPlaylists();
       updateVolumeUI();
+    });
+
+    // Limpiar intervalo al salir
+    window.addEventListener('beforeunload', () => {
+      stopProgressCheck();
     });
   </script>
 </body>
