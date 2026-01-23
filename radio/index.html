@@ -261,7 +261,7 @@
     let currentVolume = 1.0;
     let audioContext = null, analyser = null, source = null;
     let touchStartY = 0, isPulling = false;
-    let progressCheckInterval = null;
+    let audioSourceConnected = false;
 
     // Pull to refresh
     window.addEventListener('touchstart', e => { 
@@ -399,31 +399,6 @@
       els.nowPlaying.innerHTML = `<strong>${song.title}</strong>`;
     }
 
-    // Comprobación de progreso (respaldo para móviles)
-    function startProgressCheck() {
-      if (progressCheckInterval) clearInterval(progressCheckInterval);
-      
-      progressCheckInterval = setInterval(() => {
-        if (!isPlaying || isPaused || !els.audio.duration) return;
-        
-        const remaining = els.audio.duration - els.audio.currentTime;
-        
-        // Si quedan menos de 1 segundo y está cerca del final
-        if (remaining < 1 && els.audio.currentTime > 0) {
-          console.log('Forzando siguiente canción (respaldo móvil)');
-          clearInterval(progressCheckInterval);
-          nextSong();
-        }
-      }, 2000); // Comprobación cada 2 segundos
-    }
-
-    function stopProgressCheck() {
-      if (progressCheckInterval) {
-        clearInterval(progressCheckInterval);
-        progressCheckInterval = null;
-      }
-    }
-
     // Reproducción
     function playCurrentSong() {
       if (!items.length) return;
@@ -439,7 +414,6 @@
         els.pauseBtn.textContent = 'Pausar';
         els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
         connectAudioToOscilloscope();
-        startProgressCheck(); // Iniciar comprobación de respaldo
       }).catch(err => {
         console.warn("Necesaria interacción", err);
         els.status.textContent = "Toca para activar sonido";
@@ -447,14 +421,20 @@
     }
 
     function nextSong() {
-      if (!items.length || !isPlaying) return;
-      stopProgressCheck();
+      if (!items.length) return;
+      
       currentIndex = (currentIndex + 1) % items.length;
       updateNowPlaying();
+      
+      // Pequeño delay antes de reproducir
       setTimeout(() => {
-        if (audioContext && audioContext.state === 'suspended') audioContext.resume();
-        playCurrentSong();
-      }, 100);
+        if (audioContext && audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        if (isPlaying) {
+          playCurrentSong();
+        }
+      }, 200);
     }
 
     function startPlayback() {
@@ -472,47 +452,35 @@
       audioContext.resume().then(() => playCurrentSong());
     }
 
-    // Eventos de audio mejorados para móvil
+    // Evento ended simplificado
     els.audio.addEventListener('ended', () => {
-      console.log('Evento ended disparado');
-      stopProgressCheck();
+      console.log('Canción finalizada, reproduciendo siguiente...');
       nextSong();
     });
 
-    // Eventos adicionales para detectar problemas en móvil
+    // Eventos de error
     els.audio.addEventListener('error', (e) => {
       console.error('Error en audio:', e);
       els.status.textContent = "Error de reproducción";
-      stopProgressCheck();
       setTimeout(() => nextSong(), 1000);
     });
 
-    els.audio.addEventListener('stalled', () => {
-      console.warn('Audio estancado');
-    });
+    els.nextBtn.addEventListener('click', nextSong);
 
-    els.audio.addEventListener('waiting', () => {
-      console.log('Audio esperando datos');
-    });
-
-    els.audio.addEventListener('canplay', () => {
-      console.log('Audio puede reproducirse');
-    });
-
-    els.nextBtn.addEventListener('click', () => {
-      stopProgressCheck();
-      nextSong();
-    });
-
-    // Osciloscopio
+    // Osciloscopio mejorado
     function connectAudioToOscilloscope() {
-      if (source) source.disconnect();
+      // Solo conectar una vez
+      if (audioSourceConnected) return;
+      
       try {
         source = audioContext.createMediaElementSource(els.audio);
         source.connect(analyser);
         analyser.connect(audioContext.destination);
+        audioSourceConnected = true;
         drawOscilloscope();
-      } catch (e) { console.warn("Oscilograma no conectado"); }
+      } catch (e) {
+        console.warn("Oscilograma no conectado:", e);
+      }
     }
 
     function drawOscilloscope() {
@@ -589,13 +557,11 @@
         els.pauseBtn.textContent = 'Pausar';
         isPaused = false;
         els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-        startProgressCheck();
       } else {
         els.audio.pause();
         els.pauseBtn.textContent = 'Play';
         isPaused = true;
         els.status.textContent = "Pausado";
-        stopProgressCheck();
       }
     });
 
@@ -622,11 +588,6 @@
     window.addEventListener('load', async () => {
       await loadPlaylists();
       updateVolumeUI();
-    });
-
-    // Limpiar intervalo al salir
-    window.addEventListener('beforeunload', () => {
-      stopProgressCheck();
     });
   </script>
 </body>
