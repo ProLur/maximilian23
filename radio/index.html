@@ -408,13 +408,13 @@
         
         const remaining = els.audio.duration - els.audio.currentTime;
         
-        // Si quedan menos de 2 segundos y está cerca del final
-        if (remaining < 2 && els.audio.currentTime > 0 && els.audio.currentTime > (els.audio.duration * 0.9)) {
+        // Si quedan menos de 1 segundo y está cerca del final
+        if (remaining < 1 && els.audio.currentTime > 0) {
           console.log('Forzando siguiente canción (respaldo móvil)');
           clearInterval(progressCheckInterval);
           nextSong();
         }
-      }, 500); // Comprobación más frecuente (cada 500ms)
+      }, 2000); // Comprobación cada 2 segundos
     }
 
     function stopProgressCheck() {
@@ -428,39 +428,22 @@
     function playCurrentSong() {
       if (!items.length) return;
 
-      stopProgressCheck(); // Detener cualquier comprobación anterior
-      
       const song = items[currentIndex];
-      
-      // Detener reproducción actual si existe
-      if (!els.audio.paused) {
-        els.audio.pause();
-      }
-      
       els.audio.src = CONFIG.mp3Folder + song.file;
       els.audio.load();
       els.audio.volume = isMuted ? 0 : currentVolume;
 
-      // Pequeño delay antes de reproducir (crucial en móviles)
-      setTimeout(() => {
-        els.audio.play().then(() => {
-          isPlaying = true;
-          isPaused = false;
-          els.pauseBtn.textContent = 'Pausar';
-          els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
-          connectAudioToOscilloscope();
-          startProgressCheck(); // Iniciar comprobación de respaldo
-        }).catch(err => {
-          console.warn("Necesaria interacción", err);
-          els.status.textContent = "Toca para activar sonido";
-          // Reintentar tras interacción
-          setTimeout(() => {
-            if (audioContext && audioContext.state === 'suspended') {
-              audioContext.resume();
-            }
-          }, 100);
-        });
-      }, 150); // 150ms de delay
+      els.audio.play().then(() => {
+        isPlaying = true;
+        isPaused = false;
+        els.pauseBtn.textContent = 'Pausar';
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        connectAudioToOscilloscope();
+        startProgressCheck(); // Iniciar comprobación de respaldo
+      }).catch(err => {
+        console.warn("Necesaria interacción", err);
+        els.status.textContent = "Toca para activar sonido";
+      });
     }
 
     function nextSong() {
@@ -590,4 +573,61 @@
     els.volumeTrack.addEventListener('click', e => setVolume(getVolumeFromEvent(e)));
 
     let isDragging = false;
-    els.volumeKnob.addEventListener('mousedown', e =>
+    els.volumeKnob.addEventListener('mousedown', e => { e.preventDefault(); isDragging = true; });
+    els.volumeKnob.addEventListener('touchstart', e => { e.preventDefault(); isDragging = true; });
+    const moveHandler = e => { if (isDragging) setVolume(getVolumeFromEvent(e)); };
+    document.addEventListener('mousemove', moveHandler);
+    document.addEventListener('touchmove', moveHandler);
+    document.addEventListener('mouseup', () => isDragging = false);
+    document.addEventListener('touchend', () => isDragging = false);
+
+    // Botones
+    els.pauseBtn.addEventListener('click', () => {
+      if (!isPlaying) return;
+      if (isPaused) {
+        audioContext.resume().then(() => els.audio.play());
+        els.pauseBtn.textContent = 'Pausar';
+        isPaused = false;
+        els.status.textContent = isMuted ? "Silenciado" : "Emisión en directo";
+        startProgressCheck();
+      } else {
+        els.audio.pause();
+        els.pauseBtn.textContent = 'Play';
+        isPaused = true;
+        els.status.textContent = "Pausado";
+        stopProgressCheck();
+      }
+    });
+
+    els.muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      els.audio.volume = isMuted ? 0 : currentVolume;
+      els.muteBtn.textContent = isMuted ? 'Unmute' : 'Mute';
+      els.status.textContent = isMuted ? "Silenciado" : (isPaused ? "Pausado" : "Emisión en directo");
+      updateVolumeUI();
+    });
+
+    els.startBtn.addEventListener('click', startPlayback);
+
+    els.radioLogo.addEventListener('click', () => {
+      els.radioLogo.classList.remove('glow-normal');
+      els.radioLogo.classList.add('glow-intenso');
+      setTimeout(() => {
+        els.radioLogo.classList.remove('glow-intenso');
+        els.radioLogo.classList.add('glow-normal');
+      }, 3000);
+    });
+
+    // Inicio
+    window.addEventListener('load', async () => {
+      await loadPlaylists();
+      updateVolumeUI();
+    });
+
+    // Limpiar intervalo al salir
+    window.addEventListener('beforeunload', () => {
+      stopProgressCheck();
+    });
+  </script>
+</body>
+</html>
