@@ -137,8 +137,7 @@
       max-width: 92vw;
       max-height: 92vh;
     }
-    #modal-content img,
-    #modal-content video {
+    #modal-content img {
       width: 100%;
       height: auto;
       max-width: 92vw;
@@ -258,8 +257,8 @@
           <p>En realidad no son tan feroces pero nos encanta dibujarlos.</p>
         </div>
       </div>
-      <!-- Tarjeta de Gioconda -->
-      <div class="card" onclick="openModal('gioconda.png', 'Gioconda', 'giocondavid.mp4')">
+      <!-- Tarjeta de Gioconda - ahora con GIF -->
+      <div class="card" onclick="openModal('gioconda.png', 'Gioconda', 'giocondavid.gif')">
         <div class="image-container">
           <img src="gioconda.png" alt="Gioconda">
         </div>
@@ -288,11 +287,12 @@
     const modalContent = document.getElementById('modal-content');
     const modalImg = document.getElementById('modal-image');
 
-    let currentVideoSrc = null;
+    let currentGifSrc = null;
     let originalImgSrc = null;
+    let returnTimer = null;
 
-    function openModal(src, altText, videoSrc = null) {
-      currentVideoSrc = videoSrc;
+    function openModal(src, altText, gifSrc = null) {
+      currentGifSrc = gifSrc;
       originalImgSrc = src;
       modalImg.src = src;
       modalImg.alt = altText;
@@ -301,23 +301,25 @@
       modalContent.appendChild(modalImg.cloneNode(true));
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
+
+      // Limpiamos cualquier timer anterior
+      if (returnTimer) clearTimeout(returnTimer);
     }
 
     modalContent.addEventListener('click', function(e) {
-      if (currentVideoSrc && e.target.tagName === 'IMG') {
+      if (currentGifSrc && e.target.tagName === 'IMG') {
         e.stopPropagation();
         modalContent.innerHTML = '';
-        const video = document.createElement('video');
-        video.src = currentVideoSrc;
-        video.controls = true;
-        video.autoplay = true;
-        video.style.width = '100%';
-        video.style.height = 'auto';
-        video.style.objectFit = 'contain';
-        modalContent.appendChild(video);
+        const gif = document.createElement('img');
+        gif.src = currentGifSrc + '?t=' + new Date().getTime(); // Evita caché si es necesario
+        gif.alt = 'Gioconda animada';
+        gif.style.width = '100%';
+        gif.style.height = 'auto';
+        gif.style.objectFit = 'contain';
+        modalContent.appendChild(gif);
 
-        // Cuando el vídeo termine, volver a la imagen
-        video.addEventListener('ended', function() {
+        // Después de X segundos (ajusta según la duración real de tu GIF), vuelve a la imagen
+        returnTimer = setTimeout(() => {
           modalContent.innerHTML = '';
           const imgBack = document.createElement('img');
           imgBack.src = originalImgSrc;
@@ -326,16 +328,18 @@
           imgBack.style.height = 'auto';
           imgBack.style.objectFit = 'contain';
           modalContent.appendChild(imgBack);
-        });
+          currentGifSrc = null; // Desactiva para no repetir
+        }, 8000); // ← 8000 ms = 8 segundos. Cámbialo a la duración aproximada de tu GIF
 
-        currentVideoSrc = null;
+        currentGifSrc = null;
       }
     });
 
     function closeModal() {
+      if (returnTimer) clearTimeout(returnTimer);
       modal.style.display = 'none';
       document.body.style.overflow = '';
-      currentVideoSrc = null;
+      currentGifSrc = null;
       originalImgSrc = null;
       modalContent.innerHTML = '<img id="modal-image" src="" alt="Imagen ampliada">';
     }
