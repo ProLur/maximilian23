@@ -8,7 +8,11 @@
   <meta name="description" content="Trabajos realizados en clase de Plástica y Arte - CEIP Juan XXIII Zafra">
   <meta name="theme-color" content="#00ffcc">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       font-family: "Courier New", Courier, monospace;
       background: #0d1117;
@@ -115,6 +119,7 @@
       opacity: 0.9;
       line-height: 1.35;
     }
+    /* MODAL */
     #modal {
       display: none;
       position: fixed;
@@ -242,7 +247,7 @@
           <p>En realidad no son tan feroces pero nos encanta dibujarlos.</p>
         </div>
       </div>
-      <!-- NUEVA FICHA GIOCONDA -->
+      <!-- Tarjeta de Gioconda añadida -->
       <div class="card" onclick="openModal('gioconda.png', 'Gioconda')">
         <div class="image-container">
           <img src="gioconda.png" alt="Gioconda">
@@ -254,17 +259,14 @@
       </div>
     </div>
   </div>
-
   <!-- Modal -->
   <div id="modal">
     <span id="modal-close" onclick="closeModal()">×</span>
     <img id="modal-image" src="" alt="Imagen ampliada">
   </div>
-
   <footer>
     CEIP Juan XXIII • Zafra • Trabajos de Plástica
   </footer>
-
   <script>
     const modal = document.getElementById('modal');
     const modalImg = document.getElementById('modal-image');
