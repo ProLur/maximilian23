@@ -8,11 +8,7 @@
   <meta name="description" content="Trabajos realizados en clase de Plástica y Arte - CEIP Juan XXIII Zafra">
   <meta name="theme-color" content="#00ffcc">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: "Courier New", Courier, monospace;
       background: #0d1117;
@@ -119,7 +115,6 @@
       opacity: 0.9;
       line-height: 1.35;
     }
-    /* MODAL */
     #modal {
       display: none;
       position: fixed;
@@ -238,7 +233,6 @@
           <p>El propio Maximilian 23, nuestro asistente de inteligencia artificial.</p>
         </div>
       </div>
-      <!-- NUEVA FICHA AÑADIDA -->
       <div class="card" onclick="openModal('retratos.jpg', 'Retratos feroces')">
         <div class="image-container">
           <img src="retratos.jpg" alt="Retratos feroces">
@@ -246,6 +240,16 @@
         <div class="card-info">
           <h3>Retratos feroces</h3>
           <p>En realidad no son tan feroces pero nos encanta dibujarlos.</p>
+        </div>
+      </div>
+      <!-- NUEVA FICHA GIOCONDA -->
+      <div class="card" onclick="openModal('gioconda.png', 'Gioconda')">
+        <div class="image-container">
+          <img src="gioconda.png" alt="Gioconda">
+        </div>
+        <div class="card-info">
+          <h3>Gioconda</h3>
+          <p>Seguismo haciendo arte... a nuestro estilo.</p>
         </div>
       </div>
     </div>
@@ -264,23 +268,23 @@
   <script>
     const modal = document.getElementById('modal');
     const modalImg = document.getElementById('modal-image');
-    
+   
     function openModal(src, altText) {
       modalImg.src = src;
       modalImg.alt = altText;
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
-    
+   
     function closeModal() {
       modal.style.display = 'none';
       document.body.style.overflow = '';
     }
-    
+   
     modal.addEventListener('click', e => {
       if (e.target === modal) closeModal();
     });
-    
+   
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeModal();
     });
