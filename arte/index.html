@@ -130,7 +130,7 @@
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
-      cursor: pointer; /* Indica que es clickable */
+      cursor: pointer;
     }
     #modal-content {
       position: relative;
@@ -139,6 +139,8 @@
     }
     #modal-content img,
     #modal-content video {
+      width: 100%;
+      height: auto;
       max-width: 92vw;
       max-height: 92vh;
       border: 3px solid #00ffcc;
@@ -257,7 +259,7 @@
         </div>
       </div>
       <!-- Tarjeta de Gioconda -->
-      <div class="card" onclick="openModal('gioconda.png', 'Gioconda', 'giocondavid.mp4')">
+      <div class="card" onclick="openModal('gioconda.png', 'Gioconda', 'giacondavid.mp4')">
         <div class="image-container">
           <img src="gioconda.png" alt="Gioconda">
         </div>
@@ -286,39 +288,41 @@
     const modalContent = document.getElementById('modal-content');
     const modalImg = document.getElementById('modal-image');
 
-    let currentVideoSrc = null; // Para saber si hay vídeo disponible
+    let currentVideoSrc = null;
 
     function openModal(src, altText, videoSrc = null) {
-      currentVideoSrc = videoSrc; // Guardamos el src del vídeo si existe
+      currentVideoSrc = videoSrc;
       modalImg.src = src;
       modalImg.alt = altText;
-      modalImg.style.display = 'block'; // Aseguramos que la img esté visible al abrir
-      modalContent.innerHTML = ''; // Limpiamos por si había vídeo antes
-      modalContent.appendChild(modalImg.cloneNode(true)); // Clon para resetear
+      modalImg.style.display = 'block';
+      modalContent.innerHTML = ''; 
+      modalContent.appendChild(modalImg.cloneNode(true));
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
 
-    // Al hacer clic en el contenido del modal (imagen o vídeo)
+    // Segundo clic: cambiar a vídeo solo si hay videoSrc y se clica en la imagen
     modalContent.addEventListener('click', function(e) {
-      if (currentVideoSrc && e.target.tagName === 'IMG') { // Solo si hay vídeo y se clica en la img
-        e.stopPropagation(); // Evitamos que cierre el modal
-        // Reemplazamos la img por el vídeo
+      if (currentVideoSrc && e.target.tagName === 'IMG') {
+        e.stopPropagation(); // Evita cerrar el modal
         modalContent.innerHTML = '';
         const video = document.createElement('video');
         video.src = currentVideoSrc;
         video.controls = true;
         video.autoplay = true;
-        video.style.cursor = 'default'; // Para que no parezca más clickable
+        video.muted = false; // con sonido; cámbialo a true si prefieres sin
+        video.style.width = '100%';
+        video.style.height = 'auto';
+        video.style.objectFit = 'contain';
         modalContent.appendChild(video);
-        currentVideoSrc = null; // Ya no permitimos más cambios (solo una vez)
+        currentVideoSrc = null; // solo una vez
       }
     });
 
     function closeModal() {
       modal.style.display = 'none';
       document.body.style.overflow = '';
-      currentVideoSrc = null; // Reset al cerrar
+      currentVideoSrc = null;
       modalContent.innerHTML = '<img id="modal-image" src="" alt="Imagen ampliada">';
     }
 
