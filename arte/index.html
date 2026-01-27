@@ -131,7 +131,12 @@
       justify-content: center;
       padding: 1.5rem;
     }
-    #modal img {
+    #modal-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal img, #modal video {
       max-width: 92vw;
       max-height: 92vh;
       border: 3px solid #00ffcc;
@@ -188,10 +193,12 @@
     <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
     <h1>Trabajado en clase</h1>
   </header>
+
   <div class="container">
     <div class="intro">
       <button class="close-btn" onclick="window.close()">Cerrar</button>
     </div>
+
     <div class="gallery">
       <div class="card" onclick="openModal('david.jpg', 'David el gnomo')">
         <div class="image-container">
@@ -202,6 +209,7 @@
           <p>Nuestro gnomo guardián del bosque, con mucho detalle y personalidad.</p>
         </div>
       </div>
+
       <div class="card" onclick="openModal('paisajecera.jpg', 'Paisaje con cera')">
         <div class="image-container">
           <img src="paisajecera.jpg" alt="Paisaje con cera">
@@ -211,6 +219,7 @@
           <p>Dibujo donde practicamos la técnica de la cera para crear texturas y efectos de luz.</p>
         </div>
       </div>
+
       <div class="card" onclick="openModal('carretera.jpg', 'Carretera')">
         <div class="image-container">
           <img src="carretera.jpg" alt="Carretera">
@@ -220,6 +229,7 @@
           <p>Trabajamos el punto de fuga para crear profundidad y perspectiva.</p>
         </div>
       </div>
+
       <div class="card" onclick="openModal('zup.jpg', 'Zup, el amigo de Maximilian 23')">
         <div class="image-container">
           <img src="zup.jpg" alt="Zup, el amigo de Maximilian 23">
@@ -229,6 +239,7 @@
           <p>Personaje compañero y fiel amigo de nuestro asistente Maximilian.</p>
         </div>
       </div>
+
       <div class="card" onclick="openModal('maximilian23.jpg', 'Maximilian 23')">
         <div class="image-container">
           <img src="maximilian23.jpg" alt="Maximilian 23">
@@ -238,6 +249,7 @@
           <p>El propio Maximilian 23, nuestro asistente de inteligencia artificial.</p>
         </div>
       </div>
+
       <div class="card" onclick="openModal('retratos.jpg', 'Retratos feroces')">
         <div class="image-container">
           <img src="retratos.jpg" alt="Retratos feroces">
@@ -247,8 +259,9 @@
           <p>En realidad no son tan feroces pero nos encanta dibujarlos.</p>
         </div>
       </div>
-      <!-- Tarjeta de Gioconda añadida -->
-      <div class="card" onclick="openModal('gioconda.png', 'Gioconda')">
+
+      <!-- Tarjeta Gioconda → abre vídeo -->
+      <div class="card" onclick="openModal('giocondavid.mp4', 'Gioconda en acción', true)">
         <div class="image-container">
           <img src="gioconda.png" alt="Gioconda">
         </div>
@@ -259,34 +272,56 @@
       </div>
     </div>
   </div>
+
   <!-- Modal -->
   <div id="modal">
     <span id="modal-close" onclick="closeModal()">×</span>
-    <img id="modal-image" src="" alt="Imagen ampliada">
+    <div id="modal-content"></div>
   </div>
+
   <footer>
     CEIP Juan XXIII • Zafra • Trabajos de Plástica
   </footer>
+
   <script>
     const modal = document.getElementById('modal');
-    const modalImg = document.getElementById('modal-image');
-   
-    function openModal(src, altText) {
-      modalImg.src = src;
-      modalImg.alt = altText;
+    const modalContent = document.getElementById('modal-content');
+
+    function openModal(src, altText, isVideo = false) {
+      modalContent.innerHTML = ''; // Limpiamos contenido anterior
+
+      if (isVideo) {
+        const video = document.createElement('video');
+        video.src = src;
+        video.controls = true;
+        video.autoplay = true;     // reproduce automáticamente al abrir
+        video.muted = false;       // con sonido (cámbialo a true si prefieres sin sonido)
+        video.style.maxWidth = '92vw';
+        video.style.maxHeight = '92vh';
+        modalContent.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = altText;
+        img.style.maxWidth = '92vw';
+        img.style.maxHeight = '92vh';
+        modalContent.appendChild(img);
+      }
+
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
-   
+
     function closeModal() {
       modal.style.display = 'none';
       document.body.style.overflow = '';
+      modalContent.innerHTML = ''; // Detiene el vídeo y limpia
     }
-   
+
     modal.addEventListener('click', e => {
       if (e.target === modal) closeModal();
     });
-   
+
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeModal();
     });
