@@ -289,33 +289,48 @@
     const modalImg = document.getElementById('modal-image');
 
     let currentVideoSrc = null;
+    let originalImgSrc = null;   // Guardamos la src de la imagen original
 
     function openModal(src, altText, videoSrc = null) {
       currentVideoSrc = videoSrc;
+      originalImgSrc = src;  // Guardamos la imagen para volver a ella
       modalImg.src = src;
       modalImg.alt = altText;
       modalImg.style.display = 'block';
-      modalContent.innerHTML = ''; 
+      modalContent.innerHTML = '';
       modalContent.appendChild(modalImg.cloneNode(true));
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
 
-    // Segundo clic: cambiar a vídeo solo si hay videoSrc y se clica en la imagen
+    // Al hacer clic en el contenido → si es imagen y hay vídeo → cambiar a vídeo
     modalContent.addEventListener('click', function(e) {
       if (currentVideoSrc && e.target.tagName === 'IMG') {
-        e.stopPropagation(); // Evita cerrar el modal
+        e.stopPropagation();
         modalContent.innerHTML = '';
         const video = document.createElement('video');
         video.src = currentVideoSrc;
         video.controls = true;
         video.autoplay = true;
-        video.muted = false; // con sonido; cámbialo a true si prefieres sin
         video.style.width = '100%';
         video.style.height = 'auto';
         video.style.objectFit = 'contain';
         modalContent.appendChild(video);
-        currentVideoSrc = null; // solo una vez
+
+        // Cuando el vídeo termine → volver a la imagen
+        video.addEventListener('ended', function() {
+          modalContent.innerHTML = '';
+          const imgBack = document.createElement('img');
+          imgBack.src = originalImgSrc;
+          imgBack.alt = 'Gioconda';
+          imgBack.style.width = '100%';
+          imgBack.style.height = 'auto';
+          imgBack.style.objectFit = 'contain';
+          modalContent.appendChild(imgBack);
+          currentVideoSrc = null;  // Ya no se puede volver a activar el vídeo
+        });
+
+        currentVideoSrc = null;  // Evitamos múltiples cambios
       }
     });
 
@@ -323,6 +338,7 @@
       modal.style.display = 'none';
       document.body.style.overflow = '';
       currentVideoSrc = null;
+      originalImgSrc = null;
       modalContent.innerHTML = '<img id="modal-image" src="" alt="Imagen ampliada">';
     }
 
