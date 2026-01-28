@@ -56,7 +56,7 @@
       transition: transform .3s ease;
       line-height: 1;
     }
-   
+  
     @media (max-width: 600px) {
       #menuIcon, #policyIcon { display: block; }
       .left-panel { display: none !important; }
@@ -172,8 +172,8 @@
       backdrop-filter: blur(4px); box-shadow: 0 0 10px #00ffcc55; z-index: 10;
       animation: float 3s ease-in-out infinite;
     }
-    #labButton     { top: 15px; }
-    #radioButton   { top: 65px; animation-delay: 0.5s; }
+    #labButton { top: 15px; }
+    #radioButton { top: 65px; animation-delay: 0.5s; }
     #plasticaButton { top: 115px; animation-delay: 1s; }
     #labButton:hover, #radioButton:hover, #plasticaButton:hover {
       background: rgba(0,255,204,0.2); box-shadow: 0 0 12px #00ffcc;
@@ -216,6 +216,7 @@
     Maximilian 23
     <div id="policyIcon">🛡️</div>
   </header>
+
   <div id="mobileMenu">
     <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">X</div>
     <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
@@ -225,7 +226,9 @@
       <img id="mobileMaxImage" src="https://maximilian23.com/max.png" alt="Maximilian">
     </div>
   </div>
+
   <div id="overlay"></div>
+
   <div class="container">
     <div class="left-panel">
       <div id="labButton" onclick="openLab()" title="Ir al Laboratorio Musical">Laboratorio Musical</div>
@@ -235,15 +238,16 @@
         <img id="maxImage" src="max.png" alt="Maximilian grande">
       </div>
     </div>
+
     <div class="chat-panel">
       <div id="chat"></div>
       <footer>
-        <input type="text" id="message" placeholder="Escribe tu mensaje..."
-          onkeydown="if(event.key==='Enter'&&!this.disabled){sendMessage()}">
+        <input type="text" id="message" placeholder="Escribe tu mensaje...">
         <button onclick="sendMessage()" id="sendButton">Enviar</button>
       </footer>
     </div>
   </div>
+
   <div id="policyButton" title="Ver políticas de uso">Políticas de privacidad</div>
   <div id="policyBanner">
     Al continuar, aceptas nuestras
@@ -258,12 +262,10 @@
       window.open('https://maximilian23.com/lab23/', '_blank');
       closeMobileMenu();
     }
-
     function openRadio() {
       window.open('https://maximilian23.com/radio/', '_blank');
       closeMobileMenu();
     }
-
     function openArte() {
       window.open('https://maximilian23.com/arte', '_blank');
       closeMobileMenu();
@@ -323,23 +325,37 @@
       step();
     }
 
+    let isSending = false; // Protección contra envíos múltiples rápidos
+
     async function sendMessage() {
+      if (isSending) return;
+      isSending = true;
+
       const i = document.getElementById("message");
       const b = document.getElementById("sendButton");
       const chat = document.getElementById("chat");
+
       const msg = i.value.trim();
-      if (!msg) return;
+      if (!msg) {
+        isSending = false;
+        return;
+      }
+
       i.disabled = b.disabled = true;
+
       const user = document.createElement("div");
       user.className = "user";
       user.textContent = msg;
       chat.appendChild(user);
+
       const bot = document.createElement("div");
       bot.className = "bot";
       bot.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
       chat.appendChild(bot);
+
       scrollBottom();
       i.value = "";
+
       try {
         const r = await fetch(API_URL, {
           method: "POST",
@@ -347,19 +363,31 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: msg })
         });
+
         const data = await r.json();
         const reply = linkify(data.reply);
+
         bot.innerHTML = "";
         typeWriterEffect(bot, reply, 30, () => {
           i.disabled = b.disabled = false;
+          isSending = false;
           i.focus();
         });
       } catch {
         bot.textContent = "Error de conexión.";
         i.disabled = b.disabled = false;
+        isSending = false;
         scrollBottom();
       }
     }
+
+    // Listener limpio y único para Enter
+    document.getElementById("message").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !this.disabled) {
+        e.preventDefault();           // Evita comportamientos dobles
+        sendMessage();
+      }
+    });
 
     window.addEventListener("DOMContentLoaded", () => {
       const chat = document.getElementById("chat");
@@ -368,6 +396,7 @@
       chat.appendChild(b);
       typeWriterEffect(b, "Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. Recuerda escribir correctamente para que pueda entenderte bien. ¿Qué quieres saber?");
       scrollBottom();
+
       const accepted = localStorage.getItem("policiesAccepted");
       if (!accepted) {
         document.getElementById("policyBanner").classList.add("show");
