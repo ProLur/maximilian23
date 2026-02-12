@@ -120,7 +120,7 @@
       line-height: 1.35;
     }
 
-    /* MODAL - con mejoras en el botón cerrar */
+    /* MODAL */
     #modal {
       display: none;
       position: fixed;
@@ -151,8 +151,8 @@
     }
     #modal-close {
       position: absolute;
-      top: -20px;
-      right: -20px;
+      top: -12px;          /* más cerca en escritorio */
+      right: -12px;        /* más cerca en escritorio */
       font-size: 3.2rem;
       color: #00ffcc;
       cursor: pointer;
@@ -196,7 +196,7 @@
       transform: translateY(-3px);
     }
 
-    /* Ajustes para móviles */
+    /* Ajustes para móviles (más separada para mejor toque) */
     @media (max-width: 600px) {
       header h1 { font-size: 1.5rem; }
       .gallery { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; }
@@ -217,6 +217,14 @@
         width: 52px;
         height: 52px;
         background: rgba(0,0,0,0.6);
+      }
+    }
+
+    /* Para pantallas muy grandes (opcional, más cerca aún si quieres) */
+    @media (min-width: 1200px) {
+      #modal-close {
+        top: -10px;
+        right: -10px;
       }
     }
   </style>
