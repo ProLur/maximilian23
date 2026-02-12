@@ -267,9 +267,18 @@
           <p>Seguismo haciendo arte... a nuestro estilo.</p>
         </div>
       </div>
+      <!-- NUEVA TARJETA: BODEGÓN -->
+      <div class="card" onclick="openModal('bodegon.png', 'Bodegón')">
+        <div class="image-container">
+          <img src="bodegon.png" alt="Bodegón">
+        </div>
+        <div class="card-info">
+          <h3>Bodegón</h3>
+          <p>Hemos aprendido el concepto de <strong>Bodegón</strong>.</p>
+        </div>
+      </div>
     </div>
   </div>
-
   <!-- Modal -->
   <div id="modal">
     <span id="modal-close" onclick="closeModal()">×</span>
@@ -277,16 +286,13 @@
       <img id="modal-image" src="" alt="Imagen ampliada">
     </div>
   </div>
-
   <footer>
     CEIP Juan XXIII • Zafra • Trabajos de Plástica
   </footer>
-
   <script>
     const modal = document.getElementById('modal');
     const modalContent = document.getElementById('modal-content');
     const modalImg = document.getElementById('modal-image');
-
     let currentGifSrc = null;
     let originalImgSrc = null;
     let returnTimer = null;
@@ -301,7 +307,6 @@
       modalContent.appendChild(modalImg.cloneNode(true));
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
-
       // Limpiamos cualquier timer anterior
       if (returnTimer) clearTimeout(returnTimer);
     }
@@ -312,25 +317,23 @@
         modalContent.innerHTML = '';
         const gif = document.createElement('img');
         gif.src = currentGifSrc + '?t=' + new Date().getTime(); // Evita caché si es necesario
-        gif.alt = 'Gioconda animada';
+        gif.alt = 'Animación';
         gif.style.width = '100%';
         gif.style.height = 'auto';
         gif.style.objectFit = 'contain';
         modalContent.appendChild(gif);
-
-        // Después de X segundos (ajusta según la duración real de tu GIF), vuelve a la imagen
+        // Después de X segundos vuelve a la imagen estática
         returnTimer = setTimeout(() => {
           modalContent.innerHTML = '';
           const imgBack = document.createElement('img');
           imgBack.src = originalImgSrc;
-          imgBack.alt = 'Gioconda';
+          imgBack.alt = 'Imagen original';
           imgBack.style.width = '100%';
           imgBack.style.height = 'auto';
           imgBack.style.objectFit = 'contain';
           modalContent.appendChild(imgBack);
-          currentGifSrc = null; // Desactiva para no repetir
-        }, 8000); // ← 8000 ms = 8 segundos. Cámbialo a la duración aproximada de tu GIF
-
+          currentGifSrc = null;
+        }, 8000); // Ajusta este tiempo según la duración real del GIF
         currentGifSrc = null;
       }
     });
