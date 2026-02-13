@@ -1,8 +1,4 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   background: linear-gradient(180deg, #aee1f9 0%, #c7b5ff 100%);
@@ -26,26 +22,9 @@ header {
   position: relative;
 }
 
-header img {
-  height: 50px;
-  vertical-align: middle;
-  filter: drop-shadow(0 0 6px #fff);
-  margin-right: 8px;
-}
-
-header h1 {
-  display: inline-block;
-  margin: 0;
-  font-size: 1.8em;
-  color: #fff;
-  text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-}
-
-header p {
-  color: #e9f8ff;
-  font-size: 0.9em;
-  margin-top: 3px;
-}
+header img { height: 50px; vertical-align: middle; filter: drop-shadow(0 0 6px #fff); margin-right: 8px; }
+header h1 { display: inline-block; margin: 0; font-size: 1.8em; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
+header p { color: #e9f8ff; font-size: 0.9em; margin-top: 3px; }
 
 #creado-por {
   position: absolute;
@@ -56,12 +35,7 @@ header p {
   text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
-#titulo-partitura {
-  text-align: center;
-  margin: 8px 0;
-  width: 100%;
-  max-width: 600px;
-}
+#titulo-partitura { text-align: center; margin: 8px 0; width: 100%; max-width: 600px; }
 
 #titulo-editable {
   font: inherit;
@@ -192,9 +166,7 @@ select {
   max-width: 600px;
 }
 
-#controles-otros #limpiar {
-  margin-left: 20px;
-}
+#controles-otros #limpiar { margin-left: 20px; }
 
 .figura {
   width: 48px !important;
@@ -214,8 +186,7 @@ select {
   color: #333;
 }
 
-.figura:hover,
-.figura.activa {
+.figura:hover, .figura.activa {
   background: #4ae2f2;
   color: white;
   transform: scale(1.1);
@@ -237,30 +208,13 @@ button {
   gap: 5px;
 }
 
-button i {
-  font-size: 1em;
-}
+button i { font-size: 1em; }
+button:hover { transform: scale(1.1); }
+button:disabled { background: #ccc; cursor: not-allowed; }
+button.activa { background: #ff80b5 !important; }
 
-button:hover {
-  transform: scale(1.1);
-}
-
-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-button.activa {
-  background: #ff80b5 !important;
-}
-
-#play-stop.play-active {
-  background: #28a745 !important;
-}
-
-#play-stop.stop-active {
-  background: #dc3545 !important;
-}
+#play-stop.play-active { background: #28a745 !important; }
+#play-stop.stop-active { background: #dc3545 !important; }
 
 .nota {
   position: absolute;
@@ -269,13 +223,9 @@ button.activa {
   pointer-events: auto;
 }
 
-.nota:hover .plus,
-.nota:hover .minus {
-  opacity: 1;
-}
+.nota:hover .plus, .nota:hover .minus { opacity: 1; }
 
-.nota .plus,
-.nota .minus {
+.nota .plus, .nota .minus {
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -295,19 +245,13 @@ button.activa {
   transform: translateX(-50%);
 }
 
-.nota .plus:hover,
-.nota .minus:hover {
+.nota .plus:hover, .nota .minus:hover {
   background: #ff80b5;
   transform: translateX(-50%) scale(1.2);
 }
 
-.nota .plus {
-  top: -28px;
-}
-
-.nota .minus {
-  bottom: -28px;
-}
+.nota .plus { top: -28px; }
+.nota .minus { bottom: -28px; }
 
 @media (max-width: 600px) {
   header { padding: 8px; }
@@ -317,11 +261,7 @@ button.activa {
   #creado-por { font-size: 0.7em; right: 10px; }
   #titulo-editable { font-size: 1.2em; padding: 5px 10px; }
   select { padding: 5px 8px; font-size: 0.8em; }
-  .figura {
-    width: 48px !important;
-    height: 48px !important;
-    font-size: 1.3em !important;
-  }
+  .figura { width: 48px !important; height: 48px !important; font-size: 1.3em !important; }
   button { padding: 6px 12px; font-size: 0.8em; }
   #pentagrama-container {
     min-width: 95vw !important;
@@ -329,25 +269,8 @@ button.activa {
     min-height: 200px !important;
     padding: 5px;
   }
-  #pentagrama {
-    min-height: 200px !important;
-    overflow-x: auto;
-    overflow-y: auto;
-  }
-  .tempo-text {
-    font-size: 11px;
-    padding: 2px 5px;
-    left: 10px;
-  }
-  .note-label {
-    font-size: 12px;
-    padding: 3px 6px;
-  }
-  .nota .plus,
-  .nota .minus {
-    width: 20px;
-    height: 20px;
-    line-height: 18px;
-    font-size: 0.8em;
-  }
+  #pentagrama { min-height: 200px !important; overflow-x: auto; overflow-y: auto; }
+  .tempo-text { font-size: 11px; padding: 2px 5px; left: 10px; }
+  .note-label { font-size: 12px; padding: 3px 6px; }
+  .nota .plus, .nota .minus { width: 20px; height: 20px; line-height: 18px; font-size: 0.8em; }
 }
