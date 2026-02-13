@@ -292,9 +292,11 @@
     <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
     <div id="creado-por">Creado por Manuel</div>
   </header>
+
   <div id="titulo-partitura">
     <input type="text" id="titulo-editable" value="Mi Partitura">
   </div>
+
   <div id="barra-opciones">
     <label>Clave:</label>
     <select id="clave"><option value="treble" selected>Sol</option><option value="bass">Fa</option></select>
@@ -309,11 +311,13 @@
       <option value="160">Presto (160 BPM)</option>
     </select>
   </div>
+
   <div id="main-content">
     <div id="pentagrama-container">
       <div id="tempo-display" class="tempo-text" style="display:none;"></div>
       <div id="pentagrama"></div>
     </div>
+
     <div id="figuras">
       <div class="figura" data-tipo="nota" data-duracion="w">𝅝</div>
       <div class="figura" data-tipo="nota" data-duracion="h">𝅗𝅥</div>
@@ -325,11 +329,13 @@
       <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div>
       <div class="figura" data-tipo="puntillo" title="Puntillo (clic en nota para añadir/quitar)">•</div>
     </div>
+
     <div id="controles-modo">
       <button id="notas"><i class="fas fa-music"></i> Notas</button>
       <button id="play-stop" class="play-active"><i class="fas fa-play"></i> Play</button>
       <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
     </div>
+
     <div id="controles-otros">
       <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
       <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
@@ -356,20 +362,26 @@
     let currentHeight = 240;
     renderer.resize(width, currentHeight);
     const context = renderer.getContext();
-    let clave = "treble", compas = "", bpm = 0;
-    let lines = [[]], currentLine = 0;
-    let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
+
+    let clave = "treble";
+    let compas = "";
+    let bpm = 0;
+    let lines = [[]];
+    let currentLine = 0;
+    let figuraActiva = null;
+    let showNoteLabels = false;
+    let isPlaying = false;
+    let metronomeOn = false;
     let modoLigar = false;
     let primeraNotaParaLigar = null;
     let metronomeLoop = null;
     let synth = null;
+
     const noteMap = {
       treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
       bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
     };
-    const noteNameMap = {
-      c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si"
-    };
+    const noteNameMap = { c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si" };
     const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
     const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
     const tempoNames = {
@@ -385,25 +397,24 @@
     }
 
     function initSynth() {
-      if (!synth) {
-        synth = new Tone.Synth().toDestination();
-      }
+      if (!synth) synth = new Tone.Synth().toDestination();
     }
 
     function init() {
       const claveSelect = document.getElementById("clave");
       const compasSelect = document.getElementById("compas");
       const velocidadSelect = document.getElementById("velocidad");
+
       compasSelect.value = "";
       velocidadSelect.value = "";
+
       clave = claveSelect.value || "treble";
       compas = compasSelect.value || "";
       bpm = +velocidadSelect.value || 0;
+
       if (bpm) {
         tempoDisplay.textContent = tempoNames[bpm];
         tempoDisplay.style.display = "block";
-      } else {
-        tempoDisplay.style.display = "none";
       }
 
       window.addEventListener('resize', () => {
@@ -414,10 +425,7 @@
         redibujarPentagrama();
       });
 
-      claveSelect.onchange = e => {
-        clave = e.target.value;
-        resetPartitura();
-      };
+      claveSelect.onchange = e => { clave = e.target.value; resetPartitura(); };
       compasSelect.onchange = e => {
         compas = e.target.value;
         resetPartitura();
@@ -446,6 +454,8 @@
       if (compas) {
         lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH, ligaduras: [] });
       }
+      figuraActiva = null; // reseteamos selección al resetear partitura
+      document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
       redibujarPentagrama();
     }
 
@@ -455,14 +465,9 @@
         let sum = lines[i].reduce((s, c) => s + (c.staveWidth || minStaveWidth), 0);
         if (sum > MAX_LINE_WIDTH && lines[i].length > 1) {
           const last = lines[i].pop();
-          if (i + 1 < lines.length) {
-            lines[i + 1].unshift(last);
-          } else {
-            lines.push([last]);
-          }
-        } else {
-          i++;
-        }
+          if (i + 1 < lines.length) lines[i + 1].unshift(last);
+          else lines.push([last]);
+        } else i++;
       }
       for (let li = lines.length - 1; li >= 0; li--) {
         if (lines[li].some(c => !c.closed)) {
@@ -483,43 +488,43 @@
         let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion.replace('.', '')] || 50), 0);
         w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 50);
       }
-      if (li === 0 && ci === 0) {
-        w = Math.max(w, FIRST_STAVE_WIDTH);
-      }
+      if (li === 0 && ci === 0) w = Math.max(w, FIRST_STAVE_WIDTH);
       return w;
     }
 
     function redibujarPentagrama() {
-      if (!isPlaying) {
-        document.querySelectorAll(".nota, .note-label").forEach(el => el.remove());
-      }
+      if (!isPlaying) document.querySelectorAll(".nota, .note-label").forEach(el => el.remove());
       context.clear();
       let y = 40;
+
       lines = lines.filter(line => line.length > 0);
       if (lines.length === 0) {
         lines = [[{ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH, ligaduras: [] }]];
         currentLine = 0;
       }
+
       if (compas) {
         lines.forEach((line, li) => {
           let x = 10;
           line.forEach((c, ci) => {
             if (c.notas.length === 0 && ci !== line.length - 1 && !c.closed) return;
+
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
             if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
             const formatter = new VF.Formatter();
             if (c.notas.length) formatter.joinVoices([voice]);
+
             let staveWidth = calculateStaveWidth(c, li, ci);
             c.staveWidth = staveWidth;
+
             const stave = new VF.Stave(x, y, staveWidth);
-            if (li === 0 && ci === 0) {
-              stave.addClef(clave).addTimeSignature(compas);
-            } else if (c.closed) {
-              stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
-            }
+            if (li === 0 && ci === 0) stave.addClef(clave).addTimeSignature(compas);
+            else if (c.closed) stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
+
             stave.setContext(context).draw();
             c.stave = stave;
+
             if (c.notas.length) {
               formatter.format([voice], staveWidth - 30);
               voice.draw(context, stave);
@@ -529,15 +534,9 @@
             if (c.ligaduras && c.notas.length > 0) {
               c.ligaduras.forEach(lig => {
                 try {
-                  const tie = new VF.Tie({
-                    from: { line: lig.from, voice: 0 },
-                    to:   { line: lig.to,   voice: 0 }
-                  });
-                  tie.setContext(context);
-                  tie.draw();
-                } catch (err) {
-                  console.warn("Error al dibujar ligadura:", err);
-                }
+                  const tie = new VF.Tie({ from: { line: lig.from, voice: 0 }, to: { line: lig.to, voice: 0 } });
+                  tie.setContext(context).draw();
+                } catch (err) { console.warn("Error dibujando ligadura:", err); }
               });
             }
 
@@ -546,14 +545,16 @@
           y += lineHeight;
         });
       }
+
       currentHeight = Math.max(240, y + 60);
       renderer.resize(width, currentHeight);
       container.style.height = `${currentHeight}px`;
-      if (!isPlaying) {
-        updateDraggableNotes();
-      }
+
+      if (!isPlaying) updateDraggableNotes();
+
       const curr = lines[currentLine]?.[lines[currentLine].length - 1];
       document.getElementById("cerrar-compas").disabled = !curr || curr.closed || curr.beats !== +compas.split("/")[0];
+
       if (curr?.stave && !isPlaying) {
         setTimeout(() => {
           div.scrollTop = Math.max(0, curr.stave.getYForLine(0) - 60);
@@ -563,17 +564,15 @@
 
     function initFiguras() {
       document.querySelectorAll(".figura").forEach(f => {
-        f.onclick = () => {
+        f.addEventListener('click', () => {
           document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-          
-          if (f.dataset.tipo === "puntillo") {
-            figuraActiva = { tipo: "puntillo", duracion: null };
-            f.classList.add("activa");
-          } else {
-            figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
-            f.classList.add("activa");
-          }
-        };
+          f.classList.add("activa");
+
+          figuraActiva = {
+            tipo: f.dataset.tipo,
+            duracion: f.dataset.duracion || null   // null para puntillo
+          };
+        });
       });
     }
 
@@ -582,18 +581,20 @@
         showNoteLabels = !showNoteLabels;
         document.getElementById("notas").classList.toggle("activa", showNoteLabels);
       };
+
       document.getElementById("metronomo").onclick = () => {
         metronomeOn = !metronomeOn;
         document.getElementById("metronomo").classList.toggle("activa", metronomeOn);
       };
+
       document.getElementById("play-stop").onclick = playStop;
       document.getElementById("cerrar-compas").onclick = cerrarCompas;
       document.getElementById("borrar-ultimo").onclick = borrarUltimo;
+
       document.getElementById("limpiar").onclick = () => {
-        if (confirm("¿Estás seguro de que quieres limpiar toda la partitura? Esta acción no se puede deshacer.")) {
-          resetPartitura();
-        }
+        if (confirm("¿Limpiar toda la partitura? No se puede deshacer.")) resetPartitura();
       };
+
       document.getElementById("guardar").onclick = guardar;
       document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
       document.getElementById("file-input").onchange = abrir;
@@ -602,16 +603,124 @@
         modoLigar = !modoLigar;
         primeraNotaParaLigar = null;
         document.getElementById("ligar").classList.toggle("activa", modoLigar);
-        
         if (modoLigar) {
-          alert("Modo ligadura activado.\n1. Clic en la primera nota\n2. Clic en la siguiente nota (misma altura, mismo compás)");
+          alert("Modo ligadura: clic en primera nota → clic en siguiente (misma altura, mismo compás)");
         } else {
           document.querySelectorAll(".nota").forEach(n => n.style.outline = "");
         }
       };
     }
 
-    // ... (las funciones playStop, stopPlayback, changePitch, cerrarCompas, getNoteFromY, addNota, borrarUltimo, guardar, abrir se mantienen iguales)
+    div.addEventListener('click', e => {
+      if (isPlaying) return;
+      initSynth();
+
+      if (!compas) return alert("¡Selecciona un compás primero!");
+      if (!figuraActiva) return;  // ← clave: si no hay figura seleccionada, no hace nada
+
+      const rect = div.getBoundingClientRect();
+      const clickX = e.clientX - rect.left + div.scrollLeft;
+      const clickY = e.clientY - rect.top + div.scrollTop;
+
+      const targetLineIdx = Math.floor((clickY - 40) / lineHeight);
+      if (targetLineIdx < 0 || targetLineIdx >= lines.length) return;
+
+      let targetLine = targetLineIdx;
+      let targetCompasIdx = lines[targetLine].length - 1;
+      let currentCompas = lines[targetLine][targetCompasIdx];
+
+      if (currentCompas.closed) {
+        const newCompas = { notas: [], beats: 0, closed: false, staveWidth: minStaveWidth, ligaduras: [] };
+        const lineSum = lines[targetLine].reduce((sum, c) => sum + (c.staveWidth || minStaveWidth), 0) + minStaveWidth;
+        if (lineSum > MAX_LINE_WIDTH) {
+          lines.push([newCompas]);
+          targetLine = lines.length - 1;
+          targetCompasIdx = 0;
+        } else {
+          lines[targetLine].push(newCompas);
+          targetCompasIdx = lines[targetLine].length - 1;
+        }
+        currentCompas = lines[targetLine][targetCompasIdx];
+      }
+
+      const noteName = getNoteFromY(clickY, targetLine);
+      if (!noteName) return;
+
+      currentLine = targetLine;
+
+      if (figuraActiva.tipo === "puntillo") {
+        // El puntillo se maneja al clicar en .nota (ver updateDraggableNotes)
+        return;
+      }
+
+      addNota(figuraActiva.tipo, figuraActiva.duracion, noteName, targetCompasIdx);
+    });
+
+    function getNoteFromY(y, lineIndex) {
+      const lineY = lineIndex * lineHeight + 40;
+      const relY = y - lineY;
+      const noteHeight = 140;
+      const numNotes = noteMap[clave].length;
+      const step = noteHeight / (numNotes - 1);
+      const normalizedY = Math.max(0, Math.min(noteHeight, noteHeight - relY));
+      const idx = Math.round(normalizedY / step);
+      return noteMap[clave][Math.max(0, Math.min(numNotes - 1, idx))];
+    }
+
+    function addNota(tipo, dur, noteName, compasIndex) {
+      const beats = +compas.split("/")[0];
+      const currentCompas = lines[currentLine][compasIndex];
+
+      if (currentCompas.beats + duracionBeats[dur] > beats) {
+        return alert("¡No hay espacio en el compás!");
+      }
+
+      let vf;
+      if (tipo === "nota") {
+        const list = noteMap[clave];
+        const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+        const idx = list.indexOf(noteName);
+        vf = new VF.StaveNote({
+          clef: clave,
+          keys: [noteName],
+          duration: dur,
+          stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP
+        });
+      } else {
+        const rest = clave === "treble" ? "b/4" : "d/3";
+        vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: dur + "r" });
+      }
+
+      currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
+      currentCompas.beats = +(currentCompas.beats + duracionBeats[dur]).toFixed(2);
+
+      // Recalcular ancho
+      const tempVoice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
+      tempVoice.setStrict(false);
+      if (currentCompas.notas.length) tempVoice.addTickables(currentCompas.notas.map(n => n.vf));
+      const formatter = new VF.Formatter();
+      if (currentCompas.notas.length) formatter.joinVoices([tempVoice]);
+      let noteWidth = currentCompas.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion.replace('.', '')] || 50), 0);
+      currentCompas.staveWidth = Math.max(minStaveWidth, formatter.preCalculateMinTotalWidth([tempVoice]) + noteWidth + 50);
+
+      // Reflow si excede
+      const lineSum = lines[currentLine].reduce((sum, c) => sum + (c.staveWidth || minStaveWidth), 0);
+      if (lineSum > MAX_LINE_WIDTH && lines[currentLine].length > 1) {
+        const lastCompas = lines[currentLine].pop();
+        lines.push([lastCompas]);
+        currentLine = lines.length - 1;
+      }
+
+      redibujarPentagrama();
+
+      if (tipo === "nota") {
+        initSynth();
+        synth.triggerAttackRelease(
+          noteName.split("/")[0].toUpperCase() + noteName.split("/")[1],
+          duracionTiempo[dur]
+        );
+      }
+    }
 
     function updateDraggableNotes() {
       document.querySelectorAll(".nota").forEach(n => n.remove());
@@ -619,13 +728,12 @@
       lines.forEach((line, li) => {
         line.forEach((c, ci) => {
           c.notas.forEach((n, ni) => {
-            if (n.tipo === "silencio") {
-              gi++;
-              return;
-            }
+            if (n.tipo === "silencio") { gi++; return; }
+
             const g = context.svg.querySelectorAll('g.vf-stavenote')[gi];
             if (!g) return;
             const bbox = g.getBBox();
+
             const d = document.createElement("div");
             d.className = "nota";
             d.style.left = `${bbox.x}px`;
@@ -643,45 +751,26 @@
             minus.textContent = "−";
             minus.className = "minus";
 
-            plus.onclick = e => {
-              e.stopPropagation();
-              changePitch(d, 1);
-            };
-            minus.onclick = e => {
-              e.stopPropagation();
-              changePitch(d, -1);
-            };
+            plus.onclick = e => { e.stopPropagation(); changePitch(d, 1); };
+            minus.onclick = e => { e.stopPropagation(); changePitch(d, -1); };
 
             d.appendChild(plus);
             d.appendChild(minus);
             div.appendChild(d);
 
-            // ──────────────────────────────────────────────
-            // CLIC EN LA NOTA → puntillo o ligadura
-            d.onclick = (e) => {
+            // ─── CLIC EN NOTA PARA PUNTILLO O LIGADURA ───
+            d.onclick = e => {
               e.stopPropagation();
-
-              const li = +d.dataset.li;
-              const ci = +d.dataset.ci;
-              const ni = +d.dataset.ni;
-              const compas = lines[li][ci];
-              const nota = compas.notas[ni];
+              const li_ = +d.dataset.li, ci_ = +d.dataset.ci, ni_ = +d.dataset.ni;
+              const compas_ = lines[li_][ci_];
+              const nota = compas_.notas[ni_];
 
               if (figuraActiva?.tipo === "puntillo") {
-                if (nota.tipo === "silencio") {
-                  alert("No se puede poner puntillo a silencios");
-                  return;
-                }
-                if (!["q","8","h","w"].includes(nota.duracion.replace('.', ''))) {
-                  alert("Solo puntillo en redonda, blanca, negra y corchea");
-                  return;
-                }
+                if (nota.tipo === "silencio") return alert("No puntillo en silencios");
+                const baseDur = nota.duracion.replace('.', '');
+                if (!["q","8","h","w"].includes(baseDur)) return alert("Solo puntillo en redonda, blanca, negra, corchea");
 
-                if (nota.duracion.includes('.')) {
-                  nota.duracion = nota.duracion.replace('.', '');
-                } else {
-                  nota.duracion += '.';
-                }
+                nota.duracion = nota.duracion.includes('.') ? baseDur : baseDur + '.';
 
                 const list = noteMap[clave];
                 const idx = list.indexOf(nota.noteName);
@@ -694,10 +783,10 @@
                   stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP
                 });
 
-                compas.beats = 0;
-                compas.notas.forEach(n2 => {
+                compas_.beats = 0;
+                compas_.notas.forEach(n2 => {
                   let base = duracionBeats[n2.duracion.replace('.', '')] || 0;
-                  compas.beats += n2.duracion.includes('.') ? base * 1.5 : base;
+                  compas_.beats += n2.duracion.includes('.') ? base * 1.5 : base;
                 });
 
                 redibujarPentagrama();
@@ -705,34 +794,26 @@
               }
 
               if (modoLigar) {
-                if (nota.tipo === "silencio") {
-                  alert("No se puede ligar silencio");
-                  return;
-                }
-
+                // lógica ligadura (como antes)
+                if (nota.tipo === "silencio") return alert("No se liga silencio");
                 if (!primeraNotaParaLigar) {
-                  primeraNotaParaLigar = { li, ci, ni, noteName: nota.noteName };
+                  primeraNotaParaLigar = { li: li_, ci: ci_, ni: ni_, noteName: nota.noteName };
                   d.style.outline = "4px solid #ff4081";
                 } else {
                   document.querySelectorAll(".nota").forEach(n => n.style.outline = "");
-
                   if (nota.noteName !== primeraNotaParaLigar.noteName) {
-                    alert("Deben ser notas de la misma altura");
+                    alert("Deben ser misma nota");
+                    primeraNotaParaLigar = null;
+                    return;
+                  }
+                  if (li_ !== primeraNotaParaLigar.li || ci_ !== primeraNotaParaLigar.ci || ni_ !== primeraNotaParaLigar.ni + 1) {
+                    alert("Solo consecutivas en mismo compás");
                     primeraNotaParaLigar = null;
                     return;
                   }
 
-                  if (li !== primeraNotaParaLigar.li || ci !== primeraNotaParaLigar.ci || ni !== primeraNotaParaLigar.ni + 1) {
-                    alert("Solo se permiten notas consecutivas en el mismo compás por ahora");
-                    primeraNotaParaLigar = null;
-                    return;
-                  }
-
-                  compas.ligaduras = compas.ligaduras || [];
-                  compas.ligaduras.push({
-                    from: primeraNotaParaLigar.ni,
-                    to: ni
-                  });
+                  compas_.ligaduras = compas_.ligaduras || [];
+                  compas_.ligaduras.push({ from: primeraNotaParaLigar.ni, to: ni_ });
 
                   primeraNotaParaLigar = null;
                   modoLigar = false;
@@ -748,8 +829,36 @@
       });
     }
 
-    // (Aquí irían las funciones que faltan: playStop, stopPlayback, changePitch, cerrarCompas, getNoteFromY, addNota, borrarUltimo, guardar, abrir)
-    // Puedes copiarlas directamente de tu versión anterior, ya que no han cambiado.
+    // Aquí van las funciones que no cambiaron: changePitch, playStop, stopPlayback, cerrarCompas, borrarUltimo, guardar, abrir
+    // Copia las tuyas originales si tienen modificaciones adicionales
+
+    function changePitch(div, dir) {
+      // ... tu código original de changePitch ...
+    }
+
+    function playStop() {
+      // ... tu código original ...
+    }
+
+    function stopPlayback() {
+      // ... tu código original ...
+    }
+
+    function cerrarCompas() {
+      // ... tu código original ...
+    }
+
+    function borrarUltimo() {
+      // ... tu código original ...
+    }
+
+    function guardar() {
+      // ... tu código original (puedes mejorar para guardar ligaduras y puntillos si quieres)
+    }
+
+    function abrir(e) {
+      // ... tu código original ...
+    }
 
     init();
   </script>
