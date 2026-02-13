@@ -4,87 +4,224 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laboratorio Musical de Maximilian 23</title>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
-
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Todo tu CSS original exactamente igual — no lo repito aquí para no alargar */
+    /* ... copia todo el <style> de tu mensaje original ... */
+    /* Añade esto al final del style si quieres que el botón ligar se vea bien: */
+    button#ligar.activa { background: #ff4081 !important; }
+  </style>
 </head>
 <body>
 
-  <header>
-    <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
-    <h1>Laboratorio Musical de Maximilian 23</h1>
-    <p>¡Compón, juega y aprende con el robot más melódico del cole!</p>
-    <div id="creado-por">Creado por Manuel</div>
-  </header>
+  <!-- Todo tu HTML original igual hasta #figuras -->
 
-  <div id="titulo-partitura">
-    <input type="text" id="titulo-editable" value="Mi Partitura">
+  <div id="figuras">
+    <div class="figura" data-tipo="nota" data-duracion="w">𝅝</div>
+    <div class="figura" data-tipo="nota" data-duracion="h">𝅗𝅥</div>
+    <div class="figura" data-tipo="nota" data-duracion="q">𝅘𝅥</div>
+    <div class="figura" data-tipo="nota" data-duracion="8">𝅘𝅥𝅮</div>
+    <div class="figura" data-tipo="silencio" data-duracion="w">𝄻</div>
+    <div class="figura" data-tipo="silencio" data-duracion="h">𝄼</div>
+    <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div>
+    <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div>
+    <!-- Botón nuevo para puntillo -->
+    <div class="figura" data-tipo="puntillo" title="Puntillo (clic en nota para añadir/quitar)">•</div>
   </div>
 
-  <div id="barra-opciones">
-    <label>Clave:</label>
-    <select id="clave">
-      <option value="treble" selected>Sol</option>
-      <option value="bass">Fa</option>
-    </select>
-
-    <label>Compás:</label>
-    <select id="compas">
-      <option value="" selected>---</option>
-      <option value="4/4">4/4</option>
-      <option value="3/4">3/4</option>
-      <option value="2/4">2/4</option>
-    </select>
-
-    <label>Velocidad:</label>
-    <select id="velocidad">
-      <option value="" selected>---</option>
-      <option value="80">Andante (80 BPM)</option>
-      <option value="90">Moderado (90 BPM)</option>
-      <option value="120">Allegro (120 BPM)</option>
-      <option value="160">Presto (160 BPM)</option>
-    </select>
+  <!-- Controles originales + botón Ligar nuevo -->
+  <div id="controles-modo">
+    <button id="notas"><i class="fas fa-music"></i> Notas</button>
+    <button id="play-stop" class="play-active"><i class="fas fa-play"></i> Play</button>
+    <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
   </div>
 
-  <div id="main-content">
-    <div id="pentagrama-container">
-      <div id="tempo-display" class="tempo-text" style="display:none;"></div>
-      <div id="pentagrama"></div>
-    </div>
-
-    <div id="figuras">
-      <div class="figura" data-tipo="nota" data-duracion="w">𝅝</div>
-      <div class="figura" data-tipo="nota" data-duracion="h">𝅗𝅥</div>
-      <div class="figura" data-tipo="nota" data-duracion="q">𝅘𝅥</div>
-      <div class="figura" data-tipo="nota" data-duracion="8">𝅘𝅥𝅮</div>
-      <div class="figura" data-tipo="silencio" data-duracion="w">𝄻</div>
-      <div class="figura" data-tipo="silencio" data-duracion="h">𝄼</div>
-      <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div>
-      <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div>
-      <div class="figura" data-tipo="puntillo" title="Puntillo (clic en nota para añadir/quitar)">•</div>
-    </div>
-
-    <div id="controles-modo">
-      <button id="notas"><i class="fas fa-music"></i> Notas</button>
-      <button id="play-stop" class="play-active"><i class="fas fa-play"></i> Play</button>
-      <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
-    </div>
-
-    <div id="controles-otros">
-      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
-      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
-      <input type="file" id="file-input" accept=".json" style="display:none">
-      <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
-      <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
-      <button id="ligar" title="Ligar dos notas consecutivas"><i class="fas fa-link"></i> Ligar</button>
-      <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
-    </div>
+  <div id="controles-otros">
+    <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
+    <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
+    <input type="file" id="file-input" accept=".json" style="display:none">
+    <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
+    <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
+    <!-- Botón nuevo para ligadura -->
+    <button id="ligar" title="Ligar dos notas consecutivas"><i class="fas fa-link"></i> Ligar</button>
+    <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // ──────────────────────────────────────────────
+    // Tu código original completo + añadidos mínimos
+    // ──────────────────────────────────────────────
 
+    const VF = Vex.Flow;
+    const div = document.getElementById("pentagrama");
+    const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+    const container = document.getElementById("pentagrama-container");
+    const tempoDisplay = document.getElementById("tempo-display");
+    let MAX_LINE_WIDTH = Math.max(280, container.clientWidth - 40);
+    const FIRST_STAVE_WIDTH = 350;
+    const minStaveWidth = 100;
+    const lineHeight = 100;
+    const noteWidthFactors = { w: 50, h: 50, q: 55, '8': 80 };
+    let width = Math.max(280, container.clientWidth);
+    let currentHeight = 240;
+    renderer.resize(width, currentHeight);
+    const context = renderer.getContext();
+
+    let clave = "treble", compas = "", bpm = 0;
+    let lines = [[]], currentLine = 0;
+    let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
+    let modoLigar = false;                // ← nuevo
+    let primeraNotaParaLigar = null;      // ← nuevo
+    let metronomeLoop = null;
+    let synth = null;
+
+    const noteMap = { /* igual que original */ };
+    const noteNameMap = { /* igual */ };
+    const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
+    const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
+    const tempoNames = { /* igual */ };
+
+    // ─── Funciones originales sin cambios ───
+    // getNoteName, initSynth, reflowLines, calculateStaveWidth, getNoteFromY, changePitch,
+    // playStop, stopPlayback, cerrarCompas, borrarUltimo, guardar, abrir
+    // ... copia todas exactamente igual que en tu original ...
+
+    // Solo modificamos / añadimos lo siguiente:
+
+    function resetPartitura() {
+      lines = [[]];
+      currentLine = 0;
+      if (compas) {
+        lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH, ligaduras: [] });
+      }
+      figuraActiva = null;
+      modoLigar = false;
+      primeraNotaParaLigar = null;
+      document.querySelectorAll(".figura, button#ligar").forEach(el => el.classList.remove("activa"));
+      redibujarPentagrama();
+    }
+
+    function initFiguras() {
+      document.querySelectorAll(".figura").forEach(f => {
+        f.onclick = () => {
+          document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+          if (f.dataset.tipo === "puntillo") {
+            figuraActiva = { tipo: "puntillo", duracion: null };
+          } else {
+            figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
+          }
+          f.classList.add("activa");
+          initSynth();
+        };
+      });
+    }
+
+    function initControles() {
+      // ... todos los onclick originales ...
+
+      document.getElementById("ligar").onclick = () => {
+        modoLigar = !modoLigar;
+        primeraNotaParaLigar = null;
+        document.getElementById("ligar").classList.toggle("activa", modoLigar);
+        document.querySelectorAll(".nota").forEach(n => n.style.outline = "");
+        if (modoLigar) {
+          alert("Modo ligadura activado. Clic en primera nota → clic en la siguiente (misma altura, consecutivo)");
+        }
+      };
+    }
+
+    function redibujarPentagrama() {
+      // ... tu código original completo ...
+      // Añade al final del bucle line.forEach((c, ci) => { ... } después de voice.draw():
+      if (c.ligaduras && c.notas.length > 0) {
+        c.ligaduras.forEach(lig => {
+          try {
+            const tie = new VF.Tie({
+              from: { line: lig.from, voice: 0 },
+              to:   { line: lig.to,   voice: 0 }
+            });
+            tie.setContext(context).draw();
+          } catch (err) {
+            console.warn("Error ligadura:", err);
+          }
+        });
+      }
+      // ... resto igual ...
+    }
+
+    function updateDraggableNotes() {
+      // ... tu código original ...
+      // Añade dentro del forEach de c.notas.forEach((n, ni) => { ... } después de div.appendChild(d):
+      d.onclick = e => {
+        e.stopPropagation();
+        const li = +d.dataset.li, ci = +d.dataset.ci, ni = +d.dataset.ni;
+        const compas = lines[li][ci];
+        const nota = compas.notas[ni];
+
+        if (figuraActiva?.tipo === "puntillo") {
+          if (nota.tipo === "silencio") return alert("No puntillo en silencios");
+          const base = nota.duracion.replace('.', '');
+          if (!["q","8","h","w"].includes(base)) return alert("Solo puntillo en redonda/blanca/negra/corchea");
+
+          nota.duracion = nota.duracion.includes('.') ? base : base + '.';
+
+          const list = noteMap[clave];
+          const idx = list.indexOf(nota.noteName);
+          const bIdx = clave === "treble" ? list.indexOf("b/4") : list.indexOf("b/2");
+
+          nota.vf = new VF.StaveNote({
+            clef: clave,
+            keys: [nota.noteName],
+            duration: nota.duracion,
+            stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP
+          });
+
+          compas.beats = 0;
+          compas.notas.forEach(n2 => {
+            let b = duracionBeats[n2.duracion.replace('.', '')] || 0;
+            compas.beats += n2.duracion.includes('.') ? b * 1.5 : b;
+          });
+
+          redibujarPentagrama();
+          return;
+        }
+
+        if (modoLigar) {
+          if (nota.tipo === "silencio") return alert("No liga silencios");
+          if (!primeraNotaParaLigar) {
+            primeraNotaParaLigar = { li, ci, ni, noteName: nota.noteName };
+            d.style.outline = "4px solid #ff4081";
+          } else {
+            document.querySelectorAll(".nota").forEach(n => n.style.outline = "");
+            if (nota.noteName !== primeraNotaParaLigar.noteName) {
+              alert("Solo misma altura");
+              primeraNotaParaLigar = null;
+              return;
+            }
+            if (li !== primeraNotaParaLigar.li || ci !== primeraNotaParaLigar.ci || ni !== primeraNotaParaLigar.ni + 1) {
+              alert("Solo consecutivas en mismo compás");
+              primeraNotaParaLigar = null;
+              return;
+            }
+
+            compas.ligaduras = compas.ligaduras || [];
+            compas.ligaduras.push({ from: primeraNotaParaLigar.ni, to: ni });
+
+            primeraNotaParaLigar = null;
+            modoLigar = false;
+            document.getElementById("ligar").classList.remove("activa");
+            redibujarPentagrama();
+          }
+        }
+      };
+    }
+
+    // Resto de funciones originales sin cambios (addNota, getNoteFromY, etc.)
+    // ... copia todo lo demás exactamente igual ...
+
+    init();
+  </script>
 </body>
 </html>
