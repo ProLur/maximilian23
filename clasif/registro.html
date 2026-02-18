@@ -5,179 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Registro • Juego del Silencio (Privado)</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
-  <meta name="theme-color" content="#00ffcc">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: "Courier New", Courier, monospace;
-      background: #0d1117;
-      color: #e6edf3;
-      min-height: 100dvh;
-      background-image:
-        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
-        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
-      background-attachment: fixed;
-    }
-    header {
-      background: rgba(22,27,34,0.92);
-      backdrop-filter: blur(8px);
-      padding: 1rem 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      border-bottom: 2px solid #00ffcc;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    header img {
-      height: 45px;
-      border-radius: 50%;
-      border: 2px solid #00ffcc88;
-      box-shadow: 0 0 12px #00ffcc55;
-    }
-    header h1 {
-      font-size: 1.7rem;
-      color: #00ffcc;
-      text-shadow: 0 0 8px #00ffccaa;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .intro {
-      text-align: center;
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: rgba(30,45,61,0.38);
-      border: 1px solid #00ffcc44;
-      border-radius: 14px;
-      backdrop-filter: blur(6px);
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.4rem;
-      justify-content: center;
-      align-items: flex-end;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(30,45,61,0.45);
-      border: 1px solid #00ffcc55;
-      border-radius: 16px;
-      backdrop-filter: blur(8px);
-      max-width: 1000px;
-    }
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      min-width: 160px;
-    }
-    .control-group label {
-      color: #a0c0ff;
-      margin-bottom: 0.6rem;
-      font-size: 1rem;
-      opacity: 0.9;
-    }
-    .control-group select,
-    .control-group input {
-      background: #161b22;
-      border: 2px solid #00ffcc66;
-      color: #e6edf3;
-      padding: 0.9rem 1.2rem;
-      border-radius: 10px;
-      font-size: 1.15rem;
-      font-family: inherit;
-      text-align: center;
-    }
-    .btn {
-      padding: 0.9rem 2.5rem;
-      background: rgba(0,255,204,0.18);
-      color: #00ffcc;
-      border: 2px solid #00ffcc88;
-      border-radius: 999px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1.1rem;
-    }
-    .btn:hover {
-      background: rgba(0,255,204,0.35);
-      transform: translateY(-3px);
-      box-shadow: 0 0 20px rgba(0,255,204,0.4);
-    }
-    .btn-danger {
-      background: rgba(255,100,100,0.18);
-      border-color: #ff6666aa;
-      color: #ffaaaa;
-    }
-    .btn-danger:hover {
-      background: rgba(255,100,100,0.35);
-    }
-    .classification {
-      background: rgba(30,45,61,0.35);
-      border: 2px solid #00ffcc55;
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-top: 2rem;
-      backdrop-filter: blur(6px);
-      overflow-x: auto;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: rgba(13,17,23,0.85);
-      border: 3px solid #00ffcc;
-      border-radius: 12px;
-      overflow: hidden;
-      min-width: 820px;
-    }
-    th {
-      background: linear-gradient(#00ffcc22, transparent);
-      color: #00ffcc;
-      padding: 14px 10px;
-      font-size: 1.1rem;
-      border-bottom: 3px solid #00ffcc66;
-      text-shadow: 0 0 6px #00ffcc88;
-    }
-    td {
-      padding: 14px 10px;
-      text-align: center;
-      border-bottom: 1px solid #00ffcc33;
-      font-size: 1.25rem;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
-    tr:hover td { background: rgba(0,255,204,0.09); }
-    .team-name {
-      text-align: left;
-      padding-left: 1.8rem;
-      color: #00ffcc;
-      font-size: 1.3rem;
-    }
-    .total-cell {
-      background: rgba(0,255,204,0.22) !important;
-      color: #00ffcc;
-      font-size: 1.4rem;
-      border-left: 3px solid #00ffcc;
-      font-weight: bold;
-    }
-    footer {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: #00ffcc88;
-      font-size: 0.9rem;
-      border-top: 1px solid #00ffcc33;
-      margin-top: 4rem;
-    }
-    @media (max-width: 768px) {
-      .controls { flex-direction: column; align-items: stretch; padding: 1.5rem; }
-      .control-group { min-width: auto; }
-      table, th, td { font-size: 1rem; padding: 10px 8px; }
-      .team-name { padding-left: 1rem; }
-    }
+    body { font-family:"Courier New",Courier,monospace; background:#0d1117; color:#e6edf3; min-height:100dvh;
+      background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment:fixed; }
+    header { background:rgba(22,27,34,0.92); backdrop-filter:blur(8px); padding:1rem 1.2rem; display:flex; align-items:center; gap:0.8rem; border-bottom:2px solid #00ffcc; position:sticky; top:0; z-index:100; }
+    header img { height:45px; border-radius:50%; border:2px solid #00ffcc88; box-shadow:0 0 12px #00ffcc55; }
+    header h1 { font-size:1.7rem; color:#00ffcc; text-shadow:0 0 8px #00ffccaa; }
+    .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
+    .intro { text-align:center; margin-bottom:2rem; padding:1.5rem; background:rgba(30,45,61,0.38); border:1px solid #00ffcc44; border-radius:14px; backdrop-filter:blur(6px); }
+    .classification { background:rgba(30,45,61,0.35); border:2px solid #00ffcc55; border-radius:14px; padding:2rem; backdrop-filter:blur(6px); overflow-x:auto; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+    table { width:100%; border-collapse:collapse; background:rgba(13,17,23,0.85); border:3px solid #00ffcc; border-radius:12px; overflow:hidden; min-width:900px; }
+    th { background:linear-gradient(#00ffcc22,transparent); color:#00ffcc; padding:16px 12px; font-size:1.2rem; border-bottom:3px solid #00ffcc66; }
+    td { padding:12px; text-align:center; border-bottom:1px solid #00ffcc33; }
+    .team-name { text-align:left; padding-left:2rem; color:#00ffcc; font-size:1.35rem; font-weight:bold; }
+    .total-cell { background:rgba(0,255,204,0.22)!important; color:#00ffcc; font-size:1.5rem; font-weight:bold; border-left:3px solid #00ffcc; }
+    select { background:#161b22; color:#e6edf3; border:2px solid #00ffcc66; border-radius:8px; padding:8px; font-size:1.1rem; width:100%; text-align:center; }
+    .btn-update { padding:1rem 4rem; background:rgba(0,255,204,0.2); color:#00ffcc; border:3px solid #00ffcc; border-radius:999px; font-size:1.4rem; font-weight:bold; cursor:pointer; margin:2rem auto; display:block; transition:all .3s; }
+    .btn-update:hover { background:rgba(0,255,204,0.35); transform:scale(1.05); }
+    footer { text-align:center; padding:3rem 1rem; color:#00ffcc88; border-top:1px solid #00ffcc33; margin-top:4rem; }
   </style>
 </head>
 <body>
@@ -188,61 +36,16 @@
 
   <div class="container">
     <div class="intro">
-      <h2 style="color:#00ffcc; margin-bottom:0.5rem;">Panel de puntuación</h2>
-      <p>Elige equipo, semana y puntos (0–10).<br>Los cambios se guardan en la nube y se ven en la página pública.</p>
-    </div>
-
-    <div class="controls">
-      <div class="control-group">
-        <label>Equipo</label>
-        <select id="team-select">
-          <option value="3º A">3º A</option>
-          <option value="3º B">3º B</option>
-          <option value="4º A">4º A</option>
-          <option value="4º B">4º B</option>
-        </select>
-      </div>
-
-      <div class="control-group">
-        <label>Semana</label>
-        <select id="week-select">
-          <option value="1">Semana 1</option>
-          <option value="2">Semana 2</option>
-          <option value="3">Semana 3</option>
-          <option value="4">Semana 4</option>
-          <option value="5">Semana 5</option>
-          <option value="6">Semana 6</option>
-        </select>
-      </div>
-
-      <div class="control-group">
-        <label>Puntos</label>
-        <select id="points-select">
-          <option value="0">0</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5" selected>5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-        </select>
-      </div>
-
-      <button class="btn" onclick="addPoints()">+ AÑADIR</button>
-      <button class="btn" onclick="setPoints()">= ESTABLECER</button>
+      <h2 style="color:#00ffcc;">Edita las puntuaciones</h2>
+      <p>Cambia los desplegables y pulsa <strong>ACTUALIZAR</strong></p>
     </div>
 
     <div class="classification">
-      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1rem;">Vista previa de la clasificación</h2>
       <table>
         <thead>
           <tr>
             <th>Equipo</th>
-            <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th>
+            <th>Semana 1</th><th>Semana 2</th><th>Semana 3</th><th>Semana 4</th><th>Semana 5</th><th>Semana 6</th>
             <th>TOTAL</th>
           </tr>
         </thead>
@@ -250,107 +53,84 @@
       </table>
     </div>
 
-    <div style="text-align:center; margin:3rem 0 2rem;">
-      <button class="btn btn-danger" onclick="resetAll()">🗑 REINICIAR TODOS LOS DATOS</button>
+    <button class="btn-update" onclick="updateAll()">ACTUALIZAR CLASIFICACIÓN</button>
+
+    <div style="text-align:center; margin-top:2rem;">
+      <button onclick="resetAll()" style="padding:0.8rem 2rem; background:rgba(255,80,80,0.2); color:#ffaaaa; border:2px solid #ff6666; border-radius:999px; cursor:pointer;">🗑 REINICIAR TODO</button>
     </div>
   </div>
 
-  <footer>
-    CEIP Juan XXIII • Zafra • Panel privado
-  </footer>
+  <footer>CEIP Juan XXIII • Zafra • Solo profesor</footer>
 
   <script>
     const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
-
     const teams = ["3º A", "3º B", "4º A", "4º B"];
-    let scores = {
-      "3º A": [0,0,0,0,0,0],
-      "3º B": [0,0,0,0,0,0],
-      "4º A": [0,0,0,0,0,0],
-      "4º B": [0,0,0,0,0,0]
-    };
+    let scores = {"3º A":[0,0,0,0,0,0],"3º B":[0,0,0,0,0,0],"4º A":[0,0,0,0,0,0],"4º B":[0,0,0,0,0,0]};
 
     async function loadData() {
       try {
-        const res = await fetch(STORAGE_URL);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.scores) scores = data.scores;
+        const r = await fetch(STORAGE_URL);
+        if (r.ok) {
+          const d = await r.json();
+          if (d?.scores) scores = d.scores;
         }
-      } catch (e) {
-        console.error('Error cargando:', e);
-      }
+      } catch(e) {}
     }
 
-    async function saveData() {
-      try {
-        const payload = { scores, lastUpdate: new Date().toISOString() };
-        await fetch(STORAGE_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } catch (e) {
-        alert('Error al guardar. Revisa conexión a internet.');
-      }
-    }
-
-    function renderTable() {
+    function renderEditableTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
-
-      const rankedTeams = [...teams].sort((a,b) => {
-        const ta = scores[a].reduce((s,p)=>s+p,0);
-        const tb = scores[b].reduce((s,p)=>s+p,0);
-        return tb - ta;
-      });
-
-      rankedTeams.forEach(team => {
+      teams.forEach(team => {
         const row = document.createElement('tr');
         row.innerHTML = `<td class="team-name">${team}</td>`;
-        let total = 0;
-        scores[team].forEach(p => {
-          row.innerHTML += `<td>${p}</td>`;
-          total += p;
-        });
+        for (let w = 0; w < 6; w++) {
+          const selectHTML = `<select data-team="${team}" data-week="${w}">
+            ${Array.from({length:11},(_,i)=>`<option value="${i}" ${scores[team][w]===i?'selected':''}>${i}</option>`).join('')}
+          </select>`;
+          row.innerHTML += `<td>${selectHTML}</td>`;
+        }
+        const total = scores[team].reduce((a,b)=>a+b,0);
         row.innerHTML += `<td class="total-cell">${total}</td>`;
         tbody.appendChild(row);
       });
     }
 
-    async function addPoints() {
-      const team = document.getElementById('team-select').value;
-      const week = parseInt(document.getElementById('week-select').value) - 1;
-      const points = parseInt(document.getElementById('points-select').value) || 0;
-      scores[team][week] += points;
-      await saveData();
-      renderTable();
-    }
+    async function updateAll() {
+      // Leer todos los selects
+      document.querySelectorAll('select').forEach(sel => {
+        const team = sel.dataset.team;
+        const week = parseInt(sel.dataset.week);
+        const value = parseInt(sel.value);
+        scores[team][week] = value;
+      });
 
-    async function setPoints() {
-      const team = document.getElementById('team-select').value;
-      const week = parseInt(document.getElementById('week-select').value) - 1;
-      const points = parseInt(document.getElementById('points-select').value) || 0;
-      scores[team][week] = points;
-      await saveData();
-      renderTable();
+      try {
+        await fetch(STORAGE_URL, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({scores, lastUpdate: new Date().toISOString()})
+        });
+        alert('✅ Guardado correctamente en la nube');
+        renderEditableTable();
+      } catch(e) {
+        alert('Error al guardar. Revisa conexión.');
+      }
     }
 
     async function resetAll() {
-      if (!confirm('¿BORRAR TODO? Esta acción elimina todos los puntos online.\nNo se puede recuperar.')) return;
-      scores = {
-        "3º A": [0,0,0,0,0,0],
-        "3º B": [0,0,0,0,0,0],
-        "4º A": [0,0,0,0,0,0],
-        "4º B": [0,0,0,0,0,0]
-      };
-      await saveData();
-      renderTable();
+      if (!confirm('¿BORRAR TODOS LOS DATOS online?\nNo se puede recuperar.')) return;
+      scores = {"3º A":[0,0,0,0,0,0],"3º B":[0,0,0,0,0,0],"4º A":[0,0,0,0,0,0],"4º B":[0,0,0,0,0,0]};
+      await fetch(STORAGE_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({scores, lastUpdate: new Date().toISOString()})
+      });
+      renderEditableTable();
     }
 
     window.onload = async () => {
       await loadData();
-      renderTable();
+      renderEditableTable();
     };
   </script>
 </body>
