@@ -123,15 +123,61 @@
       margin-top: 2rem;
       backdrop-filter: blur(6px);
       overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
-    /* resto de estilos de tabla igual que en index.html */
-    table { width:100%; border-collapse:collapse; background:rgba(13,17,23,0.85); border:3px solid #00ffcc; border-radius:12px; overflow:hidden; min-width:820px; }
-    th { background:linear-gradient(#00ffcc22, transparent); color:#00ffcc; padding:14px 10px; font-size:1.1rem; border-bottom:3px solid #00ffcc66; }
-    td { padding:14px 10px; text-align:center; border-bottom:1px solid #00ffcc33; font-size:1.25rem; font-weight:bold; }
-    tr:hover td { background:rgba(0,255,204,0.09); }
-    .team-name { text-align:left; padding-left:1.8rem; color:#00ffcc; font-size:1.3rem; }
-    .total-cell { background:rgba(0,255,204,0.22)!important; color:#00ffcc; font-size:1.4rem; border-left:3px solid #00ffcc; }
-    footer { text-align:center; padding:3rem 1rem; color:#00ffcc88; font-size:0.9rem; border-top:1px solid #00ffcc33; margin-top:4rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.85);
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 820px;
+    }
+    th {
+      background: linear-gradient(#00ffcc22, transparent);
+      color: #00ffcc;
+      padding: 14px 10px;
+      font-size: 1.1rem;
+      border-bottom: 3px solid #00ffcc66;
+      text-shadow: 0 0 6px #00ffcc88;
+    }
+    td {
+      padding: 14px 10px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+      font-size: 1.25rem;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    tr:hover td { background: rgba(0,255,204,0.09); }
+    .team-name {
+      text-align: left;
+      padding-left: 1.8rem;
+      color: #00ffcc;
+      font-size: 1.3rem;
+    }
+    .total-cell {
+      background: rgba(0,255,204,0.22) !important;
+      color: #00ffcc;
+      font-size: 1.4rem;
+      border-left: 3px solid #00ffcc;
+      font-weight: bold;
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #00ffcc88;
+      font-size: 0.9rem;
+      border-top: 1px solid #00ffcc33;
+      margin-top: 4rem;
+    }
+    @media (max-width: 768px) {
+      .controls { flex-direction: column; align-items: stretch; padding: 1.5rem; }
+      .control-group { min-width: auto; }
+      table, th, td { font-size: 1rem; padding: 10px 8px; }
+      .team-name { padding-left: 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -142,8 +188,8 @@
 
   <div class="container">
     <div class="intro">
-      <h2 style="color:#00ffcc;">Panel de puntuación</h2>
-      <p>Selecciona equipo, semana y puntuación (0–10).<br>Los cambios se guardan online automáticamente.</p>
+      <h2 style="color:#00ffcc; margin-bottom:0.5rem;">Panel de puntuación</h2>
+      <p>Elige equipo, semana y puntos (0–10).<br>Los cambios se guardan en la nube y se ven en la página pública.</p>
     </div>
 
     <div class="controls">
@@ -191,7 +237,7 @@
     </div>
 
     <div class="classification">
-      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1rem;">Vista previa</h2>
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1rem;">Vista previa de la clasificación</h2>
       <table>
         <thead>
           <tr>
@@ -204,7 +250,7 @@
       </table>
     </div>
 
-    <div style="text-align:center; margin:2.5rem 0;">
+    <div style="text-align:center; margin:3rem 0 2rem;">
       <button class="btn btn-danger" onclick="resetAll()">🗑 REINICIAR TODOS LOS DATOS</button>
     </div>
   </div>
@@ -232,7 +278,7 @@
           if (data && data.scores) scores = data.scores;
         }
       } catch (e) {
-        console.error('Error cargando datos:', e);
+        console.error('Error cargando:', e);
       }
     }
 
@@ -245,7 +291,7 @@
           body: JSON.stringify(payload)
         });
       } catch (e) {
-        alert('Error al guardar en la nube.\nComprueba tu conexión.');
+        alert('Error al guardar. Revisa conexión a internet.');
       }
     }
 
@@ -291,7 +337,7 @@
     }
 
     async function resetAll() {
-      if (!confirm('¿REALMENTE quieres borrar TODOS los puntos?\nEsto elimina todo online y no se puede recuperar.')) return;
+      if (!confirm('¿BORRAR TODO? Esta acción elimina todos los puntos online.\nNo se puede recuperar.')) return;
       scores = {
         "3º A": [0,0,0,0,0,0],
         "3º B": [0,0,0,0,0,0],
