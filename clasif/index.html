@@ -3,117 +3,150 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registro Privado • Juego del Silencio</title>
+  <title>Clasificación • Juego del Silencio</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <meta name="description" content="Clasificación actual del Juego del Silencio - CEIP Juan XXIII Zafra">
   <meta name="theme-color" content="#00ffcc">
   <style>
-    /* Usa el mismo <style> completo que en index.html + añade estos para los controles */
-    .controls {
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      background: rgba(22,27,34,0.92);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.2rem;
       display: flex;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      justify-content: center;
-      align-items: flex-end;
-      margin: 2.5rem auto;
-      max-width: 1100px;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc88;
+      box-shadow: 0 0 12px #00ffcc55;
+    }
+    header h1 {
+      font-size: 1.7rem;
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffccaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .intro {
+      text-align: center;
+      margin-bottom: 2.5rem;
       padding: 1.8rem;
       background: rgba(30,45,61,0.38);
       border: 1px solid #00ffcc44;
       border-radius: 14px;
       backdrop-filter: blur(6px);
     }
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      min-width: 180px;
-    }
-    .control-group label {
-      color: #a0c0ff;
-      margin-bottom: 0.5rem;
-      font-size: 0.95rem;
-      opacity: 0.9;
-    }
-    .control-group select,
-    .control-group input {
-      background: #161b22;
+    .classification {
+      background: rgba(30,45,61,0.35);
       border: 2px solid #00ffcc55;
-      color: #e6edf3;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 1.1rem;
+      border-radius: 14px;
+      padding: 2rem;
+      backdrop-filter: blur(6px);
+      overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
-    .btn {
-      padding: 12px 32px;
-      background: rgba(0,255,204,0.15);
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.85);
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 820px;
+    }
+    th {
+      background: linear-gradient(#00ffcc22, transparent);
       color: #00ffcc;
-      border: 2px solid #00ffcc;
-      border-radius: 30px;
+      padding: 16px 12px;
+      font-size: 1.2rem;
+      border-bottom: 3px solid #00ffcc66;
+      text-shadow: 0 0 6px #00ffcc88;
+    }
+    td {
+      padding: 16px 12px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+      font-size: 1.35rem;
       font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 1.05rem;
+      transition: background 0.2s;
     }
-    .btn:hover { background: rgba(0,255,204,0.3); transform: translateY(-2px); box-shadow: 0 0 15px rgba(0,255,204,0.4); }
-    .btn-danger {
-      background: rgba(255,80,80,0.15);
-      border-color: #ff6666;
-      color: #ffaaaa;
+    tr:hover td { background: rgba(0,255,204,0.09); }
+    .team-name {
+      text-align: left;
+      padding-left: 2.2rem;
+      color: #00ffcc;
+      font-size: 1.4rem;
     }
-    .btn-danger:hover { background: rgba(255,80,80,0.3); }
+    .total-cell {
+      background: rgba(0,255,204,0.22) !important;
+      color: #00ffcc;
+      font-size: 1.55rem;
+      border-left: 3px solid #00ffcc;
+      font-weight: bold;
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      color: #00ffcc88;
+      font-size: 0.95rem;
+      border-top: 1px solid #00ffcc33;
+      margin-top: 5rem;
+    }
+    @media (max-width: 768px) {
+      table, th, td { font-size: 1.1rem; padding: 12px 8px; }
+      .team-name { padding-left: 1.2rem; }
+    }
   </style>
 </head>
 <body>
-  <!-- Copia el <header> y <footer> de index.html si quieres consistencia -->
-
   <header>
     <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
-    <h1>Registro • Juego del Silencio (Privado)</h1>
+    <h1>Clasificación • Juego del Silencio</h1>
   </header>
 
   <div class="container">
-    <div class="intro" style="text-align:center; color:#ffcc00;">
-      <h2>PANEL PRIVADO – Solo para el profesor</h2>
-      <p>Los cambios se guardan online y se ven inmediatamente en index.html</p>
-    </div>
-
-    <div class="controls">
-      <div class="control-group">
-        <label>Equipo</label>
-        <select id="team-select">
-          <option value="3º A">3º A</option>
-          <option value="3º B">3º B</option>
-          <option value="4º A">4º A</option>
-          <option value="4º B">4º B</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label>Semana</label>
-        <select id="week-select">
-          <option value="1">Semana 1</option>
-          <option value="2">Semana 2</option>
-          <option value="3">Semana 3</option>
-          <option value="4">Semana 4</option>
-          <option value="5">Semana 5</option>
-          <option value="6">Semana 6</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label>Puntos</label>
-        <input type="number" id="points-input" value="10" step="1" min="-999">
-      </div>
-      <button class="btn" onclick="addPoints()">+ AÑADIR</button>
-      <button class="btn" onclick="setPoints()">= ESTABLECER</button>
-      <button class="btn btn-danger" onclick="resetAll()">🗑 REINICIAR TODO</button>
+    <div class="intro">
+      <h2 style="color:#00ffcc; margin-bottom:0.6rem;">¡Clasificación actualizada!</h2>
+      <p style="font-size:1.1rem; opacity:0.9;">
+        Puntos acumulados por curso tras las 6 semanas del Juego del Silencio.<br>
+        ¡Ánimo a todos los equipos! 🚀
+      </p>
     </div>
 
     <div class="classification">
-      <h2 style="text-align:center; color:#00ffcc; margin:1.5rem 0;">Vista previa (actualiza en tiempo real)</h2>
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
+        Tabla de Clasificación – 6 Semanas
+      </h2>
       <table>
         <thead>
           <tr>
             <th>Equipo</th>
-            <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th>
+            <th>Semana 1</th>
+            <th>Semana 2</th>
+            <th>Semana 3</th>
+            <th>Semana 4</th>
+            <th>Semana 5</th>
+            <th>Semana 6</th>
             <th>TOTAL</th>
           </tr>
         </thead>
@@ -121,6 +154,10 @@
       </table>
     </div>
   </div>
+
+  <footer>
+    CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
+  </footer>
 
   <script>
     const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
@@ -138,24 +175,15 @@
         const res = await fetch(STORAGE_URL);
         if (res.ok) {
           const data = await res.json();
-          if (data && data.scores) scores = data.scores;
+          if (data && data.scores) {
+            scores = data.scores;
+          }
+          if (data && data.lastUpdate) {
+            document.getElementById('last-update').textContent = new Date(data.lastUpdate).toLocaleString('es-ES');
+          }
         }
       } catch (e) {
-        console.error('Error cargando:', e);
-      }
-    }
-
-    async function saveData() {
-      try {
-        const payload = { scores, lastUpdate: new Date().toISOString() };
-        await fetch(STORAGE_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        console.log('Guardado online');
-      } catch (e) {
-        alert('Error al guardar: ' + e.message + '\nComprueba conexión.');
+        console.error('Error al cargar datos:', e);
       }
     }
 
@@ -164,47 +192,33 @@
       tbody.innerHTML = '';
 
       const rankedTeams = [...teams].sort((a,b) => {
-        const ta = scores[a].reduce((s,p)=>s+p,0);
-        const tb = scores[b].reduce((s,p)=>s+p,0);
-        return tb - ta;
+        const totalA = scores[a].reduce((sum,p)=>sum+p,0);
+        const totalB = scores[b].reduce((sum,p)=>sum+p,0);
+        return totalB - totalA;
       });
 
       rankedTeams.forEach(team => {
         const row = document.createElement('tr');
-        row.innerHTML = `<td class="team-name">${team}</td>`;
+        const teamCell = document.createElement('td');
+        teamCell.className = 'team-name';
+        teamCell.textContent = team;
+        row.appendChild(teamCell);
+
         let total = 0;
-        scores[team].forEach(p => {
-          row.innerHTML += `<td>${p}</td>`;
-          total += p;
+        scores[team].forEach(points => {
+          const cell = document.createElement('td');
+          cell.textContent = points;
+          row.appendChild(cell);
+          total += points;
         });
-        row.innerHTML += `<td class="total-cell">${total}</td>`;
+
+        const totalCell = document.createElement('td');
+        totalCell.className = 'total-cell';
+        totalCell.textContent = total;
+        row.appendChild(totalCell);
+
         tbody.appendChild(row);
       });
-    }
-
-    async function addPoints() {
-      const team = document.getElementById('team-select').value;
-      const week = parseInt(document.getElementById('week-select').value) - 1;
-      const points = parseFloat(document.getElementById('points-input').value) || 0;
-      scores[team][week] += points;
-      await saveData();
-      renderTable();
-    }
-
-    async function setPoints() {
-      const team = document.getElementById('team-select').value;
-      const week = parseInt(document.getElementById('week-select').value) - 1;
-      const points = parseFloat(document.getElementById('points-input').value) || 0;
-      scores[team][week] = points;
-      await saveData();
-      renderTable();
-    }
-
-    async function resetAll() {
-      if (!confirm('¿Borrar TODOS los datos online? No se puede recuperar.')) return;
-      scores = { "3º A": [0,0,0,0,0,0], "3º B": [0,0,0,0,0,0], "4º A": [0,0,0,0,0,0], "4º B": [0,0,0,0,0,0] };
-      await saveData();
-      renderTable();
     }
 
     window.onload = async () => {
