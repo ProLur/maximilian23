@@ -189,7 +189,8 @@
   </footer>
 
   <script>
-    const STORAGE_URL = 'https://api.jsonbin.io/v3/b/699582afae596e708f33ce65';
+    const BIN_ID = '699582afae596e708f33ce65';
+    const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
@@ -199,13 +200,13 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // Función para obtener lunes y viernes de la semana actual
+    // Función para calcular la semana actual (lunes-viernes o cerrada)
     function getSemanaActual() {
       const hoy = new Date();
-      const diaSemana = hoy.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+      const diaSemana = hoy.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
 
-      // Calcular días a restar para llegar al lunes
-      let diasARestar = diaSemana === 0 ? 6 : diaSemana - 1;
+      // Días a restar para llegar al lunes
+      let diasARestar = (diaSemana === 0) ? 6 : diaSemana - 1;
       const lunes = new Date(hoy);
       lunes.setDate(hoy.getDate() - diasARestar);
 
@@ -213,7 +214,6 @@
       const viernes = new Date(lunes);
       viernes.setDate(lunes.getDate() + 4);
 
-      // Formato dd/mm/yyyy
       const format = d => d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
       if (diaSemana === 0 || diaSemana === 6) {
@@ -223,7 +223,7 @@
       }
     }
 
-    // Mostrar la semana al cargar
+    // Actualizar el texto de la semana al cargar
     document.getElementById('semana-actual').textContent = getSemanaActual();
 
     async function loadData() {
@@ -272,7 +272,7 @@
     async function refreshTable() {
       await loadData();
       renderTable();
-      // Actualizar también el texto de la semana al refrescar
+      // Actualizar también el texto de la semana
       document.getElementById('semana-actual').textContent = getSemanaActual();
     }
 
