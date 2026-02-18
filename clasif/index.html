@@ -102,10 +102,6 @@
       border-left: 3px solid #00ffcc;
       font-weight: bold;
     }
-    .old-week {
-      color: #ff4444 !important; /* rojo para semanas cerradas */
-      font-weight: bold;
-    }
     .btn-refresh {
       display: block;
       margin: 2rem auto;
@@ -142,7 +138,7 @@
 
   <div class="container">
     <div class="intro">
-      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.6rem;"></h2>
+      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.6rem;">Cargando...</h2>
     </div>
 
     <div class="classification">
@@ -153,16 +149,18 @@
         <thead>
           <tr>
             <th>Equipo</th>
-            <th id="semana1-header">Semana 1</th>
-            <th id="semana2-header">Semana 2</th>
-            <th id="semana3-header">Semana 3</th>
-            <th id="semana4-header">Semana 4</th>
-            <th id="semana5-header">Semana 5</th>
-            <th id="semana6-header">Semana 6</th>
+            <th>Semana 1</th>
+            <th>Semana 2</th>
+            <th>Semana 3</th>
+            <th>Semana 4</th>
+            <th>Semana 5</th>
+            <th>Semana 6</th>
             <th>TOTAL</th>
           </tr>
         </thead>
-        <tbody id="table-body"></tbody>
+        <tbody id="table-body">
+          <tr><td colspan="8" style="text-align:center; padding:2rem;">Cargando datos...</td></tr>
+        </tbody>
       </table>
     </div>
 
@@ -184,69 +182,28 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // Fecha de inicio: lunes 16 de febrero de 2026
-    const fechaInicio = new Date(2026, 1, 16); // mes 1 = febrero
-
-    function getSemanaActual() {
-      const hoy = new Date();
-      const diffTime = hoy - fechaInicio;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-      // Número de semana (1 = 16-22 feb, 2 = 23 feb-1 mar, etc.)
-      const semanaNum = Math.floor(diffDays / 7) + 1;
-
-      // Calcular lunes y domingo de la semana actual
-      const diaSemana = hoy.getDay();
-      let diasARestar = (diaSemana === 0) ? 6 : diaSemana - 1;
-      const lunes = new Date(hoy);
-      lunes.setDate(hoy.getDate() - diasARestar);
-
-      const domingo = new Date(lunes);
-      domingo.setDate(lunes.getDate() + 6);
-
-      const formatDia = d => d.getDate().toString().padStart(2, '0');
-      const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-      const mesLunes = meses[lunes.getMonth()];
-      const mesDomingo = meses[domingo.getMonth()];
-
-      let texto = `Semana ${semanaNum} del ${formatDia(lunes)} al ${formatDia(domingo)} de ${mesLunes}`;
-      if (mesLunes !== mesDomingo) {
-        texto = `Semana ${semanaNum} del ${formatDia(lunes)} de ${mesLunes} al ${formatDia(domingo)} de ${mesDomingo}`;
-      }
-
-      if (diaSemana === 0 || diaSemana === 6) {
-        texto = "Semana cerrada";
-      }
-
-      // Marcar columna de Semana 1 en rojo si ya pasó (semanaNum > 1)
-      const columnas = document.querySelectorAll('th[id^="semana"]');
-      columnas.forEach(th => {
-        if (th.id === 'semana1-header' && semanaNum > 1) {
-          th.classList.add('old-week');
-        }
-      });
-
-      return texto;
-    }
-
-    document.getElementById('semana-actual').textContent = getSemanaActual();
-
     async function loadData() {
+      console.log("Intentando cargar datos desde: " + STORAGE_URL);
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
+        console.log("Estado de la respuesta: " + res.status);
         if (res.ok) {
           const data = await res.json();
+          console.log("Datos recibidos correctamente:", data);
           scores = data.record.scores || scores;
           if (data.record.lastUpdate) {
             document.getElementById('last-update').textContent = new Date(data.record.lastUpdate).toLocaleString('es-ES');
           }
+        } else {
+          console.warn("No se pudo cargar - status: " + res.status);
         }
       } catch (e) {
-        console.error('Error al cargar:', e);
+        console.error("Error en la petición:", e);
       }
     }
 
     function renderTable() {
+      console.log("Renderizando tabla con scores:", scores);
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
@@ -265,28 +222,19 @@
         const row = document.createElement('tr');
         row.innerHTML = `<td class="team-name">${team}</td>`;
         let total = 0;
-        scores[team].forEach((points, index) => {
-          const td = document.createElement('td');
-          td.textContent = points;
-          // Si ya pasó la Semana 1 (semanaNum > 1), pintar rojo la columna 0 (Semana 1)
-          if (index === 0 && getSemanaTexto().includes('Semana') && !getSemanaTexto().includes('1')) {
-            td.classList.add('old-week');
-          }
-          row.appendChild(td);
+        scores[team].forEach(points => {
+          row.innerHTML += `<td>${points}</td>`;
           total += points;
         });
-        const totalTd = document.createElement('td');
-        totalTd.classList.add('total-cell');
-        totalTd.textContent = total;
-        row.appendChild(totalTd);
+        row.innerHTML += `<td class="total-cell">${total}</td>`;
         tbody.appendChild(row);
       });
     }
 
     async function refreshTable() {
+      console.log("Refrescando tabla...");
       await loadData();
       renderTable();
-      document.getElementById('semana-actual').textContent = getSemanaTexto();
     }
 
     window.onload = async () => {
