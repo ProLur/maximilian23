@@ -6,25 +6,131 @@
   <title>Registro • Juego del Silencio (Privado)</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <style>
-    body { font-family: "Courier New", Courier, monospace; background: #0d1117; color: #e6edf3; min-height: 100dvh;
+    body { 
+      font-family: "Courier New", Courier, monospace; 
+      background: #0d1117; 
+      color: #e6edf3; 
+      min-height: 100dvh;
       background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
                         radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
-      background-attachment: fixed; }
-    header { background: rgba(22,27,34,0.92); backdrop-filter: blur(8px); padding: 1rem 1.2rem; display: flex; align-items: center; gap: 0.8rem;
-      border-bottom: 2px solid #00ffcc; position: sticky; top: 0; z-index: 100; }
-    header img { height: 45px; border-radius: 50%; border: 2px solid #00ffcc88; box-shadow: 0 0 12px #00ffcc55; }
-    header h1 { font-size: 1.7rem; color: #00ffcc; text-shadow: 0 0 8px #00ffccaa; }
-    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-    .debug-info { background: rgba(255,0,0,0.15); border: 1px solid #ff4444; color: #ffdddd; padding: 1rem; margin: 1rem 0; border-radius: 8px; font-size: 0.95rem; white-space: pre-wrap; }
-    .classification { background: rgba(30,45,61,0.35); border: 2px solid #00ffcc55; border-radius: 14px; padding: 2rem; backdrop-filter: blur(6px); overflow-x: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-    table { width: 100%; border-collapse: collapse; background: rgba(13,17,23,0.85); border: 3px solid #00ffcc; border-radius: 12px; overflow: hidden; min-width: 900px; }
-    th { background: linear-gradient(#00ffcc22, transparent); color: #00ffcc; padding: 16px 12px; font-size: 1.2rem; border-bottom: 3px solid #00ffcc66; text-align: center; }
-    td { padding: 12px; text-align: center; border-bottom: 1px solid #00ffcc33; }
-    .participant-name { text-align: left; padding-left: 1.8rem; color: #00ffcc; font-size: 1.35rem; font-weight: bold; }
-    .total-cell { background: rgba(0,255,204,0.22) !important; color: #00ffcc; font-size: 1.5rem; font-weight: bold; border-left: 3px solid #00ffcc; }
-    select { background: #161b22; color: #e6edf3; border: 2px solid #00ffcc66; border-radius: 8px; padding: 8px 4px; font-size: 1.1rem; width: 100%; max-width: 80px; text-align: center; cursor: pointer; }
-    .btn-guardar, .btn-reload { display: inline-block; margin: 1rem 1rem; padding: 0.9rem 2.5rem; background: rgba(0,255,204,0.2); color: #00ffcc; border: 3px solid #00ffcc; border-radius: 999px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-    .btn-guardar:hover, .btn-reload:hover { background: rgba(0,255,204,0.35); transform: scale(1.05); }
+      background-attachment: fixed; 
+    }
+    header { 
+      background: rgba(22,27,34,0.92); 
+      backdrop-filter: blur(8px); 
+      padding: 1rem 1.2rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.8rem;
+      border-bottom: 2px solid #00ffcc; 
+      position: sticky; 
+      top: 0; 
+      z-index: 100; 
+    }
+    header img { 
+      height: 45px; 
+      border-radius: 50%; 
+      border: 2px solid #00ffcc88; 
+      box-shadow: 0 0 12px #00ffcc55; 
+    }
+    header h1 { 
+      font-size: 1.7rem; 
+      color: #00ffcc; 
+      text-shadow: 0 0 8px #00ffccaa; 
+    }
+    .container { 
+      max-width: 1200px; 
+      margin: 2rem auto; 
+      padding: 0 1rem; 
+    }
+    .debug-info { 
+      background: rgba(255,0,0,0.15); 
+      border: 1px solid #ff4444; 
+      color: #ffdddd; 
+      padding: 1rem; 
+      margin: 1rem 0; 
+      border-radius: 8px; 
+      font-size: 0.95rem; 
+      white-space: pre-wrap; 
+    }
+    .classification { 
+      background: rgba(30,45,61,0.35); 
+      border: 2px solid #00ffcc55; 
+      border-radius: 14px; 
+      padding: 2rem; 
+      backdrop-filter: blur(6px); 
+      overflow-x: auto; 
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); 
+    }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      background: rgba(13,17,23,0.85); 
+      border: 3px solid #00ffcc; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      min-width: 900px; 
+    }
+    th { 
+      background: linear-gradient(#00ffcc22, transparent); 
+      color: #00ffcc; 
+      padding: 16px 12px; 
+      font-size: 1.2rem; 
+      border-bottom: 3px solid #00ffcc66; 
+      text-align: center; 
+    }
+    td { 
+      padding: 12px; 
+      text-align: center; 
+      border-bottom: 1px solid #00ffcc33; 
+    }
+    .participant-name { 
+      text-align: left; 
+      padding-left: 1.8rem; 
+      color: #00ffcc; 
+      font-size: 1.35rem; 
+      font-weight: bold; 
+    }
+    .total-cell { 
+      background: rgba(0,255,204,0.22) !important; 
+      color: #00ffcc; 
+      font-size: 1.5rem; 
+      font-weight: bold; 
+      border-left: 3px solid #00ffcc; 
+    }
+    select { 
+      background: #161b22; 
+      color: #e6edf3; 
+      border: 2px solid #00ffcc66; 
+      border-radius: 8px; 
+      padding: 8px 4px; 
+      font-size: 1.1rem; 
+      width: 100%; 
+      max-width: 80px; 
+      text-align: center; 
+      cursor: pointer; 
+    }
+    .btn-guardar, .btn-reload { 
+      display: inline-block; 
+      margin: 1rem 1rem; 
+      padding: 0.9rem 2.5rem; 
+      background: rgba(0,255,204,0.2); 
+      color: #00ffcc; 
+      border: 3px solid #00ffcc; 
+      border-radius: 999px; 
+      font-size: 1.2rem; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+    .btn-guardar:hover, .btn-reload:hover { 
+      background: rgba(0,255,204,0.35); 
+      transform: scale(1.05); 
+    }
+    .status-ok {
+      color: #00ffcc;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -96,17 +202,20 @@
           participantsData = record.participants;
           scoresMap = {};
           participantsData.forEach(p => {
-            if (p.name && Array.isArray(p.scores)) scoresMap[p.name] = p.scores;
+            if (p.name && Array.isArray(p.scores)) {
+              scoresMap[p.name] = p.scores;
+            }
           });
-          log(`Cargados ${participantsData.length} participantes`);
+
+          log(`<span class="status-ok">Cargados ${participantsData.length} participantes</span>`);
           renderTable();
         } else {
-          log('No se encontró "participants" en el bin', true);
-          debug.innerHTML += '<strong>El bin no tiene el formato esperado. Crea/edita en jsonbin.io con "participants": [...] </strong>';
+          log('No se encontró "participants" como array en el bin', true);
+          debug.innerHTML += '<br><strong>El bin no tiene el formato esperado. Debe tener: "participants": [ {name: "...", scores: [0,0,...]} , ... ]</strong>';
         }
       } catch (err) {
         log(`Error: ${err.message}`, true);
-        debug.innerHTML += '<br>Verifica: bin existe? estructura correcta? conexión OK?';
+        debug.innerHTML += '<br>Verifica: ¿existe el bin? ¿tienes conexión? ¿la URL es correcta?';
       }
     }
 
@@ -128,33 +237,43 @@
 
       sorted.forEach(p => {
         const row = document.createElement('tr');
-        row.innerHTML = `<td class="participant-name">${p.name}</td>`;
+        let rowHTML = `<td class="participant-name">${p.name}</td>`;
         let total = 0;
+
         for (let w = 0; w < 6; w++) {
           const val = Number(p.scores[w]) || 0;
           total += val;
-          row.innerHTML += `<td><select data-name="\( {p.name}" data-week=" \){w}">
-            \( {Array.from({length:11},(_,i)=>`<option value=" \){i}" \( {val===i?'selected':''}> \){i}</option>`).join('')}
-          </select></td>`;
+          rowHTML += `
+            <td>
+              <select data-name="${p.name}" data-week="${w}">
+                ${Array.from({length: 11}, (_, i) => 
+                  `<option value="${i}" ${val === i ? 'selected' : ''}>${i}</option>`
+                ).join('')}
+              </select>
+            </td>`;
         }
-        row.innerHTML += `<td class="total-cell">${total}</td>`;
+
+        rowHTML += `<td class="total-cell">${total}</td>`;
+        row.innerHTML = rowHTML;
         tbody.appendChild(row);
       });
 
-      log('Tabla mostrada OK');
+      log('Tabla renderizada correctamente');
     }
 
     async function guardarDatos() {
-      log('Guardando...');
+      log('Guardando cambios...');
 
+      // Actualizamos el array original con los valores de los selects
       document.querySelectorAll('select').forEach(sel => {
         const name = sel.dataset.name;
         const week = parseInt(sel.dataset.week);
         const val = parseInt(sel.value) || 0;
 
-        // Actualizar el array correspondiente
         const participant = participantsData.find(p => p.name === name);
-        if (participant) participant.scores[week] = val;
+        if (participant && participant.scores) {
+          participant.scores[week] = val;
+        }
       });
 
       try {
@@ -164,20 +283,24 @@
             'Content-Type': 'application/json',
             'X-Master-Key': MASTER_KEY
           },
-          body: JSON.stringify({ participants: participantsData, lastUpdate: new Date().toISOString() })
+          body: JSON.stringify({ 
+            participants: participantsData, 
+            lastUpdate: new Date().toISOString() 
+          })
         });
 
         if (res.ok) {
-          log('Guardado OK');
-          alert('¡Guardado correctamente!');
-          await cargarDatos();
+          log('<span class="status-ok">¡Guardado correctamente!</span>');
+          alert('Datos guardados con éxito');
+          await cargarDatos(); // recargamos para confirmar
         } else {
-          const err = await res.text();
-          log(`Error guardar: ${res.status} - ${err}`, true);
+          const errText = await res.text();
+          log(`Error al guardar: ${res.status} - ${errText}`, true);
           alert('Error al guardar: ' + res.status);
         }
       } catch (e) {
-        log(`Error conexión: ${e.message}`, true);
+        log(`Error de conexión: ${e.message}`, true);
+        alert('No se pudo conectar. Revisa tu internet.');
       }
     }
 
