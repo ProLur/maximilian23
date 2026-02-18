@@ -45,18 +45,6 @@
       margin: 2rem auto;
       padding: 0 1rem;
     }
-    .intro {
-      text-align: center;
-      margin-bottom: 2.5rem;
-      padding: 1.8rem;
-      background: rgba(30,45,61,0.38);
-      border: 1px solid #00ffcc44;
-      border-radius: 14px;
-      backdrop-filter: blur(6px);
-    }
-    .controls {
-      display: none;           /* ← Ocultamos el selector en todas las pantallas */
-    }
     .classification {
       background: rgba(30,45,61,0.35);
       border: 2px solid #00ffcc55;
@@ -64,12 +52,12 @@
       padding: 2rem;
       backdrop-filter: blur(6px);
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      overflow-x: auto;        /* permite scroll solo si realmente hace falta */
+      overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
     table {
       width: 100%;
-      min-width: 640px;        /* evita que se haga demasiado estrecha en PC */
+      min-width: 640px;
       border-collapse: collapse;
       background: rgba(13,17,23,0.85);
       border: 3px solid #00ffcc;
@@ -105,6 +93,23 @@
       border-left: 3px solid #00ffcc;
       font-weight: bold;
     }
+    .week-info {
+      text-align: center;
+      margin: 2rem 0 0.5rem;
+      padding: 1rem;
+      background: rgba(0,255,204,0.08);
+      border: 1px solid #00ffcc33;
+      border-radius: 10px;
+    }
+    .week-info h2 {
+      color: #00ffcc;
+      margin-bottom: 0.5rem;
+      font-size: clamp(1.4rem, 3.5vw, 1.7rem);
+    }
+    .week-info p {
+      color: #00ffccaa;
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+    }
     @media (max-width: 768px) {
       .full-table { display: none; }
       .mobile-table { display: table; width: 100%; min-width: 100%; }
@@ -112,7 +117,7 @@
         font-size: clamp(1rem, 3.5vw, 1.2rem);
         padding: 14px 10px;
       }
-      .classification { padding: 1.2rem; overflow-x: auto; }
+      .classification { padding: 1.5rem 1rem; }
       .container { padding: 0 0.8rem; }
     }
     @media (min-width: 769px) {
@@ -120,26 +125,8 @@
       .full-table { display: table; }
       .classification {
         overflow-x: auto;
-        padding: 1.5rem 2rem;
+        padding: 2rem;
       }
-    }
-    .btn-refresh {
-      display: block;
-      margin: 2.5rem auto;
-      padding: 0.9rem 3rem;
-      background: rgba(0,255,204,0.18);
-      color: #00ffcc;
-      border: 2px solid #00ffcc88;
-      border-radius: 999px;
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .btn-refresh:hover {
-      background: rgba(0,255,204,0.35);
-      transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(0,255,204,0.4);
     }
     footer {
       text-align: center;
@@ -156,18 +143,13 @@
     <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
     <h1>Clasificación • Juego del Silencio</h1>
   </header>
+
   <div class="container">
-    <div class="intro">
-      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.4rem;">Semana 1</h2>
-      <p id="fecha-rango" style="color:#00ffccaa; font-size:1.1rem;"></p>
-    </div>
-
-    <!-- .controls ya no se muestra → eliminado el selector -->
-
     <div class="classification">
       <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:clamp(1.5rem, 4vw, 1.8rem);">
         Tabla de Clasificación
       </h2>
+
       <table class="full-table">
         <thead>
           <tr>
@@ -185,6 +167,7 @@
           <tr><td colspan="8" style="text-align:center; padding:2rem;">Cargando datos...</td></tr>
         </tbody>
       </table>
+
       <table class="mobile-table">
         <thead>
           <tr>
@@ -197,9 +180,15 @@
           <tr><td colspan="3" style="text-align:center; padding:2rem;">Cargando...</td></tr>
         </tbody>
       </table>
+
+      <!-- Fecha movida aquí ↓ -->
+      <div class="week-info">
+        <h2 id="semana-actual">Semana 1</h2>
+        <p id="fecha-rango"></p>
+      </div>
     </div>
-    <button class="btn-refresh" onclick="refreshTable()">ACTUALIZAR</button>
   </div>
+
   <footer>
     CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
   </footer>
@@ -267,7 +256,7 @@
     function renderTables() {
       const tbodyFull = document.getElementById('table-body-full');
       const tbodyMobile = document.getElementById('table-body-mobile');
-     
+    
       tbodyFull.innerHTML = '';
       tbodyMobile.innerHTML = '';
       const rankedTeams = [...teams].sort((a,b) => {
