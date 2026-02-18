@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clasificación • Juego del Silencio</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <meta name="description" content="Clasificación semanal del Juego del Silencio - CEIP Juan XXIII Zafra">
+  <meta name="theme-color" content="#00ffcc">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      background: rgba(22,27,34,0.92);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc88;
+      box-shadow: 0 0 12px #00ffcc55;
+    }
+    header h1 {
+      font-size: 1.7rem;
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffccaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .intro {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(30,45,61,0.38);
+      border: 1px solid #00ffcc44;
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 2.5rem;
+      padding: 1.8rem;
+      background: rgba(30,45,61,0.38);
+      border: 1px solid #00ffcc44;
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 180px;
+    }
+    .control-group label {
+      color: #a0c0ff;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+    .control-group select,
+    .control-group input {
+      background: #161b22;
+      border: 2px solid #00ffcc55;
+      color: #e6edf3;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.1rem;
+    }
+    .control-group input[type="number"] {
+      text-align: center;
+    }
+    .btn {
+      padding: 12px 32px;
+      background: rgba(0,255,204,0.12);
+      color: #00ffcc;
+      border: 2px solid #00ffcc;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.05rem;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: rgba(0,255,204,0.28);
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(0,255,204,0.4);
+    }
+    .btn-danger {
+      background: rgba(255,60,60,0.12);
+      border-color: #ff6666;
+      color: #ff9999;
+    }
+    .btn-danger:hover {
+      background: rgba(255,60,60,0.25);
+    }
+    .classification {
+      background: rgba(30,45,61,0.35);
+      border: 2px solid #00ffcc55;
+      border-radius: 14px;
+      padding: 1.8rem;
+      backdrop-filter: blur(6px);
+      overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.85);
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 820px;
+    }
+    th {
+      background: linear-gradient(#00ffcc22, transparent);
+      color: #00ffcc;
+      padding: 16px 12px;
+      font-size: 1.15rem;
+      border-bottom: 3px solid #00ffcc66;
+      text-shadow: 0 0 6px #00ffcc88;
+    }
+    td {
+      padding: 14px 12px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+      font-size: 1.25rem;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    tr:hover td {
+      background: rgba(0,255,204,0.09);
+    }
+    .team-name {
+      text-align: left;
+      padding-left: 2rem;
+      color: #00ffcc;
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+    .week-cell {
+      color: #c9d1d9;
+    }
+    .total-cell {
+      background: rgba(0,255,204,0.18) !important;
+      color: #00ffcc;
+      font-size: 1.45rem;
+      border-left: 3px solid #00ffcc;
+    }
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+      color: #00ffcc88;
+      font-size: 0.9rem;
+      border-top: 1px solid #00ffcc33;
+      margin-top: 4rem;
+    }
+    .close-btn {
+      padding: 0.7rem 1.5rem;
+      background: rgba(0,255,204,0.12);
+      color: #00ffcc;
+      border: none;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .close-btn:hover {
+      background: rgba(0,255,204,0.25);
+      transform: translateY(-3px);
+    }
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .control-group {
+        min-width: auto;
+      }
+      table {
+        font-size: 1.05rem;
+      }
+      th, td {
+        padding: 12px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
+    <h1>Clasificación • Juego del Silencio</h1>
+  </header>
+
+  <div class="container">
+    <div class="intro">
+      <h2 style="color:#00ffcc; margin-bottom:0.5rem;">¡Bienvenido al panel del profesor!</h2>
+      <p>Introduce los puntos de cada equipo por semana.<br>Todo se guarda automáticamente en tu navegador.</p>
+      <button class="close-btn" onclick="window.close()">Cerrar ventana</button>
+    </div>
+
+    <!-- PANEL DE CONTROL -->
+    <div class="controls">
+      <div class="control-group">
+        <label for="team-select">Equipo</label>
+        <select id="team-select">
+          <option value="3º A">3º A</option>
+          <option value="3º B">3º B</option>
+          <option value="4º A">4º A</option>
+          <option value="4º B">4º B</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="week-select">Semana</label>
+        <select id="week-select">
+          <option value="1">Semana 1</option>
+          <option value="2">Semana 2</option>
+          <option value="3">Semana 3</option>
+          <option value="4">Semana 4</option>
+          <option value="5">Semana 5</option>
+          <option value="6">Semana 6</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="points-input">Puntos a sumar</label>
+        <input type="number" id="points-input" value="10" step="1" min="-999" placeholder="Ej: 25">
+      </div>
+
+      <button class="btn" onclick="addPoints()">AÑADIR PUNTOS</button>
+      <button class="btn" onclick="setPoints()">ESTABLECER PUNTOS (reemplaza)</button>
+    </div>
+
+    <!-- TABLA -->
+    <div class="classification">
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.2rem; font-size:1.6rem;">
+        Tabla de Clasificación – 6 Semanas
+      </h2>
+      <table id="clasificacion-table">
+        <thead>
+          <tr>
+            <th>Equipo</th>
+            <th>Semana 1</th>
+            <th>Semana 2</th>
+            <th>Semana 3</th>
+            <th>Semana 4</th>
+            <th>Semana 5</th>
+            <th>Semana 6</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+
+      <div style="text-align:center; margin-top:2rem;">
+        <button class="btn btn-danger" onclick="resetAllData()">🗑️ REINICIAR TODOS LOS DATOS</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    CEIP Juan XXIII • Zafra • Juego del Silencio 2026
+  </footer>
+
+  <script>
+    const teams = ["3º A", "3º B", "4º A", "4º B"];
+    
+    // Datos por defecto
+    let scores = {
+      "3º A": [0, 0, 0, 0, 0, 0],
+      "3º B": [0, 0, 0, 0, 0, 0],
+      "4º A": [0, 0, 0, 0, 0, 0],
+      "4º B": [0, 0, 0, 0, 0, 0]
+    };
+
+    // Cargar datos guardados
+    function loadData() {
+      const saved = localStorage.getItem('juegoSilencio2026');
+      if (saved) {
+        scores = JSON.parse(saved);
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('juegoSilencio2026', JSON.stringify(scores));
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      teams.forEach(team => {
+        const row = document.createElement('tr');
+        
+        // Nombre equipo
+        const teamCell = document.createElement('td');
+        teamCell.className = 'team-name';
+        teamCell.textContent = team;
+        row.appendChild(teamCell);
+
+        let total = 0;
+
+        // Semanas
+        scores[team].forEach((points, index) => {
+          const cell = document.createElement('td');
+          cell.className = 'week-cell';
+          cell.textContent = points;
+          row.appendChild(cell);
+          total += points;
+        });
+
+        // Total
+        const totalCell = document.createElement('td');
+        totalCell.className = 'total-cell';
+        totalCell.textContent = total;
+        row.appendChild(totalCell);
+
+        tbody.appendChild(row);
+      });
+    }
+
+    function addPoints() {
+      const team = document.getElementById('team-select').value;
+      const week = parseInt(document.getElementById('week-select').value) - 1;
+      let points = parseFloat(document.getElementById('points-input').value) || 0;
+
+      scores[team][week] += points;
+      
+      saveData();
+      renderTable();
+      
+      // Feedback visual
+      const btn = document.querySelector('.btn');
+      const originalText = btn.textContent;
+      btn.textContent = '✓ AÑADIDO';
+      btn.style.background = 'rgba(0,255,100,0.3)';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 1200);
+    }
+
+    function setPoints() {
+      const team = document.getElementById('team-select').value;
+      const week = parseInt(document.getElementById('week-select').value) - 1;
+      let points = parseFloat(document.getElementById('points-input').value) || 0;
+
+      scores[team][week] = points;
+      
+      saveData();
+      renderTable();
+      
+      const btn = document.querySelectorAll('.btn')[1];
+      const originalText = btn.textContent;
+      btn.textContent = '✓ ESTABLECIDO';
+      btn.style.background = 'rgba(0,255,100,0.3)';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 1200);
+    }
+
+    function resetAllData() {
+      if (!confirm('¿Estás seguro de borrar TODOS los puntos?\nEsta acción no se puede deshacer.')) return;
+      
+      scores = {
+        "3º A": [0, 0, 0, 0, 0, 0],
+        "3º B": [0, 0, 0, 0, 0, 0],
+        "4º A": [0, 0, 0, 0, 0, 0],
+        "4º B": [0, 0, 0, 0, 0, 0]
+      };
+      
+      saveData();
+      renderTable();
+    }
+
+    // Inicializar
+    window.onload = function() {
+      loadData();
+      renderTable();
+    };
+  </script>
+</body>
+</html>
