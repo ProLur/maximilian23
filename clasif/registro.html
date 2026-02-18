@@ -6,21 +6,113 @@
   <title>Registro • Juego del Silencio (Privado)</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <style>
-    /* Mantengo el estilo anterior – si quieres el completo, cópialo de antes */
-    body { font-family:"Courier New",Courier,monospace; background:#0d1117; color:#e6edf3; min-height:100dvh; background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%), radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%); background-attachment:fixed; }
-    header { background:rgba(22,27,34,0.92); backdrop-filter:blur(8px); padding:1rem 1.2rem; display:flex; align-items:center; gap:0.8rem; border-bottom:2px solid #00ffcc; position:sticky; top:0; z-index:100; }
-    header img { height:45px; border-radius:50%; border:2px solid #00ffcc88; box-shadow:0 0 12px #00ffcc55; }
-    header h1 { font-size:1.7rem; color:#00ffcc; text-shadow:0 0 8px #00ffccaa; }
-    .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
-    .classification { background:rgba(30,45,61,0.35); border:2px solid #00ffcc55; border-radius:14px; padding:2rem; backdrop-filter:blur(6px); overflow-x:auto; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
-    table { width:100%; border-collapse:collapse; background:rgba(13,17,23,0.85); border:3px solid #00ffcc; border-radius:12px; overflow:hidden; min-width:900px; }
-    th { background:linear-gradient(#00ffcc22,transparent); color:#00ffcc; padding:16px 12px; font-size:1.2rem; border-bottom:3px solid #00ffcc66; }
-    td { padding:12px; text-align:center; border-bottom:1px solid #00ffcc33; }
-    .team-name { text-align:left; padding-left:2rem; color:#00ffcc; font-size:1.35rem; font-weight:bold; }
-    .total-cell { background:rgba(0,255,204,0.22)!important; color:#00ffcc; font-size:1.5rem; font-weight:bold; border-left:3px solid #00ffcc; }
-    select { background:#161b22; color:#e6edf3; border:2px solid #00ffcc66; border-radius:8px; padding:8px; font-size:1.1rem; width:100%; text-align:center; }
-    .btn-update { display:block; margin:2rem auto; padding:1rem 4rem; background:rgba(0,255,204,0.2); color:#00ffcc; border:3px solid #00ffcc; border-radius:999px; font-size:1.4rem; font-weight:bold; cursor:pointer; }
-    .btn-update:hover { background:rgba(0,255,204,0.35); transform:scale(1.05); }
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      background: rgba(22,27,34,0.92);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc88;
+      box-shadow: 0 0 12px #00ffcc55;
+    }
+    header h1 {
+      font-size: 1.7rem;
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffccaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .classification {
+      background: rgba(30,45,61,0.35);
+      border: 2px solid #00ffcc55;
+      border-radius: 14px;
+      padding: 2rem;
+      backdrop-filter: blur(6px);
+      overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.85);
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 900px;
+    }
+    th {
+      background: linear-gradient(#00ffcc22, transparent);
+      color: #00ffcc;
+      padding: 16px 12px;
+      font-size: 1.2rem;
+      border-bottom: 3px solid #00ffcc66;
+    }
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+    }
+    .team-name {
+      text-align: left;
+      padding-left: 2rem;
+      color: #00ffcc;
+      font-size: 1.35rem;
+      font-weight: bold;
+    }
+    .total-cell {
+      background: rgba(0,255,204,0.22) !important;
+      color: #00ffcc;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-left: 3px solid #00ffcc;
+    }
+    select {
+      background: #161b22;
+      color: #e6edf3;
+      border: 2px solid #00ffcc66;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 1.1rem;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-guardar {
+      display: block;
+      margin: 2rem auto;
+      padding: 1rem 4rem;
+      background: rgba(0,255,204,0.2);
+      color: #00ffcc;
+      border: 3px solid #00ffcc;
+      border-radius: 999px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-guardar:hover {
+      background: rgba(0,255,204,0.35);
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -35,7 +127,12 @@
         <thead>
           <tr>
             <th>Equipo</th>
-            <th>Semana 1</th><th>Semana 2</th><th>Semana 3</th><th>Semana 4</th><th>Semana 5</th><th>Semana 6</th>
+            <th>Semana 1</th>
+            <th>Semana 2</th>
+            <th>Semana 3</th>
+            <th>Semana 4</th>
+            <th>Semana 5</th>
+            <th>Semana 6</th>
             <th>TOTAL</th>
           </tr>
         </thead>
@@ -43,24 +140,32 @@
       </table>
     </div>
 
-    <button class="btn-update" onclick="updateAll()">ACTUALIZAR CLASIFICACIÓN</button>
+    <button class="btn-guardar" onclick="guardarDatos()">GUARDAR</button>
   </div>
 
   <script>
-    const API_KEY = '6153488f-285b-40ec-a34a-b3d673e4ec02';  // ← ¡Pega aquí tu clave!
+    const API_KEY = '6153488f-285b-40ec-a34a-b3d673e4ec02';
     const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b?apiKey=' + API_KEY;
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
-    let scores = {"3º A":[0,0,0,0,0,0],"3º B":[0,0,0,0,0,0],"4º A":[0,0,0,0,0,0],"4º B":[0,0,0,0,0,0]};
+    let scores = {
+      "3º A": [0,0,0,0,0,0],
+      "3º B": [0,0,0,0,0,0],
+      "4º A": [0,0,0,0,0,0],
+      "4º B": [0,0,0,0,0,0]
+    };
 
     async function loadData() {
       try {
-        const r = await fetch(STORAGE_URL.replace('?apiKey=' + API_KEY, '')); // GET sin key (lectura pública)
-        if (r.ok) {
-          const d = await r.json();
-          if (d?.scores) scores = d.scores;
+        // GET sin apiKey (lectura pública)
+        const res = await fetch(STORAGE_URL.split('?')[0]);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.scores) scores = data.scores;
         }
-      } catch(e) { console.error('Error carga:', e); }
+      } catch (e) {
+        console.error('Error al cargar datos:', e);
+      }
     }
 
     function renderEditableTable() {
@@ -81,28 +186,31 @@
       });
     }
 
-    async function updateAll() {
+    async function guardarDatos() {
+      // Leer valores actuales de los selects
       document.querySelectorAll('select').forEach(sel => {
         const team = sel.dataset.team;
         const week = parseInt(sel.dataset.week);
-        scores[team][week] = parseInt(sel.value);
+        scores[team][week] = parseInt(sel.value) || 0;
       });
 
       try {
         const res = await fetch(STORAGE_URL, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({scores, lastUpdate: new Date().toISOString()})
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scores, lastUpdate: new Date().toISOString() })
         });
+
         if (res.ok) {
-          alert('¡Guardado correctamente! Ahora refresca index.html');
+          alert('¡Guardado correctamente! Ahora ve a index.html y pulsa ACTUALIZAR.');
           renderEditableTable();
         } else {
-          alert('Error del servidor: ' + res.status + ' – ' + await res.text());
+          let errorText = await res.text();
+          alert(`Error al guardar:\nStatus: ${res.status}\nMensaje: ${errorText || 'Sin detalles'}\n\nComprueba consola (F12)`);
         }
-      } catch(e) {
-        alert('Error de conexión: ' + e.message + '\nRevisa consola F12');
-        console.error(e);
+      } catch (e) {
+        alert('Error de conexión o red:\n' + e.message + '\n\nAbre consola (F12 → Console) y copia el error.');
+        console.error('Detalles del error:', e);
       }
     }
 
