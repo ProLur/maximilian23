@@ -6,114 +6,20 @@
   <title>Registro • Juego del Silencio (Privado)</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <style>
-    body {
-      font-family: "Courier New", Courier, monospace;
-      background: #0d1117;
-      color: #e6edf3;
-      min-height: 100dvh;
-      background-image:
-        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
-        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
-      background-attachment: fixed;
-    }
-    header {
-      background: rgba(22,27,34,0.92);
-      backdrop-filter: blur(8px);
-      padding: 1rem 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      border-bottom: 2px solid #00ffcc;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    header img {
-      height: 45px;
-      border-radius: 50%;
-      border: 2px solid #00ffcc88;
-      box-shadow: 0 0 12px #00ffcc55;
-    }
-    header h1 {
-      font-size: 1.7rem;
-      color: #00ffcc;
-      text-shadow: 0 0 8px #00ffccaa;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .classification {
-      background: rgba(30,45,61,0.35);
-      border: 2px solid #00ffcc55;
-      border-radius: 14px;
-      padding: 2rem;
-      backdrop-filter: blur(6px);
-      overflow-x: auto;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: rgba(13,17,23,0.85);
-      border: 3px solid #00ffcc;
-      border-radius: 12px;
-      overflow: hidden;
-      min-width: 900px;
-    }
-    th {
-      background: linear-gradient(#00ffcc22, transparent);
-      color: #00ffcc;
-      padding: 16px 12px;
-      font-size: 1.2rem;
-      border-bottom: 3px solid #00ffcc66;
-    }
-    td {
-      padding: 12px;
-      text-align: center;
-      border-bottom: 1px solid #00ffcc33;
-    }
-    .team-name {
-      text-align: left;
-      padding-left: 2rem;
-      color: #00ffcc;
-      font-size: 1.35rem;
-      font-weight: bold;
-    }
-    .total-cell {
-      background: rgba(0,255,204,0.22) !important;
-      color: #00ffcc;
-      font-size: 1.5rem;
-      font-weight: bold;
-      border-left: 3px solid #00ffcc;
-    }
-    select {
-      background: #161b22;
-      color: #e6edf3;
-      border: 2px solid #00ffcc66;
-      border-radius: 8px;
-      padding: 8px;
-      font-size: 1.1rem;
-      width: 100%;
-      text-align: center;
-    }
-    .btn-guardar {
-      display: block;
-      margin: 2rem auto;
-      padding: 1rem 4rem;
-      background: rgba(0,255,204,0.2);
-      color: #00ffcc;
-      border: 3px solid #00ffcc;
-      border-radius: 999px;
-      font-size: 1.4rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-guardar:hover {
-      background: rgba(0,255,204,0.35);
-      transform: scale(1.05);
-    }
+    body { font-family:"Courier New",Courier,monospace; background:#0d1117; color:#e6edf3; min-height:100dvh; background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%), radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%); background-attachment:fixed; }
+    header { background:rgba(22,27,34,0.92); backdrop-filter:blur(8px); padding:1rem 1.2rem; display:flex; align-items:center; gap:0.8rem; border-bottom:2px solid #00ffcc; position:sticky; top:0; z-index:100; }
+    header img { height:45px; border-radius:50%; border:2px solid #00ffcc88; box-shadow:0 0 12px #00ffcc55; }
+    header h1 { font-size:1.7rem; color:#00ffcc; text-shadow:0 0 8px #00ffccaa; }
+    .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
+    .classification { background:rgba(30,45,61,0.35); border:2px solid #00ffcc55; border-radius:14px; padding:2rem; backdrop-filter:blur(6px); overflow-x:auto; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+    table { width:100%; border-collapse:collapse; background:rgba(13,17,23,0.85); border:3px solid #00ffcc; border-radius:12px; overflow:hidden; min-width:900px; }
+    th { background:linear-gradient(#00ffcc22,transparent); color:#00ffcc; padding:16px 12px; font-size:1.2rem; border-bottom:3px solid #00ffcc66; }
+    td { padding:12px; text-align:center; border-bottom:1px solid #00ffcc33; }
+    .team-name { text-align:left; padding-left:2rem; color:#00ffcc; font-size:1.35rem; font-weight:bold; }
+    .total-cell { background:rgba(0,255,204,0.22)!important; color:#00ffcc; font-size:1.5rem; font-weight:bold; border-left:3px solid #00ffcc; }
+    select { background:#161b22; color:#e6edf3; border:2px solid #00ffcc66; border-radius:8px; padding:8px; font-size:1.1rem; width:100%; text-align:center; }
+    .btn-guardar { display:block; margin:2rem auto; padding:1rem 4rem; background:rgba(0,255,204,0.2); color:#00ffcc; border:3px solid #00ffcc; border-radius:999px; font-size:1.4rem; font-weight:bold; cursor:pointer; }
+    .btn-guardar:hover { background:rgba(0,255,204,0.35); transform:scale(1.05); }
   </style>
 </head>
 <body>
@@ -145,7 +51,7 @@
   </div>
 
   <script>
-    const BIN_ID = '699582afae596e708f33ce65';
+    const BIN_ID = '699588baae596e708f33e153';
     const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';
     const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
@@ -159,7 +65,7 @@
 
     async function loadData() {
       try {
-        const res = await fetch(STORAGE_URL);
+        const res = await fetch(STORAGE_URL, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           scores = data.record.scores || scores;
@@ -204,12 +110,13 @@
           body: JSON.stringify({ scores, lastUpdate: new Date().toISOString() })
         });
 
-        const responseText = await res.text();
         if (res.ok) {
-          alert('¡Guardado correctamente!\n\nComprueba YA en:\nhttps://api.jsonbin.io/v3/b/' + BIN_ID + '\n\nSi ves el cambio allí, abre index.html y pulsa ACTUALIZAR.');
-          renderEditableTable();
+          alert('¡Guardado correctamente!\n\nRecargando la tabla...');
+          await loadData();          // Recarga los datos del servidor
+          renderEditableTable();     // Redibuja la tabla con valores actualizados
         } else {
-          alert('NO se guardó:\nStatus: ' + res.status + '\n' + responseText);
+          const errorText = await res.text();
+          alert('Error al guardar:\nStatus: ' + res.status + '\n' + errorText);
         }
       } catch (e) {
         alert('Error de conexión:\n' + e.message);
