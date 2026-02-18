@@ -147,7 +147,7 @@
   <script>
     const BIN_ID = '69958674d0ea881f40c36fa0';
     const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';
-    const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`; 
+    const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
@@ -204,12 +204,12 @@
           body: JSON.stringify({ scores, lastUpdate: new Date().toISOString() })
         });
 
+        const responseText = await res.text();
         if (res.ok) {
-          alert('¡Guardado correctamente!\n\nAhora abre index.html y pulsa ACTUALIZAR.');
+          alert('¡Guardado correctamente!\n\nComprueba ahora en esta URL:\nhttps://api.jsonbin.io/v3/b/' + BIN_ID + '\n\nSi ves los cambios allí, abre index.html y pulsa ACTUALIZAR.');
           renderEditableTable();
         } else {
-          const errorText = await res.text();
-          alert('Error al guardar:\nStatus: ' + res.status + '\n' + errorText);
+          alert('Error al guardar:\nStatus: ' + res.status + '\nMensaje: ' + responseText);
         }
       } catch (e) {
         alert('Error de conexión:\n' + e.message);
