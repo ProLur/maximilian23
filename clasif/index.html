@@ -36,12 +36,12 @@
       box-shadow: 0 0 12px #00ffcc55;
     }
     header h1 {
-      font-size: 1.7rem;
+      font-size: clamp(1.4rem, 5vw, 1.7rem);
       color: #00ffcc;
       text-shadow: 0 0 8px #00ffccaa;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 2rem auto;
       padding: 0 1rem;
     }
@@ -55,37 +55,7 @@
       backdrop-filter: blur(6px);
     }
     .controls {
-      text-align: center;
-      margin: 1.5rem 0 2rem;
-      padding: 0 1rem;
-      width: 100%;
-    }
-    .week-select {
-      background: rgba(0,255,204,0.12);
-      color: #00ffcc;
-      border: 2px solid #00ffcc88;
-      padding: 0.9rem 2.8rem 0.9rem 1.2rem;
-      font-size: 1.05rem;
-      border-radius: 12px;
-      cursor: pointer;
-      font-family: inherit;
-      width: 100%;
-      max-width: 360px;
-      min-width: 0;
-      box-sizing: border-box;
-      -webkit-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300ffcc' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-      background-size: 12px;
-      text-indent: 0.3rem;
-    }
-    .week-select::-ms-expand { display: none; }
-    .week-select option {
-      background: #0d1117;
-      color: #e6edf3;
-      padding: 0.8rem;
+      display: none;           /* ← Ocultamos el selector en todas las pantallas */
     }
     .classification {
       background: rgba(30,45,61,0.35);
@@ -94,20 +64,24 @@
       padding: 2rem;
       backdrop-filter: blur(6px);
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      overflow-x: auto;        /* permite scroll solo si realmente hace falta */
+      -webkit-overflow-scrolling: touch;
     }
     table {
       width: 100%;
+      min-width: 640px;        /* evita que se haga demasiado estrecha en PC */
       border-collapse: collapse;
       background: rgba(13,17,23,0.85);
       border: 3px solid #00ffcc;
       border-radius: 12px;
       overflow: hidden;
+      table-layout: auto;
     }
     th, td {
-      padding: 16px 12px;
+      padding: clamp(12px, 2vw, 16px) clamp(8px, 1.5vw, 12px);
       text-align: center;
       border-bottom: 1px solid #00ffcc33;
-      font-size: 1.35rem;
+      font-size: clamp(1.1rem, 2.2vw, 1.35rem);
       font-weight: bold;
     }
     th {
@@ -119,39 +93,45 @@
     tr:hover td { background: rgba(0,255,204,0.09); }
     .team-name {
       text-align: left;
-      padding-left: 2.2rem;
+      padding-left: clamp(1.2rem, 3vw, 2.2rem);
       color: #00ffcc;
-      font-size: 1.4rem;
+      font-size: clamp(1.2rem, 2.4vw, 1.4rem);
+      min-width: 140px;
     }
     .total-cell {
       background: rgba(0,255,204,0.22) !important;
       color: #00ffcc;
-      font-size: 1.55rem;
+      font-size: clamp(1.3rem, 2.6vw, 1.55rem);
       border-left: 3px solid #00ffcc;
+      font-weight: bold;
     }
-
     @media (max-width: 768px) {
       .full-table { display: none; }
-      .mobile-table { display: table; width: 100%; }
-      .mobile-table th, .mobile-table td { font-size: 1.2rem; padding: 14px 10px; }
-      .classification { overflow-x: visible; padding: 1.2rem; }
-      .week-select { font-size: 1rem; padding-right: 2.8rem; }
+      .mobile-table { display: table; width: 100%; min-width: 100%; }
+      .mobile-table th, .mobile-table td {
+        font-size: clamp(1rem, 3.5vw, 1.2rem);
+        padding: 14px 10px;
+      }
+      .classification { padding: 1.2rem; overflow-x: auto; }
+      .container { padding: 0 0.8rem; }
     }
-
     @media (min-width: 769px) {
       .mobile-table { display: none; }
       .full-table { display: table; }
+      .classification {
+        overflow-x: auto;
+        padding: 1.5rem 2rem;
+      }
     }
-
     .btn-refresh {
       display: block;
-      margin: 2rem auto;
+      margin: 2.5rem auto;
       padding: 0.9rem 3rem;
       background: rgba(0,255,204,0.18);
       color: #00ffcc;
       border: 2px solid #00ffcc88;
       border-radius: 999px;
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
@@ -176,22 +156,18 @@
     <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
     <h1>Clasificación • Juego del Silencio</h1>
   </header>
-
   <div class="container">
     <div class="intro">
-      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.4rem;">Cargando semana...</h2>
+      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.4rem;">Semana 1</h2>
       <p id="fecha-rango" style="color:#00ffccaa; font-size:1.1rem;"></p>
     </div>
 
-    <div class="controls">
-      <select id="week-selector" class="week-select" onchange="changeWeek()"></select>
-    </div>
+    <!-- .controls ya no se muestra → eliminado el selector -->
 
     <div class="classification">
-      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:clamp(1.5rem, 4vw, 1.8rem);">
         Tabla de Clasificación
       </h2>
-
       <table class="full-table">
         <thead>
           <tr>
@@ -209,7 +185,6 @@
           <tr><td colspan="8" style="text-align:center; padding:2rem;">Cargando datos...</td></tr>
         </tbody>
       </table>
-
       <table class="mobile-table">
         <thead>
           <tr>
@@ -223,10 +198,8 @@
         </tbody>
       </table>
     </div>
-
     <button class="btn-refresh" onclick="refreshTable()">ACTUALIZAR</button>
   </div>
-
   <footer>
     CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
   </footer>
@@ -234,7 +207,6 @@
   <script>
     const STORAGE_URL = 'https://api.jsonbin.io/v3/b/699588baae596e708f33e153';
     const MAX_WEEKS = 6;
-
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
       "3º A": [0,0,0,0,0,0],
@@ -242,7 +214,6 @@
       "4º A": [0,0,0,0,0,0],
       "4º B": [0,0,0,0,0,0]
     };
-
     let currentWeek = 1;
 
     function getMostRecentMonday() {
@@ -260,12 +231,9 @@
       const daysOffset = (weekNum - 1) * 7;
       const monday = new Date(baseMonday);
       monday.setDate(baseMonday.getDate() + daysOffset);
-
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-
       const format = d => d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
-
       return {
         monday: format(monday),
         sunday: format(sunday),
@@ -273,24 +241,11 @@
       };
     }
 
-    function populateWeekSelector() {
-      const select = document.getElementById('week-selector');
-      select.innerHTML = '';
-      for (let w = 1; w <= MAX_WEEKS; w++) {
-        const range = getWeekRange(w);
-        const opt = document.createElement('option');
-        opt.value = w;
-        opt.textContent = `Semana ${w}: ${range.text}`;
-        select.appendChild(opt);
-      }
-    }
-
     function updateCurrentWeekDisplay() {
-      currentWeek = 1; // Semana 1 = la actual (lunes más reciente)
+      currentWeek = 1;
       const range = getWeekRange(1);
       document.getElementById('semana-actual').textContent = `Semana 1`;
       document.getElementById('fecha-rango').textContent = range.text;
-      document.getElementById('week-selector').value = 1;
     }
 
     async function loadData() {
@@ -300,7 +255,7 @@
           const data = await res.json();
           scores = data.record.scores || scores;
           if (data.record.lastUpdate) {
-            document.getElementById('last-update').textContent = 
+            document.getElementById('last-update').textContent =
               new Date(data.record.lastUpdate).toLocaleString('es-ES');
           }
         }
@@ -312,10 +267,9 @@
     function renderTables() {
       const tbodyFull = document.getElementById('table-body-full');
       const tbodyMobile = document.getElementById('table-body-mobile');
-      
+     
       tbodyFull.innerHTML = '';
       tbodyMobile.innerHTML = '';
-
       const rankedTeams = [...teams].sort((a,b) => {
         const totalA = scores[a].reduce((sum,p)=>sum+p,0);
         const totalB = scores[b].reduce((sum,p)=>sum+p,0);
@@ -327,7 +281,7 @@
       });
 
       rankedTeams.forEach(team => {
-        // Tabla completa (escritorio)
+        // Tabla completa (PC)
         const rowFull = document.createElement('tr');
         rowFull.innerHTML = `<td class="team-name">${team}</td>`;
         let total = 0;
@@ -350,11 +304,6 @@
       });
     }
 
-    function changeWeek() {
-      currentWeek = parseInt(document.getElementById('week-selector').value);
-      renderTables();
-    }
-
     async function refreshTable() {
       await loadData();
       updateCurrentWeekDisplay();
@@ -362,7 +311,6 @@
     }
 
     window.onload = async () => {
-      populateWeekSelector();
       await refreshTable();
     };
   </script>
