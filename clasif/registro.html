@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro Privado • Juego del Silencio</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <meta name="theme-color" content="#00ffcc">
+  <style>
+    /* Usa el mismo <style> completo que en index.html + añade estos para los controles */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      justify-content: center;
+      align-items: flex-end;
+      margin: 2.5rem auto;
+      max-width: 1100px;
+      padding: 1.8rem;
+      background: rgba(30,45,61,0.38);
+      border: 1px solid #00ffcc44;
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 180px;
+    }
+    .control-group label {
+      color: #a0c0ff;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+    .control-group select,
+    .control-group input {
+      background: #161b22;
+      border: 2px solid #00ffcc55;
+      color: #e6edf3;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1.1rem;
+    }
+    .btn {
+      padding: 12px 32px;
+      background: rgba(0,255,204,0.15);
+      color: #00ffcc;
+      border: 2px solid #00ffcc;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.05rem;
+    }
+    .btn:hover { background: rgba(0,255,204,0.3); transform: translateY(-2px); box-shadow: 0 0 15px rgba(0,255,204,0.4); }
+    .btn-danger {
+      background: rgba(255,80,80,0.15);
+      border-color: #ff6666;
+      color: #ffaaaa;
+    }
+    .btn-danger:hover { background: rgba(255,80,80,0.3); }
+  </style>
+</head>
+<body>
+  <!-- Copia el <header> y <footer> de index.html si quieres consistencia -->
+
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
+    <h1>Registro • Juego del Silencio (Privado)</h1>
+  </header>
+
+  <div class="container">
+    <div class="intro" style="text-align:center; color:#ffcc00;">
+      <h2>PANEL PRIVADO – Solo para el profesor</h2>
+      <p>Los cambios se guardan online y se ven inmediatamente en index.html</p>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>Equipo</label>
+        <select id="team-select">
+          <option value="3º A">3º A</option>
+          <option value="3º B">3º B</option>
+          <option value="4º A">4º A</option>
+          <option value="4º B">4º B</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Semana</label>
+        <select id="week-select">
+          <option value="1">Semana 1</option>
+          <option value="2">Semana 2</option>
+          <option value="3">Semana 3</option>
+          <option value="4">Semana 4</option>
+          <option value="5">Semana 5</option>
+          <option value="6">Semana 6</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Puntos</label>
+        <input type="number" id="points-input" value="10" step="1" min="-999">
+      </div>
+      <button class="btn" onclick="addPoints()">+ AÑADIR</button>
+      <button class="btn" onclick="setPoints()">= ESTABLECER</button>
+      <button class="btn btn-danger" onclick="resetAll()">🗑 REINICIAR TODO</button>
+    </div>
+
+    <div class="classification">
+      <h2 style="text-align:center; color:#00ffcc; margin:1.5rem 0;">Vista previa (actualiza en tiempo real)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Equipo</th>
+            <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
+
+    const teams = ["3º A", "3º B", "4º A", "4º B"];
+    let scores = {
+      "3º A": [0,0,0,0,0,0],
+      "3º B": [0,0,0,0,0,0],
+      "4º A": [0,0,0,0,0,0],
+      "4º B": [0,0,0,0,0,0]
+    };
+
+    async function loadData() {
+      try {
+        const res = await fetch(STORAGE_URL);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.scores) scores = data.scores;
+        }
+      } catch (e) {
+        console.error('Error cargando:', e);
+      }
+    }
+
+    async function saveData() {
+      try {
+        const payload = { scores, lastUpdate: new Date().toISOString() };
+        await fetch(STORAGE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        console.log('Guardado online');
+      } catch (e) {
+        alert('Error al guardar: ' + e.message + '\nComprueba conexión.');
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      const rankedTeams = [...teams].sort((a,b) => {
+        const ta = scores[a].reduce((s,p)=>s+p,0);
+        const tb = scores[b].reduce((s,p)=>s+p,0);
+        return tb - ta;
+      });
+
+      rankedTeams.forEach(team => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td class="team-name">${team}</td>`;
+        let total = 0;
+        scores[team].forEach(p => {
+          row.innerHTML += `<td>${p}</td>`;
+          total += p;
+        });
+        row.innerHTML += `<td class="total-cell">${total}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function addPoints() {
+      const team = document.getElementById('team-select').value;
+      const week = parseInt(document.getElementById('week-select').value) - 1;
+      const points = parseFloat(document.getElementById('points-input').value) || 0;
+      scores[team][week] += points;
+      await saveData();
+      renderTable();
+    }
+
+    async function setPoints() {
+      const team = document.getElementById('team-select').value;
+      const week = parseInt(document.getElementById('week-select').value) - 1;
+      const points = parseFloat(document.getElementById('points-input').value) || 0;
+      scores[team][week] = points;
+      await saveData();
+      renderTable();
+    }
+
+    async function resetAll() {
+      if (!confirm('¿Borrar TODOS los datos online? No se puede recuperar.')) return;
+      scores = { "3º A": [0,0,0,0,0,0], "3º B": [0,0,0,0,0,0], "4º A": [0,0,0,0,0,0], "4º B": [0,0,0,0,0,0] };
+      await saveData();
+      renderTable();
+    }
+
+    window.onload = async () => {
+      await loadData();
+      renderTable();
+    };
+  </script>
+</body>
+</html>
