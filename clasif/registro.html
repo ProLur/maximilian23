@@ -6,11 +6,8 @@
   <title>Registro • Juego del Silencio (Privado)</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <style>
-    /* Mantengo el estilo anterior completo – copia el que ya tenías o usa este resumido si prefieres */
-    body { font-family:"Courier New",Courier,monospace; background:#0d1117; color:#e6edf3; min-height:100dvh;
-      background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
-      background-attachment:fixed; }
+    /* Mantengo el estilo anterior – si quieres el completo, cópialo de antes */
+    body { font-family:"Courier New",Courier,monospace; background:#0d1117; color:#e6edf3; min-height:100dvh; background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%), radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%); background-attachment:fixed; }
     header { background:rgba(22,27,34,0.92); backdrop-filter:blur(8px); padding:1rem 1.2rem; display:flex; align-items:center; gap:0.8rem; border-bottom:2px solid #00ffcc; position:sticky; top:0; z-index:100; }
     header img { height:45px; border-radius:50%; border:2px solid #00ffcc88; box-shadow:0 0 12px #00ffcc55; }
     header h1 { font-size:1.7rem; color:#00ffcc; text-shadow:0 0 8px #00ffccaa; }
@@ -50,18 +47,20 @@
   </div>
 
   <script>
-    const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
+    const API_KEY = '6153488f-285b-40ec-a34a-b3d673e4ec02';  // ← ¡Pega aquí tu clave!
+    const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b?apiKey=' + API_KEY;
+
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {"3º A":[0,0,0,0,0,0],"3º B":[0,0,0,0,0,0],"4º A":[0,0,0,0,0,0],"4º B":[0,0,0,0,0,0]};
 
     async function loadData() {
       try {
-        const r = await fetch(STORAGE_URL);
+        const r = await fetch(STORAGE_URL.replace('?apiKey=' + API_KEY, '')); // GET sin key (lectura pública)
         if (r.ok) {
           const d = await r.json();
           if (d?.scores) scores = d.scores;
         }
-      } catch(e) {}
+      } catch(e) { console.error('Error carga:', e); }
     }
 
     function renderEditableTable() {
@@ -90,15 +89,20 @@
       });
 
       try {
-        await fetch(STORAGE_URL, {
+        const res = await fetch(STORAGE_URL, {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({scores, lastUpdate: new Date().toISOString()})
         });
-        renderEditableTable();
-        alert('Guardado correctamente');
+        if (res.ok) {
+          alert('¡Guardado correctamente! Ahora refresca index.html');
+          renderEditableTable();
+        } else {
+          alert('Error del servidor: ' + res.status + ' – ' + await res.text());
+        }
       } catch(e) {
-        alert('Error al guardar: ' + e.message);
+        alert('Error de conexión: ' + e.message + '\nRevisa consola F12');
+        console.error(e);
       }
     }
 
