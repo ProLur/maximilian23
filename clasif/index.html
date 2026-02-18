@@ -126,10 +126,10 @@
 
   <div class="container">
     <div class="intro">
-      <h2 style="color:#00ffcc; margin-bottom:0.6rem;">¡Clasificación actualizada!</h2>
+      <h2 style="color:#00ffcc; margin-bottom:0.6rem;">Clasificación actual</h2>
       <p style="font-size:1.1rem; opacity:0.9;">
-        Puntos acumulados por curso tras las 6 semanas del Juego del Silencio.<br>
-        ¡Ánimo a todos los equipos! 🚀
+        Puntos por equipos en las 6 semanas del juego.<br>
+        ¡Sigue el progreso en tiempo real! 🚀
       </p>
     </div>
 
@@ -175,15 +175,13 @@
         const res = await fetch(STORAGE_URL);
         if (res.ok) {
           const data = await res.json();
-          if (data && data.scores) {
-            scores = data.scores;
-          }
+          if (data && data.scores) scores = data.scores;
           if (data && data.lastUpdate) {
             document.getElementById('last-update').textContent = new Date(data.lastUpdate).toLocaleString('es-ES');
           }
         }
       } catch (e) {
-        console.error('Error al cargar datos:', e);
+        console.error('Error al cargar:', e);
       }
     }
 
@@ -192,31 +190,20 @@
       tbody.innerHTML = '';
 
       const rankedTeams = [...teams].sort((a,b) => {
-        const totalA = scores[a].reduce((sum,p)=>sum+p,0);
-        const totalB = scores[b].reduce((sum,p)=>sum+p,0);
+        const totalA = scores[a].reduce((sum, p) => sum + p, 0);
+        const totalB = scores[b].reduce((sum, p) => sum + p, 0);
         return totalB - totalA;
       });
 
       rankedTeams.forEach(team => {
         const row = document.createElement('tr');
-        const teamCell = document.createElement('td');
-        teamCell.className = 'team-name';
-        teamCell.textContent = team;
-        row.appendChild(teamCell);
-
+        row.innerHTML = `<td class="team-name">${team}</td>`;
         let total = 0;
-        scores[team].forEach(points => {
-          const cell = document.createElement('td');
-          cell.textContent = points;
-          row.appendChild(cell);
-          total += points;
+        scores[team].forEach(p => {
+          row.innerHTML += `<td>${p}</td>`;
+          total += p;
         });
-
-        const totalCell = document.createElement('td');
-        totalCell.className = 'total-cell';
-        totalCell.textContent = total;
-        row.appendChild(totalCell);
-
+        row.innerHTML += `<td class="total-cell">${total}</td>`;
         tbody.appendChild(row);
       });
     }
