@@ -189,8 +189,8 @@
   </footer>
 
   <script>
-    const API_KEY = '6153488f-285b-40ec-a34a-b3d673e4ec02';
-    const STORAGE_URL_BASE = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
+    const BIN_ID = '699582afae596e708f33ce65';
+    const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
@@ -202,21 +202,16 @@
 
     async function loadData() {
       try {
-        // Lectura pública → sin apiKey
-        const res = await fetch(STORAGE_URL_BASE);
+        const res = await fetch(STORAGE_URL);
         if (res.ok) {
           const data = await res.json();
-          if (data && data.scores) {
-            scores = data.scores;
+          scores = data.record.scores || scores;
+          if (data.record.lastUpdate) {
+            document.getElementById('last-update').textContent = new Date(data.record.lastUpdate).toLocaleString('es-ES');
           }
-          if (data && data.lastUpdate) {
-            document.getElementById('last-update').textContent = new Date(data.lastUpdate).toLocaleString('es-ES');
-          }
-        } else {
-          console.warn('No se pudo cargar datos. Status:', res.status);
         }
       } catch (e) {
-        console.error('Error al cargar datos:', e);
+        console.error('Error al cargar:', e);
       }
     }
 
@@ -229,7 +224,6 @@
         const totalB = scores[b].reduce((sum,p)=>sum+p,0);
         if (totalA !== totalB) return totalB - totalA;
 
-        // Desempate: semanas más recientes primero
         for (let i = 5; i >= 0; i--) {
           if (scores[a][i] !== scores[b][i]) return scores[b][i] - scores[a][i];
         }
