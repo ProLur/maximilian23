@@ -189,7 +189,7 @@
   </footer>
 
   <script>
-    const BIN_ID = '699582afae596e708f33ce65';
+    const BIN_ID = '69958674d0ea881f40c36fa0';
     const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
@@ -202,7 +202,7 @@
 
     function getSemanaActual() {
       const hoy = new Date();
-      const diaSemana = hoy.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+      const diaSemana = hoy.getDay();
 
       let diasARestar = (diaSemana === 0) ? 6 : diaSemana - 1;
       const lunes = new Date(hoy);
