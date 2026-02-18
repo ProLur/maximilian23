@@ -145,7 +145,7 @@
   </div>
 
   <script>
-    const BIN_ID = '699588baae596e708f33e153';
+    const BIN_ID = '699582afae596e708f33ce65';
     const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';
     const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
@@ -206,10 +206,10 @@
 
         const responseText = await res.text();
         if (res.ok) {
-          alert('¡Guardado correctamente!\n\nComprueba ahora en esta URL:\nhttps://api.jsonbin.io/v3/b/' + BIN_ID + '\n\nSi ves los cambios allí, abre index.html y pulsa ACTUALIZAR.');
+          alert('¡Guardado correctamente!\n\nComprueba YA en:\nhttps://api.jsonbin.io/v3/b/' + BIN_ID + '\n\nSi ves el cambio allí, abre index.html y pulsa ACTUALIZAR.');
           renderEditableTable();
         } else {
-          alert('Error al guardar:\nStatus: ' + res.status + '\n' + responseText);
+          alert('NO se guardó:\nStatus: ' + res.status + '\n' + responseText);
         }
       } catch (e) {
         alert('Error de conexión:\n' + e.message);
