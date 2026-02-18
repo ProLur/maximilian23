@@ -129,6 +129,15 @@
       font-size: 1.55rem;
       border-left: 3px solid #00ffcc;
     }
+    .error-msg {
+      background: rgba(255,80,80,0.2);
+      border: 1px solid #ff4444;
+      color: #ffdddd;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      text-align: center;
+    }
 
     @media (max-width: 768px) {
       .full-table { display: none; }
@@ -179,9 +188,11 @@
 
   <div class="container">
     <div class="intro">
-      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.4rem;">Cargando semana...</h2>
+      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.4rem;">Cargando...</h2>
       <p id="fecha-rango" style="color:#00ffccaa; font-size:1.1rem;"></p>
     </div>
+
+    <div id="error-container" class="error-msg" style="display:none;"></div>
 
     <div class="controls">
       <select id="week-selector" class="week-select" onchange="changeWeek()"></select>
@@ -230,15 +241,20 @@
   <script>
     const STORAGE_URL = 'https://api.jsonbin.io/v3/b/6995e8d9ae596e708f34c912';
 
-    const participants = [
-      "Marta", "Triana", "Lucía D.", "Lucía C.", "Carlota",
-      "Erick", "David", "Francisco J."
-    ];
-
-    let scores = {};
-    participants.forEach(name => { scores[name] = [0,0,0,0,0,0]; });
-
+    let participants = [];           // ["Marta", "Triana", ...]
+    let scores = {};                 // { "Marta": [0,0,0,0,0,0], ... }
     let currentWeek = 1;
+
+    const errorContainer = document.getElementById('error-container');
+
+    function showError(msg) {
+      errorContainer.textContent = msg;
+      errorContainer.style.display = 'block';
+    }
+
+    function hideError() {
+      errorContainer.style.display = 'none';
+    }
 
     function getMostRecentMonday() {
       const today = new Date();
@@ -275,30 +291,55 @@
       }
     }
 
-    function updateCurrentWeekDisplay() {
-      currentWeek = 1;
-      const range = getWeekRange(1);
-      document.getElementById('semana-actual').textContent = `Semana 1`;
+    function updateWeekDisplay() {
+      const range = getWeekRange(currentWeek);
+      document.getElementById('semana-actual').textContent = `Semana ${currentWeek}`;
       document.getElementById('fecha-rango').textContent = range.text;
-      document.getElementById('week-selector').value = 1;
+      document.getElementById('week-selector').value = currentWeek;
     }
 
     async function loadData() {
+      hideError();
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          const loaded = data.record.scores || {};
-          participants.forEach(name => {
-            scores[name] = loaded[name] instanceof Array ? loaded[name] : [0,0,0,0,0,0];
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const record = data.record || {};
+
+        // ── NUEVA LÓGICA ── leer participants (array de objetos)
+        if (record.participants && Array.isArray(record.participants)) {
+          participants = [];
+          scores = {};
+
+          record.participants.forEach(p => {
+            if (p.name && typeof p.name === 'string' && Array.isArray(p.scores)) {
+              const name = p.name.trim();
+              participants.push(name);
+              // Aseguramos que scores tenga 6 posiciones
+              const safeScores = Array(6).fill(0);
+              p.scores.slice(0,6).forEach((v,i) => {
+                safeScores[i] = Number(v) || 0;
+              });
+              scores[name] = safeScores;
+            }
           });
-          if (data.record.lastUpdate) {
-            document.getElementById('last-update').textContent = 
-              new Date(data.record.lastUpdate).toLocaleString('es-ES');
+
+          if (participants.length === 0) {
+            throw new Error("No se encontraron participantes válidos en el registro");
           }
+        } else {
+          throw new Error("Formato inesperado: no se encontró 'participants' como array");
         }
-      } catch (e) {
-        console.error("Error cargando datos", e);
+
+        if (record.lastUpdate) {
+          document.getElementById('last-update').textContent = 
+            new Date(record.lastUpdate).toLocaleString('es-ES');
+        }
+
+      } catch (err) {
+        console.error("Error cargando datos", err);
+        showError("No se pudieron cargar los datos. " + err.message);
       }
     }
 
@@ -308,6 +349,12 @@
       tbodyFull.innerHTML = '';
       tbodyMobile.innerHTML = '';
 
+      if (participants.length === 0) {
+        tbodyFull.innerHTML = '<tr><td colspan="8">No hay participantes cargados</td></tr>';
+        return;
+      }
+
+      // Orden: total descendente + desempate por semanas recientes
       const sorted = [...participants].sort((a,b) => {
         const ta = scores[a].reduce((s,p)=>s+p,0);
         const tb = scores[b].reduce((s,p)=>s+p,0);
@@ -315,10 +362,11 @@
         for (let i = 5; i >= 0; i--) {
           if (scores[a][i] !== scores[b][i]) return scores[b][i] - scores[a][i];
         }
-        return 0;
+        return a.localeCompare(b);
       });
 
       sorted.forEach(name => {
+        // Tabla completa (desktop)
         const rowFull = document.createElement('tr');
         rowFull.innerHTML = `<td class="participant-name">${name}</td>`;
         let total = 0;
@@ -329,11 +377,12 @@
         rowFull.innerHTML += `<td class="total-cell">${total}</td>`;
         tbodyFull.appendChild(rowFull);
 
+        // Tabla móvil
         const rowMobile = document.createElement('tr');
-        const points = scores[name][currentWeek-1] ?? 0;
+        const pointsThisWeek = scores[name][currentWeek-1] ?? 0;
         rowMobile.innerHTML = `
           <td class="participant-name">${name}</td>
-          <td class="week-cell">${points}</td>
+          <td class="week-cell">${pointsThisWeek}</td>
           <td class="total-cell">${total}</td>
         `;
         tbodyMobile.appendChild(rowMobile);
@@ -341,19 +390,31 @@
     }
 
     function changeWeek() {
-      currentWeek = parseInt(document.getElementById('week-selector').value);
+      currentWeek = parseInt(document.getElementById('week-selector').value) || 1;
+      updateWeekDisplay();
       renderTables();
     }
 
     async function refreshTable() {
       await loadData();
-      updateCurrentWeekDisplay();
+      // Intentamos mantener la semana actual, pero si no hay datos → semana 1
+      if (participants.length > 0) {
+        updateWeekDisplay();
+      }
       renderTables();
     }
 
     window.onload = async () => {
       populateWeekSelector();
       await refreshTable();
+      // Ajuste inicial aproximado de semana (puedes quitar si prefieres siempre semana 1)
+      const today = new Date();
+      const weekGuess = Math.min(6, Math.max(1, Math.ceil((today - getMostRecentMonday()) / (7*24*60*60*1000)) + 1));
+      if (weekGuess !== currentWeek) {
+        currentWeek = weekGuess;
+        updateWeekDisplay();
+        renderTables();
+      }
     };
   </script>
 </body>
