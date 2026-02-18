@@ -6,7 +6,7 @@
   <title>Registro • Juego del Silencio (Privado)</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    /* Mantengo el estilo anterior completo – copia el que ya tenías o usa este resumido si prefieres */
     body { font-family:"Courier New",Courier,monospace; background:#0d1117; color:#e6edf3; min-height:100dvh;
       background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
                         radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
@@ -15,7 +15,6 @@
     header img { height:45px; border-radius:50%; border:2px solid #00ffcc88; box-shadow:0 0 12px #00ffcc55; }
     header h1 { font-size:1.7rem; color:#00ffcc; text-shadow:0 0 8px #00ffccaa; }
     .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
-    .intro { text-align:center; margin-bottom:2rem; padding:1.5rem; background:rgba(30,45,61,0.38); border:1px solid #00ffcc44; border-radius:14px; backdrop-filter:blur(6px); }
     .classification { background:rgba(30,45,61,0.35); border:2px solid #00ffcc55; border-radius:14px; padding:2rem; backdrop-filter:blur(6px); overflow-x:auto; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
     table { width:100%; border-collapse:collapse; background:rgba(13,17,23,0.85); border:3px solid #00ffcc; border-radius:12px; overflow:hidden; min-width:900px; }
     th { background:linear-gradient(#00ffcc22,transparent); color:#00ffcc; padding:16px 12px; font-size:1.2rem; border-bottom:3px solid #00ffcc66; }
@@ -23,9 +22,8 @@
     .team-name { text-align:left; padding-left:2rem; color:#00ffcc; font-size:1.35rem; font-weight:bold; }
     .total-cell { background:rgba(0,255,204,0.22)!important; color:#00ffcc; font-size:1.5rem; font-weight:bold; border-left:3px solid #00ffcc; }
     select { background:#161b22; color:#e6edf3; border:2px solid #00ffcc66; border-radius:8px; padding:8px; font-size:1.1rem; width:100%; text-align:center; }
-    .btn-update { padding:1rem 4rem; background:rgba(0,255,204,0.2); color:#00ffcc; border:3px solid #00ffcc; border-radius:999px; font-size:1.4rem; font-weight:bold; cursor:pointer; margin:2rem auto; display:block; transition:all .3s; }
+    .btn-update { display:block; margin:2rem auto; padding:1rem 4rem; background:rgba(0,255,204,0.2); color:#00ffcc; border:3px solid #00ffcc; border-radius:999px; font-size:1.4rem; font-weight:bold; cursor:pointer; }
     .btn-update:hover { background:rgba(0,255,204,0.35); transform:scale(1.05); }
-    footer { text-align:center; padding:3rem 1rem; color:#00ffcc88; border-top:1px solid #00ffcc33; margin-top:4rem; }
   </style>
 </head>
 <body>
@@ -35,11 +33,6 @@
   </header>
 
   <div class="container">
-    <div class="intro">
-      <h2 style="color:#00ffcc;">Edita las puntuaciones</h2>
-      <p>Cambia los desplegables y pulsa <strong>ACTUALIZAR</strong></p>
-    </div>
-
     <div class="classification">
       <table>
         <thead>
@@ -54,13 +47,7 @@
     </div>
 
     <button class="btn-update" onclick="updateAll()">ACTUALIZAR CLASIFICACIÓN</button>
-
-    <div style="text-align:center; margin-top:2rem;">
-      <button onclick="resetAll()" style="padding:0.8rem 2rem; background:rgba(255,80,80,0.2); color:#ffaaaa; border:2px solid #ff6666; border-radius:999px; cursor:pointer;">🗑 REINICIAR TODO</button>
-    </div>
   </div>
-
-  <footer>CEIP Juan XXIII • Zafra • Solo profesor</footer>
 
   <script>
     const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
@@ -96,12 +83,10 @@
     }
 
     async function updateAll() {
-      // Leer todos los selects
       document.querySelectorAll('select').forEach(sel => {
         const team = sel.dataset.team;
         const week = parseInt(sel.dataset.week);
-        const value = parseInt(sel.value);
-        scores[team][week] = value;
+        scores[team][week] = parseInt(sel.value);
       });
 
       try {
@@ -110,22 +95,11 @@
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({scores, lastUpdate: new Date().toISOString()})
         });
-        alert('✅ Guardado correctamente en la nube');
         renderEditableTable();
+        alert('Guardado correctamente');
       } catch(e) {
-        alert('Error al guardar. Revisa conexión.');
+        alert('Error al guardar: ' + e.message);
       }
-    }
-
-    async function resetAll() {
-      if (!confirm('¿BORRAR TODOS LOS DATOS online?\nNo se puede recuperar.')) return;
-      scores = {"3º A":[0,0,0,0,0,0],"3º B":[0,0,0,0,0,0],"4º A":[0,0,0,0,0,0],"4º B":[0,0,0,0,0,0]};
-      await fetch(STORAGE_URL, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({scores, lastUpdate: new Date().toISOString()})
-      });
-      renderEditableTable();
     }
 
     window.onload = async () => {
