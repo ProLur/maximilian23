@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clasificación • Juego del Silencio</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <meta name="description" content="Clasificación actual del Juego del Silencio - CEIP Juan XXIII Zafra">
+  <meta name="theme-color" content="#00ffcc">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      background: rgba(22,27,34,0.92);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc88;
+      box-shadow: 0 0 12px #00ffcc55;
+    }
+    header h1 {
+      font-size: 1.7rem;
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffccaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .intro {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(30,45,61,0.38);
+      border: 1px solid #00ffcc44;
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .classification {
+      background: rgba(30,45,61,0.35);
+      border: 2px solid #00ffcc55;
+      border-radius: 14px;
+      padding: 2rem;
+      backdrop-filter: blur(6px);
+      overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.85);
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 820px;
+    }
+    th {
+      background: linear-gradient(#00ffcc22, transparent);
+      color: #00ffcc;
+      padding: 16px 12px;
+      font-size: 1.2rem;
+      border-bottom: 3px solid #00ffcc66;
+      text-shadow: 0 0 6px #00ffcc88;
+    }
+    td {
+      padding: 16px 12px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+      font-size: 1.35rem;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    tr:hover td { background: rgba(0,255,204,0.09); }
+    .team-name {
+      text-align: left;
+      padding-left: 2.2rem;
+      color: #00ffcc;
+      font-size: 1.4rem;
+    }
+    .total-cell {
+      background: rgba(0,255,204,0.22) !important;
+      color: #00ffcc;
+      font-size: 1.55rem;
+      border-left: 3px solid #00ffcc;
+      font-weight: bold;
+    }
+    .motivacion {
+      text-align: center;
+      margin: 2.5rem 0;
+      font-size: 1.3rem;
+      line-height: 1.6;
+      color: #a0c0ff;
+      opacity: 0.95;
+    }
+    .motivacion strong {
+      color: #00ffcc;
+      font-size: 1.45rem;
+    }
+    .btn-refresh {
+      display: block;
+      margin: 2rem auto;
+      padding: 0.9rem 3rem;
+      background: rgba(0,255,204,0.18);
+      color: #00ffcc;
+      border: 2px solid #00ffcc88;
+      border-radius: 999px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-refresh:hover {
+      background: rgba(0,255,204,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0,255,204,0.4);
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      color: #00ffcc88;
+      font-size: 0.95rem;
+      border-top: 1px solid #00ffcc33;
+      margin-top: 5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
+    <h1>Clasificación • Juego del Silencio</h1>
+  </header>
+
+  <div class="container">
+    <div class="intro">
+      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.6rem;"></h2>
+    </div>
+
+    <div class="classification">
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
+        Tabla de Clasificación – 6 Semanas
+      </h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Equipo</th>
+            <th>Semana 1</th>
+            <th>Semana 2</th>
+            <th>Semana 3</th>
+            <th>Semana 4</th>
+            <th>Semana 5</th>
+            <th>Semana 6</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <button class="btn-refresh" onclick="refreshTable()">ACTUALIZAR</button>
+
+    <div class="motivacion">
+      <strong>Puntos acumulados por curso tras las 6 semanas del Juego del Silencio.</strong><br>
+      ¡Ánimo a todos los equipos! 🚀
+    </div>
+  </div>
+
+  <footer>
+    CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
+  </footer>
+
+  <script>
+    const BIN_ID = '699582afae596e708f33ce65';
+    const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+    const teams = ["3º A", "3º B", "4º A", "4º B"];
+    let scores = {
+      "3º A": [0,0,0,0,0,0],
+      "3º B": [0,0,0,0,0,0],
+      "4º A": [0,0,0,0,0,0],
+      "4º B": [0,0,0,0,0,0]
+    };
+
+    function getSemanaActual() {
+      const hoy = new Date();
+      const diaSemana = hoy.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+
+      let diasARestar = (diaSemana === 0) ? 6 : diaSemana - 1;
+      const lunes = new Date(hoy);
+      lunes.setDate(hoy.getDate() - diasARestar);
+
+      const viernes = new Date(lunes);
+      viernes.setDate(lunes.getDate() + 4);
+
+      const format = d => d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      if (diaSemana === 0 || diaSemana === 6) {
+        return "La semana ya se ha cerrado";
+      } else {
+        return `Estamos en la semana del lunes ${format(lunes)} al viernes ${format(viernes)}`;
+      }
+    }
+
+    document.getElementById('semana-actual').textContent = getSemanaActual();
+
+    async function loadData() {
+      try {
+        const res = await fetch(STORAGE_URL);
+        if (res.ok) {
+          const data = await res.json();
+          scores = data.record.scores || scores;
+          if (data.record.lastUpdate) {
+            document.getElementById('last-update').textContent = new Date(data.record.lastUpdate).toLocaleString('es-ES');
+          }
+        }
+      } catch (e) {
+        console.error('Error al cargar:', e);
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      const rankedTeams = [...teams].sort((a,b) => {
+        const totalA = scores[a].reduce((sum,p)=>sum+p,0);
+        const totalB = scores[b].reduce((sum,p)=>sum+p,0);
+        if (totalA !== totalB) return totalB - totalA;
+
+        for (let i = 5; i >= 0; i--) {
+          if (scores[a][i] !== scores[b][i]) return scores[b][i] - scores[a][i];
+        }
+        return 0;
+      });
+
+      rankedTeams.forEach(team => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td class="team-name">${team}</td>`;
+        let total = 0;
+        scores[team].forEach(points => {
+          row.innerHTML += `<td>${points}</td>`;
+          total += points;
+        });
+        row.innerHTML += `<td class="total-cell">${total}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function refreshTable() {
+      await loadData();
+      renderTable();
+      document.getElementById('semana-actual').textContent = getSemanaActual();
+    }
+
+    window.onload = async () => {
+      await refreshTable();
+    };
+  </script>
+</body>
+</html>
