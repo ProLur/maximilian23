@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clasificación • Juego del Silencio</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      background: rgba(22,27,34,0.92);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc88;
+      box-shadow: 0 0 12px #00ffcc55;
+    }
+    header h1 {
+      font-size: 1.7rem;
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffccaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .intro {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding: 1.8rem;
+      background: rgba(30,45,61,0.38);
+      border: 1px solid #00ffcc44;
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .controls {
+      text-align: center;
+      margin: 1.5rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .week-select {
+      background: rgba(0,255,204,0.12);
+      color: #00ffcc;
+      border: 2px solid #00ffcc88;
+      padding: 0.8rem 1.4rem;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      min-width: 280px;
+      font-family: inherit;
+    }
+    .week-select option {
+      background: #0d1117;
+      color: #e6edf3;
+    }
+    .classification {
+      background: rgba(30,45,61,0.35);
+      border: 2px solid #00ffcc55;
+      border-radius: 14px;
+      padding: 2rem;
+      backdrop-filter: blur(6px);
+      overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.85);
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th {
+      background: linear-gradient(#00ffcc22, transparent);
+      color: #00ffcc;
+      padding: 16px 12px;
+      font-size: 1.2rem;
+      border-bottom: 3px solid #00ffcc66;
+      text-shadow: 0 0 6px #00ffcc88;
+    }
+    td {
+      padding: 16px 12px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+      font-size: 1.35rem;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    tr:hover td { background: rgba(0,255,204,0.09); }
+    .team-name {
+      text-align: left;
+      padding-left: 2.2rem;
+      color: #00ffcc;
+      font-size: 1.4rem;
+    }
+    .total-cell {
+      background: rgba(0,255,204,0.22) !important;
+      color: #00ffcc;
+      font-size: 1.55rem;
+      border-left: 3px solid #00ffcc;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .full-table { display: none; }
+      .mobile-table { display: table; width: 100%; }
+      .mobile-table th, .mobile-table td { font-size: 1.2rem; padding: 14px 10px; }
+      .week-cell { display: table-cell !important; }
+    }
+
+    @media (min-width: 769px) {
+      .mobile-table { display: none; }
+      .full-table { display: table; }
+    }
+
+    .btn-refresh {
+      display: block;
+      margin: 2rem auto;
+      padding: 0.9rem 3rem;
+      background: rgba(0,255,204,0.18);
+      color: #00ffcc;
+      border: 2px solid #00ffcc88;
+      border-radius: 999px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-refresh:hover {
+      background: rgba(0,255,204,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0,255,204,0.4);
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      color: #00ffcc88;
+      font-size: 0.95rem;
+      border-top: 1px solid #00ffcc33;
+      margin-top: 5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
+    <h1>Clasificación • Juego del Silencio</h1>
+  </header>
+
+  <div class="container">
+    <div class="intro">
+      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.4rem;">Cargando semana...</h2>
+      <p id="fecha-rango" style="color:#00ffccaa; font-size:1.1rem;"></p>
+    </div>
+
+    <div class="controls">
+      <select id="week-selector" class="week-select" onchange="changeWeek()"></select>
+    </div>
+
+    <div class="classification">
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
+        Tabla de Clasificación
+      </h2>
+
+      <table class="full-table">
+        <thead>
+          <tr>
+            <th>Equipo</th>
+            <th>Semana 1</th>
+            <th>Semana 2</th>
+            <th>Semana 3</th>
+            <th>Semana 4</th>
+            <th>Semana 5</th>
+            <th>Semana 6</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody id="table-body-full">
+          <tr><td colspan="8" style="text-align:center; padding:2rem;">Cargando datos...</td></tr>
+        </tbody>
+      </table>
+
+      <table class="mobile-table">
+        <thead>
+          <tr>
+            <th>Equipo</th>
+            <th class="week-cell">Puntos</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="table-body-mobile">
+          <tr><td colspan="3" style="text-align:center; padding:2rem;">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="btn-refresh" onclick="refreshTable()">ACTUALIZAR</button>
+  </div>
+
+  <footer>
+    CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
+  </footer>
+
+  <script>
+    const STORAGE_URL = 'https://api.jsonbin.io/v3/b/699588baae596e708f33e153';
+    const YEAR = 2026; // Año del juego - cámbialo si necesitas otro
+    const MAX_WEEKS = 6;
+
+    const teams = ["3º A", "3º B", "4º A", "4º B"];
+    let scores = {
+      "3º A": [0,0,0,0,0,0],
+      "3º B": [0,0,0,0,0,0],
+      "4º A": [0,0,0,0,0,0],
+      "4º B": [0,0,0,0,0,0]
+    };
+
+    let currentWeek = 1;
+
+    // Obtener número de semana ISO actual
+    function getISOWeek(date = new Date()) {
+      const d = new Date(date);
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    // Calcular lunes y domingo de una semana ISO en un año dado
+    function getWeekRange(weekNum, year = YEAR) {
+      // Encontrar una fecha que esté en la semana deseada
+      const jan4 = new Date(year, 0, 4); // 4 ene siempre está en semana 1
+      const offset = (weekNum - 1) * 7;
+      const refDate = new Date(jan4.getTime() + offset * 86400000);
+
+      const dayOfWeek = refDate.getDay() || 7; // 0→7 (domingo)
+      const monday = new Date(refDate);
+      monday.setDate(refDate.getDate() - (dayOfWeek - 1));
+
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      const format = d => d.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit'
+      });
+
+      return {
+        monday: format(monday),
+        sunday: format(sunday),
+        text: `lun ${format(monday)} – dom ${format(sunday)}`
+      };
+    }
+
+    function populateWeekSelector() {
+      const select = document.getElementById('week-selector');
+      select.innerHTML = '';
+
+      for (let w = 1; w <= MAX_WEEKS; w++) {
+        const range = getWeekRange(w);
+        const option = document.createElement('option');
+        option.value = w;
+        option.textContent = `Semana ${w}: ${range.text}`;
+        select.appendChild(option);
+      }
+    }
+
+    function updateCurrentWeekDisplay() {
+      const now = new Date();
+      let weekNum = getISOWeek(now);
+
+      // Limitar al máximo de semanas del juego
+      weekNum = Math.min(weekNum, MAX_WEEKS);
+      // Si el juego empezó en semana 1 real, pero por si acaso ajusta manualmente si necesitas
+
+      currentWeek = weekNum;
+
+      const range = getWeekRange(weekNum);
+      document.getElementById('semana-actual').textContent = `Semana ${weekNum}`;
+      document.getElementById('fecha-rango').textContent = range.text;
+
+      // Seleccionar en el desplegable
+      document.getElementById('week-selector').value = weekNum;
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(STORAGE_URL, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          scores = data.record.scores || scores;
+          if (data.record.lastUpdate) {
+            document.getElementById('last-update').textContent = 
+              new Date(data.record.lastUpdate).toLocaleString('es-ES');
+          }
+        }
+      } catch (e) {
+        console.error("Error cargando datos", e);
+      }
+    }
+
+    function renderTables() {
+      const tbodyFull = document.getElementById('table-body-full');
+      const tbodyMobile = document.getElementById('table-body-mobile');
+      
+      tbodyFull.innerHTML = '';
+      tbodyMobile.innerHTML = '';
+
+      const rankedTeams = [...teams].sort((a,b) => {
+        const totalA = scores[a].reduce((sum,p)=>sum+p,0);
+        const totalB = scores[b].reduce((sum,p)=>sum+p,0);
+        if (totalA !== totalB) return totalB - totalA;
+        for (let i = MAX_WEEKS-1; i >= 0; i--) {
+          if (scores[a][i] !== scores[b][i]) return scores[b][i] - scores[a][i];
+        }
+        return 0;
+      });
+
+      rankedTeams.forEach(team => {
+        // Tabla completa
+        const rowFull = document.createElement('tr');
+        rowFull.innerHTML = `<td class="team-name">${team}</td>`;
+        let total = 0;
+        scores[team].forEach(points => {
+          rowFull.innerHTML += `<td>${points}</td>`;
+          total += points;
+        });
+        rowFull.innerHTML += `<td class="total-cell">${total}</td>`;
+        tbodyFull.appendChild(rowFull);
+
+        // Tabla móvil
+        const rowMobile = document.createElement('tr');
+        const pointsThisWeek = scores[team][currentWeek-1] ?? 0;
+        rowMobile.innerHTML = `
+          <td class="team-name">${team}</td>
+          <td class="week-cell">${pointsThisWeek}</td>
+          <td class="total-cell">${total}</td>
+        `;
+        tbodyMobile.appendChild(rowMobile);
+      });
+    }
+
+    function changeWeek() {
+      currentWeek = parseInt(document.getElementById('week-selector').value);
+      renderTables();
+    }
+
+    async function refreshTable() {
+      await loadData();
+      updateCurrentWeekDisplay();
+      renderTables();
+    }
+
+    window.onload = async () => {
+      populateWeekSelector();
+      await refreshTable();
+    };
+  </script>
+</body>
+                                                                     </html>
