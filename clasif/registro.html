@@ -146,7 +146,7 @@
 
   <script>
     const BIN_ID = '699582afae596e708f33ce65';
-    const MASTER_KEY = 'TU_MASTER_KEY_AQUI';  // ← CAMBIA ESTO POR TU CLAVE REAL ($2a$...)
+    const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';  // ← ¡Pega aquí tu Master Key real de JSONBin.io!
     const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
@@ -163,6 +163,8 @@
         if (res.ok) {
           const data = await res.json();
           scores = data.record.scores || scores;
+        } else {
+          console.warn('No se pudo cargar el bin (status ' + res.status + ')');
         }
       } catch (e) {
         console.error('Error al cargar:', e);
@@ -188,6 +190,7 @@
     }
 
     async function guardarDatos() {
+      // Leer todos los valores actuales de los selects
       document.querySelectorAll('select').forEach(sel => {
         const team = sel.dataset.team;
         const week = parseInt(sel.dataset.week);
@@ -205,14 +208,15 @@
         });
 
         if (res.ok) {
-          alert('¡Guardado correctamente!');
+          alert('¡Datos guardados correctamente!');
           renderEditableTable();
         } else {
           const errorText = await res.text();
-          alert('Error al guardar:\nStatus: ' + res.status + '\n' + errorText);
+          alert('Error al guardar:\nStatus: ' + res.status + '\nMensaje: ' + errorText);
         }
       } catch (e) {
-        alert('Error de conexión o clave incorrecta:\n' + e.message);
+        alert('Error de conexión o clave inválida:\n' + e.message + '\nRevisa consola (F12)');
+        console.error(e);
       }
     }
 
