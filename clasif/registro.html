@@ -11,8 +11,9 @@
       background: #0d1117;
       color: #e6edf3;
       min-height: 100dvh;
-      background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
       background-attachment: fixed;
     }
     header {
@@ -144,8 +145,9 @@
   </div>
 
   <script>
-    const API_KEY = '6153488f-285b-40ec-a34a-b3d673e4ec02';
-    const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b?apiKey=' + API_KEY;
+    const BIN_ID = '699582afae596e708f33ce65';
+    const MASTER_KEY = 'TU_MASTER_KEY_AQUI';  // ← CAMBIA ESTO POR TU CLAVE REAL ($2a$...)
+    const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
@@ -157,14 +159,13 @@
 
     async function loadData() {
       try {
-        // GET sin apiKey (lectura pública)
-        const res = await fetch(STORAGE_URL.split('?')[0]);
+        const res = await fetch(STORAGE_URL);
         if (res.ok) {
           const data = await res.json();
-          if (data && data.scores) scores = data.scores;
+          scores = data.record.scores || scores;
         }
       } catch (e) {
-        console.error('Error al cargar datos:', e);
+        console.error('Error al cargar:', e);
       }
     }
 
@@ -187,7 +188,6 @@
     }
 
     async function guardarDatos() {
-      // Leer valores actuales de los selects
       document.querySelectorAll('select').forEach(sel => {
         const team = sel.dataset.team;
         const week = parseInt(sel.dataset.week);
@@ -197,20 +197,22 @@
       try {
         const res = await fetch(STORAGE_URL, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': MASTER_KEY
+          },
           body: JSON.stringify({ scores, lastUpdate: new Date().toISOString() })
         });
 
         if (res.ok) {
-          alert('¡Guardado correctamente! Ahora ve a index.html y pulsa ACTUALIZAR.');
+          alert('¡Guardado correctamente!');
           renderEditableTable();
         } else {
-          let errorText = await res.text();
-          alert(`Error al guardar:\nStatus: ${res.status}\nMensaje: ${errorText || 'Sin detalles'}\n\nComprueba consola (F12)`);
+          const errorText = await res.text();
+          alert('Error al guardar:\nStatus: ' + res.status + '\n' + errorText);
         }
       } catch (e) {
-        alert('Error de conexión o red:\n' + e.message + '\n\nAbre consola (F12 → Console) y copia el error.');
-        console.error('Detalles del error:', e);
+        alert('Error de conexión o clave incorrecta:\n' + e.message);
       }
     }
 
