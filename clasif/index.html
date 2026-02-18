@@ -102,6 +102,10 @@
       border-left: 3px solid #00ffcc;
       font-weight: bold;
     }
+    .old-week {
+      color: #ff4444 !important; /* rojo para semanas cerradas */
+      font-weight: bold;
+    }
     .btn-refresh {
       display: block;
       margin: 2rem auto;
@@ -149,12 +153,12 @@
         <thead>
           <tr>
             <th>Equipo</th>
-            <th>Semana 1</th>
-            <th>Semana 2</th>
-            <th>Semana 3</th>
-            <th>Semana 4</th>
-            <th>Semana 5</th>
-            <th>Semana 6</th>
+            <th id="semana1-header">Semana 1</th>
+            <th id="semana2-header">Semana 2</th>
+            <th id="semana3-header">Semana 3</th>
+            <th id="semana4-header">Semana 4</th>
+            <th id="semana5-header">Semana 5</th>
+            <th id="semana6-header">Semana 6</th>
             <th>TOTAL</th>
           </tr>
         </thead>
@@ -180,37 +184,52 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // Función para calcular la semana (lunes a domingo)
-    function getSemanaTexto() {
-      const hoy = new Date();
-      const diaSemana = hoy.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+    // Fecha de inicio: lunes 16 de febrero de 2026
+    const fechaInicio = new Date(2026, 1, 16); // mes 1 = febrero
 
-      // Calcular lunes de la semana actual
+    function getSemanaActual() {
+      const hoy = new Date();
+      const diffTime = hoy - fechaInicio;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      // Número de semana (1 = 16-22 feb, 2 = 23 feb-1 mar, etc.)
+      const semanaNum = Math.floor(diffDays / 7) + 1;
+
+      // Calcular lunes y domingo de la semana actual
+      const diaSemana = hoy.getDay();
       let diasARestar = (diaSemana === 0) ? 6 : diaSemana - 1;
       const lunes = new Date(hoy);
       lunes.setDate(hoy.getDate() - diasARestar);
 
-      // Domingo = lunes + 6 días
       const domingo = new Date(lunes);
       domingo.setDate(lunes.getDate() + 6);
 
-      // Formato: dd al dd de mes (en minúsculas y sin año si es el mismo)
-      const mes = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(lunes);
-      const diaLunes = lunes.getDate().toString().padStart(2, '0');
-      const diaDomingo = domingo.getDate().toString().padStart(2, '0');
+      const formatDia = d => d.getDate().toString().padStart(2, '0');
+      const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+      const mesLunes = meses[lunes.getMonth()];
+      const mesDomingo = meses[domingo.getMonth()];
 
-      const textoSemana = `Semana 1 del ${diaLunes} al ${diaDomingo} de ${mes}`;
-
-      // Si es sábado o domingo → "Semana cerrada"
-      if (diaSemana === 0 || diaSemana === 6) {
-        return "Semana cerrada";
+      let texto = `Semana ${semanaNum} del ${formatDia(lunes)} al ${formatDia(domingo)} de ${mesLunes}`;
+      if (mesLunes !== mesDomingo) {
+        texto = `Semana ${semanaNum} del ${formatDia(lunes)} de ${mesLunes} al ${formatDia(domingo)} de ${mesDomingo}`;
       }
 
-      return textoSemana;
+      if (diaSemana === 0 || diaSemana === 6) {
+        texto = "Semana cerrada";
+      }
+
+      // Marcar columna de Semana 1 en rojo si ya pasó (semanaNum > 1)
+      const columnas = document.querySelectorAll('th[id^="semana"]');
+      columnas.forEach(th => {
+        if (th.id === 'semana1-header' && semanaNum > 1) {
+          th.classList.add('old-week');
+        }
+      });
+
+      return texto;
     }
 
-    // Mostrar al cargar
-    document.getElementById('semana-actual').textContent = getSemanaTexto();
+    document.getElementById('semana-actual').textContent = getSemanaActual();
 
     async function loadData() {
       try {
@@ -246,11 +265,20 @@
         const row = document.createElement('tr');
         row.innerHTML = `<td class="team-name">${team}</td>`;
         let total = 0;
-        scores[team].forEach(points => {
-          row.innerHTML += `<td>${points}</td>`;
+        scores[team].forEach((points, index) => {
+          const td = document.createElement('td');
+          td.textContent = points;
+          // Si ya pasó la Semana 1 (semanaNum > 1), pintar rojo la columna 0 (Semana 1)
+          if (index === 0 && getSemanaTexto().includes('Semana') && !getSemanaTexto().includes('1')) {
+            td.classList.add('old-week');
+          }
+          row.appendChild(td);
           total += points;
         });
-        row.innerHTML += `<td class="total-cell">${total}</td>`;
+        const totalTd = document.createElement('td');
+        totalTd.classList.add('total-cell');
+        totalTd.textContent = total;
+        row.appendChild(totalTd);
         tbody.appendChild(row);
       });
     }
