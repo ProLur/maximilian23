@@ -110,6 +110,25 @@
       color: #00ffccaa;
       font-size: clamp(1rem, 2.5vw, 1.15rem);
     }
+    .week-selector {
+      display: none;
+      text-align: center;
+      margin: 0 0 1.5rem 0;
+    }
+    .week-selector label {
+      color: #00ffcc;
+      margin-right: 0.8rem;
+      font-size: clamp(1rem, 3vw, 1.1rem);
+    }
+    .week-selector select {
+      background: rgba(0,255,204,0.15);
+      color: #00ffcc;
+      border: 1px solid #00ffcc66;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: clamp(1rem, 3vw, 1.1rem);
+      cursor: pointer;
+    }
     @media (max-width: 768px) {
       .full-table { display: none; }
       .mobile-table { display: table; width: 100%; min-width: 100%; }
@@ -119,14 +138,12 @@
       }
       .classification { padding: 1.5rem 1rem; }
       .container { padding: 0 0.8rem; }
+      .week-selector { display: block; }
     }
     @media (min-width: 769px) {
       .mobile-table { display: none; }
       .full-table { display: table; }
-      .classification {
-        overflow-x: auto;
-        padding: 2rem;
-      }
+      .classification { padding: 2rem; }
     }
     footer {
       text-align: center;
@@ -146,6 +163,20 @@
 
   <div class="container">
     <div class="classification">
+
+      <!-- Selector solo visible en móvil -->
+      <div class="week-selector">
+        <label for="week-select">Puntos de:</label>
+        <select id="week-select">
+          <option value="1">Semana 1</option>
+          <option value="2">Semana 2</option>
+          <option value="3">Semana 3</option>
+          <option value="4">Semana 4</option>
+          <option value="5">Semana 5</option>
+          <option value="6">Semana 6</option>
+        </select>
+      </div>
+
       <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:clamp(1.5rem, 4vw, 1.8rem);">
         Tabla de Clasificación
       </h2>
@@ -172,7 +203,7 @@
         <thead>
           <tr>
             <th>Equipo</th>
-            <th class="week-cell">Puntos</th>
+            <th id="week-header">Puntos</th>
             <th>Total</th>
           </tr>
         </thead>
@@ -181,11 +212,12 @@
         </tbody>
       </table>
 
-      <!-- Fecha movida aquí ↓ -->
+      <!-- Información de la semana seleccionada -->
       <div class="week-info">
         <h2 id="semana-actual">Semana 1</h2>
         <p id="fecha-rango"></p>
       </div>
+
     </div>
   </div>
 
@@ -230,11 +262,11 @@
       };
     }
 
-    function updateCurrentWeekDisplay() {
-      currentWeek = 1;
-      const range = getWeekRange(1);
-      document.getElementById('semana-actual').textContent = `Semana 1`;
+    function updateWeekDisplay() {
+      const range = getWeekRange(currentWeek);
+      document.getElementById('semana-actual').textContent = `Semana ${currentWeek}`;
       document.getElementById('fecha-rango').textContent = range.text;
+      document.getElementById('week-header').textContent = `Semana ${currentWeek}`;
     }
 
     async function loadData() {
@@ -259,6 +291,7 @@
     
       tbodyFull.innerHTML = '';
       tbodyMobile.innerHTML = '';
+
       const rankedTeams = [...teams].sort((a,b) => {
         const totalA = scores[a].reduce((sum,p)=>sum+p,0);
         const totalB = scores[b].reduce((sum,p)=>sum+p,0);
@@ -270,7 +303,7 @@
       });
 
       rankedTeams.forEach(team => {
-        // Tabla completa (PC)
+        // Tabla completa (PC) – todas las semanas
         const rowFull = document.createElement('tr');
         rowFull.innerHTML = `<td class="team-name">${team}</td>`;
         let total = 0;
@@ -281,7 +314,7 @@
         rowFull.innerHTML += `<td class="total-cell">${total}</td>`;
         tbodyFull.appendChild(rowFull);
 
-        // Tabla móvil
+        // Tabla móvil – solo la semana seleccionada
         const rowMobile = document.createElement('tr');
         const pointsThisWeek = scores[team][currentWeek-1] ?? 0;
         rowMobile.innerHTML = `
@@ -295,12 +328,20 @@
 
     async function refreshTable() {
       await loadData();
-      updateCurrentWeekDisplay();
+      updateWeekDisplay();
       renderTables();
     }
 
+    // Evento del selector (solo móvil)
+    document.getElementById('week-select').addEventListener('change', (e) => {
+      currentWeek = parseInt(e.target.value);
+      updateWeekDisplay();
+      renderTables();
+    });
+
     window.onload = async () => {
       await refreshTable();
+      document.getElementById('week-select').value = currentWeek;
     };
   </script>
 </body>
