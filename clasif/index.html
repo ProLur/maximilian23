@@ -189,7 +189,8 @@
   </footer>
 
   <script>
-    const STORAGE_URL = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
+    const API_KEY = '6153488f-285b-40ec-a34a-b3d673e4ec02';
+    const STORAGE_URL_BASE = 'https://api.jsonstorage.net/v1/json/434eadf6-9b1e-4f64-acfb-53d6629c339a/2a47e5bf-e204-48df-a0c1-e693305a238b';
 
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
@@ -201,16 +202,21 @@
 
     async function loadData() {
       try {
-        const res = await fetch(STORAGE_URL);
+        // Lectura pública → sin apiKey
+        const res = await fetch(STORAGE_URL_BASE);
         if (res.ok) {
           const data = await res.json();
-          if (data && data.scores) scores = data.scores;
+          if (data && data.scores) {
+            scores = data.scores;
+          }
           if (data && data.lastUpdate) {
             document.getElementById('last-update').textContent = new Date(data.lastUpdate).toLocaleString('es-ES');
           }
+        } else {
+          console.warn('No se pudo cargar datos. Status:', res.status);
         }
       } catch (e) {
-        console.error('Error al cargar:', e);
+        console.error('Error al cargar datos:', e);
       }
     }
 
@@ -223,6 +229,7 @@
         const totalB = scores[b].reduce((sum,p)=>sum+p,0);
         if (totalA !== totalB) return totalB - totalA;
 
+        // Desempate: semanas más recientes primero
         for (let i = 5; i >= 0; i--) {
           if (scores[a][i] !== scores[b][i]) return scores[b][i] - scores[a][i];
         }
