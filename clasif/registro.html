@@ -145,7 +145,7 @@
   </div>
 
   <script>
-    const BIN_ID = '699582afae596e708f33ce65';
+    const BIN_ID = '69958674d0ea881f40c36fa0';
     const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';
     const STORAGE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
@@ -163,8 +163,6 @@
         if (res.ok) {
           const data = await res.json();
           scores = data.record.scores || scores;
-        } else {
-          console.warn('No se pudo cargar (status ' + res.status + ')');
         }
       } catch (e) {
         console.error('Error al cargar:', e);
@@ -207,15 +205,14 @@
         });
 
         if (res.ok) {
-          alert('¡Guardado correctamente en JSONBin.io!\n\nAhora abre index.html y pulsa ACTUALIZAR para ver los cambios.');
+          alert('¡Guardado correctamente!\n\nAhora abre index.html y pulsa ACTUALIZAR.');
           renderEditableTable();
         } else {
           const errorText = await res.text();
-          alert('Error al guardar:\nStatus: ' + res.status + '\nMensaje: ' + (errorText || '(sin detalles)'));
+          alert('Error al guardar:\nStatus: ' + res.status + '\n' + errorText);
         }
       } catch (e) {
-        alert('Error de conexión o clave inválida:\n' + e.message + '\n\nAbre consola (F12 → Console) y copia el error.');
-        console.error(e);
+        alert('Error de conexión:\n' + e.message);
       }
     }
 
