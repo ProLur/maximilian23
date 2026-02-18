@@ -44,6 +44,16 @@
       margin: 2rem auto;
       padding: 0 1rem;
     }
+    .debug-info {
+      background: rgba(255,0,0,0.15);
+      border: 1px solid #ff4444;
+      color: #ffdddd;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+    }
     .classification {
       background: rgba(30,45,61,0.35);
       border: 2px solid #00ffcc55;
@@ -101,23 +111,22 @@
       text-align: center;
       cursor: pointer;
     }
-    .btn-guardar {
-      display: block;
-      margin: 2.5rem auto;
-      padding: 1rem 4rem;
+    .btn-guardar, .btn-reload {
+      display: inline-block;
+      margin: 1rem 1rem;
+      padding: 0.9rem 2.5rem;
       background: rgba(0,255,204,0.2);
       color: #00ffcc;
       border: 3px solid #00ffcc;
       border-radius: 999px;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-guardar:hover {
+    .btn-guardar:hover, .btn-reload:hover {
       background: rgba(0,255,204,0.35);
       transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(0,255,204,0.4);
     }
   </style>
 </head>
@@ -128,6 +137,14 @@
   </header>
 
   <div class="container">
+    <div id="debug-info" class="debug-info">
+      Estado inicial: esperando carga de datos...
+    </div>
+
+    <div style="text-align:center; margin:1.5rem 0;">
+      <button class="btn-reload" onclick="cargarDatosManual()">Cargar datos ahora</button>
+    </div>
+
     <div class="classification">
       <table>
         <thead>
@@ -142,11 +159,15 @@
             <th>TOTAL</th>
           </tr>
         </thead>
-        <tbody id="table-body"></tbody>
+        <tbody id="table-body">
+          <tr><td colspan="8" style="padding:3rem; color:#888;">Cargando participantes...</td></tr>
+        </tbody>
       </table>
     </div>
 
-    <button class="btn-guardar" onclick="guardarDatos()">GUARDAR CAMBIOS</button>
+    <div style="text-align:center;">
+      <button class="btn-guardar" onclick="guardarDatos()">GUARDAR CAMBIOS</button>
+    </div>
   </div>
 
   <script>
@@ -161,22 +182,48 @@
     let scores = {};
     participants.forEach(name => { scores[name] = [0,0,0,0,0,0]; });
 
+    const debug = document.getElementById('debug-info');
+
+    function log(msg, isError = false) {
+      debug.innerHTML += (isError ? '<strong style="color:#ff6666;">[ERROR] </strong>' : '[INFO] ') + msg + '<br>';
+      console.log(msg);
+    }
+
     async function loadData() {
+      log("Intentando cargar datos...");
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          const loaded = data.record.scores || {};
-          participants.forEach(name => {
-            scores[name] = loaded[name] instanceof Array ? loaded[name] : [0,0,0,0,0,0];
-          });
+        log(`Respuesta: status ${res.status}`);
+
+        if (!res.ok) {
+          const text = await res.text();
+          log(`Error HTTP ${res.status}: ${text}`, true);
+          return false;
         }
+
+        const data = await res.json();
+        log("Datos recibidos correctamente");
+
+        const loaded = data.record?.scores || {};
+        let countLoaded = 0;
+
+        participants.forEach(name => {
+          if (loaded[name] && Array.isArray(loaded[name])) {
+            scores[name] = loaded[name];
+            countLoaded++;
+          }
+        });
+
+        log(`Participantes cargados: \( {countLoaded}/ \){participants.length}`);
+        return true;
       } catch (e) {
-        console.error('Error al cargar:', e);
+        log(`Error en fetch: ${e.message}`, true);
+        return false;
       }
     }
 
     function renderEditableTable() {
+      log("Renderizando tabla...");
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
@@ -186,12 +233,18 @@
         return tb - ta;
       });
 
+      if (sorted.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="padding:3rem;">No hay participantes definidos</td></tr>';
+        log("No hay participantes", true);
+        return;
+      }
+
       sorted.forEach(name => {
         const row = document.createElement('tr');
         row.innerHTML = `<td class="participant-name">${name}</td>`;
         let total = 0;
         for (let w = 0; w < 6; w++) {
-          const val = scores[name][w];
+          const val = Number(scores[name][w]) || 0;
           total += val;
           row.innerHTML += `<td><select data-name="\( {name}" data-week=" \){w}">
             \( {Array.from({length:11},(_,i)=>`<option value=" \){i}" \( {val===i?'selected':''}> \){i}</option>`).join('')}
@@ -200,9 +253,22 @@
         row.innerHTML += `<td class="total-cell">${total}</td>`;
         tbody.appendChild(row);
       });
+
+      log("Tabla renderizada con éxito");
+    }
+
+    async function cargarDatosManual() {
+      debug.innerHTML = "Estado: intentando recarga manual...<br>";
+      const ok = await loadData();
+      if (ok) {
+        renderEditableTable();
+      } else {
+        debug.innerHTML += "<strong>No se pudieron cargar los datos. Verifica:</strong><br>1. Que el bin exista en https://jsonbin.io<br>2. Que tenga la clave 'scores' con los nombres<br>3. Que la conexión a internet funcione<br>";
+      }
     }
 
     async function guardarDatos() {
+      log("Preparando guardado...");
       document.querySelectorAll('select').forEach(sel => {
         const name = sel.dataset.name;
         const week = parseInt(sel.dataset.week);
@@ -210,6 +276,7 @@
       });
 
       try {
+        log("Enviando PUT...");
         const res = await fetch(STORAGE_URL, {
           method: 'PUT',
           headers: {
@@ -220,20 +287,23 @@
         });
 
         if (res.ok) {
+          log("¡Guardado OK!");
           alert('¡Guardado correctamente!');
-          await loadData();
-          renderEditableTable();
+          await cargarDatosManual(); // recargar para confirmar
         } else {
-          alert('Error al guardar:\n' + res.status + ' - ' + await res.text());
+          const err = await res.text();
+          log(`Error al guardar: ${res.status} - ${err}`, true);
+          alert('Error al guardar:\n' + res.status + ' - ' + err);
         }
       } catch (e) {
+        log(`Error conexión: ${e.message}`, true);
         alert('Error de conexión:\n' + e.message);
       }
     }
 
     window.onload = async () => {
-      await loadData();
-      renderEditableTable();
+      log("Página cargada → iniciando carga automática...");
+      await cargarDatosManual();
     };
   </script>
 </body>
