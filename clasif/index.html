@@ -130,7 +130,6 @@
       border-top: 1px solid #00ffcc33;
       margin-top: 5rem;
     }
-    /* Rojo para semanas pasadas */
     .semana-pasada {
       color: #ff4444 !important;
       text-shadow: 0 0 8px #ff444488 !important;
@@ -185,17 +184,19 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // ¡Cambia esta fecha por la real de inicio del juego!
-    const FECHA_INICIO = new Date('2025-09-15');
+    // Fecha de inicio real: 16 de febrero de 2026
+    const FECHA_INICIO = new Date('2026-02-16');
 
     function calcularSemanaActual() {
       const hoy = new Date();
       const diffMs = hoy - FECHA_INICIO;
       const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       const semanasCompletas = Math.floor(diffDias / 7);
-      let semana = semanasCompletas + 1;
-      if (semana > 7) semana = 7;
+      let semana = semanasCompletas + 1; // +1 para considerar la semana en curso
+
       if (semana < 1) semana = 1;
+      if (semana > 7) semana = 7;
+
       return semana;
     }
 
@@ -239,12 +240,7 @@
       rankedTeams.forEach((team, index) => {
         const posicion = index + 1;
         const puesto = getPuesto(posicion);
-        let prefijo = '';
-
-        // Solo medalla de oro para el primero
-        if (posicion === 1) {
-          prefijo = '🥇 ';
-        }
+        let prefijo = (posicion === 1) ? '🥇 ' : '';
 
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -259,19 +255,21 @@
         tbody.appendChild(row);
       });
 
-      // Colorear semanas pasadas en rojo
+      // Colorear cabeceras
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
+      // Resetear todo a verde
       for (let i = 1; i <= 6; i++) {
         headers[i].classList.remove('semana-pasada');
       }
 
+      // Rojo SOLO para semanas ya terminadas (anteriores a la actual)
       for (let i = 1; i < semanaActual && i <= 6; i++) {
         headers[i].classList.add('semana-pasada');
       }
 
-      // Título superior
+      // Texto superior
       let texto = `Semana actual: ${semanaActual}`;
       if (semanaActual > 6) {
         texto = "Juego finalizado – todas las semanas completadas";
