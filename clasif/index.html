@@ -36,14 +36,23 @@
       box-shadow: 0 0 12px #00ffcc55;
     }
     header h1 {
-      font-size: clamp(1.4rem, 5vw, 1.7rem);
+      font-size: 1.7rem;
       color: #00ffcc;
       text-shadow: 0 0 8px #00ffccaa;
     }
     .container {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1rem;
+    }
+    .intro {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding: 1.8rem;
+      background: rgba(30,45,61,0.38);
+      border: 1px solid #00ffcc44;
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
     }
     .classification {
       background: rgba(30,45,61,0.35);
@@ -51,99 +60,66 @@
       border-radius: 14px;
       padding: 2rem;
       backdrop-filter: blur(6px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
     table {
       width: 100%;
-      min-width: 640px;
       border-collapse: collapse;
       background: rgba(13,17,23,0.85);
       border: 3px solid #00ffcc;
       border-radius: 12px;
       overflow: hidden;
-      table-layout: auto;
-    }
-    th, td {
-      padding: clamp(12px, 2vw, 16px) clamp(8px, 1.5vw, 12px);
-      text-align: center;
-      border-bottom: 1px solid #00ffcc33;
-      font-size: clamp(1.1rem, 2.2vw, 1.35rem);
-      font-weight: bold;
+      min-width: 820px;
     }
     th {
       background: linear-gradient(#00ffcc22, transparent);
       color: #00ffcc;
+      padding: 16px 12px;
+      font-size: 1.2rem;
       border-bottom: 3px solid #00ffcc66;
       text-shadow: 0 0 6px #00ffcc88;
+      transition: all 0.3s;
+    }
+    td {
+      padding: 16px 12px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+      font-size: 1.35rem;
+      font-weight: bold;
+      transition: background 0.2s;
     }
     tr:hover td { background: rgba(0,255,204,0.09); }
     .team-name {
       text-align: left;
-      padding-left: clamp(1.2rem, 3vw, 2.2rem);
+      padding-left: 2.2rem;
       color: #00ffcc;
-      font-size: clamp(1.2rem, 2.4vw, 1.4rem);
-      min-width: 140px;
+      font-size: 1.4rem;
     }
     .total-cell {
       background: rgba(0,255,204,0.22) !important;
       color: #00ffcc;
-      font-size: clamp(1.3rem, 2.6vw, 1.55rem);
+      font-size: 1.55rem;
       border-left: 3px solid #00ffcc;
       font-weight: bold;
     }
-    .week-info {
-      text-align: center;
-      margin: 2rem 0 0.5rem;
-      padding: 1rem;
-      background: rgba(0,255,204,0.08);
-      border: 1px solid #00ffcc33;
-      border-radius: 10px;
-    }
-    .week-info h2 {
+    .btn-refresh {
+      display: block;
+      margin: 2rem auto;
+      padding: 0.9rem 3rem;
+      background: rgba(0,255,204,0.18);
       color: #00ffcc;
-      margin-bottom: 0.5rem;
-      font-size: clamp(1.4rem, 3.5vw, 1.7rem);
-    }
-    .week-info p {
-      color: #00ffccaa;
-      font-size: clamp(1rem, 2.5vw, 1.15rem);
-    }
-    .week-selector {
-      display: none;
-      text-align: center;
-      margin: 0 0 1.5rem 0;
-    }
-    .week-selector label {
-      color: #00ffcc;
-      margin-right: 0.8rem;
-      font-size: clamp(1rem, 3vw, 1.1rem);
-    }
-    .week-selector select {
-      background: rgba(0,255,204,0.15);
-      color: #00ffcc;
-      border: 1px solid #00ffcc66;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      font-size: clamp(1rem, 3vw, 1.1rem);
+      border: 2px solid #00ffcc88;
+      border-radius: 999px;
+      font-size: 1.2rem;
+      font-weight: bold;
       cursor: pointer;
+      transition: all 0.3s;
     }
-    @media (max-width: 768px) {
-      .full-table { display: none; }
-      .mobile-table { display: table; width: 100%; min-width: 100%; }
-      .mobile-table th, .mobile-table td {
-        font-size: clamp(1rem, 3.5vw, 1.2rem);
-        padding: 14px 10px;
-      }
-      .classification { padding: 1.5rem 1rem; }
-      .container { padding: 0 0.8rem; }
-      .week-selector { display: block; }
-    }
-    @media (min-width: 769px) {
-      .mobile-table { display: none; }
-      .full-table { display: table; }
-      .classification { padding: 2rem; }
+    .btn-refresh:hover {
+      background: rgba(0,255,204,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0,255,204,0.4);
     }
     footer {
       text-align: center;
@@ -160,28 +136,15 @@
     <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
     <h1>Clasificación • Juego del Silencio</h1>
   </header>
-
   <div class="container">
+    <div class="intro">
+      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.6rem;">Cargando...</h2>
+    </div>
     <div class="classification">
-
-      <!-- Selector solo visible en móvil -->
-      <div class="week-selector">
-        <label for="week-select">Puntos de:</label>
-        <select id="week-select">
-          <option value="1">Semana 1</option>
-          <option value="2">Semana 2</option>
-          <option value="3">Semana 3</option>
-          <option value="4">Semana 4</option>
-          <option value="5">Semana 5</option>
-          <option value="6">Semana 6</option>
-        </select>
-      </div>
-
-      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:clamp(1.5rem, 4vw, 1.8rem);">
-        Tabla de Clasificación
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
+        Tabla de Clasificación – 6 Semanas
       </h2>
-
-      <table class="full-table">
+      <table>
         <thead>
           <tr>
             <th>Equipo</th>
@@ -194,40 +157,19 @@
             <th>TOTAL</th>
           </tr>
         </thead>
-        <tbody id="table-body-full">
+        <tbody id="table-body">
           <tr><td colspan="8" style="text-align:center; padding:2rem;">Cargando datos...</td></tr>
         </tbody>
       </table>
-
-      <table class="mobile-table">
-        <thead>
-          <tr>
-            <th>Equipo</th>
-            <th id="week-header">Puntos</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="table-body-mobile">
-          <tr><td colspan="3" style="text-align:center; padding:2rem;">Cargando...</td></tr>
-        </tbody>
-      </table>
-
-      <!-- Información de la semana seleccionada -->
-      <div class="week-info">
-        <h2 id="semana-actual">Semana 1</h2>
-        <p id="fecha-rango"></p>
-      </div>
-
     </div>
+    <button class="btn-refresh" onclick="refreshTable()">ACTUALIZAR</button>
   </div>
-
   <footer>
     CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
   </footer>
 
   <script>
     const STORAGE_URL = 'https://api.jsonbin.io/v3/b/699588baae596e708f33e153';
-    const MAX_WEEKS = 6;
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
       "3º A": [0,0,0,0,0,0],
@@ -235,113 +177,96 @@
       "4º A": [0,0,0,0,0,0],
       "4º B": [0,0,0,0,0,0]
     };
-    let currentWeek = 1;
 
-    function getMostRecentMonday() {
-      const today = new Date();
-      const day = today.getDay();
-      const diff = (day === 0 ? -6 : 1 - day);
-      const monday = new Date(today);
-      monday.setDate(today.getDate() + diff);
-      monday.setHours(0,0,0,0);
-      return monday;
-    }
+    // ¡Cambia esta fecha por el día real de inicio del juego!
+    const FECHA_INICIO = new Date('2025-09-15'); // ejemplo: 15 de septiembre de 2025
 
-    function getWeekRange(weekNum) {
-      const baseMonday = getMostRecentMonday();
-      const daysOffset = (weekNum - 1) * 7;
-      const monday = new Date(baseMonday);
-      monday.setDate(baseMonday.getDate() + daysOffset);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      const format = d => d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
-      return {
-        monday: format(monday),
-        sunday: format(sunday),
-        text: `lunes ${format(monday)} al domingo ${format(sunday)}`
-      };
-    }
-
-    function updateWeekDisplay() {
-      const range = getWeekRange(currentWeek);
-      document.getElementById('semana-actual').textContent = `Semana ${currentWeek}`;
-      document.getElementById('fecha-rango').textContent = range.text;
-      document.getElementById('week-header').textContent = `Semana ${currentWeek}`;
+    function calcularSemanaActual() {
+      const hoy = new Date();
+      const diffMs = hoy - FECHA_INICIO;
+      const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const semanasCompletas = Math.floor(diffDias / 7);
+      return semanasCompletas + 1; // +1 → la semana en curso NO se pinta roja aún
+      // Si quieres pintar también la semana actual → return semanasCompletas;
     }
 
     async function loadData() {
+      console.log("Intentando cargar datos desde: " + STORAGE_URL);
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
+        console.log("Estado de la respuesta: " + res.status);
         if (res.ok) {
           const data = await res.json();
+          console.log("Datos recibidos correctamente:", data);
           scores = data.record.scores || scores;
           if (data.record.lastUpdate) {
-            document.getElementById('last-update').textContent =
+            document.getElementById('last-update').textContent = 
               new Date(data.record.lastUpdate).toLocaleString('es-ES');
           }
+        } else {
+          console.warn("No se pudo cargar - status: " + res.status);
         }
       } catch (e) {
-        console.error("Error cargando datos", e);
+        console.error("Error en la petición:", e);
       }
     }
 
-    function renderTables() {
-      const tbodyFull = document.getElementById('table-body-full');
-      const tbodyMobile = document.getElementById('table-body-mobile');
-    
-      tbodyFull.innerHTML = '';
-      tbodyMobile.innerHTML = '';
+    function renderTable() {
+      console.log("Renderizando tabla con scores:", scores);
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
 
       const rankedTeams = [...teams].sort((a,b) => {
         const totalA = scores[a].reduce((sum,p)=>sum+p,0);
         const totalB = scores[b].reduce((sum,p)=>sum+p,0);
         if (totalA !== totalB) return totalB - totalA;
-        for (let i = MAX_WEEKS-1; i >= 0; i--) {
+        for (let i = 5; i >= 0; i--) {
           if (scores[a][i] !== scores[b][i]) return scores[b][i] - scores[a][i];
         }
         return 0;
       });
 
       rankedTeams.forEach(team => {
-        // Tabla completa (PC) – todas las semanas
-        const rowFull = document.createElement('tr');
-        rowFull.innerHTML = `<td class="team-name">${team}</td>`;
+        const row = document.createElement('tr');
+        row.innerHTML = `<td class="team-name">${team}</td>`;
         let total = 0;
         scores[team].forEach(points => {
-          rowFull.innerHTML += `<td>${points}</td>`;
+          row.innerHTML += `<td>${points}</td>`;
           total += points;
         });
-        rowFull.innerHTML += `<td class="total-cell">${total}</td>`;
-        tbodyFull.appendChild(rowFull);
-
-        // Tabla móvil – solo la semana seleccionada
-        const rowMobile = document.createElement('tr');
-        const pointsThisWeek = scores[team][currentWeek-1] ?? 0;
-        rowMobile.innerHTML = `
-          <td class="team-name">${team}</td>
-          <td class="week-cell">${pointsThisWeek}</td>
-          <td class="total-cell">${total}</td>
-        `;
-        tbodyMobile.appendChild(rowMobile);
+        row.innerHTML += `<td class="total-cell">${total}</td>`;
+        tbody.appendChild(row);
       });
+
+      // ─────────────── Pintar semanas pasadas en ROJO ───────────────
+      const semanaActual = calcularSemanaActual();
+      const headers = document.querySelectorAll('thead th');
+
+      // headers[0] = Equipo, [1]=Sem1, [2]=Sem2, ..., [6]=Sem6, [7]=TOTAL
+      for (let i = 1; i <= 6; i++) {
+        const th = headers[i];
+        const numSemana = i;
+
+        if (numSemana < semanaActual) {
+          th.style.color = '#ff4444';
+          th.style.textShadow = '0 0 8px #ff444488';
+          th.style.background = 'linear-gradient(#ff444422, transparent)';
+        }
+      }
+
+      // Actualizar título superior
+      document.getElementById('semana-actual').textContent = 
+        `Semana actual: ${semanaActual} • ${new Date().toLocaleDateString('es-ES')}`;
     }
 
     async function refreshTable() {
+      console.log("Refrescando tabla...");
       await loadData();
-      updateWeekDisplay();
-      renderTables();
+      renderTable();
     }
-
-    // Evento del selector (solo móvil)
-    document.getElementById('week-select').addEventListener('change', (e) => {
-      currentWeek = parseInt(e.target.value);
-      updateWeekDisplay();
-      renderTables();
-    });
 
     window.onload = async () => {
       await refreshTable();
-      document.getElementById('week-select').value = currentWeek;
     };
   </script>
 </body>
