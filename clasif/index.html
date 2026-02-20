@@ -178,41 +178,41 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // ¡Cambia esta fecha por el día real de inicio del juego!
-    const FECHA_INICIO = new Date('2025-09-15'); // ejemplo: 15 de septiembre de 2025
+    // ¡Cambia esta fecha por el día real de INICIO del juego!
+    const FECHA_INICIO = new Date('2025-09-15'); // ejemplo
 
     function calcularSemanaActual() {
       const hoy = new Date();
       const diffMs = hoy - FECHA_INICIO;
       const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       const semanasCompletas = Math.floor(diffDias / 7);
-      return semanasCompletas + 1; // +1 → la semana en curso NO se pinta roja aún
-      // Si quieres pintar también la semana actual → return semanasCompletas;
+      let semana = semanasCompletas + 1; // semana en curso
+
+      // Limitamos a 6 semanas (no pintamos más allá)
+      if (semana > 7) semana = 7;     // 7 = después de terminar todo
+      if (semana < 1) semana = 1;
+
+      return semana;
     }
 
     async function loadData() {
       console.log("Intentando cargar datos desde: " + STORAGE_URL);
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
-        console.log("Estado de la respuesta: " + res.status);
         if (res.ok) {
           const data = await res.json();
-          console.log("Datos recibidos correctamente:", data);
           scores = data.record.scores || scores;
           if (data.record.lastUpdate) {
             document.getElementById('last-update').textContent = 
               new Date(data.record.lastUpdate).toLocaleString('es-ES');
           }
-        } else {
-          console.warn("No se pudo cargar - status: " + res.status);
         }
       } catch (e) {
-        console.error("Error en la petición:", e);
+        console.error("Error:", e);
       }
     }
 
     function renderTable() {
-      console.log("Renderizando tabla con scores:", scores);
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
@@ -238,16 +238,22 @@
         tbody.appendChild(row);
       });
 
-      // ─────────────── Pintar semanas pasadas en ROJO ───────────────
+      // ─────────────── Colorear cabeceras ───────────────
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
-      // headers[0] = Equipo, [1]=Sem1, [2]=Sem2, ..., [6]=Sem6, [7]=TOTAL
+      // Resetear primero todos a verde
       for (let i = 1; i <= 6; i++) {
         const th = headers[i];
-        const numSemana = i;
+        th.style.color = '#00ffcc';
+        th.style.textShadow = '0 0 6px #00ffcc88';
+        th.style.background = 'linear-gradient(#00ffcc22, transparent)';
+      }
 
-        if (numSemana < semanaActual) {
+      // Pintar rojo SOLO las semanas YA TERMINADAS (anteriores a la actual)
+      for (let i = 1; i <= 6; i++) {
+        if (i < semanaActual) {
+          const th = headers[i];
           th.style.color = '#ff4444';
           th.style.textShadow = '0 0 8px #ff444488';
           th.style.background = 'linear-gradient(#ff444422, transparent)';
@@ -255,12 +261,14 @@
       }
 
       // Actualizar título superior
-      document.getElementById('semana-actual').textContent = 
-        `Semana actual: ${semanaActual} • ${new Date().toLocaleDateString('es-ES')}`;
+      let textoSemana = `Semana actual: ${semanaActual}`;
+      if (semanaActual > 6) {
+        textoSemana = "Juego finalizado • Todas las semanas completadas";
+      }
+      document.getElementById('semana-actual').textContent = textoSemana;
     }
 
     async function refreshTable() {
-      console.log("Refrescando tabla...");
       await loadData();
       renderTable();
     }
