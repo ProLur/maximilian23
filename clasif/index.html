@@ -54,6 +54,11 @@
       border-radius: 14px;
       backdrop-filter: blur(6px);
     }
+    .semana-info {
+      margin-top: 1rem;
+      font-size: 1.3rem;
+      color: #00ffccaa;
+    }
     .classification {
       background: rgba(30,45,61,0.35);
       border: 2px solid #00ffcc55;
@@ -88,7 +93,6 @@
       font-size: 1.35rem;
       font-weight: bold;
       transition: background 0.2s;
-      color: #e6edf3;
     }
     tr:hover td { background: rgba(0,255,204,0.09); }
     .team-name {
@@ -104,24 +108,6 @@
       border-left: 3px solid #00ffcc;
       font-weight: bold;
     }
-    .btn-refresh {
-      display: block;
-      margin: 2rem auto;
-      padding: 0.9rem 3rem;
-      background: rgba(0,255,204,0.18);
-      color: #00ffcc;
-      border: 2px solid #00ffcc88;
-      border-radius: 999px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .btn-refresh:hover {
-      background: rgba(0,255,204,0.35);
-      transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(0,255,204,0.4);
-    }
     footer {
       text-align: center;
       padding: 3rem 1rem 2rem;
@@ -130,7 +116,6 @@
       border-top: 1px solid #00ffcc33;
       margin-top: 5rem;
     }
-    /* Clase para pintar rojo las semanas pasadas */
     .semana-pasada {
       color: #ff4444 !important;
       text-shadow: 0 0 8px #ff444488 !important;
@@ -145,7 +130,8 @@
   </header>
   <div class="container">
     <div class="intro">
-      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.6rem;">Cargando...</h2>
+      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.3rem;">Cargando...</h2>
+      <div class="semana-info" id="rango-fechas">Cargando fechas...</div>
     </div>
     <div class="classification">
       <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
@@ -169,7 +155,6 @@
         </tbody>
       </table>
     </div>
-    <button class="btn-refresh" onclick="refreshTable()">ACTUALIZAR</button>
   </div>
   <footer>
     CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
@@ -185,15 +170,27 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // Inicio real del juego: 16 de febrero de 2026
-    const FECHA_INICIO = new Date('2026-02-16');
+    const FECHA_INICIO = new Date(2026, 1, 16); // febrero = mes 1 en JS (0=enero)
 
     function calcularSemanaActual() {
       const hoy = new Date();
       const diffMs = hoy - FECHA_INICIO;
       const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       const semanasCompletas = Math.floor(diffDias / 7);
-      return semanasCompletas + 1; // +1 = semana en curso
+      return semanasCompletas + 1; // semana en curso
+    }
+
+    function getRangoSemana(semana) {
+      const inicio = new Date(FECHA_INICIO);
+      inicio.setDate(inicio.getDate() + (semana - 1) * 7);
+      
+      const fin = new Date(inicio);
+      fin.setDate(fin.getDate() + 6);
+
+      const meses = ["enero","febrero","marzo","abril","mayo","junio",
+                     "julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+      return `Semana ${semana} desde el ${inicio.getDate()} de ${meses[inicio.getMonth()]} al ${fin.getDate()} de ${meses[fin.getMonth()]}`;
     }
 
     async function loadData() {
@@ -208,7 +205,7 @@
           }
         }
       } catch (e) {
-        console.error("Error al cargar datos:", e);
+        console.error("Error al cargar:", e);
       }
     }
 
@@ -238,32 +235,26 @@
         tbody.appendChild(row);
       });
 
-      // ─────────────── Colorear cabeceras de semanas pasadas en rojo ───────────────
+      // Colorear semanas pasadas en rojo
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
-      // Resetear todas a verde por defecto
       for (let i = 1; i <= 6; i++) {
         headers[i].classList.remove('semana-pasada');
       }
 
-      // Pintar rojo SOLO las semanas ya completadas (anteriores a la actual)
       for (let i = 1; i < semanaActual && i <= 6; i++) {
         headers[i].classList.add('semana-pasada');
       }
 
-      // Actualizar título superior
-      document.getElementById('semana-actual').textContent = 
-        `Semana actual: ${semanaActual}`;
-    }
-
-    async function refreshTable() {
-      await loadData();
-      renderTable();
+      // Actualizar textos superiores
+      document.getElementById('semana-actual').textContent = `Semana ${semanaActual}`;
+      document.getElementById('rango-fechas').textContent = getRangoSemana(semanaActual);
     }
 
     window.onload = async () => {
-      await refreshTable();
+      await loadData();
+      renderTable();
     };
   </script>
 </body>
