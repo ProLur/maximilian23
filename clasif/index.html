@@ -96,6 +96,9 @@
       color: #00ffcc;
       font-size: 1.4rem;
     }
+    .puesto-1 { color: #ffd700; text-shadow: 0 0 10px #ffd700aa; } /* oro */
+    .puesto-2 { color: #c0c0c0; text-shadow: 0 0 8px #c0c0c0aa; }  /* plata */
+    .puesto-3 { color: #cd7f32; text-shadow: 0 0 6px #cd7f32aa; }  /* bronce */
     .total-cell {
       background: rgba(0,255,204,0.22) !important;
       color: #00ffcc;
@@ -179,24 +182,27 @@
     };
 
     // ¡Cambia esta fecha por el día real de INICIO del juego!
-    const FECHA_INICIO = new Date('2025-09-15'); // ejemplo
+    const FECHA_INICIO = new Date('2025-09-15');
 
     function calcularSemanaActual() {
       const hoy = new Date();
       const diffMs = hoy - FECHA_INICIO;
       const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       const semanasCompletas = Math.floor(diffDias / 7);
-      let semana = semanasCompletas + 1; // semana en curso
-
-      // Limitamos a 6 semanas (no pintamos más allá)
-      if (semana > 7) semana = 7;     // 7 = después de terminar todo
+      let semana = semanasCompletas + 1;
+      if (semana > 7) semana = 7;
       if (semana < 1) semana = 1;
-
       return semana;
     }
 
+    function getPuesto(posicion) {
+      if (posicion === 1) return "1º ";
+      if (posicion === 2) return "2º ";
+      if (posicion === 3) return "3º ";
+      return posicion + "º "; // para 4º y posibles empates
+    }
+
     async function loadData() {
-      console.log("Intentando cargar datos desde: " + STORAGE_URL);
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
         if (res.ok) {
@@ -208,7 +214,7 @@
           }
         }
       } catch (e) {
-        console.error("Error:", e);
+        console.error("Error al cargar datos:", e);
       }
     }
 
@@ -226,9 +232,20 @@
         return 0;
       });
 
-      rankedTeams.forEach(team => {
+      rankedTeams.forEach((team, index) => {
+        const posicion = index + 1;
         const row = document.createElement('tr');
-        row.innerHTML = `<td class="team-name">${team}</td>`;
+        
+        // Nombre con puesto
+        let teamCell = `<td class="team-name">${getPuesto(posicion)}${team}</td>`;
+        
+        // Añadimos clase especial para podio
+        if (posicion === 1) teamCell = teamCell.replace('team-name', 'team-name puesto-1');
+        if (posicion === 2) teamCell = teamCell.replace('team-name', 'team-name puesto-2');
+        if (posicion === 3) teamCell = teamCell.replace('team-name', 'team-name puesto-3');
+
+        row.innerHTML = teamCell;
+
         let total = 0;
         scores[team].forEach(points => {
           row.innerHTML += `<td>${points}</td>`;
@@ -238,11 +255,11 @@
         tbody.appendChild(row);
       });
 
-      // ─────────────── Colorear cabeceras ───────────────
+      // Colorear cabeceras de semanas
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
-      // Resetear primero todos a verde
+      // Reset a verde
       for (let i = 1; i <= 6; i++) {
         const th = headers[i];
         th.style.color = '#00ffcc';
@@ -250,7 +267,7 @@
         th.style.background = 'linear-gradient(#00ffcc22, transparent)';
       }
 
-      // Pintar rojo SOLO las semanas YA TERMINADAS (anteriores a la actual)
+      // Rojo para semanas ya terminadas
       for (let i = 1; i <= 6; i++) {
         if (i < semanaActual) {
           const th = headers[i];
@@ -260,7 +277,7 @@
         }
       }
 
-      // Actualizar título superior
+      // Título superior
       let textoSemana = `Semana actual: ${semanaActual}`;
       if (semanaActual > 6) {
         textoSemana = "Juego finalizado • Todas las semanas completadas";
