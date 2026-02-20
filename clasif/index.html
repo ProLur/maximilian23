@@ -10,7 +10,7 @@
     body {
       font-family: "Courier New", Courier, monospace;
       background: #0d1117;
-      color: #e6edf3;
+      color: #00ffcc;
       min-height: 100dvh;
       background-image:
         radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
@@ -88,6 +88,7 @@
       font-size: 1.35rem;
       font-weight: bold;
       transition: background 0.2s;
+      color: #00ffcc;
     }
     tr:hover td { background: rgba(0,255,204,0.09); }
     .team-name {
@@ -96,9 +97,6 @@
       color: #00ffcc;
       font-size: 1.4rem;
     }
-    .puesto-1 { color: #ffd700; text-shadow: 0 0 10px #ffd700aa; } /* oro */
-    .puesto-2 { color: #c0c0c0; text-shadow: 0 0 8px #c0c0c0aa; }  /* plata */
-    .puesto-3 { color: #cd7f32; text-shadow: 0 0 6px #cd7f32aa; }  /* bronce */
     .total-cell {
       background: rgba(0,255,204,0.22) !important;
       color: #00ffcc;
@@ -131,6 +129,12 @@
       font-size: 0.95rem;
       border-top: 1px solid #00ffcc33;
       margin-top: 5rem;
+    }
+    /* Rojo solo para semanas pasadas */
+    .semana-pasada {
+      color: #ff4444 !important;
+      text-shadow: 0 0 8px #ff444488 !important;
+      background: linear-gradient(#ff444422, transparent) !important;
     }
   </style>
 </head>
@@ -181,7 +185,7 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // ¡Cambia esta fecha por el día real de INICIO del juego!
+    // ¡Cambia esta fecha por la real de inicio!
     const FECHA_INICIO = new Date('2025-09-15');
 
     function calcularSemanaActual() {
@@ -199,7 +203,7 @@
       if (posicion === 1) return "1º ";
       if (posicion === 2) return "2º ";
       if (posicion === 3) return "3º ";
-      return posicion + "º "; // para 4º y posibles empates
+      return "4º ";
     }
 
     async function loadData() {
@@ -214,7 +218,7 @@
           }
         }
       } catch (e) {
-        console.error("Error al cargar datos:", e);
+        console.error("Error al cargar:", e);
       }
     }
 
@@ -235,17 +239,9 @@
       rankedTeams.forEach((team, index) => {
         const posicion = index + 1;
         const row = document.createElement('tr');
-        
-        // Nombre con puesto
-        let teamCell = `<td class="team-name">${getPuesto(posicion)}${team}</td>`;
-        
-        // Añadimos clase especial para podio
-        if (posicion === 1) teamCell = teamCell.replace('team-name', 'team-name puesto-1');
-        if (posicion === 2) teamCell = teamCell.replace('team-name', 'team-name puesto-2');
-        if (posicion === 3) teamCell = teamCell.replace('team-name', 'team-name puesto-3');
-
-        row.innerHTML = teamCell;
-
+        row.innerHTML = `
+          <td class="team-name">${getPuesto(posicion)}${team}</td>
+        `;
         let total = 0;
         scores[team].forEach(points => {
           row.innerHTML += `<td>${points}</td>`;
@@ -255,34 +251,26 @@
         tbody.appendChild(row);
       });
 
-      // Colorear cabeceras de semanas
+      // ─────────────── Colorear solo semanas pasadas en rojo ───────────────
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
-      // Reset a verde
+      // Resetear todo a verde por defecto
       for (let i = 1; i <= 6; i++) {
-        const th = headers[i];
-        th.style.color = '#00ffcc';
-        th.style.textShadow = '0 0 6px #00ffcc88';
-        th.style.background = 'linear-gradient(#00ffcc22, transparent)';
+        headers[i].classList.remove('semana-pasada');
       }
 
-      // Rojo para semanas ya terminadas
-      for (let i = 1; i <= 6; i++) {
-        if (i < semanaActual) {
-          const th = headers[i];
-          th.style.color = '#ff4444';
-          th.style.textShadow = '0 0 8px #ff444488';
-          th.style.background = 'linear-gradient(#ff444422, transparent)';
-        }
+      // Aplicar rojo SOLO a las semanas ya terminadas
+      for (let i = 1; i < semanaActual && i <= 6; i++) {
+        headers[i].classList.add('semana-pasada');
       }
 
       // Título superior
-      let textoSemana = `Semana actual: ${semanaActual}`;
+      let texto = `Semana actual: ${semanaActual}`;
       if (semanaActual > 6) {
-        textoSemana = "Juego finalizado • Todas las semanas completadas";
+        texto = "Juego finalizado – todas las semanas completadas";
       }
-      document.getElementById('semana-actual').textContent = textoSemana;
+      document.getElementById('semana-actual').textContent = texto;
     }
 
     async function refreshTable() {
