@@ -102,6 +102,12 @@
       color: #00ffcc;
       font-size: 1.4rem;
     }
+    .posicion-cell {
+      font-weight: bold;
+      min-width: 80px;
+      text-align: center;
+      color: #00ffcc;
+    }
     .total-cell {
       background: rgba(0,255,204,0.22) !important;
       color: #00ffcc;
@@ -139,6 +145,7 @@
       <table>
         <thead>
           <tr>
+            <th>Posición</th>
             <th>Equipo</th>
             <th>Semana 1</th>
             <th>Semana 2</th>
@@ -150,7 +157,7 @@
           </tr>
         </thead>
         <tbody id="table-body">
-          <tr><td colspan="8" style="text-align:center; padding:2rem;">Cargando datos...</td></tr>
+          <tr><td colspan="9" style="text-align:center; padding:2rem;">Cargando datos...</td></tr>
         </tbody>
       </table>
     </div>
@@ -198,6 +205,13 @@
       return `Semana ${semana} desde el ${inicio.getDate()} de ${meses[inicio.getMonth()]} al ${fin.getDate()} de ${meses[fin.getMonth()]}`;
     }
 
+    function getPuesto(posicion) {
+      if (posicion === 1) return "1º";
+      if (posicion === 2) return "2º";
+      if (posicion === 3) return "3º";
+      return "4º";
+    }
+
     async function loadData() {
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
@@ -228,9 +242,15 @@
         return 0;
       });
 
-      rankedTeams.forEach(team => {
+      rankedTeams.forEach((team, index) => {
+        const posicion = index + 1;
+        const puesto = getPuesto(posicion);
+
         const row = document.createElement('tr');
-        row.innerHTML = `<td class="team-name">${team}</td>`;
+        row.innerHTML = `
+          <td class="posicion-cell">${puesto}</td>
+          <td class="team-name">${team}</td>
+        `;
         let total = 0;
         scores[team].forEach(points => {
           row.innerHTML += `<td>${points}</td>`;
@@ -243,11 +263,11 @@
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 2; i <= 7; i++) {  // Desde Semana 1 (col 3) hasta Semana 6 (col 8)
         headers[i].classList.remove('semana-pasada');
       }
 
-      for (let i = 1; i < semanaActual && i <= 6; i++) {
+      for (let i = 2; i < (semanaActual + 1) && i <= 7; i++) {
         headers[i].classList.add('semana-pasada');
       }
 
