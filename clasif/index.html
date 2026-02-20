@@ -130,7 +130,7 @@
       border-top: 1px solid #00ffcc33;
       margin-top: 5rem;
     }
-    /* Rojo solo para semanas pasadas */
+    /* Rojo para semanas pasadas */
     .semana-pasada {
       color: #ff4444 !important;
       text-shadow: 0 0 8px #ff444488 !important;
@@ -185,7 +185,7 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    // ¡Cambia esta fecha por la real de inicio!
+    // ¡Cambia esta fecha por la real de inicio del juego!
     const FECHA_INICIO = new Date('2025-09-15');
 
     function calcularSemanaActual() {
@@ -200,10 +200,10 @@
     }
 
     function getPuesto(posicion) {
-      if (posicion === 1) return "1º ";
-      if (posicion === 2) return "2º ";
-      if (posicion === 3) return "3º ";
-      return "4º ";
+      if (posicion === 1) return "1º";
+      if (posicion === 2) return "2º";
+      if (posicion === 3) return "3º";
+      return "4º";
     }
 
     async function loadData() {
@@ -238,9 +238,17 @@
 
       rankedTeams.forEach((team, index) => {
         const posicion = index + 1;
+        const puesto = getPuesto(posicion);
+        let prefijo = '';
+
+        // Solo medalla de oro para el primero
+        if (posicion === 1) {
+          prefijo = '🥇 ';
+        }
+
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td class="team-name">${getPuesto(posicion)}${team}</td>
+          <td class="team-name">${prefijo}${puesto} — ${team}</td>
         `;
         let total = 0;
         scores[team].forEach(points => {
@@ -251,16 +259,14 @@
         tbody.appendChild(row);
       });
 
-      // ─────────────── Colorear solo semanas pasadas en rojo ───────────────
+      // Colorear semanas pasadas en rojo
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
-      // Resetear todo a verde por defecto
       for (let i = 1; i <= 6; i++) {
         headers[i].classList.remove('semana-pasada');
       }
 
-      // Aplicar rojo SOLO a las semanas ya terminadas
       for (let i = 1; i < semanaActual && i <= 6; i++) {
         headers[i].classList.add('semana-pasada');
       }
