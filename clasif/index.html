@@ -55,10 +55,15 @@
       border-radius: 14px;
       backdrop-filter: blur(6px);
     }
-    .semana-principal {
-      font-size: 1.9rem;
+    .semana-numero {
+      font-size: 2.2rem;
       font-weight: bold;
       color: #00ffcc;
+      margin-bottom: 0.4rem;
+    }
+    .semana-rango {
+      font-size: 1.25rem;
+      color: #00ffccaa;
     }
     .classification {
       background: rgba(30,45,61,0.35);
@@ -76,7 +81,7 @@
       border: 3px solid #00ffcc;
       border-radius: 12px;
       overflow: hidden;
-      min-width: 820px;
+      min-width: 900px;
     }
     th {
       background: linear-gradient(#00ffcc22, transparent);
@@ -162,9 +167,10 @@
       </table>
     </div>
 
-    <!-- Después: cuadro con la semana actual y fechas -->
+    <!-- Después: cuadro con semana actual -->
     <div class="intro">
-      <div class="semana-principal" id="rango-fechas">Cargando fechas...</div>
+      <div class="semana-numero" id="semana-actual">Cargando...</div>
+      <div class="semana-rango" id="rango-fechas">Cargando fechas...</div>
     </div>
 
   </div>
@@ -182,7 +188,7 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    const FECHA_INICIO = new Date(2026, 1, 16); // 16 de febrero de 2026
+    const FECHA_INICIO = new Date(2026, 1, 16);
 
     function calcularSemanaActual() {
       const hoy = new Date();
@@ -202,7 +208,7 @@
       const meses = ["enero","febrero","marzo","abril","mayo","junio",
                      "julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
-      return `Semana ${semana} desde el ${inicio.getDate()} de ${meses[inicio.getMonth()]} al ${fin.getDate()} de ${meses[fin.getMonth()]}`;
+      return `desde el ${inicio.getDate()} de ${meses[inicio.getMonth()]} al ${fin.getDate()} de ${meses[fin.getMonth()]}`;
     }
 
     function getPuesto(posicion) {
@@ -263,7 +269,7 @@
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
-      for (let i = 2; i <= 7; i++) {  // Desde Semana 1 (col 3) hasta Semana 6 (col 8)
+      for (let i = 2; i <= 7; i++) {
         headers[i].classList.remove('semana-pasada');
       }
 
@@ -271,6 +277,7 @@
         headers[i].classList.add('semana-pasada');
       }
 
+      document.getElementById('semana-actual').textContent = `Semana ${semanaActual}`;
       document.getElementById('rango-fechas').textContent = getRangoSemana(semanaActual);
     }
 
