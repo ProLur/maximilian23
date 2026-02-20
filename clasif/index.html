@@ -47,17 +47,18 @@
     }
     .intro {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin: 3rem auto 2.5rem;
+      max-width: 800px;
       padding: 1.8rem;
       background: rgba(30,45,61,0.38);
       border: 1px solid #00ffcc44;
       border-radius: 14px;
       backdrop-filter: blur(6px);
     }
-    .semana-info {
-      margin-top: 1rem;
-      font-size: 1.3rem;
-      color: #00ffccaa;
+    .semana-principal {
+      font-size: 1.9rem;
+      font-weight: bold;
+      color: #00ffcc;
     }
     .classification {
       background: rgba(30,45,61,0.35);
@@ -129,13 +130,11 @@
     <h1>Clasificación • Juego del Silencio</h1>
   </header>
   <div class="container">
-    <div class="intro">
-      <h2 id="semana-actual" style="color:#00ffcc; margin-bottom:0.3rem;">Cargando...</h2>
-      <div class="semana-info" id="rango-fechas">Cargando fechas...</div>
-    </div>
+
+    <!-- Primero: tabla de clasificación -->
     <div class="classification">
       <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
-        Tabla de Clasificación – 6 Semanas
+        Tabla de Clasificación
       </h2>
       <table>
         <thead>
@@ -155,6 +154,12 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Después: cuadro con la semana actual y fechas -->
+    <div class="intro">
+      <div class="semana-principal" id="rango-fechas">Cargando fechas...</div>
+    </div>
+
   </div>
   <footer>
     CEIP Juan XXIII • Zafra • Actualizado: <span id="last-update">—</span>
@@ -170,14 +175,14 @@
       "4º B": [0,0,0,0,0,0]
     };
 
-    const FECHA_INICIO = new Date(2026, 1, 16); // febrero = mes 1 en JS (0=enero)
+    const FECHA_INICIO = new Date(2026, 1, 16); // 16 de febrero de 2026
 
     function calcularSemanaActual() {
       const hoy = new Date();
       const diffMs = hoy - FECHA_INICIO;
       const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       const semanasCompletas = Math.floor(diffDias / 7);
-      return semanasCompletas + 1; // semana en curso
+      return semanasCompletas + 1;
     }
 
     function getRangoSemana(semana) {
@@ -235,7 +240,6 @@
         tbody.appendChild(row);
       });
 
-      // Colorear semanas pasadas en rojo
       const semanaActual = calcularSemanaActual();
       const headers = document.querySelectorAll('thead th');
 
@@ -247,8 +251,6 @@
         headers[i].classList.add('semana-pasada');
       }
 
-      // Actualizar textos superiores
-      document.getElementById('semana-actual').textContent = `Semana ${semanaActual}`;
       document.getElementById('rango-fechas').textContent = getRangoSemana(semanaActual);
     }
 
