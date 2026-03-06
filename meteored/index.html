@@ -177,7 +177,6 @@ color:#00ffccaa;
 <script>
 
 const BIN_ID="69aaa6b0d0ea881f40f4bc92"
-const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
 
 const hoy=new Date()
 const año=hoy.getFullYear()
@@ -187,6 +186,8 @@ function crearCalendario(datos){
 
 const cal=document.getElementById("calendar")
 cal.innerHTML=""
+
+const diasConDatos=new Set(datos.map(d=>d.fecha))
 
 const primerDia=new Date(año,mes,1).getDay()||7
 const diasMes=new Date(año,mes+1,0).getDate()
@@ -205,7 +206,7 @@ const d=document.createElement("div")
 d.className="day"
 d.textContent=i
 
-if(datos.some(x=>x.fecha===fecha))
+if(diasConDatos.has(fecha))
 d.classList.add("hasdata")
 
 if(i===hoy.getDate())
@@ -222,21 +223,22 @@ async function cargar(){
 try{
 
 const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
-headers:{"X-Master-Key":KEY},
 cache:"no-store"
 })
 
+if(!res.ok) throw new Error("No se pudo leer el JSON")
+
 const data=await res.json()
-const meteo=data.record.meteo||[]
+
+const meteo=data?.record?.meteo||[]
 
 crearCalendario(meteo)
 
 const tabla=document.getElementById("tabla")
-tabla.innerHTML=""
 
 let html=""
 
-[...meteo].reverse().forEach(d=>{
+;[...meteo].reverse().forEach(d=>{
 
 html+=`
 <tr>
@@ -261,6 +263,8 @@ catch(e){
 
 document.getElementById("tabla").innerHTML=
 `<tr><td colspan="9" class="loading">Error cargando datos</td></tr>`
+
+console.error(e)
 
 }
 
