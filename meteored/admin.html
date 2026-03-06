@@ -73,6 +73,10 @@
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .day:hover { background: rgba(0,255,204,0.18); transform: scale(1.05); }
     .today {
@@ -105,9 +109,9 @@
     }
     .close-btn {
       position: absolute;
-      top: 15px;
-      right: 20px;
-      font-size: 2.5rem;
+      top: 12px;
+      right: 18px;
+      font-size: 2.4rem;
       color: #00ffccbb;
       cursor: pointer;
     }
@@ -157,7 +161,7 @@
     <div class="calendar" id="calendar"></div>
   </div>
 
-  <!-- Modal (ventana) de entrada/edición de datos -->
+  <!-- Modal (ventana JavaScript) -->
   <div class="modal" id="dataModal">
     <div class="modal-content">
       <span class="close-btn" onclick="cerrarModal()">×</span>
