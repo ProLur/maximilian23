@@ -2,52 +2,96 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Meteo Zafra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Meteo • Zafra</title>
+
+<link rel="icon" href="https://maximilian23.com/Cabeza.png">
 
 <style>
 
 body{
-font-family:Arial;
-background:#0b2239;
-color:white;
-text-align:center;
-padding:30px;
+font-family:"Courier New", monospace;
+background:#0d1117;
+color:#e6edf3;
+min-height:100vh;
+background-image:
+radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
+radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
 }
 
-h1{
-margin-bottom:5px;
+header{
+background:rgba(22,27,34,0.94);
+padding:12px;
+display:flex;
+align-items:center;
+gap:10px;
+border-bottom:2px solid #00ffcc;
+}
+
+header img{
+height:36px;
+border-radius:50%;
+border:2px solid #00ffcc88;
+}
+
+header h1{
+color:#00ffcc;
+text-shadow:0 0 7px #00ffccaa;
+font-size:1.4rem;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+padding:20px;
+}
+
+.table-box{
+background:rgba(30,45,61,0.35);
+border:2px solid #00ffcc44;
+border-radius:12px;
+padding:20px;
 }
 
 table{
-margin:auto;
+width:100%;
 border-collapse:collapse;
-margin-top:30px;
+background:#0d1117;
+border:2px solid #00ffcc77;
 }
 
-td,th{
-border:1px solid #4a6a8a;
-padding:10px 14px;
+th,td{
+padding:12px;
+text-align:center;
+border-bottom:1px solid #00ffcc22;
 }
 
 th{
-background:#173d5f;
+color:#00ffcc;
+background:linear-gradient(#00ffcc18, transparent);
 }
 
-tr:nth-child(even){
-background:#12314d;
+tr:hover td{
+background:rgba(0,255,204,0.1);
 }
 
 </style>
-
 </head>
 
 <body>
 
-<h1>Estación meteorológica</h1>
-<h2>Zafra</h2>
+<header>
+<img src="https://maximilian23.com/Cabeza.png">
+<h1>Estación meteorológica • Zafra</h1>
+</header>
 
-<table id="tabla">
+<div class="container">
 
+<div class="table-box">
+
+<table>
+
+<thead>
 <tr>
 <th>Fecha</th>
 <th>Temp</th>
@@ -57,32 +101,44 @@ background:#12314d;
 <th>Lluvia</th>
 <th>Cielo</th>
 </tr>
+</thead>
+
+<tbody id="tabla">
+<tr>
+<td colspan="7">Cargando datos...</td>
+</tr>
+</tbody>
 
 </table>
 
+</div>
+
+</div>
+
 <script>
 
-const BIN_ID = "69aaa6b0d0ea881f40f4bc92"
-const API_KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
+const BIN_ID="69aaa6b0d0ea881f40f4bc92"
+const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
 
-fetch("https://api.jsonbin.io/v3/b/" + BIN_ID + "/latest", {
-headers:{
-"X-Master-Key": API_KEY
-}
+async function cargar(){
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
+headers:{"X-Master-Key":KEY}
 })
-.then(res => res.json())
-.then(data => {
 
-const datos = data.record.meteo
-const tabla = document.getElementById("tabla")
+const data=await res.json()
+const meteo=data.record.meteo || []
 
-datos.reverse().forEach(d => {
+const tabla=document.getElementById("tabla")
+tabla.innerHTML=""
 
-tabla.innerHTML += `
+meteo.reverse().forEach(d=>{
+
+tabla.innerHTML+=`
 <tr>
 <td>${d.fecha}</td>
-<td>${d.temperatura} °C</td>
-<td>${d.humedad} %</td>
+<td>${d.temperatura}°</td>
+<td>${d.humedad}%</td>
 <td>${d.viento}</td>
 <td>${d.direccion}</td>
 <td>${d.lluvia}</td>
@@ -92,7 +148,9 @@ tabla.innerHTML += `
 
 })
 
-})
+}
+
+cargar()
 
 </script>
 
