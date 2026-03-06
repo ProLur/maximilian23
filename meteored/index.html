@@ -61,53 +61,60 @@
       backdrop-filter: blur(6px);
     }
     .chart-box {
-      height: 320px;
-      max-height: 45vh;
+      height: 300px;          /* más estrecho verticalmente */
+      max-height: 40vh;       /* limita en pantallas grandes */
     }
     .calendar-box {
       padding: 1rem;
-      overflow: hidden; /* evita desborde */
+      overflow: hidden;
+    }
+    .month-title {
+      text-align: center;
+      color: #00ffcc;
+      font-size: 1.4rem;
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 6px #00ffcc88;
     }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 6px;
-      max-width: 100%; /* no más ancho que el contenedor */
+      max-width: 100%;
     }
     .day {
-      padding: 10px 4px;
-      font-size: clamp(0.85rem, 3.5vw, 1rem);
+      padding: 8px 4px;       /* menos padding para que quepan mejor */
+      font-size: clamp(0.8rem, 2.8vw, 0.95rem);  /* números más pequeños */
       text-align: center;
       border: 1px solid #00ffcc44;
       border-radius: 6px;
       background: #161b22;
       cursor: pointer;
-      min-height: 44px;
+      min-height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.15s;
     }
     .day:hover { background: rgba(0,255,204,0.15); transform: scale(1.03); }
-    .today { border: 2.5px solid #00ffcc; background: rgba(0,255,204,0.22); font-weight: bold; }
+    .today { border: 2px solid #00ffcc; background: rgba(0,255,204,0.22); font-weight: bold; }
     .hasdata { background: #00ffcc18; color: #00ffcc; }
     .legend {
-      margin-top: 1rem;
+      margin-top: 0.8rem;
       text-align: center;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 1.2rem;
+      gap: 1rem;
     }
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
     .color-box {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       border-radius: 3px;
     }
     .modal {
@@ -136,18 +143,18 @@
     .close-btn { float: right; font-size: 1.8rem; color: #00ffccaa; cursor: pointer; }
     @media (min-width: 900px) {
       .content-wrapper { flex-direction: row; gap: 2rem; }
-      .chart-box { flex: 3; height: 400px; max-height: 55vh; }
+      .chart-box { flex: 3; height: 380px; max-height: 50vh; }
       .calendar-box { flex: 1; max-width: 380px; }
       .calendar { gap: 8px; }
       .day {
-        padding: 12px 6px;
-        font-size: 1.05rem;
-        min-height: 60px;
+        padding: 10px 6px;
+        font-size: 1rem;
+        min-height: 50px;
       }
     }
     @media (min-width: 1200px) {
       .calendar-box { max-width: 420px; }
-      .day { font-size: 1.15rem; padding: 16px 8px; }
+      .day { font-size: 1.05rem; padding: 12px 8px; }
     }
   </style>
 </head>
@@ -171,6 +178,8 @@
       </div>
 
       <div class="calendar-box">
+        <!-- Mes y año visibles encima del calendario -->
+        <div class="month-title" id="monthYear"></div>
         <div class="calendar" id="calendar"></div>
       </div>
     </div>
@@ -193,6 +202,10 @@
     const hoy = new Date();
     const año = hoy.getFullYear();
     const mes = hoy.getMonth();
+
+    // Meses en español
+    const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    document.getElementById("monthYear").textContent = `${meses[mes]} ${año}`;
 
     function crearCalendario(datos) {
       const cal = document.getElementById("calendar");
