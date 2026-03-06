@@ -56,6 +56,13 @@
       font-size: 2rem;
       text-shadow: 0 0 8px #00ffcc66;
     }
+    .month-title {
+      text-align: center;
+      color: #00ffcc;
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 6px #00ffcc88;
+    }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -158,10 +165,14 @@
 
   <div class="container">
     <h2>Selecciona día para registrar / editar</h2>
+    
+    <!-- Título con mes y año -->
+    <div class="month-title" id="monthYear"></div>
+    
     <div class="calendar" id="calendar"></div>
   </div>
 
-  <!-- Modal (ventana JavaScript) -->
+  <!-- Modal (ventana) de entrada/edición -->
   <div class="modal" id="dataModal">
     <div class="modal-content">
       <span class="close-btn" onclick="cerrarModal()">×</span>
@@ -194,6 +205,15 @@
     const mes = hoy.getMonth();
     const diaHoy = hoy.getDate();
     const fechaHoy = `${año}-${(mes+1).toString().padStart(2,"0")}-${diaHoy.toString().padStart(2,"0")}`;
+
+    // Meses en español
+    const meses = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    // Mostrar mes y año
+    document.getElementById("monthYear").textContent = `${meses[mes]} ${año}`;
 
     let currentFecha = "";
 
