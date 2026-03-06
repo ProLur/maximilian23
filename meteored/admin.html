@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Panel Meteo • Admin</title>
   <link rel="icon" href="https://maximilian23.com/Cabeza.png">
   <style>
@@ -12,8 +15,9 @@
       background: #0d1117;
       color: #e6edf3;
       min-height: 100vh;
-      background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
-                        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
     }
     header {
       background: rgba(22,27,34,0.94);
@@ -70,20 +74,14 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .day:hover {
-      background: rgba(0,255,204,0.18);
-      transform: scale(1.05);
-    }
+    .day:hover { background: rgba(0,255,204,0.18); transform: scale(1.05); }
     .today {
       background: #00ffcc44 !important;
       border: 3px solid #00ffcc !important;
       color: #000 !important;
       box-shadow: 0 0 16px #00ffcc88;
     }
-    .hasdata {
-      background: #00ffcc22;
-      border-color: #00ffcc88;
-    }
+    .hasdata { background: #00ffcc22; border-color: #00ffcc88; }
     #form-section {
       display: none;
       background: rgba(30,45,61,0.9);
@@ -237,10 +235,18 @@
       };
 
       try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { "X-Master-Key": KEY },
-          cache: "no-store"
+        const timestamp = Date.now();
+        const getUrl = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${timestamp}`;
+
+        const res = await fetch(getUrl, {
+          cache: "no-store",
+          headers: {
+            "X-Master-Key": KEY,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
+          }
         });
+
         const data = await res.json();
         let meteo = data.record.meteo || [];
 
@@ -255,17 +261,20 @@
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "X-Master-Key": KEY
+            "X-Master-Key": KEY,
+            "Cache-Control": "no-cache"
           },
           body: JSON.stringify({ meteo })
         });
 
         msg.textContent = "¡Guardado correctamente!";
         msg.className = "message success";
+
         setTimeout(() => {
           document.getElementById("form-section").style.display = "none";
-          cargarDatos(); // recargar todo
-        }, 1800);
+          cargarDatos();
+        }, 1500);
+
       } catch (err) {
         msg.textContent = "Error: " + err.message;
         msg.className = "message error";
@@ -274,15 +283,25 @@
 
     async function cargarDatos() {
       try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { "X-Master-Key": KEY },
-          cache: "no-store"
+        const timestamp = Date.now();
+        const url = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${timestamp}`;
+
+        const res = await fetch(url, {
+          cache: "no-store",
+          headers: {
+            "X-Master-Key": KEY,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
+          }
         });
+
+        if (!res.ok) throw new Error(`Error lectura ${res.status}`);
+
         const data = await res.json();
         const meteo = data?.record?.meteo || [];
         crearCalendario(meteo);
       } catch (e) {
-        console.error("Error al cargar datos para calendario:", e);
+        console.error("Error al cargar calendario:", e);
       }
     }
 
