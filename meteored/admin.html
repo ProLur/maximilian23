@@ -82,42 +82,64 @@
       box-shadow: 0 0 16px #00ffcc88;
     }
     .hasdata { background: #00ffcc22; border-color: #00ffcc88; }
-    #form-section {
+    .modal {
       display: none;
-      background: rgba(30,45,61,0.9);
-      border: 2px solid #00ffcc88;
-      border-radius: 14px;
-      padding: 2rem;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
       backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
     }
+    .modal-content {
+      background: rgba(30,45,61,0.95);
+      border: 3px solid #00ffcc88;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 620px;
+      width: 100%;
+      box-shadow: 0 12px 50px rgba(0,255,204,0.4);
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 2.5rem;
+      color: #00ffccbb;
+      cursor: pointer;
+    }
+    .close-btn:hover { color: #00ffcc; transform: scale(1.1); }
     .form-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 1rem;
+      gap: 1.2rem;
     }
     input {
       width: 100%;
-      padding: 0.9rem;
+      padding: 1rem;
       background: #161b22;
-      border: 1.5px solid #00ffcc66;
-      border-radius: 8px;
+      border: 2px solid #00ffcc66;
+      border-radius: 10px;
       color: #e6edf3;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       text-align: center;
     }
     button {
-      padding: 1.1rem;
+      padding: 1.2rem;
       background: linear-gradient(135deg, #00ffcc, #00ccaa);
       border: none;
-      border-radius: 10px;
-      font-size: 1.2rem;
+      border-radius: 12px;
+      font-size: 1.3rem;
       font-weight: bold;
       color: #0d1117;
       cursor: pointer;
-      margin-top: 1rem;
+      margin-top: 1.2rem;
     }
-    button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,255,204,0.4); }
-    .message { margin-top: 1rem; text-align: center; font-weight: bold; font-size: 1.1rem; }
+    button:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,255,204,0.5); }
+    .message { margin-top: 1.2rem; text-align: center; font-weight: bold; font-size: 1.2rem; }
     .success { color: #00ffcc; }
     .error { color: #ff6666; }
     @media (min-width: 640px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -133,8 +155,12 @@
   <div class="container">
     <h2>Selecciona día para registrar / editar</h2>
     <div class="calendar" id="calendar"></div>
+  </div>
 
-    <div id="form-section">
+  <!-- Modal (ventana) de entrada/edición de datos -->
+  <div class="modal" id="dataModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="cerrarModal()">×</span>
       <h3 id="fecha-title">Fecha: —</h3>
       <form id="form">
         <div class="form-grid">
@@ -189,15 +215,15 @@
         if (i === diaHoy) d.classList.add("today");
         if (diasConDatos.has(fecha)) d.classList.add("hasdata");
 
-        d.onclick = () => editarDia(fecha, datos);
+        d.onclick = () => abrirModalEdicion(fecha, datos);
         cal.appendChild(d);
       }
     }
 
-    function editarDia(fecha, datos) {
+    function abrirModalEdicion(fecha, datos) {
       currentFecha = fecha;
       document.getElementById("fecha-title").textContent = `Editando / Registrando: ${fecha}`;
-      document.getElementById("form-section").style.display = "block";
+      document.getElementById("dataModal").style.display = "flex";
 
       const dato = datos.find(d => d.fecha === fecha) || {};
       document.getElementById("temp_indoor").value    = dato.temp_indoor    || "";
@@ -213,6 +239,14 @@
 
       document.getElementById("message").textContent = "";
     }
+
+    function cerrarModal() {
+      document.getElementById("dataModal").style.display = "none";
+    }
+
+    document.getElementById("dataModal").onclick = e => {
+      if (e.target === document.getElementById("dataModal")) cerrarModal();
+    };
 
     document.getElementById("form").onsubmit = async e => {
       e.preventDefault();
@@ -271,7 +305,7 @@
         msg.className = "message success";
 
         setTimeout(() => {
-          document.getElementById("form-section").style.display = "none";
+          cerrarModal();
           cargarDatos();
         }, 1500);
 
