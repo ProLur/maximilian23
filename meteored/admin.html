@@ -1,337 +1,292 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Panel Meteo • Admin</title>
-<link rel="icon" href="https://maximilian23.com/Cabeza.png">
-
-<style>
-
-*{margin:0;padding:0;box-sizing:border-box}
-
-body{
-font-family:"Courier New",monospace;
-background:#0d1117;
-color:#e6edf3;
-min-height:100vh;
-background-image:
-radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
-radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
-}
-
-header{
-background:rgba(22,27,34,0.94);
-padding:1rem;
-display:flex;
-align-items:center;
-gap:1rem;
-border-bottom:2px solid #00ffcc;
-}
-
-header img{
-height:48px;
-border-radius:50%;
-border:2px solid #00ffccaa;
-box-shadow:0 0 14px #00ffcc55;
-}
-
-header h1{
-color:#00ffcc;
-text-shadow:0 0 10px #00ffccbb;
-font-size:1.4rem;
-}
-
-.container{
-padding:2rem 1rem;
-max-width:1100px;
-margin:auto;
-display:flex;
-flex-direction:column;
-gap:2rem;
-}
-
-h2{
-text-align:center;
-color:#00ffcc;
-font-size:2rem;
-}
-
-/* CALENDARIO */
-
-.calendar{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:8px;
-max-width:700px;
-margin:auto;
-}
-
-.day{
-padding:22px;
-background:#161b22;
-border:1px solid #00ffcc55;
-border-radius:10px;
-font-size:1.3rem;
-font-weight:bold;
-text-align:center;
-}
-
-.today{
-background:#00ffcc33;
-border:2px solid #00ffcc;
-cursor:pointer;
-}
-
-.disabled{
-opacity:0.3;
-cursor:not-allowed;
-}
-
-/* FORM */
-
-#form-section{
-display:none;
-background:#1e2d3d;
-border:2px solid #00ffcc88;
-padding:2rem;
-border-radius:14px;
-}
-
-/* GRID DEL FORMULARIO */
-
-.form-grid{
-display:grid;
-grid-template-columns:1fr;
-gap:12px;
-}
-
-input{
-width:100%;
-padding:12px;
-background:#161b22;
-border:1px solid #00ffcc55;
-border-radius:8px;
-color:white;
-font-size:1rem;
-text-align:center;
-}
-
-button{
-grid-column:1/-1;
-padding:14px;
-margin-top:8px;
-background:#00ffcc;
-border:none;
-border-radius:10px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.message{
-margin-top:10px;
-text-align:center;
-font-weight:bold;
-}
-
-/* TABLET */
-
-@media (min-width:600px){
-
-.form-grid{
-grid-template-columns:1fr 1fr;
-}
-
-}
-
-/* PC */
-
-@media (min-width:1000px){
-
-.form-grid{
-grid-template-columns:1fr 1fr 1fr;
-}
-
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Meteo • Admin</title>
+  <link rel="icon" href="https://maximilian23.com/Cabeza.png">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: "Courier New", monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      background-image: radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
+    }
+    header {
+      background: rgba(22,27,34,0.94);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    header img {
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #00ffccaa;
+      box-shadow: 0 0 14px #00ffcc55;
+    }
+    header h1 {
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffccbb;
+      font-size: clamp(1.4rem, 6vw, 1.9rem);
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    h2 {
+      text-align: center;
+      color: #00ffcc;
+      font-size: 2rem;
+      text-shadow: 0 0 8px #00ffcc66;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .day {
+      padding: clamp(18px, 5vw, 26px);
+      background: #161b22;
+      border: 1.5px solid #00ffcc55;
+      border-radius: 10px;
+      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .day:hover {
+      background: rgba(0,255,204,0.18);
+      transform: scale(1.05);
+    }
+    .today {
+      background: #00ffcc44 !important;
+      border: 3px solid #00ffcc !important;
+      color: #000 !important;
+      box-shadow: 0 0 16px #00ffcc88;
+    }
+    .hasdata {
+      background: #00ffcc22;
+      border-color: #00ffcc88;
+    }
+    #form-section {
+      display: none;
+      background: rgba(30,45,61,0.9);
+      border: 2px solid #00ffcc88;
+      border-radius: 14px;
+      padding: 2rem;
+      backdrop-filter: blur(6px);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.9rem;
+      background: #161b22;
+      border: 1.5px solid #00ffcc66;
+      border-radius: 8px;
+      color: #e6edf3;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+    button {
+      padding: 1.1rem;
+      background: linear-gradient(135deg, #00ffcc, #00ccaa);
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #0d1117;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,255,204,0.4); }
+    .message { margin-top: 1rem; text-align: center; font-weight: bold; font-size: 1.1rem; }
+    .success { color: #00ffcc; }
+    .error { color: #ff6666; }
+    @media (min-width: 640px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .form-grid { grid-template-columns: repeat(3, 1fr); } }
+  </style>
 </head>
-
 <body>
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
+    <h1>Panel Admin • Meteo Zafra</h1>
+  </header>
 
-<header>
-<img src="https://maximilian23.com/Cabeza.png">
-<h1>Estación Meteo • Admin</h1>
-</header>
+  <div class="container">
+    <h2>Selecciona día para registrar / editar</h2>
+    <div class="calendar" id="calendar"></div>
 
-<div class="container">
+    <div id="form-section">
+      <h3 id="fecha-title">Fecha: —</h3>
+      <form id="form">
+        <div class="form-grid">
+          <input id="temp_indoor"    placeholder="Temp Indoor °C"    type="number" step="0.1">
+          <input id="hum_indoor"     placeholder="Hum Indoor %"      type="number" step="1">
+          <input id="temp_outdoor"   placeholder="Temp Outdoor °C"   type="number" step="0.1">
+          <input id="hum_outdoor"    placeholder="Hum Outdoor %"     type="number" step="1">
+          <input id="pressure"       placeholder="Presión hPa"       type="number" step="0.1">
+          <input id="wind_speed"     placeholder="Viento km/h"        type="number" step="0.1">
+          <input id="wind_gust"      placeholder="Ráfaga km/h"        type="number" step="0.1">
+          <input id="wind_direction" placeholder="Dirección viento">
+          <input id="wind_chill"     placeholder="Sensación °C"       type="number" step="0.1">
+          <input id="rain"           placeholder="Lluvia mm"          type="number" step="0.1">
+        </div>
+        <button type="submit">Guardar / Actualizar</button>
+      </form>
+      <div id="message" class="message"></div>
+    </div>
+  </div>
 
-<h2>Registrar datos del día</h2>
+  <script>
+    const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
+    const KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
 
-<div class="calendar" id="calendar"></div>
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = hoy.getMonth();
+    const diaHoy = hoy.getDate();
+    const fechaHoy = `${año}-${(mes+1).toString().padStart(2,"0")}-${diaHoy.toString().padStart(2,"0")}`;
 
-<div id="form-section">
+    let currentFecha = "";
 
-<h3 id="fecha-title"></h3>
+    function crearCalendario(datos = []) {
+      const cal = document.getElementById("calendar");
+      cal.innerHTML = "";
+      const diasConDatos = new Set(datos.map(d => d.fecha));
+      const primerDia = new Date(año, mes, 1).getDay() || 7;
+      const diasMes = new Date(año, mes + 1, 0).getDate();
 
-<form id="form">
+      for (let i = 1; i < primerDia; i++) {
+        const v = document.createElement("div");
+        v.className = "day disabled";
+        cal.appendChild(v);
+      }
 
-<div class="form-grid">
+      for (let i = 1; i <= diasMes; i++) {
+        const fecha = `${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`;
+        const d = document.createElement("div");
+        d.className = "day";
+        d.textContent = i;
 
-<input id="temp_indoor" placeholder="Temp Indoor °C" type="number" step="0.1">
+        if (i === diaHoy) d.classList.add("today");
+        if (diasConDatos.has(fecha)) d.classList.add("hasdata");
 
-<input id="hum_indoor" placeholder="Hum Indoor %" type="number">
+        d.onclick = () => editarDia(fecha, datos);
+        cal.appendChild(d);
+      }
+    }
 
-<input id="temp_outdoor" placeholder="Temp Outdoor °C" type="number" step="0.1">
+    function editarDia(fecha, datos) {
+      currentFecha = fecha;
+      document.getElementById("fecha-title").textContent = `Editando / Registrando: ${fecha}`;
+      document.getElementById("form-section").style.display = "block";
 
-<input id="hum_outdoor" placeholder="Hum Outdoor %" type="number">
+      const dato = datos.find(d => d.fecha === fecha) || {};
+      document.getElementById("temp_indoor").value    = dato.temp_indoor    || "";
+      document.getElementById("hum_indoor").value     = dato.hum_indoor     || "";
+      document.getElementById("temp_outdoor").value   = dato.temp_outdoor   || "";
+      document.getElementById("hum_outdoor").value    = dato.hum_outdoor    || "";
+      document.getElementById("pressure").value       = dato.pressure       || "";
+      document.getElementById("wind_speed").value     = dato.wind_speed     || "";
+      document.getElementById("wind_gust").value      = dato.wind_gust      || "";
+      document.getElementById("wind_direction").value = dato.wind_direction || "";
+      document.getElementById("wind_chill").value     = dato.wind_chill     || "";
+      document.getElementById("rain").value           = dato.rain           || "";
 
-<input id="pressure" placeholder="Presión hPa" type="number">
+      document.getElementById("message").textContent = "";
+    }
 
-<input id="wind_speed" placeholder="Viento km/h" type="number">
+    document.getElementById("form").onsubmit = async e => {
+      e.preventDefault();
+      const msg = document.getElementById("message");
+      msg.textContent = "Guardando...";
+      msg.className = "message";
 
-<input id="wind_gust" placeholder="Ráfaga km/h" type="number">
+      const nuevo = {
+        fecha: currentFecha,
+        temp_indoor:    document.getElementById("temp_indoor").value,
+        hum_indoor:     document.getElementById("hum_indoor").value,
+        temp_outdoor:   document.getElementById("temp_outdoor").value,
+        hum_outdoor:    document.getElementById("hum_outdoor").value,
+        pressure:       document.getElementById("pressure").value,
+        wind_speed:     document.getElementById("wind_speed").value,
+        wind_gust:      document.getElementById("wind_gust").value,
+        wind_direction: document.getElementById("wind_direction").value,
+        wind_chill:     document.getElementById("wind_chill").value,
+        rain:           document.getElementById("rain").value
+      };
 
-<input id="wind_direction" placeholder="Dirección viento">
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { "X-Master-Key": KEY },
+          cache: "no-store"
+        });
+        const data = await res.json();
+        let meteo = data.record.meteo || [];
 
-<input id="wind_chill" placeholder="Sensación térmica °C" type="number">
+        const index = meteo.findIndex(d => d.fecha === currentFecha);
+        if (index !== -1) {
+          meteo[index] = { ...meteo[index], ...nuevo };
+        } else {
+          meteo.push(nuevo);
+        }
 
-<input id="rain" placeholder="Lluvia mm" type="number">
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": KEY
+          },
+          body: JSON.stringify({ meteo })
+        });
 
-<button id="saveBtn">Guardar datos</button>
+        msg.textContent = "¡Guardado correctamente!";
+        msg.className = "message success";
+        setTimeout(() => {
+          document.getElementById("form-section").style.display = "none";
+          cargarDatos(); // recargar todo
+        }, 1800);
+      } catch (err) {
+        msg.textContent = "Error: " + err.message;
+        msg.className = "message error";
+      }
+    };
 
-</div>
+    async function cargarDatos() {
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { "X-Master-Key": KEY },
+          cache: "no-store"
+        });
+        const data = await res.json();
+        const meteo = data?.record?.meteo || [];
+        crearCalendario(meteo);
+      } catch (e) {
+        console.error("Error al cargar datos para calendario:", e);
+      }
+    }
 
-</form>
-
-<div id="message" class="message"></div>
-
-</div>
-
-</div>
-
-<script>
-
-const BIN_ID="69aaa6b0d0ea881f40f4bc92"
-const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
-
-const hoy=new Date()
-const año=hoy.getFullYear()
-const mes=hoy.getMonth()
-const dia=hoy.getDate()
-
-const fechaHoy=`${año}-${(mes+1).toString().padStart(2,"0")}-${dia.toString().padStart(2,"0")}`
-
-function crearCalendario(){
-
-const cal=document.getElementById("calendar")
-
-const primerDia=new Date(año,mes,1).getDay()||7
-const diasMes=new Date(año,mes+1,0).getDate()
-
-for(let i=1;i<primerDia;i++){
-const v=document.createElement("div")
-v.className="day disabled"
-cal.appendChild(v)
-}
-
-for(let i=1;i<=diasMes;i++){
-
-const d=document.createElement("div")
-d.className="day"
-d.textContent=i
-
-if(i===dia){
-d.classList.add("today")
-d.onclick=mostrarForm
-}else{
-d.classList.add("disabled")
-}
-
-cal.appendChild(d)
-
-}
-
-}
-
-function mostrarForm(){
-
-document.getElementById("fecha-title").textContent="Fecha: "+fechaHoy
-document.getElementById("form-section").style.display="block"
-
-}
-
-document.getElementById("form").onsubmit=async e=>{
-
-e.preventDefault()
-
-const btn=document.getElementById("saveBtn")
-btn.disabled=true
-btn.textContent="Guardando..."
-
-const msg=document.getElementById("message")
-msg.textContent="Guardando..."
-
-const nuevo={
-fecha:fechaHoy,
-temp_indoor:temp_indoor.value,
-hum_indoor:hum_indoor.value,
-temp_outdoor:temp_outdoor.value,
-hum_outdoor:hum_outdoor.value,
-pressure:pressure.value,
-wind_speed:wind_speed.value,
-wind_gust:wind_gust.value,
-wind_direction:wind_direction.value,
-wind_chill:wind_chill.value,
-rain:rain.value
-}
-
-try{
-
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
-headers:{"X-Master-Key":KEY},
-cache:"no-store"
-})
-
-const data=await res.json()
-
-const meteo=data.record.meteo||[]
-
-const index=meteo.findIndex(d=>d.fecha===fechaHoy)
-
-if(index!==-1)
-meteo[index]=nuevo
-else
-meteo.push(nuevo)
-
-await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-method:"PUT",
-headers:{
-"Content-Type":"application/json",
-"X-Master-Key":KEY
-},
-body:JSON.stringify({meteo})
-})
-
-msg.textContent="Datos guardados correctamente"
-
-btn.disabled=false
-btn.textContent="Guardar datos"
-
-}
-catch(err){
-
-msg.textContent="Error: "+err.message
-btn.disabled=false
-btn.textContent="Guardar datos"
-
-}
-
-}
-
-crearCalendario()
-
-</script>
-
+    cargarDatos();
+  </script>
 </body>
 </html>
