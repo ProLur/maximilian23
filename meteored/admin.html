@@ -1,304 +1,315 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel Meteo Niños • Admin</title>
-  <link rel="icon" href="https://maximilian23.com/Cabeza.png">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: "Courier New", Courier, monospace;
-      background: #0d1117;
-      color: #e6edf3;
-      min-height: 100dvh;
-      background-image:
-        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
-        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
-      background-attachment: fixed;
-    }
-    header {
-      background: rgba(22,27,34,0.94);
-      backdrop-filter: blur(10px);
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      border-bottom: 2px solid #00ffcc;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    header img {
-      height: 48px;
-      border-radius: 50%;
-      border: 2px solid #00ffccaa;
-      box-shadow: 0 0 14px #00ffcc55;
-    }
-    header h1 {
-      font-size: clamp(1.4rem, 6vw, 1.9rem);
-      color: #00ffcc;
-      text-shadow: 0 0 10px #00ffccbb;
-    }
-    .container {
-      padding: 2rem 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-    h2 {
-      color: #00ffcc;
-      font-size: clamp(1.8rem, 7vw, 2.6rem);
-      text-shadow: 0 0 12px #00ffcc88;
-      text-align: center;
-    }
-    .main-layout {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 12px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .day {
-      padding: 32px 16px;
-      background: rgba(22,27,34,0.8);
-      border: 1px solid #00ffcc55;
-      border-radius: 12px;
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #e6edf3dd;
-      transition: all 0.22s ease;
-      text-align: center;
-    }
-    .day:hover:not(.disabled) {
-      background: rgba(0,255,204,0.22);
-      border-color: #00ffcccc;
-      transform: scale(1.06);
-      box-shadow: 0 8px 20px rgba(0,255,204,0.3);
-    }
-    .today {
-      background: rgba(0,255,204,0.28);
-      border: 3px solid #00ffcc;
-      color: #ffffff;
-      box-shadow: 0 0 20px #00ffcc88;
-      cursor: pointer;
-    }
-    .disabled {
-      opacity: 0.35;
-      background: rgba(22,27,34,0.4);
-      border-color: #00ffcc33;
-      cursor: not-allowed;
-    }
-    /* FORM */
-    #form-section {
-      display: none;
-      background: rgba(30,45,61,0.95);
-      border: 3px solid #00ffcc88;
-      border-radius: 16px;
-      padding: 2.5rem;
-      box-shadow: 0 12px 50px rgba(0,255,204,0.4);
-    }
-    form h3 {
-      color: #00ffcc;
-      margin-bottom: 2rem;
-      font-size: 1.7rem;
-      text-align: center;
-      text-shadow: 0 0 8px #00ffcc66;
-    }
-    input {
-      width: 100%;
-      padding: 1rem 1.2rem;
-      margin: 1rem 0;
-      background: #161b22;
-      border: 2px solid #00ffcc66;
-      border-radius: 10px;
-      color: #e6edf3;
-      font-size: 1.25rem;
-      font-family: inherit;
-      text-align: center;
-    }
-    input:focus {
-      outline: none;
-      border-color: #00ffcc;
-      box-shadow: 0 0 12px #00ffcc77;
-    }
-    button {
-      width: 100%;
-      padding: 1.2rem;
-      margin-top: 1.5rem;
-      background: linear-gradient(135deg, #00ffcc, #00bb99);
-      color: #0d1117;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.4rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 30px rgba(0,255,204,0.5);
-    }
-    .message {
-      margin-top: 1.2rem;
-      padding: 1rem;
-      border-radius: 10px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-align: center;
-    }
-    .success { background: rgba(0,255,204,0.25); color: #00ffcc; }
-    .error   { background: rgba(255,90,90,0.25); color: #ff6666; }
-    /* RESPONSIVE: Desktop side-by-side */
-    @media (min-width: 768px) {
-      .main-layout {
-        flex-direction: row;
-        gap: 3rem;
-      }
-      .calendar-section {
-        width: 40%;
-      }
-      #form-section {
-        width: 60%;
-      }
-      .calendar {
-        max-width: none;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Panel Meteo Niños • Admin</title>
+<link rel="icon" href="https://maximilian23.com/Cabeza.png">
+
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+font-family:"Courier New",monospace;
+background:#0d1117;
+color:#e6edf3;
+min-height:100vh;
+background-image:
+radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
+radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
+}
+
+header{
+background:rgba(22,27,34,0.94);
+padding:1rem;
+display:flex;
+align-items:center;
+gap:1rem;
+border-bottom:2px solid #00ffcc;
+}
+
+header img{
+height:48px;
+border-radius:50%;
+border:2px solid #00ffccaa;
+box-shadow:0 0 14px #00ffcc55;
+}
+
+header h1{
+color:#00ffcc;
+text-shadow:0 0 10px #00ffccbb;
+}
+
+.container{
+padding:2rem;
+max-width:1200px;
+margin:auto;
+display:flex;
+flex-direction:column;
+gap:2rem;
+}
+
+h2{
+text-align:center;
+color:#00ffcc;
+font-size:2rem;
+}
+
+.calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:10px;
+max-width:700px;
+margin:auto;
+}
+
+.day{
+padding:26px;
+background:#161b22;
+border:1px solid #00ffcc55;
+border-radius:10px;
+font-size:1.5rem;
+font-weight:bold;
+text-align:center;
+}
+
+.today{
+background:#00ffcc33;
+border:2px solid #00ffcc;
+cursor:pointer;
+}
+
+.disabled{
+opacity:0.3;
+cursor:not-allowed;
+}
+
+#form-section{
+display:none;
+background:#1e2d3d;
+border:2px solid #00ffcc88;
+padding:2rem;
+border-radius:14px;
+}
+
+input{
+width:100%;
+padding:12px;
+margin:8px 0;
+background:#161b22;
+border:1px solid #00ffcc55;
+border-radius:8px;
+color:white;
+font-size:1rem;
+text-align:center;
+}
+
+button{
+width:100%;
+padding:14px;
+margin-top:12px;
+background:#00ffcc;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.message{
+margin-top:10px;
+text-align:center;
+font-weight:bold;
+}
+
+.success{color:#00ffcc}
+.error{color:#ff6666}
+
+</style>
 </head>
+
 <body>
 
-  <header>
-    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
-    <h1>Estación Meteo • Niños</h1>
-  </header>
+<header>
+<img src="https://maximilian23.com/Cabeza.png">
+<h1>Estación Meteo • Admin</h1>
+</header>
 
-  <div class="container">
-    <h2>¡Registra el tiempo de hoy!</h2>
-    <div class="main-layout">
-      <div class="calendar-section">
-        <div class="calendar" id="calendar"></div>
-      </div>
-      <div id="form-section">
-        <h3 id="fecha-title">Fecha: —</h3>
-        <form id="form">
-          <input id="temp_indoor"    placeholder="Temperatura Indoor (°C)" type="number" step="0.1" required>
-          <input id="hum_indoor"     placeholder="Humedad Indoor (%)" type="number" step="1" required>
-          <input id="temp_outdoor"   placeholder="Temperatura Outdoor (°C)" type="number" step="0.1" required>
-          <input id="hum_outdoor"    placeholder="Humedad Outdoor (%)" type="number" step="1" required>
-          <input id="wind_speed"     placeholder="Wind Speed (km/h)" type="number" step="0.1" required>
-          <input id="wind_chill"     placeholder="Wind Chill / Sensación (°C)" type="number" step="0.1" required>
-          <input id="wind_direction" placeholder="Wind Direction (N / NE / E... o grados)" required>
-          <button type="submit">¡Guardar datos!</button>
-        </form>
-        <div id="message" class="message" style="display:none;"></div>
-      </div>
-    </div>
-  </div>
+<div class="container">
 
-  <script>
-    const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
-    const KEY    = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
+<h2>Registrar datos del día</h2>
 
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = hoy.getMonth();
-    const dia = hoy.getDate();
-    const fechaHoy = `${año}-${(mes+1).toString().padStart(2,"0")}-${dia.toString().padStart(2,"0")}`;
+<div class="calendar" id="calendar"></div>
 
-    function crearCalendario() {
-      const cal = document.getElementById("calendar");
-      cal.innerHTML = "";
+<div id="form-section">
 
-      const primerDiaSemana = new Date(año, mes, 1).getDay() || 7;
-      const diasEnMes = new Date(año, mes + 1, 0).getDate();
+<h3 id="fecha-title"></h3>
 
-      for (let i = 1; i < primerDiaSemana; i++) {
-        const vacio = document.createElement("div");
-        vacio.className = "day disabled";
-        cal.appendChild(vacio);
-      }
+<form id="form">
 
-      for (let i = 1; i <= diasEnMes; i++) {
-        const d = document.createElement("div");
-        d.className = "day";
-        d.textContent = i;
+<input id="temp_indoor" placeholder="Temperatura Indoor (°C)" type="number" step="0.1" required>
 
-        if (i === dia) {
-          d.classList.add("today");
-          d.onclick = () => mostrarForm();
-        } else {
-          d.classList.add("disabled");
-        }
+<input id="hum_indoor" placeholder="Humedad Indoor (%)" type="number" min="0" max="100" required>
 
-        cal.appendChild(d);
-      }
-    }
+<input id="temp_outdoor" placeholder="Temperatura Outdoor (°C)" type="number" step="0.1" required>
 
-    function mostrarForm() {
-      document.getElementById("fecha-title").textContent = `Fecha: ${fechaHoy}`;
-      document.getElementById("form-section").style.display = "block";
-      document.getElementById("message").style.display = "none";
-      document.getElementById("form").reset();
-    }
+<input id="hum_outdoor" placeholder="Humedad Outdoor (%)" type="number" min="0" max="100" required>
 
-    document.getElementById("form").onsubmit = async e => {
-      e.preventDefault();
-      const msg = document.getElementById("message");
-      msg.style.display = "block";
-      msg.className = "message";
-      msg.textContent = "Guardando...";
+<input id="pressure" placeholder="Presión (hPa)" type="number" step="0.1">
 
-      const nuevo = {
-        fecha: fechaHoy,
-        temp_indoor:    document.getElementById("temp_indoor").value.trim(),
-        hum_indoor:     document.getElementById("hum_indoor").value.trim(),
-        temp_outdoor:   document.getElementById("temp_outdoor").value.trim(),
-        hum_outdoor:    document.getElementById("hum_outdoor").value.trim(),
-        wind_speed:     document.getElementById("wind_speed").value.trim(),
-        wind_chill:     document.getElementById("wind_chill").value.trim(),
-        wind_direction: document.getElementById("wind_direction").value.trim().toUpperCase()
-      };
+<input id="wind_speed" placeholder="Velocidad viento (km/h)" type="number" step="0.1">
 
-      try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { "X-Master-Key": KEY }
-        });
-        if (!res.ok) throw new Error(`Error lectura: ${res.status}`);
-        const data = await res.json();
-        const meteo = data.record.meteo || [];
-        meteo.push(nuevo);
+<input id="wind_gust" placeholder="Ráfaga viento (km/h)" type="number" step="0.1">
 
-        const putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Master-Key": KEY
-          },
-          body: JSON.stringify({ meteo })
-        });
+<input id="wind_direction" placeholder="Dirección viento (N NE E SE etc)">
 
-        if (!putRes.ok) throw new Error(`Error guardado: ${putRes.status}`);
+<input id="wind_chill" placeholder="Sensación térmica (°C)" type="number" step="0.1">
 
-        msg.className = "message success";
-        msg.textContent = "¡Datos guardados! 🌤️";
-        setTimeout(() => { document.getElementById("form-section").style.display = "none"; }, 2500);
-      } catch (err) {
-        msg.className = "message error";
-        msg.textContent = "¡Algo falló! " + err.message;
-        console.error(err);
-      }
-    };
+<input id="rain" placeholder="Lluvia (mm)" type="number" step="0.1">
 
-    crearCalendario();
-  </script>
+<button id="saveBtn">Guardar datos</button>
+
+</form>
+
+<div id="message" class="message"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const BIN_ID="69aaa6b0d0ea881f40f4bc92"
+const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
+
+const hoy=new Date()
+const año=hoy.getFullYear()
+const mes=hoy.getMonth()
+const dia=hoy.getDate()
+
+const fechaHoy=`${año}-${(mes+1).toString().padStart(2,"0")}-${dia.toString().padStart(2,"0")}`
+
+function crearCalendario(){
+
+const cal=document.getElementById("calendar")
+
+const primerDia=new Date(año,mes,1).getDay()||7
+const diasMes=new Date(año,mes+1,0).getDate()
+
+for(let i=1;i<primerDia;i++){
+const v=document.createElement("div")
+v.className="day disabled"
+cal.appendChild(v)
+}
+
+for(let i=1;i<=diasMes;i++){
+
+const d=document.createElement("div")
+d.className="day"
+d.textContent=i
+
+if(i===dia){
+d.classList.add("today")
+d.onclick=mostrarForm
+}else{
+d.classList.add("disabled")
+}
+
+cal.appendChild(d)
+
+}
+
+}
+
+function mostrarForm(){
+
+document.getElementById("fecha-title").textContent="Fecha: "+fechaHoy
+document.getElementById("form-section").style.display="block"
+
+}
+
+document.getElementById("form").onsubmit=async e=>{
+
+e.preventDefault()
+
+const btn=document.getElementById("saveBtn")
+btn.disabled=true
+btn.textContent="Guardando..."
+
+const msg=document.getElementById("message")
+msg.textContent="Guardando..."
+
+const nuevo={
+
+fecha:fechaHoy,
+
+temp_indoor:temp_indoor.value,
+hum_indoor:hum_indoor.value,
+
+temp_outdoor:temp_outdoor.value,
+hum_outdoor:hum_outdoor.value,
+
+pressure:pressure.value,
+
+wind_speed:wind_speed.value,
+wind_gust:wind_gust.value,
+wind_direction:wind_direction.value.toUpperCase(),
+
+wind_chill:wind_chill.value,
+
+rain:rain.value
+
+}
+
+try{
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
+headers:{"X-Master-Key":KEY},
+cache:"no-store"
+})
+
+const data=await res.json()
+
+const meteo=data.record.meteo||[]
+
+const index=meteo.findIndex(d=>d.fecha===fechaHoy)
+
+if(index!==-1)
+meteo[index]=nuevo
+else
+meteo.push(nuevo)
+
+await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+"X-Master-Key":KEY
+},
+body:JSON.stringify({meteo})
+})
+
+msg.className="message success"
+msg.textContent="Datos guardados correctamente"
+
+btn.disabled=false
+btn.textContent="Guardar datos"
+
+}
+catch(err){
+
+msg.className="message error"
+msg.textContent="Error: "+err.message
+
+btn.disabled=false
+btn.textContent="Guardar datos"
+
+}
+
+}
+
+crearCalendario()
+
+</script>
+
 </body>
 </html>
