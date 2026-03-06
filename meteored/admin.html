@@ -1,172 +1,233 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Panel Meteo</title>
-
-<style>
-
-body{
-font-family:"Courier New", monospace;
-background:#0d1117;
-color:#e6edf3;
-text-align:center;
-}
-
-h1{
-color:#00ffcc;
-text-shadow:0 0 7px #00ffccaa;
-}
-
-.calendar{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:6px;
-max-width:420px;
-margin:auto;
-}
-
-.day{
-padding:14px;
-background:#161b22;
-border:1px solid #00ffcc33;
-cursor:pointer;
-}
-
-.day:hover{
-background:#00ffcc22;
-}
-
-.today{
-border:2px solid #00ffcc;
-}
-
-form{
-margin-top:20px;
-background:#161b22;
-padding:20px;
-display:inline-block;
-border-radius:10px;
-}
-
-input{
-display:block;
-margin:8px auto;
-padding:6px;
-}
-
-button{
-padding:8px 20px;
-background:#00ffcc;
-border:none;
-cursor:pointer;
-}
-
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Meteo • Maximilian Style</title>
+  <link rel="icon" href="https://maximilian23.com/Cabeza.png">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      background: rgba(22,27,34,0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc99;
+      box-shadow: 0 0 10px #00ffcc44;
+    }
+    header h1 {
+      font-size: clamp(1.25rem, 5vw, 1.55rem);
+      color: #00ffcc;
+      text-shadow: 0 0 7px #00ffccaa;
+    }
+    .container {
+      padding: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h2 {
+      text-align: center;
+      color: #00ffcc;
+      margin: 1.5rem 0 1rem;
+      font-size: clamp(1.4rem, 5vw, 1.8rem);
+      text-shadow: 0 0 8px #00ffcc66;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      max-width: 480px;
+      margin: 1.5rem auto;
+    }
+    .day {
+      padding: 16px;
+      background: rgba(22,27,34,0.7);
+      border: 1px solid #00ffcc44;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: center;
+      font-weight: bold;
+      color: #e6edf3;
+    }
+    .day:hover {
+      background: rgba(0,255,204,0.18);
+      border-color: #00ffcc99;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,255,204,0.15);
+    }
+    .today {
+      border: 2px solid #00ffcc;
+      background: rgba(0,255,204,0.12);
+      box-shadow: 0 0 12px #00ffcc55;
+    }
+    form {
+      margin: 1.5rem auto;
+      max-width: 480px;
+      background: rgba(30,45,61,0.35);
+      border: 2px solid #00ffcc55;
+      border-radius: 12px;
+      padding: 1.6rem;
+      backdrop-filter: blur(6px);
+      display: none;
+    }
+    form h3 {
+      color: #00ffcc;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      font-size: 1.3rem;
+    }
+    input {
+      display: block;
+      width: 100%;
+      margin: 0.9rem 0;
+      padding: 0.7rem 1rem;
+      background: #161b22;
+      border: 1px solid #00ffcc44;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-family: inherit;
+      font-size: 1.05rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #00ffcc;
+      box-shadow: 0 0 8px #00ffcc66;
+    }
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      margin-top: 1rem;
+      background: linear-gradient(#00ffcc, #00ccaa);
+      color: #0d1117;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0,255,204,0.4);
+    }
+  </style>
 </head>
-
 <body>
 
-<h1>Panel meteorológico</h1>
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
+    <h1>Panel Meteorológico • Zafra</h1>
+  </header>
 
-<div class="calendar" id="calendar"></div>
+  <div class="container">
+    <h2>Selecciona día para registrar</h2>
+    <div class="calendar" id="calendar"></div>
 
-<form id="form" style="display:none">
+    <form id="form">
+      <h3 id="selected">—</h3>
+      <input id="temp"    placeholder="Temperatura (°C)" autocomplete="off">
+      <input id="hum"     placeholder="Humedad (%)" autocomplete="off">
+      <input id="viento"  placeholder="Viento (km/h)" autocomplete="off">
+      <input id="dir"     placeholder="Dirección viento" autocomplete="off">
+      <input id="lluvia"  placeholder="Lluvia (mm)" autocomplete="off">
+      <input id="cielo"   placeholder="Estado del cielo" autocomplete="off">
+      <button>Guardar Registro</button>
+    </form>
+  </div>
 
-<h3 id="selected"></h3>
+  <script>
+    const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
+    const KEY    = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
+    let fechaSeleccionada = "";
 
-<input id="temp" placeholder="Temperatura">
-<input id="hum" placeholder="Humedad">
-<input id="viento" placeholder="Viento">
-<input id="dir" placeholder="Dirección">
-<input id="lluvia" placeholder="Lluvia">
-<input id="cielo" placeholder="Cielo">
+    function crearCalendario() {
+      const hoy = new Date();
+      const año = hoy.getFullYear();
+      const mes = hoy.getMonth();
+      const dias = new Date(año, mes + 1, 0).getDate();
+      const cal = document.getElementById("calendar");
+      cal.innerHTML = "";
 
-<button>Guardar</button>
+      for (let i = 1; i <= dias; i++) {
+        const d = document.createElement("div");
+        d.className = "day";
+        d.textContent = i;
+        if (i === hoy.getDate() && mes === hoy.getMonth() && año === hoy.getFullYear()) {
+          d.classList.add("today");
+        }
+        d.onclick = () => {
+          fechaSeleccionada = `${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`;
+          document.getElementById("selected").textContent = fechaSeleccionada;
+          document.getElementById("form").style.display = "block";
+        };
+        cal.appendChild(d);
+      }
+    }
 
-</form>
+    document.getElementById("form").onsubmit = async e => {
+      e.preventDefault();
+      const nuevo = {
+        fecha: fechaSeleccionada,
+        temperatura: document.getElementById("temp").value,
+        humedad:     document.getElementById("hum").value,
+        viento:      document.getElementById("viento").value,
+        direccion:   document.getElementById("dir").value,
+        lluvia:      document.getElementById("lluvia").value,
+        cielo:       document.getElementById("cielo").value
+      };
 
-<script>
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          headers: { "X-Master-Key": KEY }
+        });
+        const data = await res.json();
+        const meteo = data.record.meteo || [];
+        meteo.push(nuevo);
 
-const BIN_ID="69aaa6b0d0ea881f40f4bc92"
-const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": KEY
+          },
+          body: JSON.stringify({ meteo })
+        });
 
-let fechaSeleccionada=""
+        alert("¡Registro guardado!");
+        document.getElementById("form").style.display = "none";
+        document.getElementById("form").reset();
+      } catch (err) {
+        alert("Error al guardar: " + err.message);
+      }
+    };
 
-function crearCalendario(){
-
-const hoy=new Date()
-const año=hoy.getFullYear()
-const mes=hoy.getMonth()
-
-const dias=new Date(año,mes+1,0).getDate()
-
-const cal=document.getElementById("calendar")
-
-for(let i=1;i<=dias;i++){
-
-const d=document.createElement("div")
-d.className="day"
-d.innerText=i
-
-if(i===hoy.getDate())
-d.classList.add("today")
-
-d.onclick=()=>{
-
-fechaSeleccionada=`${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`
-
-document.getElementById("selected").innerText=fechaSeleccionada
-document.getElementById("form").style.display="block"
-
-}
-
-cal.appendChild(d)
-
-}
-
-}
-
-document.getElementById("form").onsubmit=async e=>{
-
-e.preventDefault()
-
-const nuevo={
-fecha:fechaSeleccionada,
-temperatura:temp.value,
-humedad:hum.value,
-viento:viento.value,
-direccion:dir.value,
-lluvia:lluvia.value,
-cielo:cielo.value
-}
-
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
-headers:{"X-Master-Key":KEY}
-})
-
-const data=await res.json()
-
-const meteo=data.record.meteo || []
-
-meteo.push(nuevo)
-
-await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-method:"PUT",
-headers:{
-"Content-Type":"application/json",
-"X-Master-Key":KEY
-},
-body:JSON.stringify({meteo})
-})
-
-alert("Guardado")
-
-}
-
-crearCalendario()
-
-</script>
-
+    crearCalendario();
+  </script>
 </body>
 </html>
