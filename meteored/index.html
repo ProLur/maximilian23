@@ -1,278 +1,234 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Meteo • Zafra • Maximilian23</title>
-<link rel="icon" href="https://maximilian23.com/Cabeza.png">
-
-<style>
-
-*{margin:0;padding:0;box-sizing:border-box}
-
-body{
-font-family:"Courier New",monospace;
-background:#0d1117;
-color:#e6edf3;
-min-height:100vh;
-background-image:
-radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
-radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
-}
-
-/* HEADER */
-
-header{
-background:rgba(22,27,34,0.94);
-backdrop-filter:blur(10px);
-padding:0.8rem 1rem;
-display:flex;
-align-items:center;
-gap:0.7rem;
-border-bottom:2px solid #00ffcc;
-}
-
-header img{
-height:38px;
-border-radius:50%;
-border:2px solid #00ffcc99;
-}
-
-header h1{
-color:#00ffcc;
-text-shadow:0 0 6px #00ffccaa;
-font-size:1.3rem;
-}
-
-/* CONTENEDOR */
-
-.container{
-max-width:1000px;
-margin:auto;
-padding:1.2rem;
-display:flex;
-flex-direction:column;
-gap:1.5rem;
-}
-
-/* CALENDARIO */
-
-.calendar-box{
-background:rgba(30,45,61,0.35);
-border:2px solid #00ffcc44;
-border-radius:10px;
-padding:1rem;
-}
-
-.calendar{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:6px;
-}
-
-.day{
-padding:10px;
-font-size:0.9rem;
-text-align:center;
-border:1px solid #00ffcc33;
-border-radius:6px;
-background:#161b22;
-}
-
-.today{
-border:2px solid #00ffcc;
-}
-
-.hasdata{
-background:#00ffcc33;
-color:#00ffcc;
-}
-
-/* TABLA */
-
-.table-box{
-background:rgba(30,45,61,0.32);
-border:2px solid #00ffcc55;
-border-radius:10px;
-padding:1rem;
-overflow-x:auto;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-font-size:0.85rem;
-font-variant-numeric:tabular-nums;
-}
-
-th,td{
-padding:6px 8px;
-text-align:center;
-border-bottom:1px solid #00ffcc2a;
-}
-
-th{
-color:#00ffcc;
-background:linear-gradient(#00ffcc18, transparent);
-font-size:0.85rem;
-}
-
-tr:hover td{
-background:rgba(0,255,204,0.1);
-}
-
-.loading{
-padding:2rem;
-text-align:center;
-color:#00ffccaa;
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meteo • Zafra • Maximilian23</title>
+  <link rel="icon" href="https://maximilian23.com/Cabeza.png">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: "Courier New", monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
+    }
+    header {
+      background: rgba(22,27,34,0.94);
+      backdrop-filter: blur(10px);
+      padding: 0.8rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header img {
+      height: clamp(36px, 8vw, 42px);
+      border-radius: 50%;
+      border: 2px solid #00ffcc99;
+      box-shadow: 0 0 8px #00ffcc44;
+    }
+    header h1 {
+      color: #00ffcc;
+      text-shadow: 0 0 6px #00ffccaa;
+      font-size: clamp(1.2rem, 5vw, 1.5rem);
+    }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+    }
+    .calendar-box {
+      background: rgba(30,45,61,0.35);
+      border: 2px solid #00ffcc44;
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .day {
+      padding: clamp(12px, 3vw, 16px);
+      font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+      text-align: center;
+      border: 1px solid #00ffcc33;
+      border-radius: 6px;
+      background: #161b22;
+      transition: all 0.15s;
+    }
+    .day:hover {
+      background: rgba(0,255,204,0.1);
+    }
+    .today {
+      border: 2px solid #00ffcc;
+      background: rgba(0,255,204,0.15);
+    }
+    .hasdata {
+      background: #00ffcc22;
+      color: #00ffcc;
+      font-weight: bold;
+    }
+    .table-box {
+      background: rgba(30,45,61,0.32);
+      border: 2px solid #00ffcc55;
+      border-radius: 10px;
+      padding: 1.2rem;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      min-width: 800px; /* fuerza scroll en mobile */
+      border-collapse: collapse;
+      font-size: clamp(0.85rem, 3vw, 0.95rem);
+    }
+    th, td {
+      padding: 8px 10px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc22;
+    }
+    th {
+      color: #00ffcc;
+      background: linear-gradient(#00ffcc18, transparent);
+    }
+    tr:hover td {
+      background: rgba(0,255,204,0.08);
+    }
+    .loading {
+      padding: 2.5rem;
+      text-align: center;
+      color: #00ffccaa;
+      font-size: 1.1rem;
+    }
+    @media (min-width: 768px) {
+      .container { flex-direction: row; flex-wrap: wrap; }
+      .calendar-box { flex: 1 1 350px; }
+      .table-box { flex: 2 1 600px; }
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
+    <h1>Estación Meteorológica • Zafra</h1>
+  </header>
 
-<header>
-<img src="https://maximilian23.com/Cabeza.png">
-<h1>Estación Meteorológica • Zafra</h1>
-</header>
+  <div class="container">
+    <div class="calendar-box">
+      <div class="calendar" id="calendar"></div>
+    </div>
 
-<div class="container">
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>In °C</th>
+            <th>In %</th>
+            <th>Out °C</th>
+            <th>Out %</th>
+            <th>Wind</th>
+            <th>Gust</th>
+            <th>Dir</th>
+            <th>Rain</th>
+          </tr>
+        </thead>
+        <tbody id="tabla">
+          <tr><td colspan="9" class="loading">Cargando datos...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-<div class="calendar-box">
-<div class="calendar" id="calendar"></div>
-</div>
+  <script>
+    const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
+    const KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"; // ← Si falla, genera nueva Access Key en jsonbin.io
 
-<div class="table-box">
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = hoy.getMonth();
 
-<table>
+    function crearCalendario(datos) {
+      const cal = document.getElementById("calendar");
+      cal.innerHTML = "";
+      const diasConDatos = new Set(datos.map(d => d.fecha));
+      const primerDia = new Date(año, mes, 1).getDay() || 7;
+      const diasMes = new Date(año, mes + 1, 0).getDate();
 
-<thead>
-<tr>
-<th>Fecha</th>
-<th>In °C</th>
-<th>In %</th>
-<th>Out °C</th>
-<th>Out %</th>
-<th>Wind</th>
-<th>Gust</th>
-<th>Dir</th>
-<th>Rain</th>
-</tr>
-</thead>
+      // Días vacíos iniciales
+      for (let i = 1; i < primerDia; i++) {
+        const vacio = document.createElement("div");
+        vacio.className = "day";
+        cal.appendChild(vacio);
+      }
 
-<tbody id="tabla">
+      for (let i = 1; i <= diasMes; i++) {
+        const fecha = `${año}-${(mes + 1).toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`;
+        const d = document.createElement("div");
+        d.className = "day";
+        d.textContent = i;
 
-<tr>
-<td colspan="9" class="loading">Cargando datos...</td>
-</tr>
+        if (diasConDatos.has(fecha)) d.classList.add("hasdata");
+        if (i === hoy.getDate()) d.classList.add("today");
 
-</tbody>
+        cal.appendChild(d);
+      }
+    }
 
-</table>
+    async function cargar() {
+      const tabla = document.getElementById("tabla");
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+          cache: "no-store",
+          headers: {
+            "X-Master-Key": KEY  // o "X-Access-Key" si usas access key de solo lectura
+          }
+        });
 
-</div>
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Error ${res.status}: ${errText}`);
+        }
 
-</div>
+        const data = await res.json();
+        const meteo = data?.record?.meteo || [];
 
-<script>
+        crearCalendario(meteo);
 
-const BIN_ID="69aaa6b0d0ea881f40f4bc92"
+        let html = "";
+        [...meteo].reverse().forEach(d => {
+          html += `
+            <tr>
+              <td>${d.fecha || "—"}</td>
+              <td>${d.temp_indoor || "—"}</td>
+              <td>${d.hum_indoor || "—"}</td>
+              <td>${d.temp_outdoor || "—"}</td>
+              <td>${d.hum_outdoor || "—"}</td>
+              <td>${d.wind_speed || "—"}</td>
+              <td>${d.wind_gust || "—"}</td>
+              <td>${d.wind_direction || "—"}</td>
+              <td>${d.rain || "—"}</td>
+            </tr>`;
+        });
 
-const hoy=new Date()
-const año=hoy.getFullYear()
-const mes=hoy.getMonth()
+        tabla.innerHTML = html || `<tr><td colspan="9" class="loading">Aún no hay registros</td></tr>`;
+      } catch (e) {
+        console.error("Error al cargar:", e);
+        tabla.innerHTML = `<tr><td colspan="9" class="loading">Error: ${e.message} (ver consola)</td></tr>`;
+      }
+    }
 
-function crearCalendario(datos){
-
-const cal=document.getElementById("calendar")
-cal.innerHTML=""
-
-const diasConDatos=new Set(datos.map(d=>d.fecha))
-
-const primerDia=new Date(año,mes,1).getDay()||7
-const diasMes=new Date(año,mes+1,0).getDate()
-
-for(let i=1;i<primerDia;i++){
-const d=document.createElement("div")
-d.className="day"
-cal.appendChild(d)
-}
-
-for(let i=1;i<=diasMes;i++){
-
-const fecha=`${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`
-
-const d=document.createElement("div")
-d.className="day"
-d.textContent=i
-
-if(diasConDatos.has(fecha))
-d.classList.add("hasdata")
-
-if(i===hoy.getDate())
-d.classList.add("today")
-
-cal.appendChild(d)
-
-}
-
-}
-
-async function cargar(){
-
-try{
-
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
-cache:"no-store"
-})
-
-if(!res.ok) throw new Error("No se pudo leer el JSON")
-
-const data=await res.json()
-
-const meteo=data?.record?.meteo||[]
-
-crearCalendario(meteo)
-
-const tabla=document.getElementById("tabla")
-
-let html=""
-
-;[...meteo].reverse().forEach(d=>{
-
-html+=`
-<tr>
-<td>${d.fecha||""}</td>
-<td>${d.temp_indoor||""}</td>
-<td>${d.hum_indoor||""}</td>
-<td>${d.temp_outdoor||""}</td>
-<td>${d.hum_outdoor||""}</td>
-<td>${d.wind_speed||""}</td>
-<td>${d.wind_gust||""}</td>
-<td>${d.wind_direction||""}</td>
-<td>${d.rain||""}</td>
-</tr>
-`
-
-})
-
-tabla.innerHTML=html||`<tr><td colspan="9" class="loading">Sin datos</td></tr>`
-
-}
-catch(e){
-
-document.getElementById("tabla").innerHTML=
-`<tr><td colspan="9" class="loading">Error cargando datos</td></tr>`
-
-console.error(e)
-
-}
-
-}
-
-cargar()
-
-</script>
-
+    cargar();
+  </script>
 </body>
 </html>
