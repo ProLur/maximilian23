@@ -7,107 +7,164 @@
 <style>
 
 body{
-font-family:Arial;
-background:#0b2239;
-color:white;
+font-family:"Courier New", monospace;
+background:#0d1117;
+color:#e6edf3;
 text-align:center;
-padding:30px;
+}
+
+h1{
+color:#00ffcc;
+text-shadow:0 0 7px #00ffccaa;
+}
+
+.calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:6px;
+max-width:420px;
+margin:auto;
+}
+
+.day{
+padding:14px;
+background:#161b22;
+border:1px solid #00ffcc33;
+cursor:pointer;
+}
+
+.day:hover{
+background:#00ffcc22;
+}
+
+.today{
+border:2px solid #00ffcc;
 }
 
 form{
-background:#173d5f;
+margin-top:20px;
+background:#161b22;
+padding:20px;
 display:inline-block;
-padding:25px;
 border-radius:10px;
 }
 
 input{
 display:block;
-margin:10px auto;
-padding:8px;
-width:200px;
+margin:8px auto;
+padding:6px;
 }
 
 button{
-padding:10px 20px;
-margin-top:10px;
-background:#3aa6ff;
+padding:8px 20px;
+background:#00ffcc;
 border:none;
-color:white;
 cursor:pointer;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<h1>Panel Meteorológico</h1>
+<h1>Panel meteorológico</h1>
 
-<form id="form">
+<div class="calendar" id="calendar"></div>
 
-<input type="date" id="fecha" required>
+<form id="form" style="display:none">
 
-<input type="number" id="temperatura" placeholder="Temperatura °C" required>
+<h3 id="selected"></h3>
 
-<input type="number" id="humedad" placeholder="Humedad %" required>
+<input id="temp" placeholder="Temperatura">
+<input id="hum" placeholder="Humedad">
+<input id="viento" placeholder="Viento">
+<input id="dir" placeholder="Dirección">
+<input id="lluvia" placeholder="Lluvia">
+<input id="cielo" placeholder="Cielo">
 
-<input type="number" id="viento" placeholder="Viento km/h" required>
-
-<input type="text" id="direccion" placeholder="Dirección viento">
-
-<input type="number" id="lluvia" placeholder="Lluvia mm">
-
-<input type="text" id="cielo" placeholder="Estado cielo">
-
-<button type="submit">Guardar</button>
+<button>Guardar</button>
 
 </form>
 
 <script>
 
-const BIN_ID = "69aaa6b0d0ea881f40f4bc92"
-const API_KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
+const BIN_ID="69aaa6b0d0ea881f40f4bc92"
+const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
 
-document.getElementById("form").onsubmit = async e => {
+let fechaSeleccionada=""
+
+function crearCalendario(){
+
+const hoy=new Date()
+const año=hoy.getFullYear()
+const mes=hoy.getMonth()
+
+const dias=new Date(año,mes+1,0).getDate()
+
+const cal=document.getElementById("calendar")
+
+for(let i=1;i<=dias;i++){
+
+const d=document.createElement("div")
+d.className="day"
+d.innerText=i
+
+if(i===hoy.getDate())
+d.classList.add("today")
+
+d.onclick=()=>{
+
+fechaSeleccionada=`${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`
+
+document.getElementById("selected").innerText=fechaSeleccionada
+document.getElementById("form").style.display="block"
+
+}
+
+cal.appendChild(d)
+
+}
+
+}
+
+document.getElementById("form").onsubmit=async e=>{
 
 e.preventDefault()
 
-const nuevo = {
-fecha:fecha.value,
-temperatura:temperatura.value,
-humedad:humedad.value,
+const nuevo={
+fecha:fechaSeleccionada,
+temperatura:temp.value,
+humedad:hum.value,
 viento:viento.value,
-direccion:direccion.value,
+direccion:dir.value,
 lluvia:lluvia.value,
 cielo:cielo.value
 }
 
-const res = await fetch("https://api.jsonbin.io/v3/b/"+BIN_ID+"/latest",{
-headers:{
-"X-Master-Key":API_KEY
-}
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
+headers:{"X-Master-Key":KEY}
 })
 
-const data = await res.json()
+const data=await res.json()
 
-const meteo = data.record.meteo
+const meteo=data.record.meteo || []
 
 meteo.push(nuevo)
 
-await fetch("https://api.jsonbin.io/v3/b/"+BIN_ID,{
+await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
 method:"PUT",
 headers:{
 "Content-Type":"application/json",
-"X-Master-Key":API_KEY
+"X-Master-Key":KEY
 },
-body:JSON.stringify({meteo:meteo})
+body:JSON.stringify({meteo})
 })
 
-alert("Datos guardados")
+alert("Guardado")
 
 }
+
+crearCalendario()
 
 </script>
 
