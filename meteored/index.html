@@ -47,7 +47,7 @@
     }
     .container {
       padding: 1.5rem;
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
     }
     .table-box {
@@ -57,11 +57,11 @@
       padding: 1.4rem;
       backdrop-filter: blur(6px);
       box-shadow: 0 6px 24px rgba(0,0,0,0.45);
-      overflow-x: auto;
+      overflow-x: auto; /* Responsive scroll horizontal en mobile */
     }
     table {
       width: 100%;
-      min-width: 680px;
+      min-width: 900px; /* Fuerza scroll en pantallas pequeñas */
       border-collapse: collapse;
       background: rgba(13,17,23,0.88);
       border: 2px solid #00ffcc77;
@@ -91,6 +91,14 @@
       color: #00ffccaa;
       font-size: 1.2rem;
     }
+    @media (min-width: 768px) {
+      th, td {
+        padding: 14px 16px; /* Más espacio en desktop */
+      }
+      table {
+        min-width: auto; /* No fuerza scroll en desktop */
+      }
+    }
   </style>
 </head>
 <body>
@@ -102,23 +110,24 @@
 
   <div class="container">
     <div class="table-box">
-      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.2rem;">
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.2rem; font-size: clamp(1.5rem, 5vw, 1.8rem);">
         Registro Meteorológico
       </h2>
       <table>
         <thead>
           <tr>
             <th>Fecha</th>
-            <th>Temp</th>
-            <th>Humedad</th>
-            <th>Viento</th>
-            <th>Dir</th>
-            <th>Lluvia</th>
-            <th>Cielo</th>
+            <th>Temp Indoor (°C)</th>
+            <th>Hum Indoor (%)</th>
+            <th>Temp Outdoor (°C)</th>
+            <th>Hum Outdoor (%)</th>
+            <th>Wind Speed (km/h)</th>
+            <th>Wind Chill (°C)</th>
+            <th>Wind Direction</th>
           </tr>
         </thead>
         <tbody id="tabla">
-          <tr><td colspan="7" class="loading">Cargando datos...</td></tr>
+          <tr><td colspan="8" class="loading">Cargando datos...</td></tr>
         </tbody>
       </table>
     </div>
@@ -144,23 +153,24 @@
         meteo.reverse().forEach(d => {
           tabla.innerHTML += `
             <tr>
-              <td>${d.fecha}</td>
-              <td>${d.temperatura || "?"}°</td>
-              <td>${d.humedad || "?"}%</td>
-              <td>${d.viento || "?"}</td>
-              <td>${d.direccion || "?"}</td>
-              <td>${d.lluvia || "?"}</td>
-              <td>${d.cielo || "?"}</td>
+              <td>${d.fecha || "?"}</td>
+              <td>${d.temp_indoor || "?"}</td>
+              <td>${d.hum_indoor || "?"}</td>
+              <td>${d.temp_outdoor || "?"}</td>
+              <td>${d.hum_outdoor || "?"}</td>
+              <td>${d.wind_speed || "?"}</td>
+              <td>${d.wind_chill || "?"}</td>
+              <td>${d.wind_direction || "?"}</td>
             </tr>
           `;
         });
 
         if (meteo.length === 0) {
-          tabla.innerHTML = `<tr><td colspan="7" class="loading">Aún no hay registros</td></tr>`;
+          tabla.innerHTML = `<tr><td colspan="8" class="loading">Aún no hay registros</td></tr>`;
         }
       } catch (err) {
         document.getElementById("tabla").innerHTML = 
-          `<tr><td colspan="7" class="loading">Error al cargar: ${err.message}</td></tr>`;
+          `<tr><td colspan="8" class="loading">Error al cargar: ${err.message}</td></tr>`;
       }
     }
 
