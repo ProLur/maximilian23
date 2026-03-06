@@ -3,14 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel Meteo • Maximilian Style</title>
+  <title>Panel Meteo • Admin</title>
   <link rel="icon" href="https://maximilian23.com/Cabeza.png">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: "Courier New", Courier, monospace;
       background: #0d1117;
@@ -24,193 +20,270 @@
     header {
       background: rgba(22,27,34,0.94);
       backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       padding: 0.9rem 1rem;
       display: flex;
       align-items: center;
-      gap: 0.7rem;
+      gap: 0.8rem;
       border-bottom: 2px solid #00ffcc;
       position: sticky;
       top: 0;
       z-index: 100;
     }
     header img {
-      height: 38px;
+      height: 42px;
       border-radius: 50%;
       border: 2px solid #00ffcc99;
-      box-shadow: 0 0 10px #00ffcc44;
+      box-shadow: 0 0 12px #00ffcc44;
     }
     header h1 {
-      font-size: clamp(1.25rem, 5vw, 1.55rem);
+      font-size: clamp(1.3rem, 5vw, 1.7rem);
       color: #00ffcc;
-      text-shadow: 0 0 7px #00ffccaa;
+      text-shadow: 0 0 8px #00ffccaa;
     }
     .container {
-      padding: 1.5rem;
+      padding: 1.5rem 1rem;
       max-width: 1100px;
       margin: 0 auto;
+      text-align: center;
     }
     h2 {
-      text-align: center;
       color: #00ffcc;
-      margin: 1.5rem 0 1rem;
-      font-size: clamp(1.4rem, 5vw, 1.8rem);
-      text-shadow: 0 0 8px #00ffcc66;
+      margin: 1.5rem 0 1.2rem;
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
+      text-shadow: 0 0 10px #00ffcc66;
     }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      max-width: 480px;
-      margin: 1.5rem auto;
+      gap: 10px;
+      max-width: 720px;
+      margin: 0 auto 2rem;
     }
     .day {
-      padding: 16px;
-      background: rgba(22,27,34,0.7);
+      padding: 24px 12px;
+      background: rgba(22,27,34,0.75);
       border: 1px solid #00ffcc44;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      text-align: center;
+      border-radius: 10px;
+      font-size: 1.4rem;
       font-weight: bold;
-      color: #e6edf3;
+      color: #e6edf3cc;
+      transition: all 0.2s ease;
+      cursor: default;
     }
-    .day:hover {
+    .day:hover:not(.disabled) {
       background: rgba(0,255,204,0.18);
-      border-color: #00ffcc99;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,255,204,0.15);
+      border-color: #00ffccaa;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,255,204,0.22);
     }
     .today {
+      background: rgba(0,255,204,0.22);
       border: 2px solid #00ffcc;
-      background: rgba(0,255,204,0.12);
-      box-shadow: 0 0 12px #00ffcc55;
+      color: #00ffcc;
+      box-shadow: 0 0 16px #00ffcc66;
+      cursor: pointer;
     }
-    form {
-      margin: 1.5rem auto;
-      max-width: 480px;
-      background: rgba(30,45,61,0.35);
-      border: 2px solid #00ffcc55;
-      border-radius: 12px;
-      padding: 1.6rem;
-      backdrop-filter: blur(6px);
+    .disabled {
+      opacity: 0.4;
+      background: rgba(22,27,34,0.5);
+      border-color: #00ffcc22;
+      cursor: not-allowed;
+    }
+    /* MODAL */
+    .modal {
       display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
     }
+    .modal-content {
+      background: rgba(30,45,61,0.92);
+      border: 2px solid #00ffcc77;
+      border-radius: 14px;
+      padding: 2rem;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0,255,204,0.3);
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 2rem;
+      color: #00ffccaa;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .close-btn:hover { color: #00ffcc; }
     form h3 {
       color: #00ffcc;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.6rem;
+      font-size: 1.5rem;
       text-align: center;
-      font-size: 1.3rem;
     }
     input {
-      display: block;
       width: 100%;
-      margin: 0.9rem 0;
-      padding: 0.7rem 1rem;
+      padding: 0.9rem 1.1rem;
+      margin: 0.8rem 0;
       background: #161b22;
-      border: 1px solid #00ffcc44;
-      border-radius: 6px;
+      border: 1px solid #00ffcc55;
+      border-radius: 8px;
       color: #e6edf3;
+      font-size: 1.1rem;
       font-family: inherit;
-      font-size: 1.05rem;
     }
     input:focus {
       outline: none;
       border-color: #00ffcc;
-      box-shadow: 0 0 8px #00ffcc66;
+      box-shadow: 0 0 10px #00ffcc55;
     }
     button {
       width: 100%;
-      padding: 0.9rem;
-      margin-top: 1rem;
-      background: linear-gradient(#00ffcc, #00ccaa);
+      padding: 1rem;
+      margin-top: 1.2rem;
+      background: linear-gradient(135deg, #00ffcc, #00ccaa);
       color: #0d1117;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      font-size: 1.2rem;
       font-weight: bold;
-      font-size: 1.1rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s;
     }
     button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0,255,204,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,255,204,0.45);
     }
+    .message {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .success { background: rgba(0,255,204,0.2); color: #00ffcc; }
+    .error   { background: rgba(255,80,80,0.2); color: #ff5555; }
   </style>
 </head>
 <body>
 
   <header>
     <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
-    <h1>Panel Meteorológico • Zafra</h1>
+    <h1>Panel Admin Meteo • Zafra</h1>
   </header>
 
   <div class="container">
-    <h2>Selecciona día para registrar</h2>
+    <h2>Registro del día</h2>
     <div class="calendar" id="calendar"></div>
+  </div>
 
-    <form id="form">
-      <h3 id="selected">—</h3>
-      <input id="temp"    placeholder="Temperatura (°C)" autocomplete="off">
-      <input id="hum"     placeholder="Humedad (%)" autocomplete="off">
-      <input id="viento"  placeholder="Viento (km/h)" autocomplete="off">
-      <input id="dir"     placeholder="Dirección viento" autocomplete="off">
-      <input id="lluvia"  placeholder="Lluvia (mm)" autocomplete="off">
-      <input id="cielo"   placeholder="Estado del cielo" autocomplete="off">
-      <button>Guardar Registro</button>
-    </form>
+  <!-- MODAL -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close">&times;</span>
+      <h3 id="fecha-title">—</h3>
+      <form id="form">
+        <input id="temp"    placeholder="Temperatura (°C)" autocomplete="off" required>
+        <input id="hum"     placeholder="Humedad (%)" autocomplete="off" required>
+        <input id="viento"  placeholder="Viento (km/h)" autocomplete="off" required>
+        <input id="dir"     placeholder="Dirección del viento" autocomplete="off" required>
+        <input id="lluvia"  placeholder="Lluvia (mm)" autocomplete="off">
+        <input id="cielo"   placeholder="Estado del cielo (despejado, nublado...)" autocomplete="off">
+        <button type="submit">Guardar Registro</button>
+      </form>
+      <div id="message" class="message" style="display:none;"></div>
+    </div>
   </div>
 
   <script>
     const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
     const KEY    = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
-    let fechaSeleccionada = "";
+
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = hoy.getMonth();
+    const diaHoy = hoy.getDate();
+    const fechaHoy = `${año}-${(mes+1).toString().padStart(2,"0")}-${diaHoy.toString().padStart(2,"0")}`;
 
     function crearCalendario() {
-      const hoy = new Date();
-      const año = hoy.getFullYear();
-      const mes = hoy.getMonth();
-      const dias = new Date(año, mes + 1, 0).getDate();
       const cal = document.getElementById("calendar");
       cal.innerHTML = "";
 
-      for (let i = 1; i <= dias; i++) {
+      const primerDia = new Date(año, mes, 1).getDay() || 7; // 1=lunes ... 7=domingo
+      const diasMes = new Date(año, mes + 1, 0).getDate();
+
+      // Días vacíos al inicio (para alinear con lunes)
+      for (let i = 1; i < primerDia; i++) {
+        const empty = document.createElement("div");
+        empty.className = "day disabled";
+        cal.appendChild(empty);
+      }
+
+      for (let i = 1; i <= diasMes; i++) {
         const d = document.createElement("div");
         d.className = "day";
         d.textContent = i;
-        if (i === hoy.getDate() && mes === hoy.getMonth() && año === hoy.getFullYear()) {
+
+        if (i === diaHoy) {
           d.classList.add("today");
+          d.onclick = () => abrirModal(fechaHoy);
+        } else {
+          d.classList.add("disabled");
         }
-        d.onclick = () => {
-          fechaSeleccionada = `${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`;
-          document.getElementById("selected").textContent = fechaSeleccionada;
-          document.getElementById("form").style.display = "block";
-        };
+
         cal.appendChild(d);
       }
     }
 
+    function abrirModal(fecha) {
+      document.getElementById("fecha-title").textContent = `Registro para ${fecha}`;
+      document.getElementById("modal").style.display = "flex";
+      document.getElementById("message").style.display = "none";
+      document.getElementById("form").reset();
+    }
+
+    function cerrarModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    document.getElementById("close").onclick = cerrarModal;
+    document.getElementById("modal").onclick = e => {
+      if (e.target === document.getElementById("modal")) cerrarModal();
+    };
+
     document.getElementById("form").onsubmit = async e => {
       e.preventDefault();
+      const msg = document.getElementById("message");
+      msg.style.display = "block";
+      msg.className = "message";
+      msg.textContent = "Guardando...";
+
       const nuevo = {
-        fecha: fechaSeleccionada,
-        temperatura: document.getElementById("temp").value,
-        humedad:     document.getElementById("hum").value,
-        viento:      document.getElementById("viento").value,
-        direccion:   document.getElementById("dir").value,
-        lluvia:      document.getElementById("lluvia").value,
-        cielo:       document.getElementById("cielo").value
+        fecha: fechaHoy,
+        temperatura: document.getElementById("temp").value.trim(),
+        humedad:     document.getElementById("hum").value.trim(),
+        viento:      document.getElementById("viento").value.trim(),
+        direccion:   document.getElementById("dir").value.trim(),
+        lluvia:      document.getElementById("lluvia").value.trim() || "0",
+        cielo:       document.getElementById("cielo").value.trim() || "—"
       };
 
       try {
         const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
           headers: { "X-Master-Key": KEY }
         });
+        if (!res.ok) throw new Error("No se pudo leer el bin");
         const data = await res.json();
         const meteo = data.record.meteo || [];
         meteo.push(nuevo);
 
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        const put = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -219,11 +292,15 @@
           body: JSON.stringify({ meteo })
         });
 
-        alert("¡Registro guardado!");
-        document.getElementById("form").style.display = "none";
-        document.getElementById("form").reset();
+        if (!put.ok) throw new Error("Error al guardar (código " + put.status + ")");
+
+        msg.className = "message success";
+        msg.textContent = "¡Guardado correctamente!";
+        setTimeout(cerrarModal, 1800);
       } catch (err) {
-        alert("Error al guardar: " + err.message);
+        msg.className = "message error";
+        msg.textContent = "Error: " + err.message;
+        console.error(err);
       }
     };
 
