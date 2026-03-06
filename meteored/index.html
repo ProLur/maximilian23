@@ -46,42 +46,70 @@
     .main-container {
       max-width: 1300px;
       margin: 0 auto;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
+      padding: 1rem;
     }
     .content-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1.5rem;
     }
     .chart-box, .calendar-box {
       background: rgba(30,45,61,0.35);
       border: 2px solid #00ffcc55;
       border-radius: 12px;
-      padding: 1.4rem;
+      padding: 1.2rem;
       backdrop-filter: blur(6px);
     }
-    .chart-box { min-height: 380px; }
+    .chart-box {
+      height: 320px;
+      max-height: 45vh;
+    }
+    .calendar-box {
+      padding: 1rem;
+      overflow: hidden; /* evita desborde */
+    }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
+      gap: 6px;
+      max-width: 100%; /* no más ancho que el contenedor */
     }
     .day {
-      padding: clamp(14px, 4vw, 20px);
-      font-size: clamp(0.95rem, 4vw, 1.2rem);
+      padding: 10px 4px;
+      font-size: clamp(0.85rem, 3.5vw, 1rem);
       text-align: center;
       border: 1px solid #00ffcc44;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #161b22;
       cursor: pointer;
-      transition: all 0.18s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
     }
-    .day:hover { background: rgba(0,255,204,0.15); transform: scale(1.04); }
-    .today { border: 3px solid #00ffcc; background: rgba(0,255,204,0.25); font-weight: bold; }
-    .hasdata { background: #00ffcc22; color: #00ffcc; }
+    .day:hover { background: rgba(0,255,204,0.15); transform: scale(1.03); }
+    .today { border: 2.5px solid #00ffcc; background: rgba(0,255,204,0.22); font-weight: bold; }
+    .hasdata { background: #00ffcc18; color: #00ffcc; }
+    .legend {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .color-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
     .modal {
       display: none;
       position: fixed;
@@ -97,19 +125,29 @@
       background: rgba(30,45,61,0.95);
       border: 2px solid #00ffcc88;
       border-radius: 12px;
-      padding: 1.8rem;
-      max-width: 420px;
+      padding: 1.6rem;
+      max-width: 400px;
       width: 100%;
       box-shadow: 0 10px 40px rgba(0,255,204,0.35);
     }
-    .modal h3 { color: #00ffcc; margin-bottom: 1.2rem; text-align: center; }
-    .modal table { width: 100%; border-collapse: collapse; }
-    .modal td { padding: 8px; border-bottom: 1px solid #00ffcc33; }
-    .close-btn { float: right; font-size: 2rem; color: #00ffccaa; cursor: pointer; }
+    .modal h3 { color: #00ffcc; margin-bottom: 1rem; text-align: center; }
+    .modal table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    .modal td { padding: 6px 8px; border-bottom: 1px solid #00ffcc33; }
+    .close-btn { float: right; font-size: 1.8rem; color: #00ffccaa; cursor: pointer; }
     @media (min-width: 900px) {
-      .content-wrapper { flex-direction: row; gap: 2.5rem; }
-      .chart-box { flex: 2; }
-      .calendar-box { flex: 1; max-width: 420px; }
+      .content-wrapper { flex-direction: row; gap: 2rem; }
+      .chart-box { flex: 3; height: 400px; max-height: 55vh; }
+      .calendar-box { flex: 1; max-width: 380px; }
+      .calendar { gap: 8px; }
+      .day {
+        padding: 12px 6px;
+        font-size: 1.05rem;
+        min-height: 60px;
+      }
+    }
+    @media (min-width: 1200px) {
+      .calendar-box { max-width: 420px; }
+      .day { font-size: 1.15rem; padding: 16px 8px; }
     }
   </style>
 </head>
@@ -123,14 +161,21 @@
     <div class="content-wrapper">
       <div class="chart-box">
         <canvas id="meteoChart"></canvas>
+        <div class="legend">
+          <div class="legend-item"><div class="color-box" style="background:#00ffcc"></div>Temp Indoor</div>
+          <div class="legend-item"><div class="color-box" style="background:#ffaa00"></div>Temp Outdoor</div>
+          <div class="legend-item"><div class="color-box" style="background:#88ddff"></div>Hum Indoor</div>
+          <div class="legend-item"><div class="color-box" style="background:#aaff88"></div>Hum Outdoor</div>
+          <div class="legend-item"><div class="color-box" style="background:#ff66aa"></div>Viento</div>
+        </div>
       </div>
+
       <div class="calendar-box">
         <div class="calendar" id="calendar"></div>
       </div>
     </div>
   </div>
 
-  <!-- Modal al pulsar un día -->
   <div class="modal" id="dayModal">
     <div class="modal-content">
       <span class="close-btn" onclick="document.getElementById('dayModal').style.display='none'">×</span>
@@ -201,7 +246,7 @@
           }
         });
       } else {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:1.5rem;">Sin datos para este día</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:1.2rem;">Sin datos para este día</td></tr>';
       }
       document.getElementById("dayModal").style.display = "flex";
     }
@@ -230,7 +275,7 @@
             y1: { position: "right", title: { display: true, text: "Humedad %" }, grid: { drawOnChartArea: false } },
             x: { title: { display: true, text: "Fecha" } }
           },
-          plugins: { legend: { position: "top", labels: { color: "#e6edf3" } } }
+          plugins: { legend: { display: false } }
         }
       });
     }
