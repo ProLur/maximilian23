@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Meteo Zafra</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b2239;
+color:white;
+text-align:center;
+padding:30px;
+}
+
+h1{
+margin-bottom:5px;
+}
+
+table{
+margin:auto;
+border-collapse:collapse;
+margin-top:30px;
+}
+
+td,th{
+border:1px solid #4a6a8a;
+padding:10px 14px;
+}
+
+th{
+background:#173d5f;
+}
+
+tr:nth-child(even){
+background:#12314d;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Estación meteorológica</h1>
+<h2>Zafra</h2>
+
+<table id="tabla">
+
+<tr>
+<th>Fecha</th>
+<th>Temp</th>
+<th>Humedad</th>
+<th>Viento</th>
+<th>Dirección</th>
+<th>Lluvia</th>
+<th>Cielo</th>
+</tr>
+
+</table>
+
+<script>
+
+const BIN_ID = "69aaa6b0d0ea881f40f4bc92"
+const API_KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
+
+fetch("https://api.jsonbin.io/v3/b/" + BIN_ID + "/latest", {
+headers:{
+"X-Master-Key": API_KEY
+}
+})
+.then(res => res.json())
+.then(data => {
+
+const datos = data.record.meteo
+const tabla = document.getElementById("tabla")
+
+datos.reverse().forEach(d => {
+
+tabla.innerHTML += `
+<tr>
+<td>${d.fecha}</td>
+<td>${d.temperatura} °C</td>
+<td>${d.humedad} %</td>
+<td>${d.viento}</td>
+<td>${d.direccion}</td>
+<td>${d.lluvia}</td>
+<td>${d.cielo}</td>
+</tr>
+`
+
+})
+
+})
+
+</script>
+
+</body>
+</html>
