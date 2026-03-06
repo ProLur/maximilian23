@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel Meteo</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b2239;
+color:white;
+text-align:center;
+padding:30px;
+}
+
+form{
+background:#173d5f;
+display:inline-block;
+padding:25px;
+border-radius:10px;
+}
+
+input{
+display:block;
+margin:10px auto;
+padding:8px;
+width:200px;
+}
+
+button{
+padding:10px 20px;
+margin-top:10px;
+background:#3aa6ff;
+border:none;
+color:white;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Panel Meteorológico</h1>
+
+<form id="form">
+
+<input type="date" id="fecha" required>
+
+<input type="number" id="temperatura" placeholder="Temperatura °C" required>
+
+<input type="number" id="humedad" placeholder="Humedad %" required>
+
+<input type="number" id="viento" placeholder="Viento km/h" required>
+
+<input type="text" id="direccion" placeholder="Dirección viento">
+
+<input type="number" id="lluvia" placeholder="Lluvia mm">
+
+<input type="text" id="cielo" placeholder="Estado cielo">
+
+<button type="submit">Guardar</button>
+
+</form>
+
+<script>
+
+const BIN_ID = "69aaa6b0d0ea881f40f4bc92"
+const API_KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy"
+
+document.getElementById("form").onsubmit = async e => {
+
+e.preventDefault()
+
+const nuevo = {
+fecha:fecha.value,
+temperatura:temperatura.value,
+humedad:humedad.value,
+viento:viento.value,
+direccion:direccion.value,
+lluvia:lluvia.value,
+cielo:cielo.value
+}
+
+const res = await fetch("https://api.jsonbin.io/v3/b/"+BIN_ID+"/latest",{
+headers:{
+"X-Master-Key":API_KEY
+}
+})
+
+const data = await res.json()
+
+const meteo = data.record.meteo
+
+meteo.push(nuevo)
+
+await fetch("https://api.jsonbin.io/v3/b/"+BIN_ID,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+"X-Master-Key":API_KEY
+},
+body:JSON.stringify({meteo:meteo})
+})
+
+alert("Datos guardados")
+
+}
+
+</script>
+
+</body>
+</html>
