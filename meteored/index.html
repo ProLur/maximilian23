@@ -23,189 +23,233 @@
     header {
       background: rgba(22,27,34,0.94);
       backdrop-filter: blur(10px);
-      padding: 0.9rem 1rem;
+      padding: 0.9rem 1.2rem;
       display: flex;
       align-items: center;
-      gap: 0.8rem;
+      gap: 0.9rem;
       border-bottom: 2px solid #00ffcc;
       position: sticky;
       top: 0;
       z-index: 20;
     }
     header img {
-      height: clamp(38px, 9vw, 48px);
+      height: clamp(42px, 10vw, 52px);
       border-radius: 50%;
       border: 2px solid #00ffccaa;
-      box-shadow: 0 0 10px #00ffcc55;
+      box-shadow: 0 0 12px #00ffcc66;
     }
     header h1 {
       color: #00ffcc;
-      text-shadow: 0 0 8px #00ffccbb;
-      font-size: clamp(1.3rem, 5.5vw, 1.7rem);
+      text-shadow: 0 0 10px #00ffcccc;
+      font-size: clamp(1.4rem, 6vw, 1.9rem);
     }
     .main-container {
-      max-width: 1300px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 1rem;
+      padding: 1.2rem;
     }
     .content-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.8rem;
     }
-    .chart-box, .calendar-box {
-      background: rgba(30,45,61,0.35);
-      border: 2px solid #00ffcc55;
-      border-radius: 12px;
-      padding: 1.2rem;
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+    .chart-card {
+      background: rgba(30,45,61,0.4);
+      border: 2px solid #00ffcc44;
+      border-radius: 10px;
+      padding: 1rem;
       backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 220px;
+      position: relative;
     }
-    .chart-box {
-      height: 300px;          /* más estrecho verticalmente */
-      max-height: 40vh;       /* limita en pantallas grandes */
+    .chart-card:hover {
+      transform: translateY(-4px);
+      border-color: #00ffccaa;
+      box-shadow: 0 8px 25px rgba(0,255,204,0.2);
+    }
+    .chart-card h3 {
+      color: #00ffcc;
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+      text-align: center;
+      text-shadow: 0 0 6px #00ffcc88;
+    }
+    .chart-container {
+      height: 160px;
     }
     .calendar-box {
-      padding: 1rem;
-      overflow: hidden;
+      background: rgba(30,45,61,0.4);
+      border: 2px solid #00ffcc44;
+      border-radius: 10px;
+      padding: 1.2rem;
+      backdrop-filter: blur(6px);
     }
     .month-title {
       text-align: center;
       color: #00ffcc;
-      font-size: 1.4rem;
-      margin-bottom: 0.8rem;
-      text-shadow: 0 0 6px #00ffcc88;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 8px #00ffcc99;
     }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      max-width: 100%;
+      gap: 8px;
     }
     .day {
-      padding: 8px 4px;       /* menos padding para que quepan mejor */
-      font-size: clamp(0.8rem, 2.8vw, 0.95rem);  /* números más pequeños */
+      padding: 10px 4px;
+      font-size: clamp(0.85rem, 2.6vw, 1rem);
       text-align: center;
-      border: 1px solid #00ffcc44;
+      border: 1px solid #00ffcc55;
       border-radius: 6px;
       background: #161b22;
       cursor: pointer;
-      min-height: 40px;
+      min-height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.15s;
+      transition: all 0.18s;
     }
-    .day:hover { background: rgba(0,255,204,0.15); transform: scale(1.03); }
-    .today { border: 2px solid #00ffcc; background: rgba(0,255,204,0.22); font-weight: bold; }
-    .hasdata { background: #00ffcc18; color: #00ffcc; }
-    .legend {
-      margin-top: 0.8rem;
-      text-align: center;
-      font-size: 0.85rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .color-box {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-    }
+    .day:hover { background: rgba(0,255,204,0.2); transform: scale(1.04); }
+    .today { border: 2px solid #00ffcc; background: rgba(0,255,204,0.3); font-weight: bold; }
+    .hasdata { background: #00ffcc22; color: #00ffcc; font-weight: 500; }
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(4px);
-      z-index: 100;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
       align-items: center;
       justify-content: center;
       padding: 1rem;
     }
     .modal-content {
-      background: rgba(30,45,61,0.95);
-      border: 2px solid #00ffcc88;
+      background: rgba(22,27,34,0.98);
+      border: 2px solid #00ffcc99;
       border-radius: 12px;
-      padding: 1.6rem;
-      max-width: 400px;
+      padding: 1.5rem;
       width: 100%;
-      box-shadow: 0 10px 40px rgba(0,255,204,0.35);
+      max-width: 1100px;
+      height: 85vh;
+      max-height: 95vh;
+      box-shadow: 0 15px 50px rgba(0,255,204,0.4);
+      position: relative;
     }
-    .modal h3 { color: #00ffcc; margin-bottom: 1rem; text-align: center; }
-    .modal table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-    .modal td { padding: 6px 8px; border-bottom: 1px solid #00ffcc33; }
-    .close-btn { float: right; font-size: 1.8rem; color: #00ffccaa; cursor: pointer; }
-    @media (min-width: 900px) {
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      font-size: 2.2rem;
+      color: #00ffccaa;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .modal-title {
+      color: #00ffcc;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      font-size: 1.6rem;
+      text-shadow: 0 0 10px #00ffcc;
+    }
+    .modal-chart-container {
+      height: calc(100% - 70px);
+    }
+    @media (min-width: 950px) {
       .content-wrapper { flex-direction: row; gap: 2rem; }
-      .chart-box { flex: 3; height: 380px; max-height: 50vh; }
-      .calendar-box { flex: 1; max-width: 380px; }
-      .calendar { gap: 8px; }
-      .day {
-        padding: 10px 6px;
-        font-size: 1rem;
-        min-height: 50px;
-      }
+      .charts-grid { flex: 3; }
+      .calendar-box { flex: 1; max-width: 420px; min-width: 360px; }
+      .chart-card { height: 260px; }
+      .chart-container { height: 200px; }
     }
-    @media (min-width: 1200px) {
-      .calendar-box { max-width: 420px; }
-      .day { font-size: 1.05rem; padding: 12px 8px; }
+    @media (min-width: 1300px) {
+      .calendar-box { max-width: 460px; }
+      .day { font-size: 1.05rem; padding: 12px 6px; min-height: 56px; }
     }
   </style>
 </head>
 <body>
   <header>
     <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
-    <h1>Estación Meteorológica • Zafra</h1>
+    <h1>Estación Meteorológica Maximilian 23</h1>
   </header>
 
   <div class="main-container">
     <div class="content-wrapper">
-      <div class="chart-box">
-        <canvas id="meteoChart"></canvas>
-        <div class="legend">
-          <div class="legend-item"><div class="color-box" style="background:#00ffcc"></div>Temp Indoor</div>
-          <div class="legend-item"><div class="color-box" style="background:#ffaa00"></div>Temp Outdoor</div>
-          <div class="legend-item"><div class="color-box" style="background:#88ddff"></div>Hum Indoor</div>
-          <div class="legend-item"><div class="color-box" style="background:#aaff88"></div>Hum Outdoor</div>
-          <div class="legend-item"><div class="color-box" style="background:#ff66aa"></div>Viento</div>
+      <div class="charts-grid">
+        <div class="chart-card" data-type="temp_indoor" onclick="openModalChart(this)">
+          <h3>Temp Indoor (°C)</h3>
+          <div class="chart-container"><canvas id="chart-temp-indoor"></canvas></div>
+        </div>
+        <div class="chart-card" data-type="temp_outdoor" onclick="openModalChart(this)">
+          <h3>Temp Outdoor (°C)</h3>
+          <div class="chart-container"><canvas id="chart-temp-outdoor"></canvas></div>
+        </div>
+        <div class="chart-card" data-type="hum_indoor" onclick="openModalChart(this)">
+          <h3>Hum Indoor (%)</h3>
+          <div class="chart-container"><canvas id="chart-hum-indoor"></canvas></div>
+        </div>
+        <div class="chart-card" data-type="hum_outdoor" onclick="openModalChart(this)">
+          <h3>Hum Outdoor (%)</h3>
+          <div class="chart-container"><canvas id="chart-hum-outdoor"></canvas></div>
+        </div>
+        <div class="chart-card" data-type="wind_speed" onclick="openModalChart(this)">
+          <h3>Viento (km/h)</h3>
+          <div class="chart-container"><canvas id="chart-wind"></canvas></div>
         </div>
       </div>
 
       <div class="calendar-box">
-        <!-- Mes y año visibles encima del calendario -->
         <div class="month-title" id="monthYear"></div>
         <div class="calendar" id="calendar"></div>
       </div>
     </div>
   </div>
 
+  <!-- Modal para detalle del día -->
   <div class="modal" id="dayModal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width:420px; height:auto;">
       <span class="close-btn" onclick="document.getElementById('dayModal').style.display='none'">×</span>
       <h3 id="modalTitle">Datos del día</h3>
       <table id="dayDataTable"><tbody></tbody></table>
     </div>
   </div>
 
+  <!-- Modal para gráfico grande -->
+  <div class="modal" id="chartModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="document.getElementById('chartModal').style.display='none'">×</span>
+      <div class="modal-title" id="modalChartTitle"></div>
+      <div class="modal-chart-container"><canvas id="modalChartCanvas"></canvas></div>
+    </div>
+  </div>
+
   <script>
     const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
     const KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
-    let chart;
     let allData = [];
-
+    let smallCharts = {};
+    let modalChart = null;
     const hoy = new Date();
     const año = hoy.getFullYear();
     const mes = hoy.getMonth();
-
-    // Meses en español
     const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
     document.getElementById("monthYear").textContent = `${meses[mes]} ${año}`;
+
+    const chartConfigs = {
+      temp_indoor:    { label: "Temp Indoor °C",    color: "#00ffcc", unit: "°C" },
+      temp_outdoor:   { label: "Temp Outdoor °C",   color: "#ffaa00", unit: "°C" },
+      hum_indoor:     { label: "Hum Indoor %",      color: "#88ddff", unit: "%"  },
+      hum_outdoor:    { label: "Hum Outdoor %",     color: "#aaff88", unit: "%"  },
+      wind_speed:     { label: "Viento km/h",       color: "#ff66aa", unit: "km/h" }
+    };
 
     function crearCalendario(datos) {
       const cal = document.getElementById("calendar");
@@ -219,14 +263,13 @@
         vacio.className = "day";
         cal.appendChild(vacio);
       }
-
       for (let i = 1; i <= diasMes; i++) {
         const fecha = `${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`;
         const d = document.createElement("div");
         d.className = "day";
         d.textContent = i;
         if (diasConDatos.has(fecha)) d.classList.add("hasdata");
-        if (i === hoy.getDate()) d.classList.add("today");
+        if (i === hoy.getDate() && mes === hoy.getMonth() && año === hoy.getFullYear()) d.classList.add("today");
         d.onclick = () => mostrarDatosDia(fecha, datos);
         cal.appendChild(d);
       }
@@ -240,88 +283,150 @@
 
       if (dato) {
         const campos = [
-          ["Temp Indoor", dato.temp_indoor],
-          ["Hum Indoor", dato.hum_indoor],
-          ["Temp Outdoor", dato.temp_outdoor],
-          ["Hum Outdoor", dato.hum_outdoor],
-          ["Viento", dato.wind_speed],
-          ["Ráfaga", dato.wind_gust],
-          ["Dirección", dato.wind_direction],
-          ["Sensación", dato.wind_chill],
-          ["Lluvia", dato.rain],
-          ["Presión", dato.pressure]
+          ["Temp Indoor", dato.temp_indoor, "°C"],
+          ["Hum Indoor", dato.hum_indoor, "%"],
+          ["Temp Outdoor", dato.temp_outdoor, "°C"],
+          ["Hum Outdoor", dato.hum_outdoor, "%"],
+          ["Viento", dato.wind_speed, "km/h"],
+          ["Ráfaga", dato.wind_gust, "km/h"],
+          ["Dirección", dato.wind_direction, "°"],
+          ["Sensación", dato.wind_chill, "°C"],
+          ["Lluvia", dato.rain, "mm"],
+          ["Presión", dato.pressure, "hPa"]
         ];
-        campos.forEach(([label, value]) => {
-          if (value !== undefined && value !== "") {
+        campos.forEach(([label, value, unit]) => {
+          if (value !== undefined && value !== "" && value !== null) {
             const tr = document.createElement("tr");
-            tr.innerHTML = `<td style="font-weight:bold;color:#00ffccaa;">${label}:</td><td>${value}</td>`;
+            tr.innerHTML = `<td style="font-weight:bold;color:#00ffccaa;">${label}:</td><td>${value}${unit ? ' ' + unit : ''}</td>`;
             tbody.appendChild(tr);
           }
         });
       } else {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:1.2rem;">Sin datos para este día</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:1.8rem;">Sin datos para este día</td></tr>';
       }
       document.getElementById("dayModal").style.display = "flex";
     }
 
-    function initChart(datos) {
-      const ctx = document.getElementById("meteoChart").getContext("2d");
-      if (chart) chart.destroy();
+    function createSmallChart(canvasId, type) {
+      const ctx = document.getElementById(canvasId).getContext("2d");
+      const cfg = chartConfigs[type];
+      const data = allData.map(d => parseFloat(d[type])).filter(v => !isNaN(v));
+      const labels = allData.map(d => d.fecha.slice(5));
 
-      const labels = datos.map(d => d.fecha.slice(5));
-      const datasets = [
-        { label: "Temp Indoor °C", data: datos.map(d => parseFloat(d.temp_indoor)), borderColor: "#00ffcc", tension: 0.3, yAxisID: "y" },
-        { label: "Temp Outdoor °C", data: datos.map(d => parseFloat(d.temp_outdoor)), borderColor: "#ffaa00", tension: 0.3, yAxisID: "y" },
-        { label: "Humedad Indoor %", data: datos.map(d => parseFloat(d.hum_indoor)), borderColor: "#88ddff", tension: 0.3, yAxisID: "y1" },
-        { label: "Humedad Outdoor %", data: datos.map(d => parseFloat(d.hum_outdoor)), borderColor: "#aaff88", tension: 0.3, yAxisID: "y1" },
-        { label: "Viento km/h", data: datos.map(d => parseFloat(d.wind_speed)), borderColor: "#ff66aa", tension: 0.3, yAxisID: "y" }
-      ].filter(ds => ds.data.some(v => !isNaN(v)));
+      if (data.length === 0) return;
 
-      chart = new Chart(ctx, {
+      return new Chart(ctx, {
         type: "line",
-        data: { labels, datasets },
+        data: {
+          labels,
+          datasets: [{
+            label: cfg.label,
+            data,
+            borderColor: cfg.color,
+            backgroundColor: cfg.color + "22",
+            tension: 0.3,
+            pointRadius: 2,
+            borderWidth: 2
+          }]
+        },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { position: "left", title: { display: true, text: "Temp / Viento" } },
-            y1: { position: "right", title: { display: true, text: "Humedad %" }, grid: { drawOnChartArea: false } },
-            x: { title: { display: true, text: "Fecha" } }
+            x: { display: false },
+            y: {
+              title: { display: false },
+              ticks: { font: { size: 10 } }
+            }
           },
-          plugins: { legend: { display: false } }
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          },
+          elements: { point: { radius: 0, hoverRadius: 4 } }
         }
       });
+    }
+
+    function openModalChart(card) {
+      const type = card.dataset.type;
+      const cfg = chartConfigs[type];
+      document.getElementById("modalChartTitle").textContent = cfg.label;
+
+      if (modalChart) modalChart.destroy();
+
+      const ctx = document.getElementById("modalChartCanvas").getContext("2d");
+      const data = allData.map(d => parseFloat(d[type])).filter(v => !isNaN(v));
+      const labels = allData.map(d => d.fecha);
+
+      modalChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: cfg.label,
+            data,
+            borderColor: cfg.color,
+            backgroundColor: cfg.color + "33",
+            tension: 0.3,
+            pointRadius: 3,
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: "Fecha", color: "#e6edf3" } },
+            y: { title: { display: true, text: cfg.unit, color: "#e6edf3" } }
+          },
+          plugins: {
+            legend: { display: true, labels: { color: "#e6edf3" } }
+          }
+        }
+      });
+
+      document.getElementById("chartModal").style.display = "flex";
     }
 
     async function cargar() {
       try {
         const timestamp = Date.now();
         const url = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${timestamp}`;
-
         const res = await fetch(url, {
           cache: "no-store",
           headers: {
             "X-Master-Key": KEY,
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache"
+            "Cache-Control": "no-cache, no-store, must-revalidate"
           }
         });
-
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data = await res.json();
-        allData = data?.record?.meteo || [];
+        const json = await res.json();
+        allData = json?.record?.meteo || [];
 
         crearCalendario(allData);
-        initChart(allData);
+
+        // Crear gráficos pequeños
+        Object.keys(chartConfigs).forEach(type => {
+          const canvasId = `chart-${type.replace(/_/g, '-')}`;
+          smallCharts[type] = createSmallChart(canvasId, type);
+        });
+
       } catch (e) {
-        console.error("Error al cargar:", e);
-        document.querySelector(".chart-box").innerHTML = 
-          "<p style='text-align:center;padding:3rem;color:#ff6666;'>Error al cargar datos</p>";
+        console.error("Error al cargar datos:", e);
+        document.querySelector(".main-container").innerHTML += 
+          "<p style='text-align:center;padding:3rem;color:#ff6666;font-size:1.3rem;'>Error al cargar los datos meteorológicos</p>";
       }
     }
 
     cargar();
+
+    // Cerrar modales con click fuera
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = "none";
+      }
+    }
   </script>
 </body>
 </html>
