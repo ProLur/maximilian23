@@ -125,6 +125,13 @@ header h1 {
   transition: all 0.18s;
 }
 
+.day.today{
+background:#ff4444;
+color:white;
+font-weight:bold;
+border:2px solid #ff7777;
+box-shadow:0 0 10px rgba(255,0,0,0.6);
+}
 .day:hover {
   background: rgba(0,255,204,0.2);
   transform: scale(1.04);
