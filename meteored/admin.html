@@ -1,400 +1,116 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>Admin • Estación Maximilian 23</title>
-  <link rel="icon" href="https://maximilian23.com/Cabeza.png" />
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    /* Estilos adicionales SOLO para admin (no sobrescriben el styles.css principal) */
-    .admin-specific {
-      padding: 1.5rem 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
-    .month-selector {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1.2rem;
-      margin: 2rem 0;
-      flex-wrap: wrap;
-    }
+<title>Admin • Maximilian 23 Meteo</title>
 
-    .month-selector select,
-    .month-selector button {
-      background: rgba(0,255,204,0.12);
-      border: 2px solid #00ffcc77;
-      color: #00ffcc;
-      font-size: 1.3rem;
-      padding: 0.8rem 1.4rem;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.25s;
-    }
+<link rel="icon" href="https://maximilian23.com/Cabeza.png">
+<link rel="stylesheet" href="styles.css">
 
-    .month-selector select:hover,
-    .month-selector button:hover {
-      background: rgba(0,255,204,0.28);
-      border-color: #00ffcc;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,255,204,0.3);
-    }
-
-    .month-selector button {
-      width: 64px;
-      height: 64px;
-      font-size: 2.2rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-
-    .calendar {
-      gap: 12px !important;
-    }
-
-    .day {
-      min-height: 90px;
-      padding: clamp(22px, 5vw, 36px);
-      font-size: clamp(1.2rem, 4.2vw, 1.6rem);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-    }
-
-    .day-name {
-      color: #00ffcc;
-      font-size: 1.4rem;
-      font-weight: bold;
-      padding: 1.2rem 0 0.6rem;
-      text-align: center;
-    }
-
-    /* Pantalla de contraseña */
-    #password-screen {
-      position: fixed;
-      inset: 0;
-      background: rgba(13,17,23,0.98);
-      backdrop-filter: blur(12px);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2.5rem;
-      padding: 2rem;
-    }
-
-    #password-screen.hidden {
-      display: none;
-    }
-
-    #password-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.8rem;
-      width: 100%;
-      max-width: 420px;
-    }
-
-    #password-input {
-      padding: 1.3rem;
-      font-size: 1.5rem;
-      text-align: center;
-      background: #161b22;
-      border: 2px solid #00ffcc66;
-      border-radius: 12px;
-      color: #e6edf3;
-    }
-
-    #password-btn {
-      padding: 1.3rem;
-      font-size: 1.5rem;
-      background: linear-gradient(135deg, #00ffcc, #009988);
-      border: none;
-      border-radius: 12px;
-      color: #0d1117;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.25s;
-    }
-
-    #password-btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0,255,204,0.5);
-    }
-
-    #password-error {
-      color: #ff6666;
-      font-size: 1.3rem;
-      text-align: center;
-      min-height: 2rem;
-    }
-
-    /* Ajustes para modal en admin */
-    .modal-content {
-      max-width: 720px;
-    }
-
-    .form-grid {
-      gap: 1.4rem;
-    }
-
-    input {
-      font-size: 1.25rem;
-      padding: 1.1rem;
-    }
-
-    button[type="submit"] {
-      font-size: 1.45rem;
-      padding: 1.4rem;
-    }
-  </style>
 </head>
+
 <body>
 
-  <!-- Pantalla de contraseña (solo primera vez) -->
-  <div id="password-screen">
-    <h1 style="color:#00ffcc; font-size: clamp(2rem, 6vw, 2.8rem); text-shadow:0 0 14px #00ffcc;">
-      Panel Administración<br>Estación Maximilian 23
-    </h1>
-    <form id="password-form">
-      <input type="password" id="password-input" placeholder="Contraseña" autocomplete="off" />
-      <button type="submit" id="password-btn">Acceder</button>
-      <div id="password-error"></div>
-    </form>
-  </div>
+<header>
+<img src="https://maximilian23.com/Cabeza.png">
+<h1>Weather Station Admin</h1>
+</header>
 
-  <div class="admin-specific" id="main-content" style="display:none;">
-    <div class="month-selector">
-      <button onclick="cambiarMes(-1)">←</button>
-      <select id="mesSelect" onchange="cambiarMesSelect()"></select>
-      <select id="anioSelect" onchange="cambiarAnioSelect()"></select>
-      <button onclick="cambiarMes(1)">→</button>
-    </div>
 
-    <div class="calendar" id="calendar"></div>
-  </div>
+<div class="main-container">
 
-  <!-- Modal de edición -->
-  <div class="modal" id="dataModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="cerrarModal()">×</span>
-      <h3 id="fecha-title">Fecha: —</h3>
-      <form id="form">
-        <div class="form-grid">
-          <input id="temp_indoor"    placeholder="Temp Indoor °C"     type="number" step="0.1" />
-          <input id="hum_indoor"     placeholder="Hum Indoor %"       type="number" step="1"   />
-          <input id="temp_outdoor"   placeholder="Temp Outdoor °C"    type="number" step="0.1" />
-          <input id="hum_outdoor"    placeholder="Hum Outdoor %"      type="number" step="1"   />
-          <input id="pressure"       placeholder="Presión hPa"        type="number" step="0.1" />
-          <input id="wind_speed"     placeholder="Viento km/h"        type="number" step="0.1" />
-          <input id="wind_gust"      placeholder="Ráfaga km/h"        type="number" step="0.1" />
-          <input id="wind_direction" placeholder="Dirección viento"                            />
-          <input id="wind_chill"     placeholder="Sensación °C"       type="number" step="0.1" />
-          <input id="rain"           placeholder="Lluvia mm"          type="number" step="0.1" />
-        </div>
-        <button type="submit">Guardar / Actualizar</button>
-      </form>
-      <div id="message" class="message"></div>
-    </div>
-  </div>
+<form id="form">
 
-  <script>
-    const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
-    const KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
-    const PASSWORD = "SextoSexto";
-    const STORAGE_KEY = "meteo_admin_granted";
+<input id="fecha" type="date">
 
-    let currentDate = new Date();
-    let currentFecha = "";
+<input id="temp_indoor" placeholder="Temp Indoor °C">
+<input id="hum_indoor" placeholder="Hum Indoor %">
 
-    const passwordScreen = document.getElementById("password-screen");
-    const mainContent   = document.getElementById("main-content");
+<input id="temp_outdoor" placeholder="Temp Outdoor °C">
+<input id="hum_outdoor" placeholder="Hum Outdoor %">
 
-    // Verificar acceso previo
-    if (localStorage.getItem(STORAGE_KEY) === "true") {
-      passwordScreen.classList.add("hidden");
-      mainContent.style.display = "block";
-      initAdmin();
-    } else {
-      document.getElementById("password-form").onsubmit = e => {
-        e.preventDefault();
-        const input = document.getElementById("password-input").value;
-        if (input === PASSWORD) {
-          localStorage.setItem(STORAGE_KEY, "true");
-          passwordScreen.classList.add("hidden");
-          mainContent.style.display = "block";
-          initAdmin();
-        } else {
-          document.getElementById("password-error").textContent = "Contraseña incorrecta";
-          document.getElementById("password-input").value = "";
-        }
-      };
-    }
+<input id="pressure" placeholder="Pressure hPa">
 
-    function initAdmin() {
-      const mesSelect  = document.getElementById("mesSelect");
-      const anioSelect = document.getElementById("anioSelect");
+<input id="wind_speed" placeholder="Wind Speed km/h">
+<input id="wind_gust" placeholder="Wind Gust km/h">
+<input id="wind_direction" placeholder="Wind Direction °">
 
-      // Llenar meses
-      ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
-        .forEach((mes, i) => {
-          const opt = document.createElement("option");
-          opt.value = i;
-          opt.textContent = mes;
-          mesSelect.appendChild(opt);
-        });
+<input id="wind_chill" placeholder="Wind Chill °C">
 
-      // Llenar años (rango razonable)
-      const añoActual = new Date().getFullYear();
-      for (let y = añoActual - 4; y <= añoActual + 6; y++) {
-        const opt = document.createElement("option");
-        opt.value = y;
-        opt.textContent = y;
-        anioSelect.appendChild(opt);
-      }
+<input id="rain" placeholder="Rain mm">
 
-      mesSelect.value  = currentDate.getMonth();
-      anioSelect.value = currentDate.getFullYear();
+<button type="submit">Save</button>
 
-      window.cambiarMes = dir => {
-        currentDate.setMonth(currentDate.getMonth() + dir);
-        mesSelect.value = currentDate.getMonth();
-        anioSelect.value = currentDate.getFullYear();
-        crearCalendario();
-      };
+</form>
 
-      window.cambiarMesSelect = () => {
-        currentDate.setMonth(parseInt(mesSelect.value));
-        crearCalendario();
-      };
+<div id="message"></div>
 
-      window.cambiarAnioSelect = () => {
-        currentDate.setFullYear(parseInt(anioSelect.value));
-        crearCalendario();
-      };
+</div>
 
-      crearCalendario();
-    }
+<script>
 
-    // ────────────────────────────────────────────────
-    //  Funciones del calendario y guardado (igual que antes)
-    // ────────────────────────────────────────────────
+const BIN_ID="69aaa6b0d0ea881f40f4bc92";
+const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
 
-    function crearCalendario() {
-      const cal = document.getElementById("calendar");
-      cal.innerHTML = "";
+document.getElementById("form").onsubmit=async e=>{
 
-      const year  = currentDate.getFullYear();
-      const month = currentDate.getMonth();
+e.preventDefault();
 
-      ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"].forEach(d => {
-        const div = document.createElement("div");
-        div.className = "day-name";
-        div.textContent = d;
-        cal.appendChild(div);
-      });
+const nuevo={
 
-      const hoy = new Date();
-      const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;
+fecha:document.getElementById("fecha").value,
+temp_indoor:document.getElementById("temp_indoor").value,
+hum_indoor:document.getElementById("hum_indoor").value,
+temp_outdoor:document.getElementById("temp_outdoor").value,
+hum_outdoor:document.getElementById("hum_outdoor").value,
+pressure:document.getElementById("pressure").value,
+wind_speed:document.getElementById("wind_speed").value,
+wind_gust:document.getElementById("wind_gust").value,
+wind_direction:document.getElementById("wind_direction").value,
+wind_chill:document.getElementById("wind_chill").value,
+rain:document.getElementById("rain").value
 
-      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${Date.now()}`, {
-        cache: "no-store",
-        headers: { "X-Master-Key": KEY }
-      })
-      .then(r => r.json())
-      .then(data => {
-        const meteo = data?.record?.meteo || [];
-        const conDatos = new Set(meteo.map(d => d.fecha));
+};
 
-        const primerDia = new Date(year, month, 1).getDay() || 7;
-        const diasMes = new Date(year, month + 1, 0).getDate();
+try{
 
-        for (let i = 1; i < primerDia; i++) {
-          cal.appendChild(Object.assign(document.createElement("div"), {className:"day disabled"}));
-        }
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
+headers:{"X-Master-Key":KEY}
+});
 
-        for (let i = 1; i <= diasMes; i++) {
-          const fecha = `${year}-${String(month+1).padStart(2,"0")}-${String(i).padStart(2,"0")}`;
-          const d = document.createElement("div");
-          d.className = "day";
-          d.textContent = i;
-          if (fecha === hoyStr) d.classList.add("today");
-          if (conDatos.has(fecha)) d.classList.add("hasdata");
-          d.onclick = () => abrirModal(fecha, meteo);
-          cal.appendChild(d);
-        }
-      });
-    }
+const data=await res.json();
 
-    function abrirModal(fecha, datos) {
-      currentFecha = fecha;
-      document.getElementById("fecha-title").textContent = `Editando: ${fecha}`;
-      document.getElementById("dataModal").style.display = "flex";
+let meteo=data.record.meteo || [];
 
-      const dato = datos.find(d => d.fecha === fecha) || {};
-      ["temp_indoor","hum_indoor","temp_outdoor","hum_outdoor","pressure","wind_speed","wind_gust","wind_direction","wind_chill","rain"]
-        .forEach(id => document.getElementById(id).value = dato[id] ?? "");
-    }
+meteo.push(nuevo);
 
-    function cerrarModal() {
-      document.getElementById("dataModal").style.display = "none";
-    }
+await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+"X-Master-Key":KEY
+},
+body:JSON.stringify({meteo})
+});
 
-    document.getElementById("dataModal").onclick = e => {
-      if (e.target.id === "dataModal") cerrarModal();
-    };
+document.getElementById("message").innerText="Saved";
 
-    document.getElementById("form").onsubmit = async e => {
-      e.preventDefault();
-      const msg = document.getElementById("message");
-      msg.textContent = "Guardando...";
+}
 
-      const nuevo = {
-        fecha: currentFecha,
-        temp_indoor:    document.getElementById("temp_indoor").value,
-        hum_indoor:     document.getElementById("hum_indoor").value,
-        temp_outdoor:   document.getElementById("temp_outdoor").value,
-        hum_outdoor:    document.getElementById("hum_outdoor").value,
-        pressure:       document.getElementById("pressure").value,
-        wind_speed:     document.getElementById("wind_speed").value,
-        wind_gust:      document.getElementById("wind_gust").value,
-        wind_direction: document.getElementById("wind_direction").value,
-        wind_chill:     document.getElementById("wind_chill").value,
-        rain:           document.getElementById("rain").value
-      };
+catch(err){
 
-      try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { "X-Master-Key": KEY }
-        });
-        const data = await res.json();
-        let meteo = data.record.meteo || [];
+document.getElementById("message").innerText="Error";
 
-        const idx = meteo.findIndex(d => d.fecha === currentFecha);
-        idx !== -1 ? meteo[idx] = {...meteo[idx], ...nuevo} : meteo.push(nuevo);
+}
 
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json", "X-Master-Key": KEY },
-          body: JSON.stringify({ meteo })
-        });
+}
 
-        msg.textContent = "¡Guardado!";
-        msg.className = "message success";
-        setTimeout(() => { cerrarModal(); crearCalendario(); }, 1200);
-      } catch (err) {
-        msg.textContent = "Error: " + err.message;
-        msg.className = "message error";
-      }
-    };
-  </script>
+</script>
+
 </body>
 </html>
