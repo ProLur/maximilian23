@@ -64,8 +64,13 @@
       background: var(--bg-panel);
       border-right: 2px solid var(--accent);
       position: relative;
-      overflow: hidden;               /* ← Esto bloquea el scroll con la rueda */
+      overflow-y: auto;
+      overflow-x: hidden;
       padding: 20px 0 100px 0;
+      scrollbar-width: none; /* Firefox */
+    }
+    .left-panel::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
     }
     .buttons-top {
       display: flex;
@@ -125,6 +130,7 @@
       display: flex;
       flex-direction: column;
       background: var(--bg-panel);
+      min-width: 0;
     }
     @media (min-width: 768px) {
       .left-panel { display: flex; flex-direction: column; }
@@ -184,6 +190,7 @@
       outline: none;
       background: #f8f9fa;
       color: #000;
+      min-width: 0;
     }
     button {
       background: var(--accent);
@@ -195,6 +202,7 @@
       font-weight: bold;
       font-size: 15px;
       color: #000;
+      flex-shrink: 0;
     }
     #policyButton {
       position: fixed;
