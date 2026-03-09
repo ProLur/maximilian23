@@ -70,11 +70,13 @@
       cursor: pointer;
       background: none;
       border: none;
-      padding: 4px;
+      padding: 4px 8px;
       line-height: 1;
       transition: transform 0.2s;
+      top: 50%;
+      transform: translateY(-50%);
     }
-    #hamburger:hover { transform: scale(1.15); }
+    #hamburger:hover { transform: translateY(-50%) scale(1.15); }
     @media (max-width: 767px) {
       #hamburger { display: block; }
     }
@@ -95,6 +97,8 @@
       height: 100dvh;
       z-index: 1001;
       width: clamp(260px, 75vw, 320px);
+      overflow-y: auto;
+      flex-direction: column;
       animation: slideIn 0.25s ease;
     }
     @keyframes slideIn {
@@ -172,6 +176,7 @@
       text-align: center;
       width: 70%;
       max-width: 180px;
+      flex-shrink: 0;
     }
     .left-panel img {
       width: 100%;
@@ -372,17 +377,22 @@
 
     function linkify(t) {
       return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
-        u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+        u => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);
     }
 
     function typeWriterEffect(el, text, delay = 28, done = null) {
-      let i = 0; el.innerHTML = "";
+      let i = 0;
+      el.textContent = "";
       function step() {
         if (i < text.length) {
-          el.innerHTML = text.substring(0, ++i);
+          i++;
+          // Escribir como texto plano durante el efecto
+          el.textContent = text.substring(0, i);
           if (i % 4 === 0) scrollBottom();
           setTimeout(step, delay);
         } else {
+          // Solo al terminar, convertir URLs en enlaces
+          el.innerHTML = linkify(text);
           scrollBottom();
           if (done) done();
         }
