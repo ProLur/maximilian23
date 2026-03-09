@@ -1,267 +1,374 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>Meteo • Zafra • Maximilian23</title>
-  <link rel="icon" href="https://maximilian23.com/Cabeza.png">
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<title>Meteo • Zafra • Maximilian23</title>
+
+<link rel="icon" href="https://maximilian23.com/Cabeza.png">
+<link rel="stylesheet" href="styles.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-  <header>
-    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
-    <h1>Estación Meteorológica Maximilian 23</h1>
-  </header>
 
-  <div class="main-container">
-    <div class="content-wrapper">
-      <div class="charts-grid">
-        <div class="chart-card" data-type="temp_indoor" onclick="openModalChart(this)">
-          <h3>Temp Indoor (°C)</h3>
-          <div class="chart-container"><canvas id="chart-temp-indoor"></canvas></div>
-        </div>
-        <div class="chart-card" data-type="temp_outdoor" onclick="openModalChart(this)">
-          <h3>Temp Outdoor (°C)</h3>
-          <div class="chart-container"><canvas id="chart-temp-outdoor"></canvas></div>
-        </div>
-        <div class="chart-card" data-type="hum_indoor" onclick="openModalChart(this)">
-          <h3>Hum Indoor (%)</h3>
-          <div class="chart-container"><canvas id="chart-hum-indoor"></canvas></div>
-        </div>
-        <div class="chart-card" data-type="hum_outdoor" onclick="openModalChart(this)">
-          <h3>Hum Outdoor (%)</h3>
-          <div class="chart-container"><canvas id="chart-hum-outdoor"></canvas></div>
-        </div>
-        <div class="chart-card" data-type="wind_speed" onclick="openModalChart(this)">
-          <h3>Viento (km/h)</h3>
-          <div class="chart-container"><canvas id="chart-wind"></canvas></div>
-        </div>
-      </div>
+<header>
+<img src="https://maximilian23.com/Cabeza.png">
+<h1>Estación Meteorológica Maximilian 23</h1>
+</header>
 
-      <div class="calendar-box">
-        <div class="month-title" id="monthYear"></div>
-        <div class="calendar" id="calendar"></div>
-      </div>
-    </div>
-  </div>
+<div class="main-container">
 
-  <!-- Modal para detalle del día -->
-  <div class="modal" id="dayModal">
-    <div class="modal-content" style="max-width:420px; height:auto;">
-      <span class="close-btn" onclick="document.getElementById('dayModal').style.display='none'">×</span>
-      <h3 id="modalTitle">Datos del día</h3>
-      <table id="dayDataTable"><tbody></tbody></table>
-    </div>
-  </div>
+<div class="content-wrapper">
 
-  <!-- Modal para gráfico grande -->
-  <div class="modal" id="chartModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="document.getElementById('chartModal').style.display='none'">×</span>
-      <div class="modal-title" id="modalChartTitle"></div>
-      <div class="modal-chart-container"><canvas id="modalChartCanvas"></canvas></div>
-    </div>
-  </div>
+<div class="charts-grid">
 
-  <script>
-    // Aquí va todo el JavaScript que ya tenías (sin cambios)
-    const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
-    const KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
-    let allData = [];
-    let smallCharts = {};
-    let modalChart = null;
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = hoy.getMonth();
-    const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    document.getElementById("monthYear").textContent = `${meses[mes]} ${año}`;
+<div class="chart-card" data-type="temp_indoor" onclick="openModalChart(this)">
+<h3>Temp Indoor (°C)</h3>
+<div class="chart-container">
+<canvas id="chart-temp-indoor"></canvas>
+</div>
+</div>
 
-    const chartConfigs = {
-      temp_indoor:    { label: "Temp Indoor °C",    color: "#00ffcc", unit: "°C" },
-      temp_outdoor:   { label: "Temp Outdoor °C",   color: "#ffaa00", unit: "°C" },
-      hum_indoor:     { label: "Hum Indoor %",      color: "#88ddff", unit: "%"  },
-      hum_outdoor:    { label: "Hum Outdoor %",     color: "#aaff88", unit: "%"  },
-      wind_speed:     { label: "Viento km/h",       color: "#ff66aa", unit: "km/h" }
-    };
+<div class="chart-card" data-type="temp_outdoor" onclick="openModalChart(this)">
+<h3>Temp Outdoor (°C)</h3>
+<div class="chart-container">
+<canvas id="chart-temp-outdoor"></canvas>
+</div>
+</div>
 
-    function crearCalendario(datos) {
-      const cal = document.getElementById("calendar");
-      cal.innerHTML = "";
-      const diasConDatos = new Set(datos.map(d => d.fecha));
-      const primerDia = new Date(año, mes, 1).getDay() || 7;
-      const diasMes = new Date(año, mes + 1, 0).getDate();
+<div class="chart-card" data-type="hum_indoor" onclick="openModalChart(this)">
+<h3>Hum Indoor (%)</h3>
+<div class="chart-container">
+<canvas id="chart-hum-indoor"></canvas>
+</div>
+</div>
 
-      for (let i = 1; i < primerDia; i++) {
-        const vacio = document.createElement("div");
-        vacio.className = "day";
-        cal.appendChild(vacio);
-      }
-      for (let i = 1; i <= diasMes; i++) {
-        const fecha = `${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`;
-        const d = document.createElement("div");
-        d.className = "day";
-        d.textContent = i;
-        if (diasConDatos.has(fecha)) d.classList.add("hasdata");
-        if (i === hoy.getDate() && mes === hoy.getMonth() && año === hoy.getFullYear()) d.classList.add("today");
-        d.onclick = () => mostrarDatosDia(fecha, datos);
-        cal.appendChild(d);
-      }
-    }
+<div class="chart-card" data-type="hum_outdoor" onclick="openModalChart(this)">
+<h3>Hum Outdoor (%)</h3>
+<div class="chart-container">
+<canvas id="chart-hum-outdoor"></canvas>
+</div>
+</div>
 
-    function mostrarDatosDia(fecha, datos) {
-      const dato = datos.find(d => d.fecha === fecha);
-      const tbody = document.getElementById("dayDataTable").querySelector("tbody");
-      tbody.innerHTML = "";
-      document.getElementById("modalTitle").textContent = `Datos: ${fecha}`;
+<div class="chart-card" data-type="wind_speed" onclick="openModalChart(this)">
+<h3>Viento (km/h)</h3>
+<div class="chart-container">
+<canvas id="chart-wind-speed"></canvas>
+</div>
+</div>
 
-      if (dato) {
-        const campos = [
-          ["Temp Indoor", dato.temp_indoor, "°C"],
-          ["Hum Indoor", dato.hum_indoor, "%"],
-          ["Temp Outdoor", dato.temp_outdoor, "°C"],
-          ["Hum Outdoor", dato.hum_outdoor, "%"],
-          ["Viento", dato.wind_speed, "km/h"],
-          ["Ráfaga", dato.wind_gust, "km/h"],
-          ["Dirección", dato.wind_direction, "°"],
-          ["Sensación", dato.wind_chill, "°C"],
-          ["Lluvia", dato.rain, "mm"],
-          ["Presión", dato.pressure, "hPa"]
-        ];
-        campos.forEach(([label, value, unit]) => {
-          if (value !== undefined && value !== "" && value !== null) {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td style="font-weight:bold;color:#00ffccaa;">${label}:</td><td>${value}${unit ? ' ' + unit : ''}</td>`;
-            tbody.appendChild(tr);
-          }
-        });
-      } else {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:1.8rem;">Sin datos para este día</td></tr>';
-      }
-      document.getElementById("dayModal").style.display = "flex";
-    }
+</div>
 
-    function createSmallChart(canvasId, type) {
-      const ctx = document.getElementById(canvasId).getContext("2d");
-      const cfg = chartConfigs[type];
-      const data = allData.map(d => parseFloat(d[type])).filter(v => !isNaN(v));
-      const labels = allData.map(d => d.fecha.slice(5));
+<div class="calendar-box">
+<div class="month-title" id="monthYear"></div>
+<div class="calendar" id="calendar"></div>
+</div>
 
-      if (data.length === 0) return;
+</div>
+</div>
 
-      return new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            label: cfg.label,
-            data,
-            borderColor: cfg.color,
-            backgroundColor: cfg.color + "22",
-            tension: 0.3,
-            pointRadius: 2,
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { display: false },
-            y: {
-              title: { display: false },
-              ticks: { font: { size: 10 } }
-            }
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-          },
-          elements: { point: { radius: 0, hoverRadius: 4 } }
-        }
-      });
-    }
 
-    function openModalChart(card) {
-      const type = card.dataset.type;
-      const cfg = chartConfigs[type];
-      document.getElementById("modalChartTitle").textContent = cfg.label;
+<!-- MODAL DIA -->
 
-      if (modalChart) modalChart.destroy();
+<div class="modal" id="dayModal">
+<div class="modal-content" style="max-width:420px;height:auto;">
+<span class="close-btn" onclick="document.getElementById('dayModal').style.display='none'">×</span>
+<h3 id="modalTitle">Datos del día</h3>
+<table id="dayDataTable"><tbody></tbody></table>
+</div>
+</div>
 
-      const ctx = document.getElementById("modalChartCanvas").getContext("2d");
-      const data = allData.map(d => parseFloat(d[type])).filter(v => !isNaN(v));
-      const labels = allData.map(d => d.fecha);
 
-      modalChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            label: cfg.label,
-            data,
-            borderColor: cfg.color,
-            backgroundColor: cfg.color + "33",
-            tension: 0.3,
-            pointRadius: 3,
-            borderWidth: 3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { title: { display: true, text: "Fecha", color: "#e6edf3" } },
-            y: { title: { display: true, text: cfg.unit, color: "#e6edf3" } }
-          },
-          plugins: {
-            legend: { display: true, labels: { color: "#e6edf3" } }
-          }
-        }
-      });
+<!-- MODAL GRAFICO -->
 
-      document.getElementById("chartModal").style.display = "flex";
-    }
+<div class="modal" id="chartModal">
+<div class="modal-content">
+<span class="close-btn" onclick="document.getElementById('chartModal').style.display='none'">×</span>
+<div class="modal-title" id="modalChartTitle"></div>
+<div class="modal-chart-container">
+<canvas id="modalChartCanvas"></canvas>
+</div>
+</div>
+</div>
 
-    async function cargar() {
-      try {
-        const timestamp = Date.now();
-        const url = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${timestamp}`;
-        const res = await fetch(url, {
-          cache: "no-store",
-          headers: {
-            "X-Master-Key": KEY,
-            "Cache-Control": "no-cache, no-store, must-revalidate"
-          }
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        allData = json?.record?.meteo || [];
 
-        crearCalendario(allData);
 
-        Object.keys(chartConfigs).forEach(type => {
-          const canvasId = `chart-${type.replace(/_/g, '-')}`;
-          smallCharts[type] = createSmallChart(canvasId, type);
-        });
+<script>
 
-      } catch (e) {
-        console.error("Error al cargar datos:", e);
-        document.querySelector(".main-container").innerHTML += 
-          "<p style='text-align:center;padding:3rem;color:#ff6666;font-size:1.3rem;'>Error al cargar los datos meteorológicos</p>";
-      }
-    }
+const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
+const KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
 
-    cargar();
+let allData = [];
+let smallCharts = {};
+let modalChart = null;
 
-    window.onclick = function(event) {
-      if (event.target.classList.contains('modal')) {
-        event.target.style.display = "none";
-      }
-    }
-  </script>
+const hoy = new Date();
+const año = hoy.getFullYear();
+const mes = hoy.getMonth();
+
+const meses = [
+"Enero","Febrero","Marzo","Abril","Mayo","Junio",
+"Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+document.getElementById("monthYear").textContent =
+`${meses[mes]} ${año}`;
+
+
+
+const chartConfigs = {
+
+temp_indoor:{label:"Temp Indoor °C",color:"#00ffcc",unit:"°C"},
+temp_outdoor:{label:"Temp Outdoor °C",color:"#ffaa00",unit:"°C"},
+hum_indoor:{label:"Hum Indoor %",color:"#88ddff",unit:"%"},
+hum_outdoor:{label:"Hum Outdoor %",color:"#aaff88",unit:"%"},
+wind_speed:{label:"Viento km/h",color:"#ff66aa",unit:"km/h"}
+
+};
+
+
+
+function crearCalendario(datos){
+
+const cal = document.getElementById("calendar");
+cal.innerHTML="";
+
+const diasConDatos=new Set(datos.map(d=>d.fecha));
+
+const primerDia=new Date(año,mes,1).getDay()||7;
+const diasMes=new Date(año,mes+1,0).getDate();
+
+for(let i=1;i<primerDia;i++){
+
+const vacio=document.createElement("div");
+vacio.className="day";
+cal.appendChild(vacio);
+
+}
+
+for(let i=1;i<=diasMes;i++){
+
+const fecha=`${año}-${(mes+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`;
+
+const d=document.createElement("div");
+
+d.className="day";
+d.textContent=i;
+
+if(diasConDatos.has(fecha))
+d.classList.add("hasdata");
+
+if(i===hoy.getDate())
+d.classList.add("today");
+
+d.onclick=()=>mostrarDatosDia(fecha,datos);
+
+cal.appendChild(d);
+
+}
+
+}
+
+
+
+function mostrarDatosDia(fecha,datos){
+
+const dato=datos.find(d=>d.fecha===fecha);
+
+const tbody=document.getElementById("dayDataTable").querySelector("tbody");
+
+tbody.innerHTML="";
+
+document.getElementById("modalTitle").textContent=`Datos: ${fecha}`;
+
+if(dato){
+
+const campos=[
+
+["Temp Indoor",dato.temp_indoor,"°C"],
+["Hum Indoor",dato.hum_indoor,"%"],
+["Temp Outdoor",dato.temp_outdoor,"°C"],
+["Hum Outdoor",dato.hum_outdoor,"%"],
+["Viento",dato.wind_speed,"km/h"],
+["Ráfaga",dato.wind_gust,"km/h"],
+["Dirección",dato.wind_direction,"°"],
+["Sensación",dato.wind_chill,"°C"],
+["Lluvia",dato.rain,"mm"],
+["Presión",dato.pressure,"hPa"]
+
+];
+
+campos.forEach(([label,value,unit])=>{
+
+if(value!==undefined&&value!==""&&value!==null){
+
+const tr=document.createElement("tr");
+
+tr.innerHTML=`<td style="font-weight:bold;color:#00ffccaa;">${label}:</td><td>${value} ${unit}</td>`;
+
+tbody.appendChild(tr);
+
+}
+
+});
+
+}
+
+else{
+
+tbody.innerHTML='<tr><td colspan="2" style="text-align:center;padding:1.8rem;">Sin datos</td></tr>';
+
+}
+
+document.getElementById("dayModal").style.display="flex";
+
+}
+
+
+
+function createSmallChart(canvasId,type){
+
+const canvas=document.getElementById(canvasId);
+
+if(!canvas) return;
+
+const ctx=canvas.getContext("2d");
+
+const cfg=chartConfigs[type];
+
+const data=allData.map(d=>parseFloat(d[type])).filter(v=>!isNaN(v));
+
+const labels=allData.map(d=>(d.fecha||"").slice(5));
+
+if(data.length===0) return;
+
+return new Chart(ctx,{
+type:"line",
+data:{
+labels,
+datasets:[{
+label:cfg.label,
+data,
+borderColor:cfg.color,
+backgroundColor:cfg.color+"22",
+tension:0.3,
+pointRadius:2,
+borderWidth:2
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}}
+}
+});
+
+}
+
+
+
+function openModalChart(card){
+
+const type=card.dataset.type;
+const cfg=chartConfigs[type];
+
+document.getElementById("modalChartTitle").textContent=cfg.label;
+
+if(modalChart) modalChart.destroy();
+
+const ctx=document.getElementById("modalChartCanvas").getContext("2d");
+
+const data=allData.map(d=>parseFloat(d[type])).filter(v=>!isNaN(v));
+
+const labels=allData.map(d=>d.fecha);
+
+modalChart=new Chart(ctx,{
+type:"line",
+data:{
+labels,
+datasets:[{
+label:cfg.label,
+data,
+borderColor:cfg.color,
+backgroundColor:cfg.color+"33",
+tension:0.3,
+pointRadius:3,
+borderWidth:3
+}]
+}
+});
+
+document.getElementById("chartModal").style.display="flex";
+
+}
+
+
+
+async function cargar(){
+
+try{
+
+const timestamp=Date.now();
+
+const url=`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${timestamp}`;
+
+const res=await fetch(url,{
+cache:"no-store",
+headers:{
+"X-Master-Key":KEY
+}
+});
+
+if(!res.ok)
+throw new Error(res.status);
+
+const json=await res.json();
+
+allData=json?.record?.meteo || json?.record || [];
+
+crearCalendario(allData);
+
+Object.keys(chartConfigs).forEach(type=>{
+
+const canvasId=`chart-${type.replace(/_/g,'-')}`;
+
+smallCharts[type]=createSmallChart(canvasId,type);
+
+});
+
+}
+
+catch(e){
+
+console.error(e);
+
+document.querySelector(".main-container").innerHTML+=
+"<p style='text-align:center;padding:3rem;color:#ff6666;font-size:1.3rem;'>Error al cargar datos meteorológicos</p>";
+
+}
+
+}
+
+cargar();
+
+
+window.onclick=function(event){
+
+if(event.target.classList.contains('modal')){
+
+event.target.style.display="none";
+
+}
+
+}
+
+</script>
+
 </body>
 </html>
