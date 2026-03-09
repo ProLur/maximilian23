@@ -484,7 +484,9 @@
     const duracionTiempoBase = { w:"1n", h:"2n", q:"4n", '8':"8n" };
     function getDurTiempo(dur) {
       const base = dur.replace('d','');
-      return duracionTiempoBase[base] || "4n";
+      const toneStr = duracionTiempoBase[base] || "4n";
+      // Tone.js acepta "2n." para notas con puntillo (×1.5 duración)
+      return dur.endsWith('d') ? toneStr + '.' : toneStr;
     }
 
     const tempoNames = {
@@ -498,6 +500,15 @@
       const [letter] = note.split("/");
       const clean = letter.replace('#','').replace('b','');
       return noteNameMap[clean] || clean;
+    }
+
+    // Convierte clave VexFlow + accidental guardado → nota Tone.js
+    // "g/4", null → "G4"  |  "e/4", "b" → "Eb4"  |  "f/5", "#" → "F#5"
+    function vexToTone(noteKey, accidental) {
+      const [letterPart, octave] = noteKey.split("/");
+      const letter = letterPart.replace(/[#b]/g,'').toUpperCase();
+      const acc = accidental === '#' ? '#' : (accidental === 'b' ? 'b' : '');
+      return letter + acc + octave;
     }
 
     function initSynth() {
@@ -715,8 +726,9 @@
       if (!isPlaying) updateDraggableNotes();
 
       const curr = lines[currentLine]?.[lines[currentLine].length-1];
+      const beatsNeeded = +compas.split("/")[0];
       document.getElementById("cerrar-compas").disabled =
-        !curr || curr.closed || curr.beats !== +compas.split("/")[0];
+        !curr || curr.closed || Math.abs(curr.beats - beatsNeeded) > 0.01;
 
       if (curr?.stave && !isPlaying) {
         setTimeout(() => { div.scrollTop = Math.max(0, curr.stave.getYForLine(0) - 60); }, 100);
@@ -785,10 +797,10 @@
         lines.forEach(line => {
           line.forEach(c => {
             c.notas.forEach(n => {
-              const durTiempo = getDurTiempo(n.duracion);
-              const durSecs = Tone.Time(durTiempo).toSeconds() * (n.duracion.endsWith('d') ? 1.5 : 1);
+              const durTiempo = getDurTiempo(n.duracion); // ya incluye "." si puntillo
+              const durSecs = Tone.Time(durTiempo).toSeconds();
               if (n.tipo === "nota") {
-                events.push({ time: totalTime, note: n.noteName, durTiempo, durSecs, gi, noteName: getNoteName(n.noteName) });
+                events.push({ time: totalTime, note: n.noteName, accidental: n.accidental, durTiempo, durSecs, gi, noteName: getNoteName(n.noteName) });
               }
               totalTime += durSecs;
               gi++;
@@ -815,10 +827,7 @@
 
           Tone.Transport.schedule((time) => {
             if (synth) {
-              const noteParts = event.note.split("/");
-              const letter = noteParts[0].replace('b','').toUpperCase();
-              const acc = noteParts[0].includes('#') ? '#' : (noteParts[0].includes('b') ? 'b' : '');
-              synth.triggerAttackRelease(letter + acc + noteParts[1], event.durTiempo, time);
+              synth.triggerAttackRelease(vexToTone(event.note, event.accidental), event.durTiempo, time);
             }
           }, startTime);
 
@@ -922,10 +931,7 @@
       redibujarPentagrama();
       if (synth) {
         Tone.start().then(() => {
-          const parts = nota.noteName.split("/");
-          const letter = parts[0].replace('b','').toUpperCase();
-          const acc = parts[0].includes('#') ? '#' : (parts[0].includes('b') ? 'b' : '');
-          synth.triggerAttackRelease(letter + acc + parts[1], getDurTiempo(nota.duracion));
+          synth.triggerAttackRelease(vexToTone(nota.noteName, nota.accidental), getDurTiempo(nota.duracion));
         });
       }
     }
@@ -949,7 +955,7 @@
 
     function cerrarCompas() {
       const curr = lines[currentLine][lines[currentLine].length-1];
-      if (!curr || curr.closed || curr.beats !== +compas.split("/")[0]) return;
+      if (!curr || curr.closed || Math.abs(curr.beats - +compas.split("/")[0]) > 0.01) return;
       curr.closed = true;
 
       const newCompas = { notas:[], beats:0, closed:false, staveWidth:minStaveWidth };
@@ -1079,10 +1085,7 @@
         initSynth();
         if (synth) {
           Tone.start().then(() => {
-            const parts = noteKey.split("/");
-            const letter = parts[0].replace('b','').toUpperCase();
-            const acc = parts[0].includes('#') ? '#' : (parts[0].includes('b') ? 'b' : '');
-            synth.triggerAttackRelease(letter + acc + parts[1], getDurTiempo(dur));
+            synth.triggerAttackRelease(vexToTone(noteKey, accidental), getDurTiempo(dur));
           });
         }
       }
