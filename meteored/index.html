@@ -1,8 +1,11 @@
-<!DOCTYPE html> 
+```html
+<!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -13,6 +16,7 @@
 <link rel="stylesheet" href="styles.css">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -23,6 +27,7 @@
 </header>
 
 <div class="main-container">
+
 <div class="content-wrapper">
 
 <div class="charts-grid">
@@ -73,6 +78,9 @@
 </div>
 
 
+
+<!-- MODAL DIA -->
+
 <div class="modal" id="dayModal">
 <div class="modal-content" style="max-width:420px;height:auto;">
 <span class="close-btn" onclick="document.getElementById('dayModal').style.display='none'">×</span>
@@ -81,6 +89,9 @@
 </div>
 </div>
 
+
+
+<!-- MODAL GRAFICO -->
 
 <div class="modal" id="chartModal">
 <div class="modal-content">
@@ -107,18 +118,25 @@ const hoy=new Date();
 const año=hoy.getFullYear();
 const mes=hoy.getMonth();
 
-const meses=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const meses=[
+"Enero","Febrero","Marzo","Abril","Mayo","Junio",
+"Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
 
 document.getElementById("monthYear").textContent=`${meses[mes]} ${año}`;
 
 
+
 const chartConfigs={
+
 temp_indoor:{label:"Temperatura interior",color:"#00ffcc",unit:"°C"},
 temp_outdoor:{label:"Temperatura exterior",color:"#ffaa00",unit:"°C"},
 hum_indoor:{label:"Humedad interior",color:"#88ddff",unit:"%"},
 hum_outdoor:{label:"Humedad exterior",color:"#aaff88",unit:"%"},
 wind_speed:{label:"Velocidad del viento",color:"#ff66aa",unit:"km/h"}
+
 };
+
 
 
 function crearCalendario(datos){
@@ -163,6 +181,7 @@ cal.appendChild(d);
 }
 
 
+
 function mostrarDatosDia(fecha,datos){
 
 const dato=datos.find(d=>d.fecha===fecha);
@@ -173,7 +192,14 @@ tbody.innerHTML="";
 
 document.getElementById("modalTitle").textContent=`Datos: ${fecha}`;
 
-if(dato){
+if(!dato){
+
+tbody.innerHTML='<tr><td colspan="2" style="text-align:center;padding:1.8rem;">Sin datos</td></tr>';
+
+document.getElementById("dayModal").style.display="flex";
+return;
+
+}
 
 const campos=[
 
@@ -181,22 +207,22 @@ const campos=[
 ["Humedad interior",dato.hum_indoor,"%"],
 ["Temperatura exterior",dato.temp_outdoor,"°C"],
 ["Humedad exterior",dato.hum_outdoor,"%"],
-["Velocidad viento",dato.wind_speed,"km/h"],
+["Presión",dato.pressure,"hPa"],
+["Viento",dato.wind_speed,"km/h"],
 ["Ráfaga",dato.wind_gust,"km/h"],
-["Dirección viento",dato.wind_direction,"°"],
+["Dirección del viento",dato.wind_direction,"°"],
 ["Sensación térmica",dato.wind_chill,"°C"],
-["Lluvia",dato.rain,"mm"],
-["Presión",dato.pressure,"hPa"]
+["Lluvia",dato.rain,"mm"]
 
 ];
 
 campos.forEach(([label,value,unit])=>{
 
-if(value!==undefined&&value!==""&&value!==null){
+if(value!==undefined && value!==null && value!==""){
 
 const tr=document.createElement("tr");
 
-tr.innerHTML=`<td style="font-weight:bold;color:#00ffccaa;">${label}:</td><td>${value} ${unit}</td>`;
+tr.innerHTML=`<td style="font-weight:bold;color:#00ffccaa;">${label}</td><td>${value} ${unit}</td>`;
 
 tbody.appendChild(tr);
 
@@ -204,15 +230,85 @@ tbody.appendChild(tr);
 
 });
 
-}
-
-else{
-
-tbody.innerHTML='<tr><td colspan="2" style="text-align:center;padding:1.8rem;">Sin datos</td></tr>';
-
-}
-
 document.getElementById("dayModal").style.display="flex";
+
+}
+
+
+
+function createSmallChart(canvasId,type){
+
+const canvas=document.getElementById(canvasId);
+
+if(!canvas) return;
+
+const ctx=canvas.getContext("2d");
+
+const cfg=chartConfigs[type];
+
+const data=allData.map(d=>parseFloat(d[type])).filter(v=>!isNaN(v));
+
+const labels=allData.map(d=>(d.fecha||"").slice(5));
+
+if(data.length===0) return;
+
+return new Chart(ctx,{
+type:"line",
+data:{
+labels,
+datasets:[{
+label:cfg.label,
+data,
+borderColor:cfg.color,
+backgroundColor:cfg.color+"22",
+tension:0.3,
+pointRadius:2,
+borderWidth:2
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}}
+}
+});
+
+}
+
+
+
+function openModalChart(card){
+
+const type=card.dataset.type;
+const cfg=chartConfigs[type];
+
+document.getElementById("modalChartTitle").textContent=cfg.label;
+
+if(modalChart) modalChart.destroy();
+
+const ctx=document.getElementById("modalChartCanvas").getContext("2d");
+
+const data=allData.map(d=>parseFloat(d[type])).filter(v=>!isNaN(v));
+
+const labels=allData.map(d=>d.fecha);
+
+modalChart=new Chart(ctx,{
+type:"line",
+data:{
+labels,
+datasets:[{
+label:cfg.label,
+data,
+borderColor:cfg.color,
+backgroundColor:cfg.color+"33",
+tension:0.3,
+pointRadius:3,
+borderWidth:3
+}]
+}
+});
+
+document.getElementById("chartModal").style.display="flex";
 
 }
 
@@ -258,7 +354,19 @@ document.querySelector(".main-container").innerHTML+=
 
 cargar();
 
+
+window.onclick=function(event){
+
+if(event.target.classList.contains('modal')){
+
+event.target.style.display="none";
+
+}
+
+}
+
 </script>
 
 </body>
 </html>
+```
