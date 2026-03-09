@@ -64,7 +64,8 @@
       background: var(--bg-panel);
       border-right: 2px solid var(--accent);
       position: relative;
-      overflow-y: auto;
+      overflow-x: hidden;          /* ← evita scroll horizontal */
+      overflow-y: auto;            /* solo vertical si hace falta */
       padding: 20px 0 100px 0;
     }
     .buttons-top {
@@ -75,11 +76,13 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      padding: 0 10px 15px;
+      padding: 0 12px 15px;
+      width: 100%;
+      max-width: 100%;             /* asegura que no desborde */
     }
     .floating-btn {
-      width: 88%;
-      max-width: 220px;
+      width: 90%;
+      max-width: 240px;
       background: rgba(0,255,204,0.1);
       color: var(--accent);
       font-family: "Courier New", monospace;
@@ -93,6 +96,7 @@
       backdrop-filter: blur(4px);
       text-align: center;
       animation: float 4s ease-in-out infinite;
+      box-sizing: border-box;
     }
     .floating-btn:hover {
       background: rgba(0,255,204,0.25);
