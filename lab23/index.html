@@ -305,7 +305,68 @@
     .nota .plus { top: -26px; }
     .nota .minus { bottom: -26px; }
 
-    /* ── Print / PDF ── */
+    /* ── Menú desplegable archivo ── */
+    #menu-archivo {
+      position: relative;
+      display: inline-block;
+    }
+    #btn-menu-archivo {
+      background: rgba(0,255,204,0.1);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-family: "Courier New", monospace;
+      font-size: 0.85em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    #btn-menu-archivo:hover {
+      background: rgba(0,255,204,0.22);
+      box-shadow: 0 0 12px rgba(0,255,204,0.4);
+    }
+    #dropdown-archivo {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: rgba(13,17,23,0.98);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      min-width: 160px;
+      z-index: 1000;
+      box-shadow: 0 0 20px rgba(0,255,204,0.2);
+      overflow: hidden;
+    }
+    #dropdown-archivo.open { display: block; }
+    .drop-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      color: var(--accent);
+      font-family: "Courier New", monospace;
+      font-size: 0.85em;
+      cursor: pointer;
+      transition: background 0.15s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .drop-item:hover { background: rgba(0,255,204,0.12); }
+    .drop-item.danger { color: #ff4466; }
+    .drop-item.danger:hover { background: rgba(255,68,102,0.1); }
+    .drop-separator {
+      height: 1px;
+      background: rgba(0,255,204,0.15);
+      margin: 2px 0;
+    }
+
+
     @media print {
       body { background: #fff !important; padding: 0 !important; }
       header, #titulo-partitura, #barra-opciones, #figuras, #modificadores,
@@ -380,6 +441,19 @@
       <option value="168">Presto (168)</option>
       <option value="200">Prestissimo (200)</option>
     </select>
+
+    <!-- Menú desplegable archivo -->
+    <div id="menu-archivo">
+      <button id="btn-menu-archivo"><i class="fas fa-folder"></i> Archivo ▾</button>
+      <div id="dropdown-archivo">
+        <button class="drop-item" id="guardar"><i class="fas fa-save"></i> Guardar</button>
+        <button class="drop-item" id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
+        <input type="file" id="file-input" accept=".json" style="display:none">
+        <button class="drop-item" id="exportar-pdf"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+        <div class="drop-separator"></div>
+        <button class="drop-item danger" id="limpiar"><i class="fas fa-trash"></i> Limpiar todo</button>
+      </div>
+    </div>
   </div>
 
   <div id="main-content">
@@ -388,7 +462,7 @@
       <div id="pentagrama"></div>
     </div>
 
-    <!-- Figuras rítmicas -->
+    <!-- Figuras rítmicas + Cerrar compás -->
     <div id="figuras">
       <div class="figura" data-tipo="nota" data-duracion="w" title="Redonda">𝅝</div>
       <div class="figura" data-tipo="nota" data-duracion="h" title="Blanca">𝅗𝅥</div>
@@ -398,6 +472,7 @@
       <div class="figura" data-tipo="silencio" data-duracion="h" title="Silencio blanca">𝄼</div>
       <div class="figura" data-tipo="silencio" data-duracion="q" title="Silencio negra">𝄽</div>
       <div class="figura" data-tipo="silencio" data-duracion="8" title="Silencio corchea">𝄾</div>
+      <button id="cerrar-compas" disabled style="height:44px;border-radius:22px;padding:0 14px;font-size:0.8em;flex-shrink:0;"><i class="fas fa-check"></i> Cerrar</button>
     </div>
 
     <!-- Modificadores -->
@@ -422,15 +497,7 @@
       <button id="notas"><i class="fas fa-music"></i> Notas</button>
       <button id="play-stop" class="play-active"><i class="fas fa-play"></i> Play</button>
       <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
-    </div>
-    <div id="controles-otros">
-      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
-      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
-      <input type="file" id="file-input" accept=".json" style="display:none">
-      <button id="exportar-pdf"><i class="fas fa-file-pdf"></i> PDF</button>
-      <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar</button>
       <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar</button>
-      <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
     </div>
   </div>
 
@@ -759,15 +826,26 @@
       document.getElementById("cerrar-compas").onclick = cerrarCompas;
       document.getElementById("borrar-ultimo").onclick = borrarUltimo;
       document.getElementById("limpiar").onclick = () => {
+        dropdown.classList.remove("open");
         if (confirm("¿Estás seguro de que quieres limpiar toda la partitura? Esta acción no se puede deshacer.")) {
           resetPartitura();
           resetMods();
         }
       };
-      document.getElementById("guardar").onclick = guardar;
-      document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
+      document.getElementById("guardar").onclick = () => { guardar(); dropdown.classList.remove("open"); };
+      document.getElementById("abrir").onclick = () => { document.getElementById("file-input").click(); dropdown.classList.remove("open"); };
       document.getElementById("file-input").onchange = abrir;
-      document.getElementById("exportar-pdf").onclick = exportarPDF;
+      document.getElementById("exportar-pdf").onclick = () => { exportarPDF(); dropdown.classList.remove("open"); };
+
+      // Menú desplegable archivo
+      const btnMenu = document.getElementById("btn-menu-archivo");
+      const dropdown = document.getElementById("dropdown-archivo");
+      btnMenu.addEventListener("click", e => {
+        e.stopPropagation();
+        dropdown.classList.toggle("open");
+      });
+      document.addEventListener("click", () => dropdown.classList.remove("open"));
+      dropdown.addEventListener("click", e => e.stopPropagation());
     }
 
     function exportarPDF() {
