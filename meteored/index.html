@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,6 +16,20 @@
 <link rel="stylesheet" href="styles.css">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+/* DIA ACTUAL EN ROJO */
+
+.day.today{
+background:#ff4444;
+color:white;
+border:2px solid #ff8888;
+font-weight:bold;
+box-shadow:0 0 10px rgba(255,0,0,0.6);
+}
+
+</style>
 
 </head>
 
@@ -152,9 +167,12 @@ for(let i=1;i<primerDia;i++){
 
 const vacio=document.createElement("div");
 vacio.className="day";
+
 cal.appendChild(vacio);
 
 }
+
+
 
 for(let i=1;i<=diasMes;i++){
 
@@ -183,9 +201,9 @@ cal.appendChild(d);
 
 function mostrarDatosDia(fecha,datos){
 
-const dato=datos.find(d=>d.fecha===fecha);
+const dato = datos.find(d => d.fecha === fecha);
 
-const tbody=document.getElementById("dayDataTable").querySelector("tbody");
+const tbody = document.getElementById("dayDataTable").querySelector("tbody");
 
 tbody.innerHTML="";
 
@@ -193,7 +211,7 @@ document.getElementById("modalTitle").textContent=`Datos: ${fecha}`;
 
 if(!dato){
 
-tbody.innerHTML='<tr><td colspan="2" style="text-align:center;padding:1.8rem;">Sin datos</td></tr>';
+tbody.innerHTML='<tr><td colspan="2" style="text-align:center;padding:1.5rem;">Sin datos</td></tr>';
 
 document.getElementById("dayModal").style.display="flex";
 return;
@@ -202,26 +220,31 @@ return;
 
 const campos=[
 
-["Temperatura interior",dato.temp_indoor,"°C"],
-["Humedad interior",dato.hum_indoor,"%"],
-["Temperatura exterior",dato.temp_outdoor,"°C"],
-["Humedad exterior",dato.hum_outdoor,"%"],
-["Presión",dato.pressure,"hPa"],
-["Viento",dato.wind_speed,"km/h"],
-["Ráfaga",dato.wind_gust,"km/h"],
-["Dirección del viento",dato.wind_direction,"°"],
-["Sensación térmica",dato.wind_chill,"°C"],
-["Lluvia",dato.rain,"mm"]
+["Temperatura interior","temp_indoor","°C"],
+["Humedad interior","hum_indoor","%"],
+["Temperatura exterior","temp_outdoor","°C"],
+["Humedad exterior","hum_outdoor","%"],
+["Presión","pressure","hPa"],
+["Viento","wind_speed","km/h"],
+["Ráfaga","wind_gust","km/h"],
+["Dirección del viento","wind_direction","°"],
+["Sensación térmica","wind_chill","°C"],
+["Lluvia","rain","mm"]
 
 ];
 
-campos.forEach(([label,value,unit])=>{
+campos.forEach(([label,campo,unit])=>{
+
+const value=dato[campo];
 
 if(value!==undefined && value!==null && value!==""){
 
 const tr=document.createElement("tr");
 
-tr.innerHTML=`<td style="font-weight:bold;color:#00ffccaa;">${label}</td><td>${value} ${unit}</td>`;
+tr.innerHTML=`
+<td style="font-weight:bold;color:#00ffccaa;">${label}</td>
+<td>${value} ${unit}</td>
+`;
 
 tbody.appendChild(tr);
 
@@ -368,3 +391,4 @@ event.target.style.display="none";
 
 </body>
 </html>
+```
