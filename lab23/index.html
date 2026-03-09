@@ -813,6 +813,7 @@
         const numBeats = +compas.split("/")[0];
         const beatDuration = Tone.Time("4n").toSeconds();
         const introTime = metronomeOn ? numBeats * beatDuration : 0;
+        const START_OFFSET = 0.1; // evita que la primera nota se salte por race condition
 
         if (metronomeOn) {
           metronomeLoop = new Tone.Loop((time) => {
@@ -823,7 +824,7 @@
         const allNotes = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
 
         events.forEach(event => {
-          const startTime = event.time + introTime;
+          const startTime = event.time + introTime + START_OFFSET;
 
           Tone.Transport.schedule((time) => {
             if (synth) {
@@ -859,7 +860,7 @@
           }, startTime + event.durSecs);
         });
 
-        Tone.Transport.schedule(() => { stopPlayback(); }, totalTime + introTime);
+        Tone.Transport.schedule(() => { stopPlayback(); }, totalTime + introTime + START_OFFSET);
         Tone.Transport.start();
         playStopButton.innerHTML = '<i class="fas fa-stop"></i> Stop';
         playStopButton.classList.remove("play-active");
