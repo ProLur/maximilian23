@@ -8,172 +8,8 @@
   <meta http-equiv="Expires" content="0">
   <title>Meteo • Zafra • Maximilian23</title>
   <link rel="icon" href="https://maximilian23.com/Cabeza.png">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: "Courier New", monospace;
-      background: #0d1117;
-      color: #e6edf3;
-      min-height: 100vh;
-      background-image:
-        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
-        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
-    }
-    header {
-      background: rgba(22,27,34,0.94);
-      backdrop-filter: blur(10px);
-      padding: 0.9rem 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.9rem;
-      border-bottom: 2px solid #00ffcc;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-    header img {
-      height: clamp(42px, 10vw, 52px);
-      border-radius: 50%;
-      border: 2px solid #00ffccaa;
-      box-shadow: 0 0 12px #00ffcc66;
-    }
-    header h1 {
-      color: #00ffcc;
-      text-shadow: 0 0 10px #00ffcccc;
-      font-size: clamp(1.4rem, 6vw, 1.9rem);
-    }
-    .main-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1.2rem;
-    }
-    .content-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 1.8rem;
-    }
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.2rem;
-    }
-    .chart-card {
-      background: rgba(30,45,61,0.4);
-      border: 2px solid #00ffcc44;
-      border-radius: 10px;
-      padding: 1rem;
-      backdrop-filter: blur(6px);
-      cursor: pointer;
-      transition: all 0.2s;
-      height: 220px;
-      position: relative;
-    }
-    .chart-card:hover {
-      transform: translateY(-4px);
-      border-color: #00ffccaa;
-      box-shadow: 0 8px 25px rgba(0,255,204,0.2);
-    }
-    .chart-card h3 {
-      color: #00ffcc;
-      font-size: 1.1rem;
-      margin-bottom: 0.6rem;
-      text-align: center;
-      text-shadow: 0 0 6px #00ffcc88;
-    }
-    .chart-container {
-      height: 160px;
-    }
-    .calendar-box {
-      background: rgba(30,45,61,0.4);
-      border: 2px solid #00ffcc44;
-      border-radius: 10px;
-      padding: 1.2rem;
-      backdrop-filter: blur(6px);
-    }
-    .month-title {
-      text-align: center;
-      color: #00ffcc;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      text-shadow: 0 0 8px #00ffcc99;
-    }
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-    }
-    .day {
-      padding: 10px 4px;
-      font-size: clamp(0.85rem, 2.6vw, 1rem);
-      text-align: center;
-      border: 1px solid #00ffcc55;
-      border-radius: 6px;
-      background: #161b22;
-      cursor: pointer;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.18s;
-    }
-    .day:hover { background: rgba(0,255,204,0.2); transform: scale(1.04); }
-    .today { border: 2px solid #00ffcc; background: rgba(0,255,204,0.3); font-weight: bold; }
-    .hasdata { background: #00ffcc22; color: #00ffcc; font-weight: 500; }
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(6px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .modal-content {
-      background: rgba(22,27,34,0.98);
-      border: 2px solid #00ffcc99;
-      border-radius: 12px;
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 1100px;
-      height: 85vh;
-      max-height: 95vh;
-      box-shadow: 0 15px 50px rgba(0,255,204,0.4);
-      position: relative;
-    }
-    .close-btn {
-      position: absolute;
-      top: 12px;
-      right: 20px;
-      font-size: 2.2rem;
-      color: #00ffccaa;
-      cursor: pointer;
-      z-index: 10;
-    }
-    .modal-title {
-      color: #00ffcc;
-      text-align: center;
-      margin-bottom: 1.2rem;
-      font-size: 1.6rem;
-      text-shadow: 0 0 10px #00ffcc;
-    }
-    .modal-chart-container {
-      height: calc(100% - 70px);
-    }
-    @media (min-width: 950px) {
-      .content-wrapper { flex-direction: row; gap: 2rem; }
-      .charts-grid { flex: 3; }
-      .calendar-box { flex: 1; max-width: 420px; min-width: 360px; }
-      .chart-card { height: 260px; }
-      .chart-container { height: 200px; }
-    }
-    @media (min-width: 1300px) {
-      .calendar-box { max-width: 460px; }
-      .day { font-size: 1.05rem; padding: 12px 6px; min-height: 56px; }
-    }
-  </style>
 </head>
 <body>
   <header>
@@ -232,6 +68,7 @@
   </div>
 
   <script>
+    // Aquí va todo el JavaScript que ya tenías (sin cambios)
     const BIN_ID = "69aaa6b0d0ea881f40f4bc92";
     const KEY = "$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
     let allData = [];
@@ -406,7 +243,6 @@
 
         crearCalendario(allData);
 
-        // Crear gráficos pequeños
         Object.keys(chartConfigs).forEach(type => {
           const canvasId = `chart-${type.replace(/_/g, '-')}`;
           smallCharts[type] = createSmallChart(canvasId, type);
@@ -421,7 +257,6 @@
 
     cargar();
 
-    // Cerrar modales con click fuera
     window.onclick = function(event) {
       if (event.target.classList.contains('modal')) {
         event.target.style.display = "none";
