@@ -64,21 +64,16 @@
       background: var(--bg-panel);
       border-right: 2px solid var(--accent);
       position: relative;
-      overflow-x: hidden;          /* ← evita scroll horizontal */
-      overflow-y: auto;            /* solo vertical si hace falta */
+      overflow: hidden;               /* ← Esto bloquea el scroll con la rueda */
       padding: 20px 0 100px 0;
     }
     .buttons-top {
-      position: sticky;
-      top: 20px;
-      z-index: 5;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      padding: 0 12px 15px;
+      padding: 20px 12px 15px;
       width: 100%;
-      max-width: 100%;             /* asegura que no desborde */
     }
     .floating-btn {
       width: 90%;
@@ -96,7 +91,6 @@
       backdrop-filter: blur(4px);
       text-align: center;
       animation: float 4s ease-in-out infinite;
-      box-sizing: border-box;
     }
     .floating-btn:hover {
       background: rgba(0,255,204,0.25);
