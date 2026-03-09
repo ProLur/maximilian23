@@ -1,16 +1,62 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 
-<title>Admin • Maximilian 23 Meteo</title>
+<title>Admin • Maximilian 23 Weather</title>
 
 <link rel="icon" href="https://maximilian23.com/Cabeza.png">
 <link rel="stylesheet" href="styles.css">
+
+<style>
+
+.admin-container{
+max-width:900px;
+margin:auto;
+padding:2rem;
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:1rem;
+margin-top:1.5rem;
+}
+
+input{
+padding:1rem;
+font-size:1.2rem;
+background:#161b22;
+border:2px solid #00ffcc55;
+border-radius:10px;
+color:#e6edf3;
+}
+
+button{
+margin-top:1.5rem;
+padding:1.2rem;
+font-size:1.3rem;
+background:#00ffcc;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+button:hover{
+background:#00ddaa;
+}
+
+.message{
+margin-top:1rem;
+font-size:1.2rem;
+}
+
+</style>
 
 </head>
 
@@ -21,36 +67,41 @@
 <h1>Weather Station Admin</h1>
 </header>
 
-
-<div class="main-container">
+<div class="admin-container">
 
 <form id="form">
 
+<div class="form-grid">
+
 <input id="fecha" type="date">
 
-<input id="temp_indoor" placeholder="Temp Indoor °C">
-<input id="hum_indoor" placeholder="Hum Indoor %">
+<input id="temp_indoor" placeholder="Temp Indoor °C" type="number" step="0.1">
+<input id="hum_indoor" placeholder="Hum Indoor %" type="number" step="1">
 
-<input id="temp_outdoor" placeholder="Temp Outdoor °C">
-<input id="hum_outdoor" placeholder="Hum Outdoor %">
+<input id="temp_outdoor" placeholder="Temp Outdoor °C" type="number" step="0.1">
+<input id="hum_outdoor" placeholder="Hum Outdoor %" type="number" step="1">
 
-<input id="pressure" placeholder="Pressure hPa">
+<input id="pressure" placeholder="Pressure hPa" type="number" step="0.1">
 
-<input id="wind_speed" placeholder="Wind Speed km/h">
-<input id="wind_gust" placeholder="Wind Gust km/h">
+<input id="wind_speed" placeholder="Wind Speed km/h" type="number" step="0.1">
+<input id="wind_gust" placeholder="Wind Gust km/h" type="number" step="0.1">
+
 <input id="wind_direction" placeholder="Wind Direction °">
 
-<input id="wind_chill" placeholder="Wind Chill °C">
+<input id="wind_chill" placeholder="Wind Chill °C" type="number" step="0.1">
 
-<input id="rain" placeholder="Rain mm">
+<input id="rain" placeholder="Rain mm" type="number" step="0.1">
 
-<button type="submit">Save</button>
+</div>
+
+<button type="submit">Save Data</button>
 
 </form>
 
-<div id="message"></div>
+<div id="message" class="message"></div>
 
 </div>
+
 
 <script>
 
@@ -64,15 +115,22 @@ e.preventDefault();
 const nuevo={
 
 fecha:document.getElementById("fecha").value,
+
 temp_indoor:document.getElementById("temp_indoor").value,
 hum_indoor:document.getElementById("hum_indoor").value,
+
 temp_outdoor:document.getElementById("temp_outdoor").value,
 hum_outdoor:document.getElementById("hum_outdoor").value,
+
 pressure:document.getElementById("pressure").value,
+
 wind_speed:document.getElementById("wind_speed").value,
 wind_gust:document.getElementById("wind_gust").value,
+
 wind_direction:document.getElementById("wind_direction").value,
+
 wind_chill:document.getElementById("wind_chill").value,
+
 rain:document.getElementById("rain").value
 
 };
@@ -80,14 +138,22 @@ rain:document.getElementById("rain").value
 try{
 
 const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
-headers:{"X-Master-Key":KEY}
+headers:{
+"X-Master-Key":KEY
+}
 });
 
 const data=await res.json();
 
 let meteo=data.record.meteo || [];
 
+const idx=meteo.findIndex(d=>d.fecha===nuevo.fecha);
+
+if(idx!==-1){
+meteo[idx]={...meteo[idx],...nuevo};
+}else{
 meteo.push(nuevo);
+}
 
 await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
 method:"PUT",
@@ -100,11 +166,9 @@ body:JSON.stringify({meteo})
 
 document.getElementById("message").innerText="Saved";
 
-}
+}catch(err){
 
-catch(err){
-
-document.getElementById("message").innerText="Error";
+document.getElementById("message").innerText="Error saving data";
 
 }
 
@@ -114,3 +178,4 @@ document.getElementById("message").innerText="Error";
 
 </body>
 </html>
+```
