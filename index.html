@@ -80,7 +80,6 @@
     @media (max-width: 767px) {
       #hamburger { display: block; }
     }
-    /* Overlay oscuro al abrir el drawer */
     #drawer-overlay {
       display: none;
       position: fixed;
@@ -89,7 +88,6 @@
       z-index: 1000;
     }
     #drawer-overlay.open { display: block; }
-    /* Panel lateral deslizante en móvil */
     .left-panel.drawer-open {
       display: flex !important;
       position: fixed;
@@ -103,16 +101,7 @@
     }
     @keyframes slideIn {
       from { transform: translateX(-100%); }
-      to   { transform: translateX(0); }
-    }
-      font-size: 24px;
-      color: var(--accent);
-      cursor: pointer;
-      transition: transform 0.3s;
-    }
-    #policyIcon:hover { transform: rotate(30deg); }
-    @media (max-width: 767px) {
-      #policyIcon { display: block; }
+      to { transform: translateX(0); }
     }
     .container {
       flex: 1;
@@ -128,10 +117,10 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 20px 0 100px 0;
-      scrollbar-width: none; /* Firefox */
+      scrollbar-width: none;
     }
     .left-panel::-webkit-scrollbar {
-      display: none; /* Chrome/Safari */
+      display: none;
     }
     .buttons-top {
       display: flex;
@@ -331,10 +320,8 @@
     Maximilian 23
     <div id="policyIcon" title="Ver políticas de uso">🛡️</div>
   </header>
-
   <div id="drawer-overlay"></div>
   <div id="pull-indicator">↓ Suelta para actualizar</div>
-
   <div class="container">
     <div class="left-panel">
       <div class="buttons-top">
@@ -343,24 +330,20 @@
         <div class="floating-btn" onclick="window.open('https://maximilian23.com/arte', '_blank')">Plástica</div>
         <div class="floating-btn" onclick="window.open('http://maximilian23.com/meteored/', '_blank')">Meteored</div>
       </div>
-
       <div class="image-container">
         <img id="maxImage" src="https://maximilian23.com/max.png" alt="Maximilian grande">
       </div>
     </div>
-
     <div class="chat-panel">
       <div id="chat"></div>
       <footer>
-        <input type="text" id="message" placeholder="Escribe tu mensaje..." 
+        <input type="text" id="message" placeholder="Escribe tu mensaje..."
                onkeydown="if(event.key==='Enter'&&!this.disabled){sendMessage(); event.preventDefault()}">
         <button onclick="sendMessage()" id="sendButton">Enviar</button>
       </footer>
     </div>
   </div>
-
   <div id="policyButton" title="Ver políticas de uso">⚙️ Políticas</div>
-
   <div id="policyBanner">
     Este sitio utiliza cookies y almacena datos de sesión para ofrecer un mejor servicio.
     Al continuar, aceptas nuestras <a href="https://maximilian23.com/politica.html" target="_blank">políticas de uso</a>.
@@ -375,24 +358,28 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    function linkify(t) {
-      return t.replace(/(https?:\/\/[^\s"']+[a-zA-Z0-9\/#?=&_%~\-])/g,
-        u => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);
+    function linkify(text) {
+      // Mejora ligera: mejor detección de URLs (incluye más caracteres comunes)
+      const urlRegex = /(https?:\/\/[^\s<>"']+[\w\/#?=&+%~.,\-])/gi;
+      return text.replace(urlRegex, url => 
+        `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+      );
     }
 
     function typeWriterEffect(el, text, delay = 28, done = null) {
       let i = 0;
-      el.textContent = "";
+      el.innerHTML = "";  // Limpiamos con innerHTML para permitir HTML desde el principio
+
       function step() {
         if (i < text.length) {
           i++;
-          // Escribir como texto plano durante el efecto
-          el.textContent = text.substring(0, i);
+          // Durante la escritura mostramos el HTML progresivamente
+          el.innerHTML = text.substring(0, i);
           if (i % 4 === 0) scrollBottom();
           setTimeout(step, delay);
         } else {
-          // Solo al terminar, convertir URLs en enlaces
-          el.innerHTML = linkify(text);
+          // Al finalizar, aseguramos que todo el HTML esté renderizado
+          el.innerHTML = text;
           scrollBottom();
           if (done) done();
         }
@@ -408,11 +395,14 @@
       if (!msg) return;
 
       input.disabled = btn.disabled = true;
+
+      // Mensaje del usuario
       const userMsg = document.createElement("div");
       userMsg.className = "user";
       userMsg.textContent = msg;
       chat.appendChild(userMsg);
 
+      // Mensaje del bot (con typing)
       const botMsg = document.createElement("div");
       botMsg.className = "bot";
       botMsg.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
@@ -427,12 +417,22 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: msg })
         });
+
+        if (!res.ok) throw new Error("Error en la respuesta del servidor");
+
         const data = await res.json();
+        const replyText = data.reply || "Sin respuesta";
+
+        // Aplicamos linkify ANTES del efecto de escritura
+        const linkedText = linkify(replyText);
+
+        // Limpiamos el typing y empezamos a escribir
         botMsg.innerHTML = "";
-        typeWriterEffect(botMsg, linkify(data.reply || "Sin respuesta"), 28, () => {
+        typeWriterEffect(botMsg, linkedText, 28, () => {
           input.disabled = btn.disabled = false;
           input.focus();
         });
+
       } catch (err) {
         botMsg.textContent = "⚠️ Error de conexión. Intenta otra vez.";
         input.disabled = btn.disabled = false;
@@ -445,14 +445,16 @@
       const welcome = document.createElement("div");
       welcome.className = "bot";
       chat.appendChild(welcome);
-      typeWriterEffect(welcome, "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?");
+      typeWriterEffect(welcome, 
+        "🤖 Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?"
+      );
 
       if (!localStorage.getItem("policiesAccepted")) {
         document.getElementById("policyBanner").classList.add("show");
       }
     });
 
-    // ── Pull to refresh ──
+    // Pull to refresh
     (function() {
       let startY = 0, pulling = false;
       const indicator = document.getElementById("pull-indicator");
@@ -492,6 +494,7 @@
       document.querySelector(".left-panel").classList.add("drawer-open");
       document.getElementById("drawer-overlay").classList.add("open");
     });
+
     document.getElementById("drawer-overlay")?.addEventListener("click", () => {
       document.querySelector(".left-panel").classList.remove("drawer-open");
       document.getElementById("drawer-overlay").classList.remove("open");
