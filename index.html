@@ -40,10 +40,46 @@
       flex-shrink: 0;
     }
     header img { height: 44px; width: auto; }
-    #policyIcon {
+    #hamburger {
       display: none;
       position: absolute;
-      right: 16px;
+      left: 16px;
+      font-size: 22px;
+      color: var(--accent);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+    #hamburger:hover { transform: scale(1.15); }
+    @media (max-width: 767px) {
+      #hamburger { display: block; }
+    }
+    /* Overlay oscuro al abrir el drawer */
+    #drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 1000;
+    }
+    #drawer-overlay.open { display: block; }
+    /* Panel lateral deslizante en móvil */
+    .left-panel.drawer-open {
+      display: flex !important;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100dvh;
+      z-index: 1001;
+      width: clamp(260px, 75vw, 320px);
+      animation: slideIn 0.25s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(0); }
+    }
       font-size: 24px;
       color: var(--accent);
       cursor: pointer;
@@ -264,10 +300,13 @@
 </head>
 <body>
   <header>
+    <button id="hamburger" title="Menú">☰</button>
     <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
     Maximilian 23
     <div id="policyIcon" title="Ver políticas de uso">🛡️</div>
   </header>
+
+  <div id="drawer-overlay"></div>
 
   <div class="container">
     <div class="left-panel">
@@ -379,6 +418,15 @@
       if (!localStorage.getItem("policiesAccepted")) {
         document.getElementById("policyBanner").classList.add("show");
       }
+    });
+
+    document.getElementById("hamburger")?.addEventListener("click", () => {
+      document.querySelector(".left-panel").classList.add("drawer-open");
+      document.getElementById("drawer-overlay").classList.add("open");
+    });
+    document.getElementById("drawer-overlay")?.addEventListener("click", () => {
+      document.querySelector(".left-panel").classList.remove("drawer-open");
+      document.getElementById("drawer-overlay").classList.remove("open");
     });
 
     document.getElementById("policyIcon")?.addEventListener("click", () => {
