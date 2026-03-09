@@ -131,6 +131,18 @@
       border: 1px solid #ddd;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
+    #dinamica-display {
+      position: absolute;
+      top: 30px;
+      left: 50px;
+      font-size: 14px;
+      font-style: italic;
+      font-weight: bold;
+      color: #333;
+      font-family: "Times New Roman", serif;
+      z-index: 10;
+      display: none;
+    }
     .note-label {
       position: absolute;
       font-size: 14px;
@@ -462,6 +474,7 @@
   <div id="main-content">
     <div id="pentagrama-container">
       <div id="tempo-display" class="tempo-text" style="display:none;"></div>
+      <div id="dinamica-display"></div>
       <div id="pentagrama"></div>
     </div>
 
@@ -608,6 +621,13 @@
       });
       document.getElementById("dinamica-select").addEventListener("change", e => {
         modDinamica = e.target.value;
+        const dd = document.getElementById("dinamica-display");
+        if (modDinamica) {
+          dd.textContent = modDinamica;
+          dd.style.display = "block";
+        } else {
+          dd.style.display = "none";
+        }
       });
     }
 
@@ -618,6 +638,8 @@
       document.getElementById("btn-bemol").classList.remove("activo");
       document.getElementById("btn-ligadura").classList.remove("activo");
       document.getElementById("dinamica-select").value = "";
+      const dd = document.getElementById("dinamica-display");
+      if (dd) { dd.textContent = ""; dd.style.display = "none"; }
     }
 
     function init() {
@@ -769,43 +791,6 @@
                 // Guardar última nota para siguiente compás
                 if (n.tipo === "nota") lastVfNote = n.vf;
               });
-
-              // Dinámicas — texto SVG directo debajo de cada nota
-              if (c.notas.length) {
-                const svgEl = context.svg;
-                const staveNotes = svgEl.querySelectorAll('g.vf-stavenote');
-                let giLocal = 0;
-                // calcular índice global de la primera nota de este compás
-                let globalOffset = 0;
-                for (let li2 = 0; li2 < li; li2++) {
-                  lines[li2].forEach(c2 => { globalOffset += c2.notas.length; });
-                }
-                for (let ci2 = 0; ci2 < ci; ci2++) {
-                  globalOffset += line[ci2].notas.length;
-                }
-                c.notas.forEach((n, ni) => {
-                  if (n.dinamica && n.tipo === "nota") {
-                    const noteEl = staveNotes[globalOffset + ni];
-                    if (noteEl) {
-                      try {
-                        const bbox = noteEl.getBBox();
-                        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        txt.setAttribute("x", bbox.x + bbox.width / 2);
-                        txt.setAttribute("y", bbox.y + bbox.height + 18);
-                        txt.setAttribute("text-anchor", "middle");
-                        txt.setAttribute("font-family", "Times New Roman, serif");
-                        txt.setAttribute("font-size", "13");
-                        txt.setAttribute("font-style", "italic");
-                        txt.setAttribute("font-weight", "bold");
-                        txt.setAttribute("fill", "#333");
-                        txt.textContent = n.dinamica;
-                        svgEl.appendChild(txt);
-                      } catch(e) {}
-                    }
-                  }
-                });
-              }
-            }
 
             x += staveWidth;
           });
