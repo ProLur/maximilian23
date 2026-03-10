@@ -10,11 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: "Courier New", Courier, monospace;
@@ -94,7 +90,7 @@
       padding: 0 1rem;
       flex-wrap: nowrap;
       max-width: 100%;
-      overflow-x: auto;
+      overflow: visible !important; /* ¡Clave para que el menú no genere scroll! */
       position: relative;
       z-index: 50;
     }
@@ -154,8 +150,9 @@
       border: 2px solid #00ffcc88;
       border-radius: 8px;
       min-width: 220px;
+      max-width: 280px;
       z-index: 9999 !important;
-      box-shadow: 0 10px 30px rgba(0,255,204,0.3);
+      box-shadow: 0 10px 30px rgba(0,255,204,0.4);
       backdrop-filter: blur(8px);
       overflow: visible;
     }
@@ -353,6 +350,11 @@
       #barra-opciones { flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
       .controles-linea { gap: 0.8rem; }
       .figura { width: 56px; height: 56px; font-size: 2rem; }
+      #acciones-menu {
+        left: auto;
+        right: 0;
+        min-width: 180px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -529,23 +531,23 @@
       initControles();
       resetPartitura();
 
-      // Menú desplegable Archivo - ahora con z-index alto y visibilidad asegurada
+      // Menú desplegable Archivo - versión arreglada
       const accionesBtn = document.getElementById('acciones-btn');
       const accionesMenu = document.getElementById('acciones-menu');
 
-      accionesBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Evita que el clic se propague y cierre inmediatamente
+      accionesBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
         accionesMenu.classList.toggle('show');
       });
 
-      document.addEventListener('click', (e) => {
+      document.addEventListener('click', function(e) {
         if (!accionesBtn.contains(e.target) && !accionesMenu.contains(e.target)) {
           accionesMenu.classList.remove('show');
         }
       });
 
-      // Exportar a PDF
-      document.getElementById('export-pdf').addEventListener('click', () => {
+      // Exportar PDF
+      document.getElementById('export-pdf').addEventListener('click', function() {
         const element = document.getElementById('pentagrama-container');
         const opt = {
           margin: 0.5,
@@ -560,7 +562,7 @@
     }
 
     // =====================================================================
-    // Resto del código JavaScript original (sin cambios)
+    // Resto del JavaScript original (funciones completas) - sin cambios
     // =====================================================================
 
     function resetPartitura() {
