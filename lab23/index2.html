@@ -85,59 +85,6 @@
       backdrop-filter: blur(4px);
     }
 
-    .acciones-dropdown {
-      position: relative;
-    }
-
-    #acciones-btn {
-      padding: 0.6rem 1.3rem;
-      background: rgba(0,255,204,0.12);
-      border: 1px solid #00ffcc66;
-      border-radius: 8px;
-      color: #00ffcc;
-      cursor: pointer;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    #acciones-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: rgba(22,27,34,0.98);
-      border: 1px solid #00ffcc66;
-      border-radius: 8px;
-      min-width: 200px;
-      z-index: 50;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-      backdrop-filter: blur(6px);
-    }
-
-    #acciones-menu.show {
-      display: block;
-    }
-
-    #acciones-menu button {
-      width: 100%;
-      text-align: left;
-      padding: 0.75rem 1.3rem;
-      background: none;
-      border: none;
-      color: #e6edf3;
-      cursor: pointer;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-    }
-
-    #acciones-menu button:hover {
-      background: rgba(0,255,204,0.18);
-    }
-
     #barra-opciones {
       display: flex;
       align-items: center;
@@ -148,6 +95,8 @@
       flex-wrap: nowrap;
       max-width: 100%;
       overflow-x: auto;
+      position: relative;
+      z-index: 50;
     }
 
     #barra-opciones > div {
@@ -170,6 +119,68 @@
       color: #e6edf3;
       min-width: 130px;
       font-size: 0.95rem;
+    }
+
+    .acciones-dropdown {
+      position: relative;
+      z-index: 200;
+    }
+
+    #acciones-btn {
+      padding: 0.6rem 1.3rem;
+      background: rgba(0,255,204,0.18);
+      border: 1px solid #00ffcc88;
+      border-radius: 8px;
+      color: #00ffcc;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    #acciones-btn:hover {
+      background: rgba(0,255,204,0.28);
+      box-shadow: 0 0 12px rgba(0,255,204,0.4);
+    }
+
+    #acciones-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: rgba(13,17,23,0.98);
+      border: 2px solid #00ffcc88;
+      border-radius: 8px;
+      min-width: 220px;
+      z-index: 9999 !important;
+      box-shadow: 0 10px 30px rgba(0,255,204,0.3);
+      backdrop-filter: blur(8px);
+      overflow: visible;
+    }
+
+    #acciones-menu.show {
+      display: block;
+    }
+
+    #acciones-menu button {
+      width: 100%;
+      text-align: left;
+      padding: 0.8rem 1.4rem;
+      background: none;
+      border: none;
+      color: #e6edf3;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    #acciones-menu button:hover {
+      background: rgba(0,255,204,0.25);
     }
 
     #main-content {
@@ -295,6 +306,44 @@
       color: #ff8080;
     }
 
+    .nota {
+      position: absolute;
+      cursor: move;
+      z-index: 100;
+    }
+
+    .nota:hover .plus, .nota:hover .minus {
+      opacity: 1;
+    }
+
+    .nota .plus, .nota .minus {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #00ffcc;
+      color: #0d1117;
+      position: absolute;
+      text-align: center;
+      line-height: 24px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.25s;
+      z-index: 101;
+      border: 2px solid #0d1117;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nota .plus:hover, .nota .minus:hover {
+      background: #00cc9e;
+      transform: translateX(-50%) scale(1.2);
+    }
+
+    .nota .plus { top: -30px; }
+    .nota .minus { bottom: -30px; }
+
     @media (max-width: 1100px) {
       #barra-opciones { gap: 1rem; padding: 0 0.5rem; }
       select { min-width: 120px; }
@@ -384,7 +433,6 @@
       <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
       <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar compás</button>
     </div>
-
   </div>
 
   <script>
@@ -481,16 +529,23 @@
       initControles();
       resetPartitura();
 
+      // Menú desplegable Archivo - ahora con z-index alto y visibilidad asegurada
       const accionesBtn = document.getElementById('acciones-btn');
       const accionesMenu = document.getElementById('acciones-menu');
-      accionesBtn.onclick = () => accionesMenu.classList.toggle('show');
-      document.addEventListener('click', e => {
+
+      accionesBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Evita que el clic se propague y cierre inmediatamente
+        accionesMenu.classList.toggle('show');
+      });
+
+      document.addEventListener('click', (e) => {
         if (!accionesBtn.contains(e.target) && !accionesMenu.contains(e.target)) {
           accionesMenu.classList.remove('show');
         }
       });
 
-      document.getElementById('export-pdf').onclick = () => {
+      // Exportar a PDF
+      document.getElementById('export-pdf').addEventListener('click', () => {
         const element = document.getElementById('pentagrama-container');
         const opt = {
           margin: 0.5,
@@ -501,10 +556,13 @@
         };
         html2pdf().set(opt).from(element).save();
         accionesMenu.classList.remove('show');
-      };
+      });
     }
 
-    // Resto del script (funciones originales completas)
+    // =====================================================================
+    // Resto del código JavaScript original (sin cambios)
+    // =====================================================================
+
     function resetPartitura() {
       lines = [[]];
       currentLine = 0;
