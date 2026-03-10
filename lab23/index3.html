@@ -339,6 +339,44 @@
       color: #ff8080;
     }
 
+    .nota {
+      position: absolute;
+      cursor: move;
+      z-index: 100;
+    }
+
+    .nota:hover .plus, .nota:hover .minus {
+      opacity: 1;
+    }
+
+    .nota .plus, .nota .minus {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #00ffcc;
+      color: #0d1117;
+      position: absolute;
+      text-align: center;
+      line-height: 24px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.25s;
+      z-index: 101;
+      border: 2px solid #0d1117;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nota .plus:hover, .nota .minus:hover {
+      background: #00cc9e;
+      transform: translateX(-50%) scale(1.2);
+    }
+
+    .nota .plus { top: -30px; }
+    .nota .minus { bottom: -30px; }
+
     @media (max-width: 1100px) {
       #barra-opciones { gap: 1rem; padding: 0 0.5rem; }
       select { min-width: 120px; }
@@ -430,7 +468,7 @@
       <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div>
       <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div>
       <div class="figura" data-tipo="puntillo" title="Puntillo"><span style="font-size:1.4rem">•</span></div>
-      <div class="figura" data-tipo="ligadura" title="Ligadura"><i class="fas fa-link"></i></div>
+      <div class="figura" data-tipo="ligadura" title="Ligadura"><span style="font-size:1.8rem">↝</span></div>
     </div>
 
     <div class="controles-linea" id="controles-modo">
@@ -499,6 +537,8 @@
       if (bpm) {
         tempoDisplay.textContent = tempoNames[bpm];
         tempoDisplay.style.display = "block";
+      } else {
+        tempoDisplay.style.display = "none";
       }
       window.addEventListener('resize', () => {
         width = Math.max(280, container.clientWidth);
@@ -530,14 +570,16 @@
 
       const accionesBtn = document.getElementById('acciones-btn');
       const accionesMenu = document.getElementById('acciones-menu');
-      accionesBtn.onclick = () => accionesMenu.classList.toggle('show');
+      accionesBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        accionesMenu.classList.toggle('show');
+      });
       document.addEventListener('click', e => {
         if (!accionesBtn.contains(e.target) && !accionesMenu.contains(e.target)) {
           accionesMenu.classList.remove('show');
         }
       });
 
-      // Exportar PDF con nueva disposición solicitada
       document.getElementById('export-pdf').onclick = () => {
         const titulo = document.getElementById('titulo-editable').value.trim() || 'Mi Partitura';
         const autor = document.getElementById('autor-input').value.trim() || 'Anónimo';
@@ -546,7 +588,7 @@
         pdfContainer.style.padding = '40px 50px';
         pdfContainer.style.fontFamily = '"Courier New", Courier, monospace';
         pdfContainer.style.background = 'white';
-        pdfContainer.style.width = '794px'; // A4 @ 96dpi
+        pdfContainer.style.width = '794px';
         pdfContainer.style.boxSizing = 'border-box';
         pdfContainer.style.position = 'relative';
         pdfContainer.style.minHeight = '1123px';
@@ -561,7 +603,7 @@
         tituloDiv.textContent = titulo;
         pdfContainer.appendChild(tituloDiv);
 
-        // Autor arriba a la derecha (posición absoluta)
+        // Autor arriba derecha
         const autorDiv = document.createElement('div');
         autorDiv.style.position = 'absolute';
         autorDiv.style.top = '40px';
@@ -571,7 +613,7 @@
         autorDiv.textContent = `Autor: ${autor}`;
         pdfContainer.appendChild(autorDiv);
 
-        // Pie de página centrado abajo
+        // Pie centrado abajo
         const footerDiv = document.createElement('div');
         footerDiv.style.position = 'absolute';
         footerDiv.style.bottom = '40px';
@@ -583,7 +625,6 @@
         footerDiv.innerHTML = 'Hecho con Laboratorio Musical Maximilian 23<br>www.maximilian23.com';
         pdfContainer.appendChild(footerDiv);
 
-        // Clon del pentagrama (centrado)
         const pentagramaClone = document.getElementById('pentagrama-container').cloneNode(true);
         pentagramaClone.style.border = 'none';
         pentagramaClone.style.boxShadow = 'none';
@@ -603,10 +644,6 @@
         document.getElementById('acciones-menu').classList.remove('show');
       };
     }
-
-    // =====================================================================
-    // Resto del código JavaScript (funcionalidad original + puntillo + ligadura)
-    // =====================================================================
 
     function resetPartitura() {
       lines = [[]];
@@ -682,14 +719,23 @@
               formatter.format([voice], staveWidth - 30);
               voice.draw(context, stave);
 
-              // Puntillos y ligaduras
+              // Puntillos y ligaduras mejoradas
               c.notas.forEach((n, ni) => {
-                if (n.puntillo) n.vf.addDotToAll();
-                if (n.ligadaConAnterior && prevNota) {
-                  const tie = new VF.Tie([
-                    { first_note: prevNota.vf, last_note: n.vf, first_indices: [0], last_indices: [0] }
-                  ]);
-                  tie.setContext(context).draw();
+                if (n.puntillo) {
+                  n.vf.addDotToAll();
+                }
+                if (n.ligadaConAnterior && prevNota && prevNota.vf && n.vf) {
+                  try {
+                    const tie = new VF.Tie({
+                      first_note: prevNota.vf,
+                      last_note: n.vf,
+                      first_indices: [0],
+                      last_indices: [0]
+                    });
+                    tie.setContext(context).draw();
+                  } catch (err) {
+                    console.warn("Error dibujando ligadura:", err);
+                  }
                 }
                 prevNota = n;
               });
@@ -722,11 +768,12 @@
       document.querySelectorAll(".figura").forEach(f => {
         f.onclick = () => {
           const tipo = f.dataset.tipo;
+          document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
           if (tipo === "puntillo" || tipo === "ligadura") {
             figuraActiva = { tipo };
+            f.classList.add("activa");
           } else {
-            document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-            figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
+            figuraActiva = { tipo, duracion: f.dataset.duracion };
             f.classList.add("activa");
           }
           initSynth();
@@ -1024,20 +1071,27 @@
       const beats = +compas.split("/")[0];
       const currentCompas = lines[currentLine][compasIndex];
 
+      // Puntillo mejorado
       if (figuraActiva.tipo === "puntillo") {
-        const lastNota = currentCompas.notas.slice().reverse().find(n => n.tipo === "nota" && !n.puntillo);
-        if (lastNota && currentCompas.beats + duracionBeats[lastNota.duracion] * 0.5 <= beats) {
-          lastNota.puntillo = true;
-          lastNota.vf.addDotToAll();
-          currentCompas.beats += duracionBeats[lastNota.duracion] * 0.5;
-          redibujarPentagrama();
+        const lastNota = currentCompas.notas.slice().reverse().find(n => n.tipo === "nota");
+        if (lastNota) {
+          const extra = duracionBeats[lastNota.duracion] * 0.5;
+          if (currentCompas.beats + extra <= beats) {
+            lastNota.puntillo = true;
+            lastNota.vf.addDotToAll();
+            currentCompas.beats += extra;
+            redibujarPentagrama();
+          } else {
+            alert("No cabe el puntillo (se excedería el tiempo del compás).");
+          }
         } else {
-          alert("No se puede añadir puntillo (no hay nota o no cabe)");
+          alert("No hay nota previa a la que añadir puntillo.");
         }
         figuraActiva = null;
         return;
       }
 
+      // Ligadura mejorada
       if (figuraActiva.tipo === "ligadura") {
         modoLigadura = true;
         figuraActiva = null;
@@ -1069,6 +1123,8 @@
         const prev = currentCompas.notas[currentCompas.notas.length - 1];
         if (prev.tipo === "nota" && prev.noteName === noteName) {
           nuevaNota.ligadaConAnterior = true;
+          modoLigadura = false;
+        } else {
           modoLigadura = false;
         }
       }
