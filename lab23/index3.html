@@ -476,16 +476,16 @@
         `;
 
         const pdfRenderer = new VF.Renderer(pdfPentagrama, VF.Renderer.Backends.SVG);
-        const pdfScale = 0.68;  // ← AJUSTA AQUÍ si quieres más pequeño (0.6) o más grande (0.75-0.8)
+        const pdfScale = 0.68;
         const pdfWidth  = 680;
-        const pdfHeight = 1000;
+        const pdfHeight = Math.max(1000, lines.length * 120);
 
         pdfRenderer.resize(pdfWidth * pdfScale, pdfHeight * pdfScale);
         const pdfContext = pdfRenderer.getContext();
         pdfContext.scale(pdfScale, pdfScale);
 
         let y = 40;
-        let prevNota = null;
+        let prevIdx = -1;
 
         if (compas) {
           lines.forEach((line, li) => {
@@ -495,40 +495,65 @@
 
               const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
               voice.setStrict(false);
-              if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
+
+              const staveNotesPDF = c.notas.map((n, ni) => {
+                let vfPDF;
+                if (n.tipo === "nota") {
+                  vfPDF = new VF.StaveNote({
+                    clef: clave,
+                    keys: [n.noteName],
+                    duration: n.duracion,
+                  });
+                  if (n.puntillo) vfPDF.addDotToAll();
+                } else {
+                  const restKey = clave === "treble" ? "b/4" : "d/3";
+                  vfPDF = new VF.StaveNote({
+                    clef: clave,
+                    keys: [restKey],
+                    duration: n.duracion + "r"
+                  });
+                }
+                return vfPDF;
+              });
+
+              if (staveNotesPDF.length) voice.addTickables(staveNotesPDF);
 
               const formatter = new VF.Formatter();
-              if (c.notas.length) formatter.joinVoices([voice]);
+              if (staveNotesPDF.length) formatter.joinVoices([voice]);
 
               let staveWidth = c.staveWidth || 150;
-              const stave = new VF.Stave(x, y, staveWidth);
 
+              const stave = new VF.Stave(x, y, staveWidth);
               if (li === 0 && ci === 0) stave.addClef(clave).addTimeSignature(compas);
               if (c.closed) stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
 
               stave.setContext(pdfContext).draw();
 
-              if (c.notas.length) {
+              if (staveNotesPDF.length) {
                 formatter.format([voice], staveWidth - 30);
                 voice.draw(pdfContext, stave);
 
+                // Ligaduras
+                prevIdx = -1;
                 c.notas.forEach((n, ni) => {
-                  if (n.puntillo) n.vf.addDotToAll();
-                  if (n.ligadaConAnterior && prevNota && prevNota.vf && n.vf) {
-                    const tie = new VF.Tie({
-                      first_note: prevNota.vf,
-                      last_note: n.vf,
-                      first_indices: [0],
-                      last_indices: [0]
-                    });
-                    tie.setContext(pdfContext).draw();
+                  if (n.tipo === "nota") {
+                    if (n.ligadaConAnterior && prevIdx >= 0) {
+                      const tie = new VF.Tie({
+                        first_note: staveNotesPDF[prevIdx],
+                        last_note:  staveNotesPDF[ni],
+                        first_indices: [0],
+                        last_indices: [0]
+                      });
+                      tie.setContext(pdfContext).draw();
+                    }
+                    prevIdx = ni;
                   }
-                  prevNota = n;
                 });
               }
+
               x += staveWidth;
             });
-            y += 95;  // ← puedes bajar a 85 o 90 si quieres líneas más juntas
+            y += 95;
           });
         }
 
