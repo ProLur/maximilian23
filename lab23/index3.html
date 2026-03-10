@@ -262,21 +262,22 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 1rem;
+      gap: 0.8rem;
       margin: 1.2rem 0;
-      max-width: 800px;
+      max-width: 900px;
+      padding: 0.5rem;
     }
 
     .figura {
-      width: 62px;
-      height: 62px;
+      width: 60px;
+      height: 60px;
       background: rgba(30,45,61,0.4);
       border: 2px solid #00ffcc66;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.3rem;
+      font-size: 2.2rem;
       color: #e6edf3;
       cursor: pointer;
       transition: all 0.3s;
@@ -289,13 +290,17 @@
       box-shadow: 0 0 16px #00ffcc66;
     }
 
+    .figura[data-tipo="puntillo"], .figura[data-tipo="ligadura"] {
+      font-size: 1.8rem;
+    }
+
     .controles-linea {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
       margin: 1rem 0;
-      max-width: 800px;
+      max-width: 900px;
     }
 
     button {
@@ -345,11 +350,7 @@
       #barra-opciones { flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
       .controles-linea { gap: 0.8rem; }
       .figura { width: 56px; height: 56px; font-size: 2rem; }
-      #acciones-menu {
-        left: auto;
-        right: 0;
-        min-width: 180px;
-      }
+      #acciones-menu { left: auto; right: 0; min-width: 180px; }
     }
 
     @media (max-width: 480px) {
@@ -428,6 +429,8 @@
       <div class="figura" data-tipo="silencio" data-duracion="h">𝄼</div>
       <div class="figura" data-tipo="silencio" data-duracion="q">𝄽</div>
       <div class="figura" data-tipo="silencio" data-duracion="8">𝄾</div>
+      <div class="figura" data-tipo="puntillo" title="Puntillo"><span style="font-size:1.4rem">•</span></div>
+      <div class="figura" data-tipo="ligadura" title="Ligadura"><i class="fas fa-link"></i></div>
     </div>
 
     <div class="controles-linea" id="controles-modo">
@@ -459,14 +462,13 @@
     let figuraActiva = null, showNoteLabels = false, isPlaying = false, metronomeOn = false;
     let metronomeLoop = null;
     let synth = null;
+    let modoLigadura = false;
 
     const noteMap = {
       treble: ["g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5"],
       bass: ["b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4"]
     };
-    const noteNameMap = {
-      c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si"
-    };
+    const noteNameMap = { c: "Do", d: "Re", e: "Mi", f: "Fa", g: "Sol", a: "La", b: "Si" };
     const duracionBeats = { w: 4, h: 2, q: 1, '8': 0.5 };
     const duracionTiempo = { w: "1n", h: "2n", q: "4n", '8': "8n" };
     const tempoNames = {
@@ -482,9 +484,7 @@
     }
 
     function initSynth() {
-      if (!synth) {
-        synth = new Tone.Synth().toDestination();
-      }
+      if (!synth) synth = new Tone.Synth().toDestination();
     }
 
     function init() {
@@ -499,8 +499,6 @@
       if (bpm) {
         tempoDisplay.textContent = tempoNames[bpm];
         tempoDisplay.style.display = "block";
-      } else {
-        tempoDisplay.style.display = "none";
       }
       window.addEventListener('resize', () => {
         width = Math.max(280, container.clientWidth);
@@ -509,10 +507,7 @@
         reflowLines();
         redibujarPentagrama();
       });
-      claveSelect.onchange = e => {
-        clave = e.target.value;
-        resetPartitura();
-      };
+      claveSelect.onchange = e => { clave = e.target.value; resetPartitura(); };
       compasSelect.onchange = e => {
         compas = e.target.value;
         resetPartitura();
@@ -535,91 +530,88 @@
 
       const accionesBtn = document.getElementById('acciones-btn');
       const accionesMenu = document.getElementById('acciones-menu');
-
-      accionesBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        accionesMenu.classList.toggle('show');
-      });
-
-      document.addEventListener('click', function(e) {
+      accionesBtn.onclick = () => accionesMenu.classList.toggle('show');
+      document.addEventListener('click', e => {
         if (!accionesBtn.contains(e.target) && !accionesMenu.contains(e.target)) {
           accionesMenu.classList.remove('show');
         }
       });
 
-      // Exportar a PDF con cabecera personalizada
-      document.getElementById('export-pdf').addEventListener('click', function() {
+      // Exportar PDF con nueva disposición solicitada
+      document.getElementById('export-pdf').onclick = () => {
         const titulo = document.getElementById('titulo-editable').value.trim() || 'Mi Partitura';
         const autor = document.getElementById('autor-input').value.trim() || 'Anónimo';
 
-        // Creamos un contenedor temporal con la cabecera para el PDF
         const pdfContainer = document.createElement('div');
-        pdfContainer.style.padding = '20px';
+        pdfContainer.style.padding = '40px 50px';
         pdfContainer.style.fontFamily = '"Courier New", Courier, monospace';
         pdfContainer.style.background = 'white';
-        pdfContainer.style.width = '794px'; // A4 en 96dpi ≈ 794px
+        pdfContainer.style.width = '794px'; // A4 @ 96dpi
         pdfContainer.style.boxSizing = 'border-box';
+        pdfContainer.style.position = 'relative';
+        pdfContainer.style.minHeight = '1123px';
 
-        // Cabecera
-        const headerDiv = document.createElement('div');
-        headerDiv.style.display = 'flex';
-        headerDiv.style.justifyContent = 'space-between';
-        headerDiv.style.marginBottom = '20px';
-        headerDiv.style.fontSize = '14px';
-        headerDiv.style.color = '#006644';
+        // Título centrado arriba
+        const tituloDiv = document.createElement('div');
+        tituloDiv.style.textAlign = 'center';
+        tituloDiv.style.fontSize = '24px';
+        tituloDiv.style.fontWeight = 'bold';
+        tituloDiv.style.marginBottom = '30px';
+        tituloDiv.style.color = '#006644';
+        tituloDiv.textContent = titulo;
+        pdfContainer.appendChild(tituloDiv);
 
-        const left = document.createElement('div');
-        left.innerHTML = 'Hecho con Laboratorio Musical Maximilian 23<br>www.maximilian23.com';
+        // Autor arriba a la derecha (posición absoluta)
+        const autorDiv = document.createElement('div');
+        autorDiv.style.position = 'absolute';
+        autorDiv.style.top = '40px';
+        autorDiv.style.right = '50px';
+        autorDiv.style.fontSize = '14px';
+        autorDiv.style.color = '#006644';
+        autorDiv.textContent = `Autor: ${autor}`;
+        pdfContainer.appendChild(autorDiv);
 
-        const center = document.createElement('div');
-        center.style.textAlign = 'center';
-        center.style.fontSize = '18px';
-        center.style.fontWeight = 'bold';
-        center.textContent = titulo;
+        // Pie de página centrado abajo
+        const footerDiv = document.createElement('div');
+        footerDiv.style.position = 'absolute';
+        footerDiv.style.bottom = '40px';
+        footerDiv.style.left = '0';
+        footerDiv.style.right = '0';
+        footerDiv.style.textAlign = 'center';
+        footerDiv.style.fontSize = '12px';
+        footerDiv.style.color = '#00664488';
+        footerDiv.innerHTML = 'Hecho con Laboratorio Musical Maximilian 23<br>www.maximilian23.com';
+        pdfContainer.appendChild(footerDiv);
 
-        const right = document.createElement('div');
-        right.style.textAlign = 'right';
-        right.innerHTML = `Autor: ${autor}`;
-
-        headerDiv.appendChild(left);
-        headerDiv.appendChild(center);
-        headerDiv.appendChild(right);
-
-        pdfContainer.appendChild(headerDiv);
-
-        // Copiamos el pentagrama
+        // Clon del pentagrama (centrado)
         const pentagramaClone = document.getElementById('pentagrama-container').cloneNode(true);
         pentagramaClone.style.border = 'none';
         pentagramaClone.style.boxShadow = 'none';
-        pentagramaClone.style.margin = '0';
+        pentagramaClone.style.margin = '20px auto 0';
+        pentagramaClone.style.width = '90%';
         pdfContainer.appendChild(pentagramaClone);
 
-        // Generamos el PDF
         const opt = {
           margin: 0,
           filename: titulo + '.pdf',
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, logging: false },
-          jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' } // A4 en píxeles
+          jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(pdfContainer).save();
-
-        // Limpiamos
-        accionesMenu.classList.remove('show');
-      });
+        document.getElementById('acciones-menu').classList.remove('show');
+      };
     }
 
     // =====================================================================
-    // Resto del código JavaScript original (sin cambios)
+    // Resto del código JavaScript (funcionalidad original + puntillo + ligadura)
     // =====================================================================
 
     function resetPartitura() {
       lines = [[]];
       currentLine = 0;
-      if (compas) {
-        lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH });
-      }
+      if (compas) lines[0].push({ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH });
       redibujarPentagrama();
     }
 
@@ -629,14 +621,9 @@
         let sum = lines[i].reduce((s, c) => s + (c.staveWidth || minStaveWidth), 0);
         if (sum > MAX_LINE_WIDTH && lines[i].length > 1) {
           const last = lines[i].pop();
-          if (i + 1 < lines.length) {
-            lines[i + 1].unshift(last);
-          } else {
-            lines.push([last]);
-          }
-        } else {
-          i++;
-        }
+          if (i + 1 < lines.length) lines[i + 1].unshift(last);
+          else lines.push([last]);
+        } else i++;
       }
       for (let li = lines.length - 1; li >= 0; li--) {
         if (lines[li].some(c => !c.closed)) {
@@ -654,19 +641,15 @@
       if (c.notas.length) formatter.joinVoices([voice]);
       let w = c.staveWidth || minStaveWidth;
       if (c.notas.length) {
-        let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
+        let noteWidth = c.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50) * (n.puntillo ? 1.2 : 1), 0);
         w = Math.max(w, formatter.preCalculateMinTotalWidth([voice]) + noteWidth + 50);
       }
-      if (li === 0 && ci === 0) {
-        w = Math.max(w, FIRST_STAVE_WIDTH);
-      }
+      if (li === 0 && ci === 0) w = Math.max(w, FIRST_STAVE_WIDTH);
       return w;
     }
 
     function redibujarPentagrama() {
-      if (!isPlaying) {
-        document.querySelectorAll(".nota, .note-label").forEach(el => el.remove());
-      }
+      if (!isPlaying) document.querySelectorAll(".nota, .note-label").forEach(el => el.remove());
       context.clear();
       let y = 40;
       lines = lines.filter(line => line.length > 0);
@@ -674,6 +657,9 @@
         lines = [[{ notas: [], beats: 0, closed: false, staveWidth: FIRST_STAVE_WIDTH }]];
         currentLine = 0;
       }
+
+      let prevNota = null;
+
       if (compas) {
         lines.forEach((line, li) => {
           let x = 10;
@@ -681,41 +667,48 @@
             if (c.notas.length === 0 && ci !== line.length - 1 && !c.closed) return;
             const voice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
             voice.setStrict(false);
-            if (c.notas.length) voice.addTickables(c.notas.map(n => n.vf));
+            const staveNotes = c.notas.map(n => n.vf);
+            if (c.notas.length) voice.addTickables(staveNotes);
             const formatter = new VF.Formatter();
             if (c.notas.length) formatter.joinVoices([voice]);
             let staveWidth = calculateStaveWidth(c, li, ci);
             c.staveWidth = staveWidth;
             const stave = new VF.Stave(x, y, staveWidth);
-            if (li === 0 && ci === 0) {
-              stave.addClef(clave).addTimeSignature(compas);
-            } else if (c.closed) {
-              stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
-            }
+            if (li === 0 && ci === 0) stave.addClef(clave).addTimeSignature(compas);
+            else if (c.closed) stave.addModifier(new VF.Barline(VF.Barline.type.SINGLE));
             stave.setContext(context).draw();
             c.stave = stave;
             if (c.notas.length) {
               formatter.format([voice], staveWidth - 30);
               voice.draw(context, stave);
+
+              // Puntillos y ligaduras
+              c.notas.forEach((n, ni) => {
+                if (n.puntillo) n.vf.addDotToAll();
+                if (n.ligadaConAnterior && prevNota) {
+                  const tie = new VF.Tie([
+                    { first_note: prevNota.vf, last_note: n.vf, first_indices: [0], last_indices: [0] }
+                  ]);
+                  tie.setContext(context).draw();
+                }
+                prevNota = n;
+              });
             }
             x += staveWidth;
           });
           y += lineHeight;
         });
       }
+
       currentHeight = Math.max(260, y + 60);
       renderer.resize(width, currentHeight);
       container.style.height = `${currentHeight}px`;
 
-      if (lines.length > 1) {
-        container.classList.add('multi-line');
-      } else {
-        container.classList.remove('multi-line');
-      }
+      if (lines.length > 1) container.classList.add('multi-line');
+      else container.classList.remove('multi-line');
 
-      if (!isPlaying) {
-        updateDraggableNotes();
-      }
+      if (!isPlaying) updateDraggableNotes();
+
       const curr = lines[currentLine]?.[lines[currentLine].length - 1];
       document.getElementById("cerrar-compas").disabled = !curr || curr.closed || curr.beats !== +compas.split("/")[0];
       if (curr?.stave && !isPlaying) {
@@ -728,9 +721,14 @@
     function initFiguras() {
       document.querySelectorAll(".figura").forEach(f => {
         f.onclick = () => {
-          document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
-          figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
-          f.classList.add("activa");
+          const tipo = f.dataset.tipo;
+          if (tipo === "puntillo" || tipo === "ligadura") {
+            figuraActiva = { tipo };
+          } else {
+            document.querySelectorAll(".figura").forEach(el => el.classList.remove("activa"));
+            figuraActiva = { tipo: f.dataset.tipo, duracion: f.dataset.duracion };
+            f.classList.add("activa");
+          }
           initSynth();
         };
       });
@@ -749,9 +747,7 @@
       document.getElementById("cerrar-compas").onclick = cerrarCompas;
       document.getElementById("borrar-ultimo").onclick = borrarUltimo;
       document.getElementById("limpiar").onclick = () => {
-        if (confirm("¿Estás seguro de que quieres limpiar toda la partitura? Esta acción no se puede deshacer.")) {
-          resetPartitura();
-        }
+        if (confirm("¿Limpiar toda la partitura?")) resetPartitura();
       };
       document.getElementById("guardar").onclick = guardar;
       document.getElementById("abrir").onclick = () => document.getElementById("file-input").click();
@@ -777,24 +773,32 @@
         let gi = 0;
         lines.forEach(line => {
           line.forEach(c => {
+            let prevNota = null;
             c.notas.forEach(n => {
               if (n.tipo === "nota") {
-                events.push({
-                  time: totalTime,
-                  note: n.noteName,
-                  dur: duracionTiempo[n.duracion],
-                  gi: gi,
-                  noteName: getNoteName(n.noteName)
-                });
+                let dur = duracionTiempo[n.duracion];
+                if (n.puntillo) dur = Tone.Time(dur).add(Tone.Time(dur).div(2)).toNotation();
+                if (prevNota && n.ligadaConAnterior) {
+                  events[events.length - 1].dur = Tone.Time(events[events.length - 1].dur).add(dur).toNotation();
+                } else {
+                  events.push({
+                    time: totalTime,
+                    note: n.noteName,
+                    dur: dur,
+                    gi: gi,
+                    noteName: getNoteName(n.noteName)
+                  });
+                }
+                prevNota = n;
+              } else {
+                prevNota = null;
               }
-              totalTime += Tone.Time(duracionTiempo[n.duracion]).toSeconds();
+              totalTime += Tone.Time(duracionTiempo[n.duracion]).toSeconds() * (n.puntillo ? 1.5 : 1);
               gi++;
             });
           });
         });
-        if (!events.length && !metronomeOn) {
-          return alert("¡Añade notas para reproducir!");
-        }
+        if (!events.length && !metronomeOn) return alert("¡Añade notas!");
         const numBeats = +compas.split("/")[0];
         const beatDuration = Tone.Time("4n").toSeconds();
         const introTime = metronomeOn ? numBeats * beatDuration : 0;
@@ -806,17 +810,10 @@
         const allNotes = Array.from(context.svg.querySelectorAll('g.vf-stavenote'));
         events.forEach(event => {
           const startTime = event.time + introTime;
-          const duration = Tone.Time(event.dur).toSeconds();
-          Tone.Transport.schedule((time) => {
-            if (synth) {
-              synth.triggerAttackRelease(
-                event.note.split("/")[0].toUpperCase() + event.note.split("/")[1],
-                event.dur,
-                time
-              );
-            }
+          Tone.Transport.schedule(time => {
+            if (synth) synth.triggerAttackRelease(event.note.split("/")[0].toUpperCase() + event.note.split("/")[1], event.dur, time);
           }, startTime);
-          Tone.Transport.schedule((time) => {
+          Tone.Transport.schedule(time => {
             const noteElement = allNotes[event.gi];
             if (noteElement) {
               noteElement.querySelectorAll('path, line, circle').forEach(el => {
@@ -826,7 +823,7 @@
             }
           }, startTime);
           if (showNoteLabels) {
-            Tone.Transport.schedule((time) => {
+            Tone.Transport.schedule(time => {
               const noteElement = allNotes[event.gi];
               if (noteElement) {
                 const bbox = noteElement.getBBox();
@@ -848,11 +845,11 @@
                 setTimeout(() => {
                   label.style.opacity = '0';
                   setTimeout(() => label.remove(), 400);
-                }, duration * 1000 * 0.8);
+                }, Tone.Time(event.dur).toSeconds() * 1000 * 0.8);
               }
             }, startTime);
           }
-          Tone.Transport.schedule((time) => {
+          Tone.Transport.schedule(time => {
             const noteElement = allNotes[event.gi];
             if (noteElement) {
               noteElement.querySelectorAll('path, line, circle').forEach(el => {
@@ -860,11 +857,9 @@
                 el.style.fill = 'black';
               });
             }
-          }, startTime + duration);
+          }, startTime + Tone.Time(event.dur).toSeconds());
         });
-        Tone.Transport.schedule(() => {
-          stopPlayback();
-        }, totalTime + introTime);
+        Tone.Transport.schedule(() => stopPlayback(), totalTime + introTime);
         Tone.Transport.start();
         playStopButton.innerHTML = '<i class="fas fa-stop"></i> Stop';
         playStopButton.classList.remove("play-active");
@@ -872,7 +867,7 @@
         isPlaying = true;
       }).catch(err => {
         console.error("Error al iniciar Tone.js:", err);
-        alert("Error al iniciar la reproducción. Asegúrate de interactuar con la página primero.");
+        alert("Error al iniciar la reproducción.");
       });
     }
 
@@ -957,6 +952,7 @@
         duration: nota.duracion,
         stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP
       });
+      if (nota.puntillo) nota.vf.addDotToAll();
       redibujarPentagrama();
       if (synth) {
         Tone.start().then(() => {
@@ -1027,9 +1023,31 @@
     function addNota(tipo, dur, noteName, compasIndex) {
       const beats = +compas.split("/")[0];
       const currentCompas = lines[currentLine][compasIndex];
+
+      if (figuraActiva.tipo === "puntillo") {
+        const lastNota = currentCompas.notas.slice().reverse().find(n => n.tipo === "nota" && !n.puntillo);
+        if (lastNota && currentCompas.beats + duracionBeats[lastNota.duracion] * 0.5 <= beats) {
+          lastNota.puntillo = true;
+          lastNota.vf.addDotToAll();
+          currentCompas.beats += duracionBeats[lastNota.duracion] * 0.5;
+          redibujarPentagrama();
+        } else {
+          alert("No se puede añadir puntillo (no hay nota o no cabe)");
+        }
+        figuraActiva = null;
+        return;
+      }
+
+      if (figuraActiva.tipo === "ligadura") {
+        modoLigadura = true;
+        figuraActiva = null;
+        return;
+      }
+
       if (currentCompas.beats + duracionBeats[dur] > beats) {
         return alert("¡No hay suficiente espacio en el compás!");
       }
+
       let vf;
       if (tipo === "nota") {
         const list = noteMap[clave];
@@ -1045,15 +1063,27 @@
         const rest = clave === "treble" ? "b/4" : "d/3";
         vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: dur + "r" });
       }
-      currentCompas.notas.push({ tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf });
+
+      const nuevaNota = { tipo, duracion: dur, noteName: tipo === "nota" ? noteName : null, vf };
+      if (modoLigadura && currentCompas.notas.length > 0) {
+        const prev = currentCompas.notas[currentCompas.notas.length - 1];
+        if (prev.tipo === "nota" && prev.noteName === noteName) {
+          nuevaNota.ligadaConAnterior = true;
+          modoLigadura = false;
+        }
+      }
+
+      currentCompas.notas.push(nuevaNota);
       currentCompas.beats = +(currentCompas.beats + duracionBeats[dur]).toFixed(2);
+
       const tempVoice = new VF.Voice({ num_beats: +compas.split("/")[0], beat_value: 4 });
       tempVoice.setStrict(false);
       if (currentCompas.notas.length) tempVoice.addTickables(currentCompas.notas.map(n => n.vf));
       const formatter = new VF.Formatter();
       if (currentCompas.notas.length) formatter.joinVoices([tempVoice]);
-      let noteWidth = currentCompas.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50), 0);
+      let noteWidth = currentCompas.notas.reduce((sum, n) => sum + (noteWidthFactors[n.duracion] || 50) * (n.puntillo ? 1.2 : 1), 0);
       currentCompas.staveWidth = Math.max(minStaveWidth, formatter.preCalculateMinTotalWidth([tempVoice]) + noteWidth + 50);
+
       const lineSum = lines[currentLine].reduce((sum, c) => sum + (c.staveWidth || minStaveWidth), 0);
       if (lineSum > MAX_LINE_WIDTH && lines[currentLine].length > 1) {
         const lastCompas = lines[currentLine].pop();
@@ -1080,11 +1110,12 @@
         for (let ci = lines[li].length - 1; ci >= 0; ci--) {
           const c = lines[li][ci];
           if (c.notas.length) {
-            c.beats -= duracionBeats[c.notas[c.notas.length - 1].duracion];
-            c.notas.pop();
+            const last = c.notas.pop();
+            c.beats -= duracionBeats[last.duracion] * (last.puntillo ? 1.5 : 1);
             c.closed = false;
             c.staveWidth = Math.max(minStaveWidth, minStaveWidth + (c.notas.length * 80));
             currentLine = li;
+            modoLigadura = false;
             redibujarPentagrama();
             return;
           }
@@ -1098,7 +1129,13 @@
         autor: document.getElementById("autor-input").value,
         clave, compas, bpm,
         lines: lines.map(l => l.map(c => ({
-          notas: c.notas.map(n => ({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName })),
+          notas: c.notas.map(n => ({
+            tipo: n.tipo,
+            duracion: n.duracion,
+            noteName: n.noteName,
+            puntillo: n.puntillo || false,
+            ligadaConAnterior: n.ligadaConAnterior || false
+          })),
           beats: c.beats,
           closed: c.closed,
           staveWidth: c.staveWidth
@@ -1141,11 +1178,12 @@
                   duration: n.duracion,
                   stem_direction: idx >= bIdx ? VF.Stem.DOWN : VF.Stem.UP
                 });
+                if (n.puntillo) vf.addDotToAll();
               } else {
                 const rest = clave === "treble" ? "b/4" : "d/3";
                 vf = new VF.StaveNote({ clef: clave, keys: [rest], duration: n.duracion + "r" });
               }
-              comp.notas.push({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName, vf });
+              comp.notas.push({ tipo: n.tipo, duracion: n.duracion, noteName: n.noteName, vf, puntillo: n.puntillo, ligadaConAnterior: n.ligadaConAnterior });
             });
             if (l.indexOf(c) === 0 && d.lines.indexOf(l) === 0) {
               comp.staveWidth = Math.max(comp.staveWidth, FIRST_STAVE_WIDTH);
