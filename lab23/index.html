@@ -127,7 +127,7 @@
     /* ── pentagrama ── */
     .pentagrama-wrapper{
       flex:1;background:white;border:2px solid #00ffcc55;border-radius:12px;
-      overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);
+      overflow:visible;box-shadow:0 8px 24px rgba(0,0,0,.5);
       position:relative;max-width:860px;min-height:160px;transition:height .3s ease;
     }
     #pentagrama-container{width:100%;position:relative;}
@@ -173,31 +173,58 @@
       transition:opacity .4s;font-family:"Courier New",Courier,monospace;
     }
 
-    /* ── overlays +/- ── */
-    .nota-overlay{position:absolute;z-index:200;pointer-events:none;}
-    .nota-overlay .pm-btn{
-      width:20px;height:20px;border-radius:50%;
-      background:#00ffcc;color:#0d1117;
-      position:absolute;text-align:center;line-height:18px;
-      font-size:.8rem;font-weight:bold;cursor:pointer;
-      pointer-events:all;border:2px solid #0d1117;
-      left:50%;transform:translateX(-50%);
-      opacity:0;transition:opacity .2s;user-select:none;
+    /* ── overlays táctiles ── */
+    .nota-overlay{
+      position:absolute;z-index:200;
+      pointer-events:all;cursor:pointer;
+      border-radius:4px;
+      transition:background .15s;
     }
-    .nota-overlay .pm-btn.plus{top:-24px;}
-    .nota-overlay .pm-btn.minus{bottom:-24px;}
-    .nota-overlay:hover .pm-btn{opacity:.9;}
-    .nota-overlay.pinned .pm-btn{opacity:1;}
-    .nota-overlay .pm-btn:hover{background:#00cc9e;}
+    /* Nota seleccionada: resaltado cyan */
+    .nota-overlay.selected{
+      background:rgba(0,255,204,.22);
+      outline:2px solid #00ffcc;
+      outline-offset:1px;
+    }
+    /* Botones + y − grandes, siempre visibles cuando la nota está seleccionada */
+    .nota-overlay .pm-btn{
+      width:34px;height:34px;border-radius:50%;
+      background:#00ffcc;color:#0d1117;
+      position:absolute;text-align:center;line-height:32px;
+      font-size:1.3rem;font-weight:bold;cursor:pointer;
+      pointer-events:all;border:2px solid rgba(0,0,0,.25);
+      left:50%;transform:translateX(-50%);
+      display:none;user-select:none;
+      box-shadow:0 2px 8px rgba(0,255,204,.5);
+      touch-action:manipulation;
+    }
+    .nota-overlay.selected .pm-btn{display:block;}
+    .nota-overlay .pm-btn.plus {top:-42px;}
+    .nota-overlay .pm-btn.minus{bottom:-42px;}
+    .nota-overlay .pm-btn:active{background:#00cc9e;transform:translateX(-50%) scale(.93);}
 
-    /* ── selección de ligadura ── */
+    /* Modo puntillo activo: overlay con cursor especial y resaltado */
+    .nota-overlay.dot-mode{
+      cursor:crosshair;
+      background:rgba(255,200,0,.12);
+      outline:2px dashed #ffcc00;
+      outline-offset:2px;
+    }
+    .nota-overlay.dot-mode:active{
+      background:rgba(255,200,0,.3);
+    }
+    /* En modo puntillo/ligadura el SVG no debe interceptar eventos */
+    body.dot-active #pentagrama svg,
+    body.tie-active #pentagrama svg{
+      pointer-events:none;
+    }
     .nota-overlay.liga-sel{
       outline:2px solid #ffcc00;outline-offset:2px;border-radius:4px;
-      pointer-events:all;cursor:pointer;
+      cursor:pointer;
     }
-    .nota-overlay.liga-sel::after{
-      content:'';position:absolute;inset:-3px;border-radius:4px;
-      background:rgba(255,204,0,.15);pointer-events:none;
+    .nota-overlay.liga-sel.picked{
+      outline-color:#00ffcc;
+      background:rgba(0,255,204,.2);
     }
   </style>
 </head>
@@ -382,7 +409,6 @@ let dotMode=false;
 let tieMode=false;    // modo ligadura: elegir 2 notas existentes
 let tiePick=[];       // índices [mi,ni] de notas seleccionadas para ligar
 let showLbls=false, playing=false, metroOn=false, metroLoop=null, synth=null;
-let pinnedOv=null, pinnedTmr=null;
 
 /* ══ MAPAS ══ */
 const NOTES={
@@ -404,7 +430,12 @@ renderer.resize(svgW,180);
 const ctx=renderer.getContext();
 
 /* ══ SYNTH ══ */
-const initSynth=()=>{if(!synth)synth=new Tone.Synth().toDestination();};
+const initSynth=()=>{
+  if(!synth) synth=new Tone.Synth({
+    oscillator:{type:"triangle"},
+    envelope:{attack:0.02,decay:0.1,sustain:0.8,release:1.5}
+  }).toDestination();
+};
 const playNote=(note,dur)=>{
   if(!note)return;initSynth();
   Tone.start().then(()=>{try{synth.triggerAttackRelease(note.split("/")[0].toUpperCase()+note.split("/")[1],dur);}catch(e){}});
@@ -428,9 +459,18 @@ function mkNote(note,dur,dot,isRest){
    Abierto  → OPEN_W fijo (no se estira aunque esté solo)
    Cerrado  → VexFlow calcula
 ════════════════════════ */
+/* ══ ANCHO DE COMPÁS ══
+   Abierto  → calculado según notas ya presentes (mínimo OPEN_W)
+   Cerrado  → VexFlow calcula
+════════════════════════ */
+const NOTE_W={w:52,h:48,q:44,"8":38}; // px por figura en compás abierto
 function mWidth(m,isFirst){
   const base=isFirst?CLEF_EXTRA:0;
-  if(!m.closed)return OPEN_W+base;
+  if(!m.closed){
+    // Ancho dinámico: suma el espacio de cada nota ya puesta + margen
+    const used=m.notes.reduce((s,n)=>s+(NOTE_W[n.dur]||44),0);
+    return Math.max(OPEN_W, used+60)+base;
+  }
   if(!m.notes.length)return Math.max(MIN_W+20,base+70);
   const v=mkVoice(m);
   const f=new VF.Formatter();f.joinVoices([v]);
@@ -460,8 +500,7 @@ function layoutLines(){
 function draw(){
   ctx.clear();
   document.querySelectorAll(".nota-overlay,.note-label").forEach(e=>e.remove());
-  pinnedOv=null;
-  if(pinnedTmr){clearTimeout(pinnedTmr);pinnedTmr=null;}
+  selectedOv=null;
 
   if(!timeSig||!measures.length){
     renderer.resize(svgW,160);wrapper.style.height="160px";
@@ -491,83 +530,138 @@ function draw(){
       stave.setContext(ctx).draw();
       if(m.notes.length){
         const voice=mkVoice(m);
-        const fmt=new VF.Formatter();fmt.joinVoices([voice]);
+
+        // Calcular beams ANTES de formatear para que VexFlow elimine los flags
+        const beams=[];
+        let grp=[];
+        m.notes.forEach(n=>{
+          if(n.dur==="8"&&n.type==="nota"){
+            if(grp.length===0){
+              grp.push(n);
+            } else {
+              const pIdx=NOTES[clef].indexOf(grp[grp.length-1].note);
+              const cIdx=NOTES[clef].indexOf(n.note);
+              const pDir=pIdx>=CTR_IDX?VF.Stem.DOWN:VF.Stem.UP;
+              const cDir=cIdx>=CTR_IDX?VF.Stem.DOWN:VF.Stem.UP;
+              if(pDir===cDir){
+                grp.push(n);
+                if(grp.length===2){
+                  try{beams.push(new VF.Beam(grp.map(x=>x.vn)));}catch(e){}
+                  grp=[];
+                }
+              } else {
+                grp=[n];
+              }
+            }
+          } else {
+            grp=[];
+          }
+        });
+
+        const fmt=new VF.Formatter();
+        fmt.joinVoices([voice]);
         fmt.format([voice],dw-(i===0?CLEF_EXTRA+18:28));
         voice.draw(ctx,stave);
+        beams.forEach(b=>{try{b.setContext(ctx).draw();}catch(e){}});
       }
       x+=dw;
     });
   });
 
-  // Dibujar ligaduras — recorrer notas en orden global
-  // Una ligadura conecta n[k].tie=true con la nota anterior de mismo tipo "nota"
-  let allNotes=[];
-  measures.forEach(m=>m.notes.forEach(n=>allNotes.push(n)));
-  for(let k=1;k<allNotes.length;k++){
-    if(!allNotes[k].tie||allNotes[k].type!=="nota") continue;
-    // Buscar la nota anterior de tipo "nota"
-    let prev=null;
-    for(let p=k-1;p>=0;p--){if(allNotes[p].type==="nota"){prev=allNotes[p];break;}}
-    if(!prev) continue;
-    try{
-      new VF.StaveTie({
-        first_note:prev.vn,
-        last_note:allNotes[k].vn,
-        first_indices:[0],
-        last_indices:[0]
-      }).setContext(ctx).draw();
-    }catch(e){}
-  }
+  // Dibujar ligaduras — usar los pares exactos guardados en tie:{fromMi,fromNi}
+  measures.forEach((m,mi)=>{
+    m.notes.forEach((n,ni)=>{
+      if(!n.tie||n.type!=="nota")return;
+      const {fromMi,fromNi}=n.tie;
+      const srcNote=measures[fromMi]?.notes[fromNi];
+      if(!srcNote||srcNote.type!=="nota")return;
+      try{
+        new VF.StaveTie({
+          first_note:srcNote.vn,
+          last_note:n.vn,
+          first_indices:[0],
+          last_indices:[0]
+        }).setContext(ctx).draw();
+      }catch(e){}
+    });
+  });
   updateCloseBtn();
-  if(!playing)buildOverlays();
+  if(!playing) requestAnimationFrame(buildOverlays);
 }
 
-/* ══ OVERLAYS +/- y SELECCIÓN LIGADURA ══ */
+/* ══ OVERLAYS TÁCTILES ══ */
+let selectedOv=null;
+
 function buildOverlays(){
+  selectedOv=null;
+  document.querySelectorAll(".nota-overlay").forEach(e=>e.remove());
   const svgNotes=Array.from(ctx.svg.querySelectorAll("g.vf-stavenote"));
+  const svgEl=ctx.svg;
+
   let gi=0;
   measures.forEach((m,mi)=>{
     m.notes.forEach((n,ni)=>{
       if(n.type==="silencio"){gi++;return;}
       const g=svgNotes[gi];if(!g){gi++;return;}
       try{
+        // getBBox da coordenadas en el espacio del SVG (sin scroll, sin zoom)
         const bb=g.getBBox();
-        const svgR=ctx.svg.getBoundingClientRect();
+        if(!bb||bb.width===0){gi++;return;}
+
+        // Convertir a coordenadas del container usando la matriz del SVG
+        const pt1=svgEl.createSVGPoint();
+        pt1.x=bb.x; pt1.y=bb.y;
+        const pt2=svgEl.createSVGPoint();
+        pt2.x=bb.x+bb.width; pt2.y=bb.y+bb.height;
+        const ctm=svgEl.getScreenCTM();
+        const c1=pt1.matrixTransform(ctm);
+        const c2=pt2.matrixTransform(ctm);
         const cR=container.getBoundingClientRect();
+
+        const rawX=c1.x-cR.left;
+        const rawY=c1.y-cR.top+container.scrollTop;
+        const rawW=c2.x-c1.x;
+        const rawH=c2.y-c1.y;
+
+        const ovW=Math.max(rawW,44);
+        const ovH=Math.max(rawH,44);
+        const ovX=rawX-(ovW-rawW)/2;
+        const ovY=rawY-(ovH-rawH)/2;
+
         const ov=document.createElement("div");
         ov.className="nota-overlay";
-        ov.style.cssText=`left:${svgR.left-cR.left+bb.x}px;top:${svgR.top-cR.top+bb.y}px;width:${bb.width}px;height:${bb.height}px`;
+        ov.style.cssText=`left:${ovX}px;top:${ovY}px;width:${ovW}px;height:${ovH}px;position:absolute;z-index:300;`;
         ov.dataset.mi=mi;ov.dataset.ni=ni;
 
-        // Si estamos en modo ligadura, el overlay es clickeable para seleccionar
         if(tieMode){
           ov.classList.add("liga-sel");
-          // Resaltar si ya está seleccionado
-          if(tiePick.some(p=>p[0]===mi&&p[1]===ni)){
-            ov.style.outline="2px solid #00ffcc";
-            ov.style.background="rgba(0,255,204,.2)";
-          }
-          ov.addEventListener("click",e=>{
-            e.stopPropagation();
-            selectForTie(mi,ni);
+          if(tiePick.some(p=>p[0]===mi&&p[1]===ni))ov.classList.add("picked");
+          ov.addEventListener("pointerdown",e=>{e.stopPropagation();e.preventDefault();selectForTie(mi,ni);});
+        } else if(dotMode){
+          ov.classList.add("dot-mode");
+          ov.addEventListener("pointerdown",e=>{
+            e.stopPropagation();e.preventDefault();
+            toggleDotOn(mi,ni);
           });
         } else {
-          // Modo normal: overlay con +/-
-          ov.addEventListener("click",e=>{
-            e.stopPropagation();
-            if(pinnedOv&&pinnedOv!==ov)pinnedOv.classList.remove("pinned");
-            if(pinnedTmr){clearTimeout(pinnedTmr);pinnedTmr=null;}
-            ov.classList.add("pinned");pinnedOv=ov;
-            pinnedTmr=setTimeout(()=>{ov.classList.remove("pinned");pinnedOv=null;pinnedTmr=null;},3000);
-          });
           const mkBtn=(lbl,cls,dir)=>{
             const b=document.createElement("div");
             b.textContent=lbl;b.className="pm-btn "+cls;
-            b.addEventListener("click",e=>{e.stopPropagation();shiftPitch(mi,ni,dir);});
+            b.addEventListener("pointerdown",e=>{
+              e.stopPropagation();e.preventDefault();
+              shiftPitch(mi,ni,dir);
+            });
             return b;
           };
-          ov.appendChild(mkBtn("+","plus",1));
+          ov.appendChild(mkBtn("+","plus", 1));
           ov.appendChild(mkBtn("−","minus",-1));
+          ov.addEventListener("pointerdown",e=>{
+            if(e.target!==ov)return;
+            e.stopPropagation();
+            if(selectedOv&&selectedOv!==ov) selectedOv.classList.remove("selected");
+            if(selectedOv===ov){ov.classList.remove("selected");selectedOv=null;}
+            else{ov.classList.add("selected");selectedOv=ov;}
+          });
         }
         container.appendChild(ov);
       }catch(e){}
@@ -576,34 +670,41 @@ function buildOverlays(){
   });
 }
 
+// Toque en el pentagrama fuera de notas → deseleccionar
+divEl.addEventListener("pointerdown",e=>{
+  if(e.target===divEl||e.target.tagName==="svg"){
+    if(selectedOv){selectedOv.classList.remove("selected");selectedOv=null;}
+  }
+},{capture:false});
+
 /* Seleccionar notas para ligar */
 function selectForTie(mi,ni){
-  // Si ya está en la selección, quitarla
+  // ¿Ya estaba en la selección pendiente? → deseleccionar
   const idx=tiePick.findIndex(p=>p[0]===mi&&p[1]===ni);
   if(idx>=0){tiePick.splice(idx,1);draw();return;}
+
   tiePick.push([mi,ni]);
+
   if(tiePick.length===2){
-    applyTie();
+    const globalIdx=([m,n])=>{
+      let g=0;for(let i=0;i<m;i++)g+=measures[i].notes.length;return g+n;
+    };
+    const sorted=[...tiePick].sort((a,b)=>globalIdx(a)-globalIdx(b));
+    const [mi1,ni1]=sorted[0];
+    const [mi2,ni2]=sorted[1];
+    const dest=measures[mi2].notes[ni2];
+
+    // ¿Ya existe una ligadura entre estas dos notas exactas? → quitarla
+    if(dest.tie&&dest.tie.fromMi===mi1&&dest.tie.fromNi===ni1){
+      dest.tie=false;
+    } else {
+      dest.tie={fromMi:mi1,fromNi:ni1};
+    }
+    tiePick=[];
+    draw();
   } else {
     draw();
   }
-}
-function applyTie(){
-  // Ordenar por posición global
-  const globalIdx=([mi,ni])=>{
-    let g=0;
-    for(let m=0;m<mi;m++)g+=measures[m].notes.length;
-    g+=ni;return g;
-  };
-  tiePick.sort((a,b)=>globalIdx(a)-globalIdx(b));
-  const [mi1,ni1]=tiePick[0];
-  const [mi2,ni2]=tiePick[1];
-  // La segunda nota recibe el tie
-  measures[mi2].notes[ni2].tie=true;
-  tiePick=[];
-  // Desactivar modo ligadura tras aplicar
-  // (dejarlo activo para que el usuario pueda seguir ligando)
-  draw();
 }
 
 function shiftPitch(mi,ni,dir){
@@ -618,8 +719,8 @@ function shiftPitch(mi,ni,dir){
 
 /* ══ CLICK EN PENTAGRAMA → añadir nota ══ */
 divEl.addEventListener("click",e=>{
-  // En modo ligadura el click lo gestionan los overlays, no el pentagrama
   if(tieMode)return;
+  if(dotMode)return; // en modo puntillo los taps van a los overlays
   if(!timeSig||!activeFig)return;
 
   const rect=divEl.getBoundingClientRect();
@@ -652,25 +753,37 @@ function noteFromY(y){
   return list[Math.max(0,Math.min(list.length-1,CTR_IDX+steps))];
 }
 
-/* ══ PUNTILLO: aplicar a la última nota puesta ══ */
-function applyDot(){
-  if(!timeSig)return;
-  for(let mi=measures.length-1;mi>=0;mi--){
-    for(let ni=measures[mi].notes.length-1;ni>=0;ni--){
-      const n=measures[mi].notes[ni];
-      if(n.type!=="nota") continue;
-      if(n.dot){alert("La última nota ya tiene puntillo.");return;}
-      const bPer=+timeSig.split("/")[0];
-      const extra=BEATS[n.dur]*0.5;
-      if(measures[mi].beats+extra>bPer+0.01){alert("No cabe el puntillo: el compás se llenaría.");return;}
-      n.dot=true;
-      n.vn=mkNote(n.note,n.dur,true,false);
-      measures[mi].beats=+(measures[mi].beats+extra).toFixed(4);
-      draw();
-      return;
-    }
+/* ══ PUNTILLO ══
+   dotMode = modo activo (botón • encendido).
+   En ese modo, tocar cualquier nota le añade o quita el puntillo.
+   La lógica real está en buildOverlays — cuando dotMode=true
+   el tap en overlay llama a toggleDotOn(mi,ni).
+════════════════ */
+function toggleDotOn(mi,ni){
+  const n=measures[mi].notes[ni];
+  if(n.type!=="nota"){return;}
+  const bPer=+timeSig.split("/")[0];
+
+  if(n.dot){
+    // Quitar puntillo
+    const extra=BEATS[n.dur]*0.5;
+    n.dot=false;
+    n.vn=mkNote(n.note,n.dur,false,false);
+    measures[mi].beats=+(measures[mi].beats-extra).toFixed(4);
+    draw();
+    return;
   }
-  alert("No hay ninguna nota a la que aplicar el puntillo.");
+  // Poner puntillo — comprobar espacio solo en compás abierto
+  const extra=BEATS[n.dur]*0.5;
+  if(!measures[mi].closed && measures[mi].beats+extra>bPer+0.01){
+    alert("No cabe el puntillo: el compás se llenaría.");return;
+  }
+  n.dot=true;
+  n.vn=mkNote(n.note,n.dur,true,false);
+  if(!measures[mi].closed){
+    measures[mi].beats=+(measures[mi].beats+extra).toFixed(4);
+  }
+  draw();
 }
 
 /* ══ CERRAR COMPÁS ══ */
@@ -721,18 +834,40 @@ function togglePlay(){
     activeFig=null;dotMode=false;tieMode=false;tiePick=[];
     Tone.Transport.bpm.value=bpm;Tone.Transport.cancel();
     let t0=0;const evs=[];let gi=0;const spb=60/bpm;
-    measures.forEach(m=>{
-      let prevEv=null;
-      m.notes.forEach(n=>{
+    const evMap={};
+    const globalKey=(mi,ni)=>`${mi}_${ni}`;
+
+    measures.forEach((m,mi)=>{
+      m.notes.forEach((n,ni)=>{
         const sec=BEATS[n.dur]*(n.dot?1.5:1)*spb;
         if(n.type==="nota"){
-          if(prevEv&&n.tie){prevEv.sec+=sec;}
-          else{const ev={t:t0,note:n.note,sec,gi,lbl:dname(n.note)};evs.push(ev);prevEv=ev;}
-        }else prevEv=null;
-        t0+=sec;gi++;
+          if(n.tie&&n.tie.fromMi!==undefined){
+            const srcKey=globalKey(n.tie.fromMi,n.tie.fromNi);
+            const srcEv=evMap[srcKey];
+            console.log(`Nota ligada [${mi},${ni}] → origen [${n.tie.fromMi},${n.tie.fromNi}] srcKey=${srcKey} srcEv=`,srcEv);
+            if(srcEv){
+              srcEv.sec+=sec;
+              console.log(`  → duración origen ahora: ${srcEv.sec.toFixed(3)}s`);
+              evMap[globalKey(mi,ni)]=srcEv;
+            } else {
+              console.warn(`  → ORIGEN NO ENCONTRADO, sonando como nota normal`);
+              const ev={t:t0,note:n.note,sec,gi,lbl:dname(n.note)};
+              evs.push(ev);
+              evMap[globalKey(mi,ni)]=ev;
+            }
+          } else {
+            const ev={t:t0,note:n.note,sec,gi,lbl:dname(n.note)};
+            evs.push(ev);
+            evMap[globalKey(mi,ni)]=ev;
+          }
+        }
+        // Avanzar tiempo e índice SVG siempre, una sola vez por nota
+        t0+=sec;
+        gi++;
       });
     });
     if(!evs.length&&!metroOn)return alert("¡Añade notas!");
+    console.log("Eventos a programar:",evs.map(e=>({note:e.note,sec:e.sec.toFixed(3),t:e.t.toFixed(3)})));
     const nBeats=+timeSig.split("/")[0];
     const intro=metroOn?nBeats*spb:0;
     if(metroOn){metroLoop=new Tone.Loop(t=>{new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3","8n",t);},"4n").start(0);}
@@ -969,14 +1104,21 @@ function init(){
 
   // Puntillo — aplica a la última nota puesta
   document.getElementById("btn-puntillo").addEventListener("click",()=>{
-    applyDot();
+    dotMode=!dotMode;
+    document.getElementById("btn-puntillo").classList.toggle("activa",dotMode);
+    if(dotMode){ tieMode=false; tiePick=[]; document.getElementById("btn-ligadura").classList.remove("activa"); }
+    document.body.classList.toggle("dot-active",dotMode);
+    document.body.classList.toggle("tie-active",tieMode);
+    draw();
   });
 
   // Ligadura — modo selección de 2 notas existentes
   document.getElementById("btn-ligadura").addEventListener("click",()=>{
     tieMode=!tieMode;tiePick=[];
+    if(tieMode){dotMode=false;document.getElementById("btn-puntillo").classList.remove("activa");document.body.classList.remove("dot-active");}
     document.getElementById("btn-ligadura").classList.toggle("activa",tieMode);
-    draw(); // redibujar para mostrar/quitar highlights
+    document.body.classList.toggle("tie-active",tieMode);
+    draw();
   });
 
   document.getElementById("cerrar-compas").onclick=closeMeasure;
