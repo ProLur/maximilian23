@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio Musical • Maximilian 23 • Versión BETA</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+      font-family:"Courier New",Courier,monospace;
+      background:#0d1117;color:#e6edf3;
+      min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+      background-image:
+        radial-gradient(circle at 20% 10%,rgba(0,255,204,.07) 0%,transparent 50%),
+        radial-gradient(circle at 80% 90%,rgba(0,255,204,.05) 0%,transparent 50%);
+      background-attachment:fixed;
+    }
+    header{
+      background:rgba(22,27,34,.92);backdrop-filter:blur(8px);
+      width:100%;padding:.9rem 1.2rem;
+      display:flex;align-items:center;justify-content:center;gap:.9rem;
+      border-bottom:2px solid #00ffcc;position:sticky;top:0;z-index:100;
+    }
+    header img{height:48px;border-radius:50%;border:2px solid #00ffcc88;box-shadow:0 0 12px #00ffcc55;}
+    header h1{font-size:1.8rem;color:#00ffcc;text-shadow:0 0 8px #00ffccaa;}
+    #creado-por{position:absolute;top:.9rem;right:1.2rem;font-size:.85rem;color:#00ffcc88;}
+
+    .titulo-container{
+      width:100%;max-width:1100px;margin:1.2rem 0 .8rem;
+      display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1.5rem;
+    }
+    #titulo-partitura{flex:1;min-width:280px;max-width:460px;}
+    #titulo-editable{
+      width:100%;padding:.7rem 1rem;font-size:1.4rem;
+      background:rgba(30,45,61,.4);border:1px solid #00ffcc55;border-radius:10px;
+      color:#e6edf3;text-align:center;backdrop-filter:blur(4px);
+      font-family:"Courier New",Courier,monospace;
+    }
+    #autor-container{flex:1;min-width:220px;max-width:320px;display:flex;align-items:center;gap:.6rem;}
+    #autor-label{color:#00ffcc;font-weight:bold;white-space:nowrap;font-size:1rem;}
+    #autor-input{
+      flex:1;padding:.7rem .8rem;font-size:1.1rem;
+      background:rgba(30,45,61,.4);border:1px solid #00ffcc55;border-radius:10px;
+      color:#e6edf3;backdrop-filter:blur(4px);font-family:"Courier New",Courier,monospace;
+    }
+
+    /* ── barra superior: todo en una línea ── */
+    #barra-opciones{
+      display:flex;align-items:center;justify-content:center;
+      gap:1rem;margin:.5rem 0 1rem;padding:0 1rem;
+      flex-wrap:nowrap;width:100%;max-width:1200px;
+      position:relative;z-index:500;
+      /* NO overflow:auto — cortaría el dropdown */
+    }
+    #barra-opciones label{color:#00ffcc;white-space:nowrap;font-size:.88rem;}
+    select{
+      padding:.45rem .7rem;background:rgba(30,45,61,.5);
+      border:1px solid #00ffcc66;border-radius:8px;color:#e6edf3;
+      font-size:.88rem;font-family:"Courier New",Courier,monospace;
+      white-space:nowrap;
+    }
+    .acciones-dropdown{position:relative;z-index:600;flex-shrink:0;}
+    #acciones-btn{
+      padding:.45rem 1rem;background:rgba(0,255,204,.18);
+      border:1px solid #00ffcc88;border-radius:8px;color:#00ffcc;
+      cursor:pointer;font-weight:bold;display:flex;align-items:center;gap:.4rem;
+      font-family:"Courier New",Courier,monospace;font-size:.88rem;white-space:nowrap;
+    }
+    #acciones-btn:hover{background:rgba(0,255,204,.28);box-shadow:0 0 10px rgba(0,255,204,.4);}
+    #acciones-menu{
+      display:none;position:absolute;top:calc(100% + 4px);left:0;
+      background:rgba(13,17,23,.99);border:2px solid #00ffcc88;border-radius:8px;
+      min-width:210px;z-index:9999;box-shadow:0 10px 28px rgba(0,255,204,.5);backdrop-filter:blur(8px);
+    }
+    #acciones-menu.show{display:block;}
+    #acciones-menu button{
+      width:100%;text-align:left;padding:.7rem 1.2rem;
+      background:none;border:none;color:#e6edf3;cursor:pointer;
+      display:flex;align-items:center;gap:.7rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;
+    }
+    #acciones-menu button:hover{background:rgba(0,255,204,.22);}
+
+    /* ── layout principal ── */
+    .main-layout{
+      width:100%;max-width:1200px;display:flex;
+      justify-content:center;gap:1.2rem;padding:0 1.5rem 2rem;align-items:flex-start;
+    }
+
+    /* ── sidebar figuras ── */
+    .sidebar-left{
+      width:136px;flex-shrink:0;position:sticky;top:110px;align-self:flex-start;
+      padding:.9rem .6rem;background:rgba(30,45,61,.3);
+      border-radius:12px;border:1px solid #00ffcc33;backdrop-filter:blur(6px);
+      display:flex;flex-direction:column;gap:1rem;
+    }
+    .fig-pair{display:flex;gap:.6rem;justify-content:center;}
+    .figura{
+      width:54px;height:54px;
+      background:rgba(30,45,61,.45);border:2px solid #00ffcc55;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:all .22s;user-select:none;overflow:visible;flex-shrink:0;
+    }
+    .figura:hover,.figura.activa{
+      background:rgba(0,255,204,.18);border-color:#00ffcc;
+      transform:scale(1.1);box-shadow:0 0 14px #00ffcc55;
+    }
+    .figura svg{width:78%;height:78%;}
+
+    /* modos puntillo / ligadura */
+    .modo-pair{display:flex;gap:.6rem;justify-content:center;}
+    .figura-modo{
+      width:54px;height:32px;
+      background:rgba(30,45,61,.45);border:2px solid #00ffcc55;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.25rem;color:#e6edf3;cursor:pointer;transition:all .22s;user-select:none;
+    }
+    .figura-modo:hover,.figura-modo.activa{
+      background:rgba(0,255,204,.2);border-color:#00ffcc;box-shadow:0 0 12px #00ffcc44;
+    }
+
+    /* ── pentagrama ── */
+    .pentagrama-wrapper{
+      flex:1;background:white;border:2px solid #00ffcc55;border-radius:12px;
+      overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);
+      position:relative;max-width:860px;min-height:160px;transition:height .3s ease;
+    }
+    #pentagrama-container{width:100%;position:relative;}
+    #pentagrama{width:100%;display:block;}
+    .tempo-text{
+      position:absolute;top:.45rem;left:1.8rem;
+      background:rgba(255,255,255,.92);color:#006644;
+      padding:.2rem .6rem;border-radius:6px;border:1px solid #00cc99;
+      font-weight:bold;z-index:10;font-size:.78rem;pointer-events:none;
+    }
+
+    /* ── sidebar derecho ── */
+    .sidebar-right{
+      width:136px;flex-shrink:0;position:sticky;top:110px;align-self:flex-start;
+      display:flex;flex-direction:column;gap:.8rem;padding:.9rem .55rem;
+      background:rgba(30,45,61,.3);border-radius:12px;
+      border:1px solid #00ffcc33;backdrop-filter:blur(6px);
+    }
+    .sidebar-right button{
+      padding:.75rem .5rem;background:rgba(0,255,204,.12);
+      border:1px solid #00ffcc66;border-radius:8px;color:#00ffcc;
+      font-weight:bold;cursor:pointer;transition:all .25s;font-size:.82rem;
+      font-family:"Courier New",Courier,monospace;
+      display:flex;align-items:center;justify-content:center;gap:.35rem;
+    }
+    .sidebar-right button.activa{
+      background:rgba(0,255,204,.35)!important;border-color:#00ffcc;
+      box-shadow:0 0 10px rgba(0,255,204,.4);
+    }
+    .sidebar-right button:hover:not(:disabled){
+      background:rgba(0,255,204,.22);border-color:#00ffcc;transform:translateY(-1px);
+    }
+    .sidebar-right button:disabled{opacity:.38;cursor:not-allowed;}
+    #play-stop.stop-active{
+      background:rgba(255,80,80,.35)!important;border-color:#ff8080;color:#ff8080;
+    }
+
+    /* ── nota labels durante play ── */
+    .note-label{
+      position:absolute;color:#00ffcc;background:rgba(13,17,23,.85);
+      padding:3px 6px;border-radius:5px;border:1px solid #00ffcc55;
+      font-size:.78rem;pointer-events:none;z-index:50;white-space:nowrap;
+      transition:opacity .4s;font-family:"Courier New",Courier,monospace;
+    }
+
+    /* ── overlays +/- ── */
+    .nota-overlay{position:absolute;z-index:200;pointer-events:none;}
+    .nota-overlay .pm-btn{
+      width:20px;height:20px;border-radius:50%;
+      background:#00ffcc;color:#0d1117;
+      position:absolute;text-align:center;line-height:18px;
+      font-size:.8rem;font-weight:bold;cursor:pointer;
+      pointer-events:all;border:2px solid #0d1117;
+      left:50%;transform:translateX(-50%);
+      opacity:0;transition:opacity .2s;user-select:none;
+    }
+    .nota-overlay .pm-btn.plus{top:-24px;}
+    .nota-overlay .pm-btn.minus{bottom:-24px;}
+    .nota-overlay:hover .pm-btn{opacity:.9;}
+    .nota-overlay.pinned .pm-btn{opacity:1;}
+    .nota-overlay .pm-btn:hover{background:#00cc9e;}
+
+    /* ── selección de ligadura ── */
+    .nota-overlay.liga-sel{
+      outline:2px solid #ffcc00;outline-offset:2px;border-radius:4px;
+      pointer-events:all;cursor:pointer;
+    }
+    .nota-overlay.liga-sel::after{
+      content:'';position:absolute;inset:-3px;border-radius:4px;
+      background:rgba(255,204,0,.15);pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
+  <h1>Laboratorio Musical</h1>
+  <div id="creado-por">Creado por Manuel</div>
+</header>
+
+<div class="titulo-container">
+  <div id="titulo-partitura">
+    <input type="text" id="titulo-editable" value="Mi Partitura">
+  </div>
+  <div id="autor-container">
+    <label id="autor-label">Autor:</label>
+    <input type="text" id="autor-input" placeholder="Tu nombre" value="">
+  </div>
+</div>
+
+<!-- Barra en una sola línea -->
+<div id="barra-opciones">
+  <div class="acciones-dropdown">
+    <button id="acciones-btn"><i class="fas fa-file"></i> Archivo</button>
+    <div id="acciones-menu">
+      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
+      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
+      <button id="export-pdf"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+      <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
+    </div>
+    <input type="file" id="file-input" accept=".json" style="display:none">
+  </div>
+  <label>Clave:</label>
+  <select id="clave">
+    <option value="treble" selected>Sol</option>
+    <option value="bass">Fa</option>
+  </select>
+  <label>Compás:</label>
+  <select id="compas">
+    <option value="" selected>---</option>
+    <option value="2/4">2/4</option>
+    <option value="3/4">3/4</option>
+    <option value="4/4">4/4</option>
+    <option value="6/8">6/8</option>
+  </select>
+  <label>Velocidad:</label>
+  <select id="velocidad">
+    <option value="" selected>---</option>
+    <option value="40">Grave (40)</option>
+    <option value="50">Largo (50)</option>
+    <option value="60">Larghetto (60)</option>
+    <option value="66">Adagio (66)</option>
+    <option value="76">Andante (76)</option>
+    <option value="88">Andantino (88)</option>
+    <option value="100">Moderato (100)</option>
+    <option value="112">Allegretto (112)</option>
+    <option value="120">Allegro (120)</option>
+    <option value="140">Vivace (140)</option>
+    <option value="160">Presto (160)</option>
+    <option value="184">Prestissimo (184)</option>
+  </select>
+</div>
+
+<div class="main-layout">
+
+  <!-- Fuente Bravura para figuras musicales reales -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Music&display=swap');
+    .figura span.glyph {
+      font-family: "Bravura", "Noto Music", "Segoe UI Symbol", serif;
+      font-size: 2.4rem;
+      color: #e6edf3;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    /* Silencio redonda y blanca usan rectángulos SVG pequeños — más fieles */
+    .figura span.rect-rest {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+  </style>
+
+  <!-- SIDEBAR IZQUIERDO — figuras con caracteres Unicode musicales reales -->
+  <div class="sidebar-left" id="figuras">
+
+    <!-- Redonda | Silencio redonda -->
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="w" title="Redonda (4 tiempos)">
+        <span class="glyph">𝅝</span>
+      </div>
+      <div class="figura" data-tipo="silencio" data-duracion="w" title="Silencio redonda (4 tiempos)">
+        <!-- Bloque colgado arriba = silencio redonda -->
+        <svg viewBox="0 0 44 34" style="width:70%;height:auto">
+          <rect x="7" y="14" width="30" height="10" fill="#e6edf3"/>
+          <line x1="5" y1="14" x2="39" y2="14" stroke="#e6edf3" stroke-width="2.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Blanca | Silencio blanca -->
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="h" title="Blanca (2 tiempos)">
+        <span class="glyph">𝅗𝅥</span>
+      </div>
+      <div class="figura" data-tipo="silencio" data-duracion="h" title="Silencio blanca (2 tiempos)">
+        <!-- Bloque apoyado abajo = silencio blanca -->
+        <svg viewBox="0 0 44 34" style="width:70%;height:auto">
+          <rect x="7" y="10" width="30" height="10" fill="#e6edf3"/>
+          <line x1="5" y1="20" x2="39" y2="20" stroke="#e6edf3" stroke-width="2.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Negra | Silencio negra -->
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="q" title="Negra (1 tiempo)">
+        <span class="glyph">𝅘𝅥</span>
+      </div>
+      <div class="figura" data-tipo="silencio" data-duracion="q" title="Silencio negra (1 tiempo)">
+        <span class="glyph">𝄽</span>
+      </div>
+    </div>
+
+    <!-- Corchea | Silencio corchea -->
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="8" title="Corchea (½ tiempo)">
+        <span class="glyph">𝅘𝅥𝅮</span>
+      </div>
+      <div class="figura" data-tipo="silencio" data-duracion="8" title="Silencio corchea (½ tiempo)">
+        <span class="glyph">𝄾</span>
+      </div>
+    </div>
+
+    <!-- Puntillo / Ligadura -->
+    <div class="modo-pair">
+      <div class="figura-modo" id="btn-puntillo" title="Aplicar puntillo a la última nota">•</div>
+      <div class="figura-modo" id="btn-ligadura" title="Modo ligadura: selecciona 2 notas">↝</div>
+    </div>
+
+  </div><!-- /sidebar-left -->
+
+  <!-- PENTAGRAMA -->
+  <div class="pentagrama-wrapper" id="pentagrama-wrapper">
+    <div id="pentagrama-container">
+      <div id="tempo-display" class="tempo-text" style="display:none;"></div>
+      <div id="pentagrama"></div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR DERECHO -->
+  <div class="sidebar-right">
+    <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar compás</button>
+    <button id="notas"><i class="fas fa-music"></i> Notas</button>
+    <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
+    <button id="play-stop"><i class="fas fa-play"></i> Play</button>
+    <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar último</button>
+  </div>
+
+</div><!-- /main-layout -->
+
+<script>
+(function(){
+"use strict";
+const VF=Vex.Flow;
+const divEl=document.getElementById("pentagrama");
+const wrapper=document.getElementById("pentagrama-wrapper");
+const container=document.getElementById("pentagrama-container");
+const tempoDisp=document.getElementById("tempo-display");
+
+/* ══ CONSTANTES ══ */
+const STAVE_Y0=40, LINE_H=115, CLEF_EXTRA=95;
+const OPEN_W=130,  MIN_W=90,   NOTE_PX=5.5, CTR_IDX=9, PAD_L=28;
+
+/* ══ ESTADO ══ */
+let svgW=760, clef="treble", timeSig="", bpm=0;
+let measures=[];
+let activeFig=null;   // {type,dur}
+let dotMode=false;
+let tieMode=false;    // modo ligadura: elegir 2 notas existentes
+let tiePick=[];       // índices [mi,ni] de notas seleccionadas para ligar
+let showLbls=false, playing=false, metroOn=false, metroLoop=null, synth=null;
+let pinnedOv=null, pinnedTmr=null;
+
+/* ══ MAPAS ══ */
+const NOTES={
+  treble:["g/3","a/3","b/3","c/4","d/4","e/4","f/4","g/4","a/4","b/4","c/5","d/5","e/5","f/5","g/5","a/5","b/5"],
+  bass:  ["b/1","c/2","d/2","e/2","f/2","g/2","a/2","b/2","c/3","d/3","e/3","f/3","g/3","a/3","b/3","c/4","d/4"]
+};
+const NNAMES={c:"Do",d:"Re",e:"Mi",f:"Fa",g:"Sol",a:"La",b:"Si"};
+const BEATS={w:4,h:2,q:1,"8":.5};
+const TDUR={w:"1n",h:"2n",q:"4n","8":"8n"};
+const TLBLS={40:"Grave (40)",50:"Largo (50)",60:"Larghetto (60)",66:"Adagio (66)",
+             76:"Andante (76)",88:"Andantino (88)",100:"Moderato (100)",112:"Allegretto (112)",
+             120:"Allegro (120)",140:"Vivace (140)",160:"Presto (160)",184:"Prestissimo (184)"};
+const DNAMES={w:"redonda",h:"blanca",q:"negra","8":"corchea"};
+const dname=n=>{const[l,o]=n.split("/");return`${NNAMES[l]} ${o}`;};
+
+/* ══ RENDERER ══ */
+const renderer=new VF.Renderer(divEl,VF.Renderer.Backends.SVG);
+renderer.resize(svgW,180);
+const ctx=renderer.getContext();
+
+/* ══ SYNTH ══ */
+const initSynth=()=>{if(!synth)synth=new Tone.Synth().toDestination();};
+const playNote=(note,dur)=>{
+  if(!note)return;initSynth();
+  Tone.start().then(()=>{try{synth.triggerAttackRelease(note.split("/")[0].toUpperCase()+note.split("/")[1],dur);}catch(e){}});
+};
+
+/* ══ CREAR STAVENOTE ══ */
+function mkNote(note,dur,dot,isRest){
+  let vn;
+  if(isRest){
+    const rk=clef==="treble"?"b/4":"d/3";
+    vn=new VF.StaveNote({keys:[rk],duration:dur+"r"});
+  }else{
+    const idx=NOTES[clef].indexOf(note);
+    vn=new VF.StaveNote({keys:[note],duration:dur,clef,stem_direction:idx>=CTR_IDX?VF.Stem.DOWN:VF.Stem.UP});
+  }
+  if(dot)vn.addDotToAll();
+  return vn;
+}
+
+/* ══ ANCHO DE COMPÁS ══
+   Abierto  → OPEN_W fijo (no se estira aunque esté solo)
+   Cerrado  → VexFlow calcula
+════════════════════════ */
+function mWidth(m,isFirst){
+  const base=isFirst?CLEF_EXTRA:0;
+  if(!m.closed)return OPEN_W+base;
+  if(!m.notes.length)return Math.max(MIN_W+20,base+70);
+  const v=mkVoice(m);
+  const f=new VF.Formatter();f.joinVoices([v]);
+  return Math.max(base+100,f.preCalculateMinTotalWidth([v])+base+68);
+}
+function mkVoice(m){
+  const v=new VF.Voice({num_beats:+timeSig.split("/")[0],beat_value:4});
+  v.setStrict(false);
+  if(m.notes.length)v.addTickables(m.notes.map(n=>n.vn));
+  return v;
+}
+
+/* ══ LAYOUT EN FILAS ══ */
+function layoutLines(){
+  const maxW=svgW-PAD_L*2;
+  const lines=[];let row=[],used=0;
+  measures.forEach((m,i)=>{
+    const w=mWidth(m,i===0);
+    if(used+w>maxW&&row.length){lines.push(row);row=[];used=0;}
+    row.push({m,w,i});used+=w;
+  });
+  if(row.length)lines.push(row);
+  return lines;
+}
+
+/* ══ REDIBUJAR ══ */
+function draw(){
+  ctx.clear();
+  document.querySelectorAll(".nota-overlay,.note-label").forEach(e=>e.remove());
+  pinnedOv=null;
+  if(pinnedTmr){clearTimeout(pinnedTmr);pinnedTmr=null;}
+
+  if(!timeSig||!measures.length){
+    renderer.resize(svgW,160);wrapper.style.height="160px";
+    updateCloseBtn();return;
+  }
+  const lines=layoutLines();
+  const totalH=STAVE_Y0+lines.length*LINE_H+55;
+  renderer.resize(svgW,totalH);
+  wrapper.style.height=totalH+"px";
+  container.style.height=totalH+"px";
+
+  lines.forEach((line,li)=>{
+    const y=STAVE_Y0+li*LINE_H;
+    const maxW=svgW-PAD_L*2;
+    const sumW=line.reduce((s,it)=>s+it.w,0);
+    // Solo estirar si hay 2+ compases cerrados en la fila (nunca si hay solo 1)
+    const cItems=line.filter(it=>it.m.closed);
+    const cSum=cItems.reduce((s,it)=>s+it.w,0);
+    const xtra=(cItems.length>=2)?Math.max(0,maxW-sumW):0;
+    let x=PAD_L;
+    line.forEach(({m,w,i})=>{
+      // Compás abierto: NUNCA se estira
+      const dw=(m.closed&&cSum>0&&xtra>0)?w+xtra*(w/cSum):w;
+      const stave=new VF.Stave(x,y,dw);
+      if(i===0)stave.addClef(clef).addTimeSignature(timeSig);
+      stave.setEndBarType(i===measures.length-1?VF.Barline.type.DOUBLE:VF.Barline.type.SINGLE);
+      stave.setContext(ctx).draw();
+      if(m.notes.length){
+        const voice=mkVoice(m);
+        const fmt=new VF.Formatter();fmt.joinVoices([voice]);
+        fmt.format([voice],dw-(i===0?CLEF_EXTRA+18:28));
+        voice.draw(ctx,stave);
+      }
+      x+=dw;
+    });
+  });
+
+  // Dibujar ligaduras — recorrer notas en orden global
+  // Una ligadura conecta n[k].tie=true con la nota anterior de mismo tipo "nota"
+  let allNotes=[];
+  measures.forEach(m=>m.notes.forEach(n=>allNotes.push(n)));
+  for(let k=1;k<allNotes.length;k++){
+    if(!allNotes[k].tie||allNotes[k].type!=="nota") continue;
+    // Buscar la nota anterior de tipo "nota"
+    let prev=null;
+    for(let p=k-1;p>=0;p--){if(allNotes[p].type==="nota"){prev=allNotes[p];break;}}
+    if(!prev) continue;
+    try{
+      new VF.StaveTie({
+        first_note:prev.vn,
+        last_note:allNotes[k].vn,
+        first_indices:[0],
+        last_indices:[0]
+      }).setContext(ctx).draw();
+    }catch(e){}
+  }
+  updateCloseBtn();
+  if(!playing)buildOverlays();
+}
+
+/* ══ OVERLAYS +/- y SELECCIÓN LIGADURA ══ */
+function buildOverlays(){
+  const svgNotes=Array.from(ctx.svg.querySelectorAll("g.vf-stavenote"));
+  let gi=0;
+  measures.forEach((m,mi)=>{
+    m.notes.forEach((n,ni)=>{
+      if(n.type==="silencio"){gi++;return;}
+      const g=svgNotes[gi];if(!g){gi++;return;}
+      try{
+        const bb=g.getBBox();
+        const svgR=ctx.svg.getBoundingClientRect();
+        const cR=container.getBoundingClientRect();
+        const ov=document.createElement("div");
+        ov.className="nota-overlay";
+        ov.style.cssText=`left:${svgR.left-cR.left+bb.x}px;top:${svgR.top-cR.top+bb.y}px;width:${bb.width}px;height:${bb.height}px`;
+        ov.dataset.mi=mi;ov.dataset.ni=ni;
+
+        // Si estamos en modo ligadura, el overlay es clickeable para seleccionar
+        if(tieMode){
+          ov.classList.add("liga-sel");
+          // Resaltar si ya está seleccionado
+          if(tiePick.some(p=>p[0]===mi&&p[1]===ni)){
+            ov.style.outline="2px solid #00ffcc";
+            ov.style.background="rgba(0,255,204,.2)";
+          }
+          ov.addEventListener("click",e=>{
+            e.stopPropagation();
+            selectForTie(mi,ni);
+          });
+        } else {
+          // Modo normal: overlay con +/-
+          ov.addEventListener("click",e=>{
+            e.stopPropagation();
+            if(pinnedOv&&pinnedOv!==ov)pinnedOv.classList.remove("pinned");
+            if(pinnedTmr){clearTimeout(pinnedTmr);pinnedTmr=null;}
+            ov.classList.add("pinned");pinnedOv=ov;
+            pinnedTmr=setTimeout(()=>{ov.classList.remove("pinned");pinnedOv=null;pinnedTmr=null;},3000);
+          });
+          const mkBtn=(lbl,cls,dir)=>{
+            const b=document.createElement("div");
+            b.textContent=lbl;b.className="pm-btn "+cls;
+            b.addEventListener("click",e=>{e.stopPropagation();shiftPitch(mi,ni,dir);});
+            return b;
+          };
+          ov.appendChild(mkBtn("+","plus",1));
+          ov.appendChild(mkBtn("−","minus",-1));
+        }
+        container.appendChild(ov);
+      }catch(e){}
+      gi++;
+    });
+  });
+}
+
+/* Seleccionar notas para ligar */
+function selectForTie(mi,ni){
+  // Si ya está en la selección, quitarla
+  const idx=tiePick.findIndex(p=>p[0]===mi&&p[1]===ni);
+  if(idx>=0){tiePick.splice(idx,1);draw();return;}
+  tiePick.push([mi,ni]);
+  if(tiePick.length===2){
+    applyTie();
+  } else {
+    draw();
+  }
+}
+function applyTie(){
+  // Ordenar por posición global
+  const globalIdx=([mi,ni])=>{
+    let g=0;
+    for(let m=0;m<mi;m++)g+=measures[m].notes.length;
+    g+=ni;return g;
+  };
+  tiePick.sort((a,b)=>globalIdx(a)-globalIdx(b));
+  const [mi1,ni1]=tiePick[0];
+  const [mi2,ni2]=tiePick[1];
+  // La segunda nota recibe el tie
+  measures[mi2].notes[ni2].tie=true;
+  tiePick=[];
+  // Desactivar modo ligadura tras aplicar
+  // (dejarlo activo para que el usuario pueda seguir ligando)
+  draw();
+}
+
+function shiftPitch(mi,ni,dir){
+  const n=measures[mi].notes[ni];
+  const list=NOTES[clef];
+  const idx=list.indexOf(n.note)+dir;
+  if(idx<0||idx>=list.length)return;
+  n.note=list[idx];
+  n.vn=mkNote(n.note,n.dur,n.dot,false);
+  draw();playNote(n.note,TDUR[n.dur]);
+}
+
+/* ══ CLICK EN PENTAGRAMA → añadir nota ══ */
+divEl.addEventListener("click",e=>{
+  // En modo ligadura el click lo gestionan los overlays, no el pentagrama
+  if(tieMode)return;
+  if(!timeSig||!activeFig)return;
+
+  const rect=divEl.getBoundingClientRect();
+  const clickY=e.clientY-rect.top;
+  const note=noteFromY(clickY);
+
+  const cur=measures[measures.length-1];
+  const bPer=+timeSig.split("/")[0];
+  const bv=BEATS[activeFig.dur]||0;
+  const total=bv*(dotMode?1.5:1);
+
+  if(cur.beats+total>bPer+0.01){
+    alert(`¡No cabe ${DNAMES[activeFig.dur]||"figura"}${dotMode?" con puntillo":""} en el compás!`);
+    return;
+  }
+  const isRest=activeFig.type==="silencio";
+  const vn=mkNote(isRest?null:note,activeFig.dur,dotMode,isRest);
+  cur.notes.push({type:activeFig.type,dur:activeFig.dur,note:isRest?null:note,vn,dot:dotMode,tie:false});
+  cur.beats+=total;
+  draw();
+  if(!isRest)playNote(note,TDUR[activeFig.dur]);
+});
+
+function noteFromY(y){
+  const lineIdx=Math.max(0,Math.floor((y-STAVE_Y0)/LINE_H));
+  const lineTopY=STAVE_Y0+lineIdx*LINE_H;
+  const yInLine=y-lineTopY;
+  const steps=Math.round((42-yInLine)/NOTE_PX);
+  const list=NOTES[clef];
+  return list[Math.max(0,Math.min(list.length-1,CTR_IDX+steps))];
+}
+
+/* ══ PUNTILLO: aplicar a la última nota puesta ══ */
+function applyDot(){
+  if(!timeSig)return;
+  for(let mi=measures.length-1;mi>=0;mi--){
+    for(let ni=measures[mi].notes.length-1;ni>=0;ni--){
+      const n=measures[mi].notes[ni];
+      if(n.type!=="nota") continue;
+      if(n.dot){alert("La última nota ya tiene puntillo.");return;}
+      const bPer=+timeSig.split("/")[0];
+      const extra=BEATS[n.dur]*0.5;
+      if(measures[mi].beats+extra>bPer+0.01){alert("No cabe el puntillo: el compás se llenaría.");return;}
+      n.dot=true;
+      n.vn=mkNote(n.note,n.dur,true,false);
+      measures[mi].beats=+(measures[mi].beats+extra).toFixed(4);
+      draw();
+      return;
+    }
+  }
+  alert("No hay ninguna nota a la que aplicar el puntillo.");
+}
+
+/* ══ CERRAR COMPÁS ══ */
+function closeMeasure(){
+  const cur=measures[measures.length-1];
+  const bPer=+timeSig.split("/")[0];
+  if(!cur||cur.closed||cur.beats<bPer-0.01)return;
+  cur.closed=true;
+  measures.push({notes:[],beats:0,closed:false});
+  draw();
+}
+function updateCloseBtn(){
+  const cur=measures.length?measures[measures.length-1]:null;
+  const bPer=timeSig?+timeSig.split("/")[0]:0;
+  document.getElementById("cerrar-compas").disabled=!cur||cur.closed||cur.beats<bPer-0.01;
+}
+
+/* ══ BORRAR ÚLTIMO ══ */
+function deleteLast(){
+  if(!measures.length)return;
+  const last=measures[measures.length-1];
+  if(last.notes.length){
+    const rm=last.notes.pop();
+    last.beats-=BEATS[rm.dur]*(rm.dot?1.5:1);
+    last.closed=false;
+  }else if(measures.length>1)measures.pop();
+  draw();
+}
+
+/* ══ RESET ══ */
+function reset(){
+  measures=[];tieMode=false;dotMode=false;activeFig=null;tiePick=[];
+  document.querySelectorAll(".figura,.figura-modo").forEach(el=>el.classList.remove("activa"));
+  if(timeSig)measures.push({notes:[],beats:0,closed:false});
+  draw();
+}
+
+/* ══ PLAY / STOP ══ */
+function togglePlay(){
+  const btn=document.getElementById("play-stop");
+  if(playing){stopPlay();return;}
+  if(!timeSig)return alert("Selecciona un compás");
+  if(!bpm)return alert("Selecciona una velocidad");
+  Tone.start().then(()=>{
+    initSynth();
+    document.querySelectorAll(".figura,.figura-modo").forEach(el=>el.classList.remove("activa"));
+    document.querySelectorAll(".nota-overlay").forEach(el=>el.remove());
+    activeFig=null;dotMode=false;tieMode=false;tiePick=[];
+    Tone.Transport.bpm.value=bpm;Tone.Transport.cancel();
+    let t0=0;const evs=[];let gi=0;const spb=60/bpm;
+    measures.forEach(m=>{
+      let prevEv=null;
+      m.notes.forEach(n=>{
+        const sec=BEATS[n.dur]*(n.dot?1.5:1)*spb;
+        if(n.type==="nota"){
+          if(prevEv&&n.tie){prevEv.sec+=sec;}
+          else{const ev={t:t0,note:n.note,sec,gi,lbl:dname(n.note)};evs.push(ev);prevEv=ev;}
+        }else prevEv=null;
+        t0+=sec;gi++;
+      });
+    });
+    if(!evs.length&&!metroOn)return alert("¡Añade notas!");
+    const nBeats=+timeSig.split("/")[0];
+    const intro=metroOn?nBeats*spb:0;
+    if(metroOn){metroLoop=new Tone.Loop(t=>{new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3","8n",t);},"4n").start(0);}
+    const svgNotes=Array.from(ctx.svg.querySelectorAll("g.vf-stavenote"));
+    evs.forEach(ev=>{
+      const st=ev.t+intro;
+      Tone.Transport.schedule(t=>{try{const p=ev.note.split("/")[0].toUpperCase()+ev.note.split("/")[1];synth.triggerAttackRelease(p,ev.sec+"s",t);}catch(e){}},st);
+      Tone.Transport.schedule(()=>{svgNotes[ev.gi]?.querySelectorAll("path,line,circle").forEach(el=>{el.style.stroke="#00ffcc";el.style.fill="#00ffcc";});},st);
+      if(showLbls){
+        Tone.Transport.schedule(()=>{
+          const g=svgNotes[ev.gi];if(!g)return;
+          try{
+            const bb=g.getBBox();const sr=ctx.svg.getBoundingClientRect(),cr=container.getBoundingClientRect();
+            const lb=document.createElement("div");lb.className="note-label";lb.textContent=ev.lbl;
+            lb.style.left=(sr.left-cr.left+bb.x+bb.width/2)+"px";
+            lb.style.top=(sr.top-cr.top+bb.y+bb.height+8)+"px";
+            lb.style.transform="translateX(-50%)";container.appendChild(lb);
+            setTimeout(()=>{lb.style.opacity="0";setTimeout(()=>lb.remove(),400);},ev.sec*800);
+          }catch(e){}
+        },st);
+      }
+      Tone.Transport.schedule(()=>{svgNotes[ev.gi]?.querySelectorAll("path,line,circle").forEach(el=>{el.style.stroke="black";el.style.fill="black";});},st+ev.sec);
+    });
+    Tone.Transport.schedule(()=>stopPlay(),t0+intro+0.1);
+    Tone.Transport.start();playing=true;
+    btn.innerHTML='<i class="fas fa-stop"></i> Stop';btn.classList.add("stop-active");
+  }).catch(err=>{console.error(err);alert("Error al iniciar la reproducción.");});
+}
+function stopPlay(){
+  Tone.Transport.stop();Tone.Transport.cancel();
+  if(metroLoop){metroLoop.stop();metroLoop.dispose();metroLoop=null;}
+  ctx.svg.querySelectorAll("g.vf-stavenote path,g.vf-stavenote line,g.vf-stavenote circle").forEach(el=>{el.style.stroke="black";el.style.fill="black";});
+  document.querySelectorAll(".note-label").forEach(el=>el.remove());
+  const btn=document.getElementById("play-stop");
+  btn.innerHTML='<i class="fas fa-play"></i> Play';btn.classList.remove("stop-active");
+  playing=false;buildOverlays();
+}
+
+/* ══ EXPORTAR PDF ══
+   Método definitivo:
+   1. Serializar el SVG de VexFlow a string
+   2. Convertirlo a imagen PNG via canvas (funciona porque es mismo origen)
+   3. Usar jsPDF (disponible en window.jspdf del bundle html2pdf) para crear el PDF
+      con título, autor, imagen del pentagrama y footer.
+════════════════════════════════════════════════════════ */
+function exportPDF(){
+  const title=document.getElementById("titulo-editable").value.trim()||"Mi Partitura";
+  const author=document.getElementById("autor-input").value.trim()||"Anónimo";
+  document.getElementById("acciones-menu").classList.remove("show");
+
+  // 1. Limpiar colores de play del SVG
+  ctx.svg.querySelectorAll("*").forEach(el=>{
+    if(el.style){el.style.removeProperty("stroke");el.style.removeProperty("fill");}
+  });
+
+  // 2. Obtener dimensiones reales
+  const svgW2=+ctx.svg.getAttribute("width")||svgW;
+  const svgH2=+ctx.svg.getAttribute("height")||200;
+
+  // 3. Serializar SVG con namespace explícito para que el canvas pueda cargarlo
+  const clone=ctx.svg.cloneNode(true);
+  clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  clone.setAttribute("width",svgW2);
+  clone.setAttribute("height",svgH2);
+  // Fondo blanco sin borde
+  const bgRect=document.createElementNS("http://www.w3.org/2000/svg","rect");
+  bgRect.setAttribute("width","100%");bgRect.setAttribute("height","100%");
+  bgRect.setAttribute("fill","white");bgRect.setAttribute("stroke","none");
+  clone.insertBefore(bgRect,clone.firstChild);
+  // Eliminar cualquier rect de borde exterior que añada VexFlow
+  clone.querySelectorAll("rect").forEach(r=>{
+    const w=+r.getAttribute("width");const h=+r.getAttribute("height");
+    const x=+r.getAttribute("x")||0;const y=+r.getAttribute("y")||0;
+    // Si es casi del tamaño del SVG completo y en posición 0,0 → es un borde, eliminarlo
+    if(x<=2&&y<=2&&w>=svgW2-10&&h>=svgH2-10&&r!==bgRect) r.remove();
+  });
+
+  const svgStr=new XMLSerializer().serializeToString(clone);
+  const svgBlob=new Blob([svgStr],{type:"image/svg+xml;charset=utf-8"});
+  const url=URL.createObjectURL(svgBlob);
+
+  const img=new Image();
+  img.onload=function(){
+    // 4. Dibujar en canvas
+    const scale=2;
+    const cv=document.createElement("canvas");
+    cv.width=svgW2*scale; cv.height=svgH2*scale;
+    const c2=cv.getContext("2d");
+    c2.fillStyle="#ffffff";
+    c2.fillRect(0,0,cv.width,cv.height);
+    c2.scale(scale,scale);
+    c2.drawImage(img,0,0,svgW2,svgH2);
+    URL.revokeObjectURL(url);
+    const png=cv.toDataURL("image/png");
+
+    // 5. Crear PDF con jsPDF — disponible como window.jspdf.jsPDF en el bundle
+    const jsPDFCtor=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+    if(!jsPDFCtor){
+      // fallback: abrir en nueva ventana como imagen
+      const win=window.open();
+      win.document.write(`<html><body style="margin:0;background:#fff">
+        <div style="font-family:serif;padding:30px 40px">
+          <h2 style="text-align:center;color:#006644">${title}</h2>
+          ${author?`<p style="text-align:right;color:#006644;margin-top:-10px">Autor: ${author}</p>`:""}
+          <img src="${png}" style="width:100%;display:block;margin-top:10px">
+          <p style="text-align:center;font-size:10px;color:#aaa;margin-top:16px">Hecho con Laboratorio Musical Maximilian 23 · www.maximilian23.com</p>
+        </div></body></html>`);
+      win.document.close();
+      setTimeout(()=>win.print(),800);
+      return;
+    }
+
+    const doc=new jsPDFCtor({unit:"mm",format:"a4",orientation:"portrait"});
+    const pageW=doc.internal.pageSize.getWidth();   // 210mm
+    const pageH=doc.internal.pageSize.getHeight();  // 297mm
+    const margin=14;
+    const contentW=pageW-margin*2;
+
+    // Título centrado
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(18);
+    doc.setTextColor(0,102,68);
+    doc.text(title,pageW/2,margin+8,{align:"center"});
+
+    // Autor arriba a la derecha, misma línea que el título
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(11);
+    doc.setTextColor(0,102,68);
+    doc.text(author,pageW-margin,margin+8,{align:"right"});
+
+    // Imagen pentagrama — sin borde
+    const imgY=margin+14;
+    const imgRatio=svgH2/svgW2;
+    const imgH=Math.min(contentW*imgRatio, pageH-imgY-margin-16);
+    doc.addImage(png,"PNG",margin,imgY,contentW,imgH,undefined,undefined,undefined,{border:0});
+
+    // Footer verde oscuro
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(8);
+    doc.setTextColor(0,102,68);
+    doc.text("Hecho con Laboratorio Musical Maximilian 23  ·  www.maximilian23.com",
+             pageW/2, pageH-8, {align:"center"});
+
+    doc.save(title+".pdf");
+  };
+  img.onerror=function(){
+    URL.revokeObjectURL(url);
+    alert("Error al generar el PDF. Por favor, intenta de nuevo.");
+  };
+  img.src=url;
+}
+
+/* ══ GUARDAR / ABRIR JSON ══ */
+function saveJson(){
+  const data={
+    title:document.getElementById("titulo-editable").value,
+    author:document.getElementById("autor-input").value,
+    clef, timeSig, bpm,
+    tempoLabel:TLBLS[bpm]||"",
+    measures:measures.map(m=>({
+      notes:m.notes.map(n=>({type:n.type,dur:n.dur,note:n.note,dot:n.dot,tie:n.tie})),
+      beats:m.beats, closed:m.closed
+    }))
+  };
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  a.download=(data.title||"partitura")+".json";
+  a.click();
+  document.getElementById("acciones-menu").classList.remove("show");
+}
+
+function loadJson(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      document.getElementById("titulo-editable").value=d.title||"Mi Partitura";
+      document.getElementById("autor-input").value=d.author||"";
+      // Restaurar selects
+      document.getElementById("clave").value=d.clef||"treble";
+      document.getElementById("compas").value=d.timeSig||"";
+      document.getElementById("velocidad").value=d.bpm||"";
+      clef=d.clef||"treble";
+      timeSig=d.timeSig||"";
+      bpm=+d.bpm||0;
+      tempoDisp.textContent=TLBLS[bpm]||d.tempoLabel||"";
+      tempoDisp.style.display=bpm?"block":"none";
+      measures=d.measures.map(m=>{
+        const ms={notes:[],beats:m.beats,closed:m.closed};
+        m.notes.forEach(n=>{
+          ms.notes.push({
+            type:n.type,dur:n.dur,note:n.note,
+            vn:mkNote(n.note,n.dur,n.dot,n.type==="silencio"),
+            dot:n.dot,tie:n.tie
+          });
+        });
+        return ms;
+      });
+      draw();
+    }catch(err){alert("Archivo inválido: "+err.message);}
+  };
+  r.readAsText(file);
+  e.target.value="";
+  document.getElementById("acciones-menu").classList.remove("show");
+}
+
+/* ══ INIT ══ */
+function init(){
+  // Reset duro de todos los selects al cargar la página
+  document.getElementById("clave").value="treble";
+  document.getElementById("compas").value="";
+  document.getElementById("velocidad").value="";
+  document.getElementById("titulo-editable").value="Mi Partitura";
+  document.getElementById("autor-input").value="";
+  tempoDisp.style.display="none";
+
+  document.getElementById("clave").onchange=e=>{clef=e.target.value;reset();};
+  document.getElementById("compas").onchange=e=>{timeSig=e.target.value;reset();};
+  document.getElementById("velocidad").onchange=e=>{
+    bpm=+e.target.value;
+    tempoDisp.textContent=TLBLS[bpm]||"";
+    tempoDisp.style.display=bpm?"block":"none";
+  };
+
+  // Figuras
+  document.querySelectorAll(".figura").forEach(el=>{
+    el.addEventListener("click",()=>{
+      document.querySelectorAll(".figura").forEach(f=>f.classList.remove("activa"));
+      activeFig={type:el.dataset.tipo,dur:el.dataset.duracion};
+      el.classList.add("activa");initSynth();
+    });
+  });
+
+  // Puntillo — aplica a la última nota puesta
+  document.getElementById("btn-puntillo").addEventListener("click",()=>{
+    applyDot();
+  });
+
+  // Ligadura — modo selección de 2 notas existentes
+  document.getElementById("btn-ligadura").addEventListener("click",()=>{
+    tieMode=!tieMode;tiePick=[];
+    document.getElementById("btn-ligadura").classList.toggle("activa",tieMode);
+    draw(); // redibujar para mostrar/quitar highlights
+  });
+
+  document.getElementById("cerrar-compas").onclick=closeMeasure;
+  document.getElementById("borrar-ultimo").onclick=deleteLast;
+  document.getElementById("play-stop").onclick=togglePlay;
+  document.getElementById("notas").onclick=()=>{showLbls=!showLbls;document.getElementById("notas").classList.toggle("activa",showLbls);};
+  document.getElementById("metronomo").onclick=()=>{metroOn=!metroOn;document.getElementById("metronomo").classList.toggle("activa",metroOn);};
+  document.getElementById("limpiar").onclick=()=>{if(confirm("¿Limpiar toda la partitura?"))reset();};
+  document.getElementById("guardar").onclick=saveJson;
+  document.getElementById("abrir").onclick=()=>document.getElementById("file-input").click();
+  document.getElementById("file-input").onchange=loadJson;
+  document.getElementById("export-pdf").onclick=exportPDF;
+
+  const ab=document.getElementById("acciones-btn"),am=document.getElementById("acciones-menu");
+  ab.addEventListener("click",e=>{e.stopPropagation();am.classList.toggle("show");});
+  document.addEventListener("click",e=>{if(!ab.contains(e.target))am.classList.remove("show");});
+
+  window.addEventListener("resize",()=>{svgW=Math.max(300,wrapper.clientWidth-4);draw();});
+  svgW=Math.max(300,wrapper.clientWidth-4);
+  reset();
+}
+init();
+})();
+</script>
+</body>
+</html>
