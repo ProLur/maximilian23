@@ -780,7 +780,7 @@ function stopPlay(){
 ════════════════════════════════════════════════════════ */
 function exportPDF(){
   const title=document.getElementById("titulo-editable").value.trim()||"Mi Partitura";
-  const author=document.getElementById("autor-input").value.trim()||"";
+  const author=document.getElementById("autor-input").value.trim()||"Anónimo";
   document.getElementById("acciones-menu").classList.remove("show");
 
   // 1. Limpiar colores de play del SVG
@@ -858,12 +858,10 @@ function exportPDF(){
     doc.text(title,pageW/2,margin+8,{align:"center"});
 
     // Autor arriba a la derecha, misma línea que el título
-    if(author){
-      doc.setFont("helvetica","normal");
-      doc.setFontSize(11);
-      doc.setTextColor(0,102,68);
-      doc.text(author,pageW-margin,margin+8,{align:"right"});
-    }
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(11);
+    doc.setTextColor(0,102,68);
+    doc.text(author,pageW-margin,margin+8,{align:"right"});
 
     // Imagen pentagrama — sin borde
     const imgY=margin+14;
@@ -871,10 +869,10 @@ function exportPDF(){
     const imgH=Math.min(contentW*imgRatio, pageH-imgY-margin-16);
     doc.addImage(png,"PNG",margin,imgY,contentW,imgH,undefined,undefined,undefined,{border:0});
 
-    // Footer
+    // Footer verde oscuro
     doc.setFont("helvetica","normal");
     doc.setFontSize(8);
-    doc.setTextColor(150,150,150);
+    doc.setTextColor(0,102,68);
     doc.text("Hecho con Laboratorio Musical Maximilian 23  ·  www.maximilian23.com",
              pageW/2, pageH-8, {align:"center"});
 
