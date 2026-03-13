@@ -6,163 +6,236 @@
   <title>Clasificación • Juego del Silencio</title>
   <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       font-family: "Courier New", Courier, monospace;
       background: #0d1117;
       color: #e6edf3;
       min-height: 100dvh;
-      background-image:
-        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
-        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-image: 
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.07) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.05) 0%, transparent 50%);
       background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
     }
+
     header {
-      background: rgba(22,27,34,0.92);
-      backdrop-filter: blur(8px);
-      padding: 1rem 1.2rem;
+      background: rgba(22,27,34,0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 0.9rem 1rem;
       display: flex;
       align-items: center;
-      gap: 0.8rem;
+      justify-content: center;
+      gap: 0.7rem;
       border-bottom: 2px solid #00ffcc;
       position: sticky;
       top: 0;
       z-index: 100;
     }
+
     header img {
-      height: 45px;
+      height: 38px;
       border-radius: 50%;
-      border: 2px solid #00ffcc88;
-      box-shadow: 0 0 12px #00ffcc55;
+      border: 2px solid #00ffcc99;
+      box-shadow: 0 0 10px #00ffcc44;
     }
+
     header h1 {
-      font-size: 1.7rem;
+      font-size: clamp(1.25rem, 5vw, 1.55rem);
       color: #00ffcc;
-      text-shadow: 0 0 8px #00ffccaa;
+      text-shadow: 0 0 7px #00ffccaa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .container {
+
+    .main-content {
+      flex: 1;
+      width: 100%;
       max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+      margin: 0 auto;
+      padding: 1rem;
     }
+
+    .classification {
+      background: rgba(30,45,61,0.32);
+      border: 2px solid #00ffcc55;
+      border-radius: 12px;
+      padding: 1.4rem;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+
+    .table-wrapper {
+      position: relative;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .table-container {
+      display: flex;
+      min-width: 1000px; /* fuerza scroll si la pantalla es pequeña */
+    }
+
+    table {
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.88);
+      border: 2px solid #00ffcc77;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc2a;
+      min-width: 70px;
+      font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+    }
+
+    th {
+      background: rgba(13,17,23,0.95);
+      color: #00ffcc;
+      text-shadow: 0 0 5px #00ffcc77;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .left-table { border-right: none; }
+    .left-table th, .left-table td { min-width: auto; }
+
+    .pos-col   { width: 60px;  background: rgba(13,17,23,1); font-weight: bold; color: #00ffcc; }
+    .team-col  { width: 160px; background: rgba(13,17,23,1); text-align: left; padding-left: 1.6rem; color: #00ffcc; font-size: clamp(1.05rem, 4vw, 1.25rem); }
+
+    .week-col  { min-width: 65px; }
+    .total-col { 
+      width: 90px;  
+      background: rgba(0,255,204,0.24); 
+      color: #00ffcc; 
+      font-weight: bold; 
+      font-size: clamp(1.15rem, 4.2vw, 1.4rem); 
+      border-left: 3px solid #00ffcc99; 
+    }
+
+    .right-table { border-left: none; }
+
+    tr:hover td { background: rgba(0,255,204,0.11); }
+
     .intro {
       text-align: center;
-      margin-bottom: 2.5rem;
-      padding: 1.8rem;
-      background: rgba(30,45,61,0.38);
-      border: 1px solid #00ffcc44;
-      border-radius: 14px;
-      backdrop-filter: blur(6px);
-    }
-    .classification {
+      margin: 1.8rem auto 2rem;
+      padding: 1.4rem;
       background: rgba(30,45,61,0.35);
-      border: 2px solid #00ffcc55;
-      border-radius: 14px;
-      padding: 2rem;
-      backdrop-filter: blur(6px);
-      overflow-x: auto;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: rgba(13,17,23,0.85);
-      border: 3px solid #00ffcc;
+      border: 1px solid #00ffcc44;
       border-radius: 12px;
-      overflow: hidden;
-      min-width: 820px;
+      backdrop-filter: blur(6px);
+      max-width: 600px;
     }
-    th {
-      background: linear-gradient(#00ffcc22, transparent);
-      color: #00ffcc;
-      padding: 16px 12px;
-      font-size: 1.2rem;
-      border-bottom: 3px solid #00ffcc66;
-      text-shadow: 0 0 6px #00ffcc88;
-    }
-    td {
-      padding: 16px 12px;
-      text-align: center;
-      border-bottom: 1px solid #00ffcc33;
-      font-size: 1.35rem;
+
+    .semana-numero {
+      font-size: clamp(1.9rem, 6vw, 2.4rem);
       font-weight: bold;
-      transition: background 0.2s;
-    }
-    tr:hover td { background: rgba(0,255,204,0.09); }
-    .team-name {
-      text-align: left;
-      padding-left: 2.2rem;
       color: #00ffcc;
-      font-size: 1.4rem;
+      margin-bottom: 0.3rem;
     }
-    .total-cell {
-      background: rgba(0,255,204,0.22) !important;
-      color: #00ffcc;
-      font-size: 1.55rem;
-      border-left: 3px solid #00ffcc;
-      font-weight: bold;
+
+    .semana-rango {
+      font-size: clamp(1.1rem, 4vw, 1.3rem);
+      color: #00ffccaa;
     }
-    .btn-refresh {
-      display: block;
-      margin: 2rem auto;
-      padding: 0.9rem 3rem;
-      background: rgba(0,255,204,0.18);
-      color: #00ffcc;
-      border: 2px solid #00ffcc88;
-      border-radius: 999px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .btn-refresh:hover {
-      background: rgba(0,255,204,0.35);
-      transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(0,255,204,0.4);
-    }
+
     footer {
       text-align: center;
-      padding: 3rem 1rem 2rem;
+      padding: 2.5rem 1rem 1.8rem;
       color: #00ffcc88;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       border-top: 1px solid #00ffcc33;
-      margin-top: 5rem;
+      margin-top: auto;
+    }
+
+    .semana-pasada {
+      color: #ff5555 !important;
+      background: linear-gradient(#ff444422, transparent) !important;
+      text-shadow: 0 0 7px #ff444488 !important;
+    }
+
+    @media (max-width: 600px) {
+      .main-content { padding: 0.8rem; }
+      th, td { padding: 10px 8px; font-size: 0.95rem; }
+      .team-col { padding-left: 1.2rem; width: 130px; }
+      header { padding: 0.8rem 1rem; gap: 0.6rem; }
+      header img { height: 34px; }
     }
   </style>
 </head>
 <body>
+
   <header>
     <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
     <h1>Clasificación • Juego del Silencio</h1>
   </header>
 
-  <div class="container">
-    <div class="intro">
-      <h2 style="color:#00ffcc; margin-bottom:0.6rem;">¡Clasificación actualizada!</h2>
-    </div>
+  <div class="main-content">
 
     <div class="classification">
-      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.5rem; font-size:1.8rem;">
-        Tabla de Clasificación – 6 Semanas
+      <h2 style="text-align:center; color:#00ffcc; margin-bottom:1.3rem; font-size: clamp(1.4rem, 5vw, 1.7rem);">
+        Tabla de Clasificación
       </h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Equipo</th>
-            <th>Semana 1</th>
-            <th>Semana 2</th>
-            <th>Semana 3</th>
-            <th>Semana 4</th>
-            <th>Semana 5</th>
-            <th>Semana 6</th>
-            <th>TOTAL</th>
-          </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
+
+      <div class="table-wrapper">
+        <div class="table-container">
+          <!-- Tabla izquierda fija -->
+          <table class="left-table">
+            <thead>
+              <tr>
+                <th class="pos-col">Pos</th>
+                <th class="team-col">Equipo</th>
+              </tr>
+            </thead>
+            <tbody id="left-body">
+              <!-- Se llena con JS -->
+            </tbody>
+          </table>
+
+          <!-- Tabla derecha con scroll -->
+          <table class="right-table">
+            <thead>
+              <tr>
+                <th class="week-col">S1</th>
+                <th class="week-col">S2</th>
+                <th class="week-col">S3</th>
+                <th class="week-col">S4</th>
+                <th class="week-col">S5</th>
+                <th class="week-col">S6</th>
+                <th class="week-col">S7</th>
+                <th class="week-col">S8</th>
+                <th class="week-col">S9</th>
+                <th class="week-col">S10</th>
+                <th class="total-col">Total</th>
+              </tr>
+            </thead>
+            <tbody id="right-body">
+              <!-- Se llena con JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <button class="btn-refresh" onclick="refreshTable()">ACTUALIZAR</button>
+    <div class="intro">
+      <div class="semana-numero" id="semana-actual">Cargando...</div>
+      <div class="semana-rango" id="rango-fechas">Cargando fechas...</div>
+    </div>
+
   </div>
 
   <footer>
@@ -171,66 +244,110 @@
 
   <script>
     const STORAGE_URL = 'https://api.jsonbin.io/v3/b/699588baae596e708f33e153';
-
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     let scores = {
-      "3º A": [0,0,0,0,0,0],
-      "3º B": [0,0,0,0,0,0],
-      "4º A": [0,0,0,0,0,0],
-      "4º B": [0,0,0,0,0,0]
+      "3º A": Array(10).fill(0),
+      "3º B": Array(10).fill(0),
+      "4º A": Array(10).fill(0),
+      "4º B": Array(10).fill(0)
     };
+    const FECHA_INICIO = new Date(2026, 1, 16); // 16 febrero 2026
+
+    function calcularSemanaActual() {
+      const hoy = new Date();
+      const diffMs = hoy - FECHA_INICIO;
+      const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const semanas = Math.floor(diffDias / 7);
+      return Math.min(semanas + 1, 10);
+    }
+
+    function getRangoSemana(semana) {
+      const inicio = new Date(FECHA_INICIO);
+      inicio.setDate(inicio.getDate() + (semana - 1) * 7);
+      const fin = new Date(inicio);
+      fin.setDate(fin.getDate() + 6);
+      const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+      return `del ${inicio.getDate()} ${meses[inicio.getMonth()]} al ${fin.getDate()} ${meses[fin.getMonth()]}`;
+    }
+
+    function getPuesto(pos) {
+      return pos === 1 ? "1º" : pos === 2 ? "2º" : pos === 3 ? "3º" : "4º";
+    }
 
     async function loadData() {
       try {
         const res = await fetch(STORAGE_URL, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          scores = data.record.scores || scores;
+          const loaded = data.record.scores;
+          if (loaded) {
+            Object.keys(loaded).forEach(t => {
+              if (teams.includes(t)) {
+                scores[t] = [...loaded[t].slice(0,10), ...Array(10).fill(0)].slice(0,10);
+              }
+            });
+          }
           if (data.record.lastUpdate) {
-            document.getElementById('last-update').textContent = new Date(data.record.lastUpdate).toLocaleString('es-ES');
+            document.getElementById('last-update').textContent = 
+              new Date(data.record.lastUpdate).toLocaleString('es-ES', {dateStyle: 'medium', timeStyle: 'short'});
           }
         }
       } catch (e) {
-        console.error('Error al cargar:', e);
+        console.error("Error al cargar datos", e);
       }
     }
 
     function renderTable() {
-      const tbody = document.getElementById('table-body');
-      tbody.innerHTML = '';
+      const leftBody  = document.getElementById('left-body');
+      const rightBody = document.getElementById('right-body');
+      leftBody.innerHTML = rightBody.innerHTML = '';
 
       const rankedTeams = [...teams].sort((a,b) => {
-        const totalA = scores[a].reduce((sum,p)=>sum+p,0);
-        const totalB = scores[b].reduce((sum,p)=>sum+p,0);
-        if (totalA !== totalB) return totalB - totalA;
-
-        for (let i = 5; i >= 0; i--) {
+        const ta = scores[a].reduce((s,p)=>s+p,0);
+        const tb = scores[b].reduce((s,p)=>s+p,0);
+        if (ta !== tb) return tb - ta;
+        for (let i = 9; i >= 0; i--) {
           if (scores[a][i] !== scores[b][i]) return scores[b][i] - scores[a][i];
         }
         return 0;
       });
 
-      rankedTeams.forEach(team => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td class="team-name">${team}</td>`;
-        let total = 0;
-        scores[team].forEach(points => {
-          row.innerHTML += `<td>${points}</td>`;
-          total += points;
-        });
-        row.innerHTML += `<td class="total-cell">${total}</td>`;
-        tbody.appendChild(row);
-      });
-    }
+      rankedTeams.forEach((team, i) => {
+        const pos = i + 1;
+        const total = scores[team].reduce((s,p)=>s+p,0);
 
-    async function refreshTable() {
-      await loadData();
-      renderTable();
+        // Izquierda
+        leftBody.innerHTML += `
+          <tr>
+            <td class="pos-col">${getPuesto(pos)}</td>
+            <td class="team-col">${team}</td>
+          </tr>
+        `;
+
+        // Derecha
+        let rightHTML = '<tr>';
+        scores[team].forEach(puntos => {
+          rightHTML += `<td class="week-col">${puntos}</td>`;
+        });
+        rightHTML += `<td class="total-col">${total}</td></tr>`;
+        rightBody.innerHTML += rightHTML;
+      });
+
+      const semanaActual = calcularSemanaActual();
+      document.querySelectorAll('.right-table thead th.week-col').forEach((th, idx) => {
+        const week = idx + 1;
+        th.classList.toggle('semana-pasada', week < semanaActual);
+      });
+
+      document.getElementById('semana-actual').textContent = `Semana ${semanaActual}`;
+      document.getElementById('rango-fechas').textContent = getRangoSemana(semanaActual);
     }
 
     window.onload = async () => {
-      await refreshTable();
+      await loadData();
+      renderTable();
     };
   </script>
+
 </body>
 </html>
