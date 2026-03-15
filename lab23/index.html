@@ -64,7 +64,7 @@
     .nota-overlay .pm-btn:active{background:#00cc9e;transform:translateX(-50%) scale(.93);}
     .nota-overlay.dot-mode{cursor:crosshair;background:rgba(255,200,0,.12);outline:2px dashed #ffcc00;outline-offset:2px;}
     .nota-overlay.dot-mode:active{background:rgba(255,200,0,.3);}
-    body.dot-active #pentagrama svg, body.tie-active #pentagrama svg{pointer-events:none;}
+    body.tie-active #pentagrama svg{pointer-events:none;}
     .nota-overlay.liga-sel{outline:2px solid #ffcc00;outline-offset:2px;border-radius:4px;cursor:pointer;}
     .nota-overlay.liga-sel.picked{outline-color:#00ffcc;background:rgba(0,255,204,.2);}
   </style>
@@ -196,6 +196,8 @@ let dotMode = false;
 let tieMode = false;
 let tiePick = [];
 let showLbls = false, playing = false, metroOn = false, metroLoop = null, synth = null;
+/* FIX: metrónomo - reusar un solo synth en vez de crear uno nuevo por tick */
+let metroSynth = null;
 
 const NOTES = {
   treble:["g/3","a/3","b/3","c/4","d/4","e/4","f/4","g/4","a/4","b/4","c/5","d/5","e/5","f/5","g/5","a/5","b/5"],
@@ -219,21 +221,34 @@ const initSynth = ()=>{
   }).toDestination();
 };
 
+/* FIX: metrónomo - inicializar synth una sola vez */
+const initMetroSynth = ()=>{
+  if(!metroSynth) metroSynth = new Tone.MembraneSynth().toDestination();
+};
+
 const playNote = (note,dur)=>{
   if(!note)return;initSynth();
   Tone.start().then(()=>{try{synth.triggerAttackRelease(note.split("/")[0].toUpperCase()+note.split("/")[1],dur);}catch(e){}});
 };
 
+/*
+ * FIX puntillos VexFlow 4.2.3:
+ * - addDotToAll() NO EXISTE en esta versión
+ * - Sufijo "d" ("qd","hd","wd","8d") → ticks correctos (1.5x) pero NO dibuja el punto
+ * - addModifier(new VF.Dot(), 0) → dibuja el punto pero NO cambia ticks
+ * - Solución: COMBINAR ambos → "qd" + addModifier(new VF.Dot(), 0)
+ */
 function mkNote(note,dur,dot,isRest){
+  const vfDur = dot ? dur + "d" : dur;
+  const rk=clef==="treble"?"b/4":"d/3";
   let vn;
   if(isRest){
-    const rk=clef==="treble"?"b/4":"d/3";
-    vn=new VF.StaveNote({keys:[rk],duration:dur+"r"});
+    vn = new VF.StaveNote({keys:[rk],duration:vfDur+"r"});
   }else{
     const idx=NOTES[clef].indexOf(note);
-    vn=new VF.StaveNote({keys:[note],duration:dur,clef,stem_direction:idx>=CTR_IDX?VF.Stem.DOWN:VF.Stem.UP});
+    vn = new VF.StaveNote({keys:[note],duration:vfDur,clef,stem_direction:idx>=CTR_IDX?VF.Stem.DOWN:VF.Stem.UP});
   }
-  if(dot)vn.addDotToAll();
+  if(dot) vn.addModifier(new VF.Dot(), 0);
   return vn;
 }
 
@@ -241,7 +256,7 @@ const NOTE_W={w:52,h:48,q:44,"8":38};
 function mWidth(m,isFirst){
   const base=isFirst?CLEF_EXTRA:0;
   if(!m.closed){
-    const used=m.notes.reduce((s,n)=>s+(NOTE_W[n.dur]||44),0);
+    const used=m.notes.reduce((s,n)=>s+(NOTE_W[n.dur]||44)+(n.dot?12:0),0);
     return Math.max(OPEN_W, used+60)+base;
   }
   if(!m.notes.length)return Math.max(MIN_W+20,base+70);
@@ -250,7 +265,9 @@ function mWidth(m,isFirst){
   return Math.max(base+100,f.preCalculateMinTotalWidth([v])+base+68);
 }
 function mkVoice(m){
-  const v=new VF.Voice({num_beats:+timeSig.split("/")[0],beat_value:4});
+  const num = +timeSig.split("/")[0];
+  const den = +timeSig.split("/")[1];
+  const v=new VF.Voice({num_beats:num,beat_value:den});
   v.setStrict(false);
   if(m.notes.length)v.addTickables(m.notes.map(n=>n.vn));
   return v;
@@ -322,6 +339,7 @@ function draw(){
     });
   });
 
+  /* Dibujar ligaduras visuales (StaveTie) */
   measures.forEach((m,mi)=>{
     m.notes.forEach((n,ni)=>{
       if(!n.tie||n.type!=="nota")return;
@@ -428,11 +446,22 @@ function shiftPitch(mi,ni,dir){
   const list=NOTES[clef];
   const idx=list.indexOf(n.note)+dir;
   if(idx<0||idx>=list.length)return;
-  n.note=list[idx];
-  n.vn=mkNote(n.note,n.dur,n.dot,false);
-  draw();playNote(n.note,TDUR[n.dur]);
+  const prevNote=n.note;
+  const prevVn=n.vn;
+  try{
+    n.note=list[idx];
+    n.vn=mkNote(n.note,n.dur,n.dot,false);
+    draw();playNote(n.note,TDUR[n.dur]);
+  }catch(e){
+    n.note=prevNote;
+    n.vn=prevVn;
+    console.error("Error shiftPitch:",e);
+  }
 }
 
+/* FIX: En dotMode, el click en el pentagrama NO añade notas.
+   dotMode es solo para editar puntillos en notas existentes (via overlays).
+   Para añadir notas nuevas, desactivar dotMode primero. */
 divEl.addEventListener("click",e=>{
   if(tieMode||dotMode)return;
   if(!timeSig||!activeFig)return;
@@ -440,20 +469,32 @@ divEl.addEventListener("click",e=>{
   const clickY=e.clientY-rect.top;
   const note=noteFromY(clickY);
   const cur=measures[measures.length-1];
-  const bPer=+timeSig.split("/")[0];
+  const bPer=beatsPerMeasure();
   const bv=BEATS[activeFig.dur]||0;
-  const total=bv*(dotMode?1.5:1);
+  const total=bv;
   if(cur.beats+total>bPer+0.01){
-    alert(`¡No cabe ${DNAMES[activeFig.dur]||"figura"}${dotMode?" con puntillo":""} en el compás!`);
+    alert(`¡No cabe ${DNAMES[activeFig.dur]||"figura"} en el compás!`);
     return;
   }
   const isRest=activeFig.type==="silencio";
-  const vn=mkNote(isRest?null:note,activeFig.dur,dotMode,isRest);
-  cur.notes.push({type:activeFig.type,dur:activeFig.dur,note:isRest?null:note,vn,dot:dotMode,tie:false});
-  cur.beats+=total;
-  draw();
-  if(!isRest)playNote(note,TDUR[activeFig.dur]);
+  try{
+    const vn=mkNote(isRest?null:note,activeFig.dur,false,isRest);
+    cur.notes.push({type:activeFig.type,dur:activeFig.dur,note:isRest?null:note,vn,dot:false,tie:false});
+    cur.beats+=total;
+    draw();
+    if(!isRest)playNote(note,TDUR[activeFig.dur]);
+  }catch(err){
+    console.error("Error al añadir nota:",err);
+  }
 });
+
+/* Helper: beats por compás teniendo en cuenta el denominador */
+function beatsPerMeasure(){
+  if(!timeSig) return 0;
+  const [num, den] = timeSig.split("/").map(Number);
+  /* Convertir a beats de negra: num * (4/den) */
+  return num * (4 / den);
+}
 
 function noteFromY(y){
   const lineIdx=Math.max(0,Math.floor((y-STAVE_Y0)/LINE_H));
@@ -467,28 +508,46 @@ function noteFromY(y){
 function toggleDotOn(mi,ni){
   const n=measures[mi].notes[ni];
   if(n.type!=="nota")return;
-  const bPer=+timeSig.split("/")[0];
+  const bPer=beatsPerMeasure();
+  /* Quitar puntillo */
   if(n.dot){
     const extra=BEATS[n.dur]*0.5;
-    n.dot=false;
-    n.vn=mkNote(n.note,n.dur,false,false);
-    measures[mi].beats=+(measures[mi].beats-extra).toFixed(4);
+    try{
+      const newVn=mkNote(n.note,n.dur,false,false);
+      n.dot=false;
+      n.vn=newVn;
+      measures[mi].beats=+(measures[mi].beats-extra).toFixed(4);
+    }catch(e){console.error("Error quitando puntillo:",e);}
     draw();
     return;
   }
+  /* Poner puntillo */
   const extra=BEATS[n.dur]*0.5;
   if(!measures[mi].closed && measures[mi].beats+extra>bPer+0.01){
     alert("No cabe el puntillo: el compás se llenaría.");return;
   }
-  n.dot=true;
-  n.vn=mkNote(n.note,n.dur,true,false);
-  if(!measures[mi].closed)measures[mi].beats=+(measures[mi].beats+extra).toFixed(4);
+  /* Guardar estado previo para rollback si falla */
+  const prevVn=n.vn;
+  const prevBeats=measures[mi].beats;
+  try{
+    const newVn=mkNote(n.note,n.dur,true,false);
+    n.dot=true;
+    n.vn=newVn;
+    if(!measures[mi].closed)measures[mi].beats=+(measures[mi].beats+extra).toFixed(4);
+  }catch(e){
+    /* Rollback: restaurar estado anterior */
+    n.dot=false;
+    n.vn=prevVn;
+    measures[mi].beats=prevBeats;
+    console.error("Error aplicando puntillo:",e);
+    alert("Error al aplicar el puntillo.");
+  }
   draw();
 }
 
 function closeMeasure(){
   const cur=measures[measures.length-1];
-  const bPer=+timeSig.split("/")[0];
+  const bPer=beatsPerMeasure();
   if(!cur||cur.closed||cur.beats<bPer-0.01)return;
   cur.closed=true;
   measures.push({notes:[],beats:0,closed:false});
@@ -497,7 +556,7 @@ function closeMeasure(){
 
 function updateCloseBtn(){
   const cur=measures.length?measures[measures.length-1]:null;
-  const bPer=timeSig?+timeSig.split("/")[0]:0;
+  const bPer=beatsPerMeasure();
   document.getElementById("cerrar-compas").disabled=!cur||cur.closed||cur.beats<bPer-0.01;
 }
 
@@ -515,6 +574,7 @@ function deleteLast(){
 function reset(){
   measures=[];tieMode=false;dotMode=false;activeFig=null;tiePick=[];
   document.querySelectorAll(".figura,.figura-modo").forEach(el=>el.classList.remove("activa"));
+  document.body.classList.remove("tie-active");
   if(timeSig)measures.push({notes:[],beats:0,closed:false});
   draw();
 }
@@ -529,6 +589,7 @@ function togglePlay(){
     document.querySelectorAll(".figura,.figura-modo").forEach(el=>el.classList.remove("activa"));
     document.querySelectorAll(".nota-overlay").forEach(el=>el.remove());
     activeFig=null;dotMode=false;tieMode=false;tiePick=[];
+    document.body.classList.remove("tie-active");
     Tone.Transport.bpm.value=bpm;Tone.Transport.cancel();
 
     let t0=0;
@@ -538,54 +599,38 @@ function togglePlay(){
 
     measures.forEach((m,mi)=>{
       m.notes.forEach((n,ni)=>{
+        const sec=BEATS[n.dur]*(n.dot?1.5:1)*spb;
+
         if(n.type!=="nota"){
-          const sec=BEATS[n.dur]*(n.dot?1.5:1)*spb;
           t0+=sec;
           gi++;
           return;
         }
 
-        const sec=BEATS[n.dur]*(n.dot?1.5:1)*spb;
-        const thisNote=n.note;
-
-        let isTieDestination=false;
-        let prevNote=null;
-        let prevMi=mi;
-        let prevNi=ni-1;
-
-        if(prevNi<0 && prevMi>0){
-          prevMi--;
-          prevNi=measures[prevMi].notes.length-1;
-        }
-
-        if(prevMi>=0 && prevNi>=0){
-          prevNote=measures[prevMi].notes[prevNi];
-          if(prevNote.tie && prevNote.tie.fromMi===mi && prevNote.tie.fromNi===ni){
-            isTieDestination=true;
+        /* FIX: ligaduras en playback — comprobar n.tie (la nota actual),
+           no la nota anterior. El tie se guarda en la nota DESTINO. */
+        let isTieDestination = false;
+        if(n.tie && n.tie.fromMi !== undefined){
+          const srcNote = measures[n.tie.fromMi]?.notes[n.tie.fromNi];
+          if(srcNote && srcNote.type === "nota" && srcNote.note === n.note){
+            isTieDestination = true;
           }
         }
 
-        let shouldAttack=true;
-
-        if(isTieDestination && prevNote && prevNote.note===thisNote){
-          shouldAttack=false;
-          if(evs.length>0){
-            const lastEv=evs[evs.length-1];
-            if(lastEv.gi===gi-1){
-              lastEv.sec+=sec;
-            }
+        if(isTieDestination){
+          /* Extender la duración del último evento en vez de crear uno nuevo */
+          if(evs.length > 0){
+            const lastEv = evs[evs.length - 1];
+            lastEv.sec += sec;
           }
-        }
-
-        if(shouldAttack){
-          const ev={
-            t:t0,
-            note:thisNote,
+        } else {
+          evs.push({
+            t: t0,
+            note: n.note,
             sec,
             gi,
-            lbl:dname(thisNote)
-          };
-          evs.push(ev);
+            lbl: dname(n.note)
+          });
         }
 
         t0+=sec;
@@ -597,8 +642,11 @@ function togglePlay(){
 
     const nBeats=+timeSig.split("/")[0];
     const intro=metroOn?nBeats*spb:0;
+
+    /* FIX: metrónomo — reusar un solo synth */
     if(metroOn){
-      metroLoop=new Tone.Loop(t=>{new Tone.MembraneSynth().toDestination().triggerAttackRelease("C3","8n",t);},"4n").start(0);
+      initMetroSynth();
+      metroLoop=new Tone.Loop(t=>{metroSynth.triggerAttackRelease("C3","8n",t);},"4n").start(0);
     }
 
     const svgNotes=Array.from(ctx.svg.querySelectorAll("g.vf-stavenote"));
@@ -801,15 +849,14 @@ function init(){
       tieMode=false;
       tiePick=[];
       document.getElementById("btn-ligadura").classList.remove("activa");
+      document.body.classList.remove("tie-active");
     }
-    document.body.classList.toggle("dot-active",dotMode);
-    document.body.classList.toggle("tie-active",tieMode);
     draw();
   });
 
   document.getElementById("btn-ligadura").addEventListener("click",()=>{
     tieMode=!tieMode;tiePick=[];
-    if(tieMode){dotMode=false;document.getElementById("btn-puntillo").classList.remove("activa");document.body.classList.remove("dot-active");}
+    if(tieMode){dotMode=false;document.getElementById("btn-puntillo").classList.remove("activa");}
     document.getElementById("btn-ligadura").classList.toggle("activa",tieMode);
     document.body.classList.toggle("tie-active",tieMode);
     draw();
