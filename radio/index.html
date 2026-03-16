@@ -55,7 +55,7 @@
       position: fixed;
       top: 50%; left: 50%;
       width: 200vmax; height: 200vmax;
-      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
+      background: radial-gradient(circle, rgba(0,255,204,0.25) 2%, transparent 60%);
       transform: translate(-50%, -50%);
       animation: radar 12s linear infinite;
       opacity: 0.08;
@@ -128,8 +128,8 @@
       padding: 14px; 
       border: 2px solid var(--glow); 
       border-radius: 12px; 
-      box-shadow: 0 0 16px var(--glow), inset 0 0 8px rgba(0,255,114,0.15); 
-      background: rgba(0, 20, 0, 0.8); 
+      background: rgba(22,27,34,0.9);
+      box-shadow: 0 0 16px rgba(0,255,204,0.25); 
       backdrop-filter: blur(4px); 
       display: flex; 
       flex-direction: column; 
@@ -141,8 +141,8 @@
 
     .volume-horizontal { width: 100%; max-width: 320px; height: 46px; display: flex; align-items: center; justify-content: center; padding: 0 10px; position: relative; margin: 0 auto; }
     .volume-track-h { width: 100%; height: 18px; background: var(--leather); border: 2px solid #0a3d0a; border-radius: 9px; position: relative; overflow: visible; cursor: pointer; box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 0 12px rgba(0,255,114,0.3); background-image: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px); }
-    .volume-fill-h { height: 100%; background: linear-gradient(90deg, #004d00, #00ff72, #004d00); position: absolute; left: 0; top: 0; border-radius: 7px; box-shadow: 0 0 15px var(--glow); transition: width 0.15s ease; }
-    .volume-knob-h { width: 32px; height: 32px; background: radial-gradient(circle at 30% 30%, #0f5f0f, #001f00); border: 3px solid #00ff72; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 100%; box-shadow: 0 0 20px var(--glow), 0 0 30px #00ffcc, inset 0 0 8px rgba(0,0,0,0.8); cursor: grab; transition: transform 0.15s ease, box-shadow 0.2s; z-index: 10; }
+    .volume-fill-h { height: 100%; background: linear-gradient(90deg, #1e2d3d, #00ffcc, #1e2d3d); position: absolute; left: 0; top: 0; border-radius: 7px; box-shadow: 0 0 15px var(--glow); transition: width 0.15s ease; }
+    .volume-knob-h { width: 32px; height: 32px; background: radial-gradient(circle at 30% 30%, #243b4a, #161b22); border: 3px solid #00ffcc; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 100%; box-shadow: 0 0 20px var(--glow), 0 0 30px #00ffcc, inset 0 0 8px rgba(0,0,0,0.8); cursor: grab; transition: transform 0.15s ease, box-shadow 0.2s; z-index: 10; }
     .volume-knob-h::before { content: ''; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #001400; border: 2px solid #004d00; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: inset 0 0 6px rgba(0,0,0,0.8); }
     .volume-knob-h:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.2); box-shadow: 0 0 30px #00ffcc, 0 0 40px #00ff72; }
 
@@ -497,9 +497,9 @@
         ctx.fillStyle = '#001400';
         ctx.fillRect(0, 0, w, h);
         ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#00ff72';
+        ctx.strokeStyle = '#00ffcc';
         ctx.shadowBlur = 16;
-        ctx.shadowColor = '#00ff72';
+        ctx.shadowColor = '#00ffcc';
         ctx.beginPath();
         let x = 0;
         const sliceWidth = w / bufferLength;
