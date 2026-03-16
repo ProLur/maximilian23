@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio Musical • Maximilian 23 • Versión BETA</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Music&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:"Courier New",Courier,monospace;background:#0d1117;color:#e6edf3;min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+      background-image:radial-gradient(circle at 20% 10%,rgba(0,255,204,.07) 0%,transparent 50%),radial-gradient(circle at 80% 90%,rgba(0,255,204,.05) 0%,transparent 50%);
+      background-attachment:fixed;}
+    header{background:#161b22;backdrop-filter:blur(8px);width:100%;padding:.9rem 1.2rem;display:flex;align-items:center;justify-content:center;gap:.9rem;border-bottom:2px solid #00ffcc;position:sticky;top:0;z-index:100;}
+    header img{height:48px;border-radius:50%;border:2px solid #00ffcc88;box-shadow:0 0 12px #00ffcc55;}
+    header h1{font-size:1.8rem;color:#00ffcc;text-shadow:0 0 8px #00ffccaa;}
+    #creado-por{position:absolute;top:.9rem;right:1.2rem;font-size:.85rem;color:#00ffcc88;}
+    .titulo-container{width:100%;max-width:1100px;margin:1.2rem 0 .8rem;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1.5rem;}
+    #titulo-partitura{flex:1;min-width:280px;max-width:460px;}
+    #titulo-editable{width:100%;padding:.7rem 1rem;font-size:1.4rem;background:rgba(30,45,61,.4);border:1px solid #00ffcc55;border-radius:10px;color:#e6edf3;text-align:center;backdrop-filter:blur(4px);font-family:"Courier New",Courier,monospace;}
+    #autor-container{flex:1;min-width:220px;max-width:320px;display:flex;align-items:center;gap:.6rem;}
+    #autor-label{color:#00ffcc;font-weight:bold;white-space:nowrap;font-size:1rem;}
+    #autor-input{flex:1;padding:.7rem .8rem;font-size:1.1rem;background:rgba(30,45,61,.4);border:1px solid #00ffcc55;border-radius:10px;color:#e6edf3;backdrop-filter:blur(4px);font-family:"Courier New",Courier,monospace;}
+    #barra-opciones{display:flex;align-items:center;justify-content:center;gap:.7rem;margin:.5rem 0 1rem;padding:0 1rem;flex-wrap:wrap;width:100%;max-width:1200px;position:relative;z-index:50;}
+    #barra-opciones label{color:#00ffcc;white-space:nowrap;font-size:.88rem;}
+    select{padding:.45rem .7rem;background:rgba(30,45,61,.5);border:1px solid #00ffcc66;border-radius:8px;color:#e6edf3;font-size:.88rem;font-family:"Courier New",Courier,monospace;white-space:nowrap;}
+    /* ── Dropdowns genéricos ── */
+    .acciones-dropdown{position:relative;z-index:60;flex-shrink:0;}
+    .dd-btn{padding:.45rem 1rem;background:rgba(0,255,204,.18);border:1px solid #00ffcc88;border-radius:8px;color:#00ffcc;cursor:pointer;font-weight:bold;display:flex;align-items:center;gap:.4rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;white-space:nowrap;}
+    .dd-btn:hover{background:rgba(0,255,204,.28);box-shadow:0 0 10px rgba(0,255,204,.4);}
+    .dd-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;background:rgba(13,17,23,.99);border:2px solid #00ffcc88;border-radius:8px;min-width:210px;z-index:9999;box-shadow:0 10px 28px rgba(0,255,204,.5);backdrop-filter:blur(8px);}
+    .dd-menu.show{display:block;}
+    .dd-menu button{width:100%;text-align:left;padding:.7rem 1.2rem;background:none;border:none;color:#e6edf3;cursor:pointer;display:flex;align-items:center;gap:.7rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;}
+    .dd-menu button:hover{background:rgba(0,255,204,.22);}
+    /* ── Layout ── */
+    .main-layout{width:100%;max-width:1200px;display:flex;justify-content:center;gap:1.2rem;padding:0 1.5rem 2rem;align-items:flex-start;}
+    .sidebar-left{width:136px;flex-shrink:0;position:sticky;top:110px;align-self:flex-start;padding:.9rem .6rem;background:rgba(30,45,61,.3);border-radius:12px;border:1px solid #00ffcc33;backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:1rem;}
+    .fig-pair{display:flex;gap:.6rem;justify-content:center;}
+    .figura{width:54px;height:54px;background:rgba(30,45,61,.45);border:2px solid #00ffcc55;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .22s;user-select:none;overflow:visible;flex-shrink:0;}
+    .figura:hover,.figura.activa{background:rgba(0,255,204,.18);border-color:#00ffcc;transform:scale(1.1);box-shadow:0 0 14px #00ffcc55;}
+    .figura svg{width:78%;height:78%;}
+    .figura span.glyph{font-family:"Bravura","Noto Music","Segoe UI Symbol",serif;font-size:2.4rem;color:#e6edf3;line-height:1;display:flex;align-items:center;justify-content:center;user-select:none;}
+    .modo-pair{display:flex;gap:.6rem;justify-content:center;}
+    .figura-modo{width:54px;height:32px;background:rgba(30,45,61,.45);border:2px solid #00ffcc55;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;color:#e6edf3;cursor:pointer;transition:all .22s;user-select:none;}
+    .figura-modo:hover,.figura-modo.activa{background:rgba(0,255,204,.2);border-color:#00ffcc;box-shadow:0 0 12px #00ffcc44;}
+    .pentagrama-wrapper{flex:1;background:white;border:2px solid #00ffcc55;border-radius:12px;overflow-x:auto;overflow-y:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);position:relative;max-width:860px;min-height:160px;transition:height .3s ease;}
+    #pentagrama-container{width:100%;position:relative;}
+    #pentagrama{width:100%;display:block;}
+    .tempo-text{position:absolute;top:.45rem;left:1.8rem;background:rgba(255,255,255,.92);color:#006644;padding:.2rem .6rem;border-radius:6px;border:1px solid #00cc99;font-weight:bold;z-index:10;font-size:.78rem;pointer-events:none;}
+    .sidebar-right{width:136px;flex-shrink:0;position:sticky;top:110px;align-self:flex-start;display:flex;flex-direction:column;gap:.8rem;padding:.9rem .55rem;background:rgba(30,45,61,.3);border-radius:12px;border:1px solid #00ffcc33;backdrop-filter:blur(6px);}
+    .sidebar-right button{padding:.75rem .5rem;background:rgba(0,255,204,.12);border:1px solid #00ffcc66;border-radius:8px;color:#00ffcc;font-weight:bold;cursor:pointer;transition:all .25s;font-size:.82rem;font-family:"Courier New",Courier,monospace;display:flex;align-items:center;justify-content:center;gap:.35rem;}
+    .sidebar-right button.activa{background:rgba(0,255,204,.35)!important;border-color:#00ffcc;box-shadow:0 0 10px rgba(0,255,204,.4);}
+    .sidebar-right button:hover:not(:disabled){background:rgba(0,255,204,.22);border-color:#00ffcc;transform:translateY(-1px);}
+    .sidebar-right button:disabled{opacity:.38;cursor:not-allowed;}
+    #play-stop{background:rgba(0,120,255,.25)!important;border-color:#4099ff;color:#4099ff;box-shadow:0 0 8px rgba(0,120,255,.3);}
+    #play-stop:hover{background:rgba(0,120,255,.35)!important;box-shadow:0 0 14px rgba(0,120,255,.5);}
+    #play-stop.stop-active{background:rgba(255,50,50,.3)!important;border-color:#ff4444;color:#ff4444;box-shadow:0 0 10px rgba(255,50,50,.4);animation:pulse-red 1.2s ease-in-out infinite;}
+    @keyframes pulse-red{0%,100%{box-shadow:0 0 8px rgba(255,50,50,.3);}50%{box-shadow:0 0 18px rgba(255,50,50,.6);}}
+    .note-label{position:absolute;color:#00ffcc;background:rgba(13,17,23,.85);padding:3px 6px;border-radius:5px;border:1px solid #00ffcc55;font-size:.78rem;pointer-events:none;z-index:50;white-space:nowrap;transition:opacity .4s;font-family:"Courier New",Courier,monospace;}
+    /* ── Overlays de nota ── */
+    .nota-overlay{position:absolute;z-index:200;pointer-events:all;cursor:pointer;border-radius:4px;transition:background .15s;}
+    .nota-overlay.selected{background:rgba(0,255,204,.22);outline:2px solid #00ffcc;outline-offset:1px;}
+    /* Modo cambio-figura: resalta en azul */
+    .nota-overlay.fig-mode{cursor:crosshair;background:rgba(0,180,255,.12);outline:2px dashed #00b4ff;outline-offset:2px;}
+    .nota-overlay.fig-mode:hover{background:rgba(0,180,255,.28);}
+    /* Modo borrar: resalta en rojo */
+    .nota-overlay.del-mode{cursor:crosshair;background:rgba(255,60,60,.1);outline:2px dashed #ff4444;outline-offset:2px;}
+    .nota-overlay.del-mode:hover{background:rgba(255,60,60,.28);}
+    .nota-overlay .pm-btn{width:34px;height:34px;border-radius:50%;background:#00ffcc;color:#0d1117;position:absolute;text-align:center;line-height:32px;font-size:1.3rem;font-weight:bold;cursor:pointer;pointer-events:all;border:2px solid rgba(0,0,0,.25);left:50%;transform:translateX(-50%);display:none;user-select:none;box-shadow:0 2px 8px rgba(0,255,204,.5);touch-action:manipulation;}
+    .nota-overlay.selected .pm-btn{display:block;}
+    .nota-overlay .pm-btn.plus{top:-42px;}
+    .nota-overlay .pm-btn.minus{bottom:-42px;}
+    .nota-overlay .pm-btn:active{background:#00cc9e;transform:translateX(-50%) scale(.93);}
+    .nota-overlay.dot-mode{cursor:crosshair;background:rgba(255,200,0,.12);outline:2px dashed #ffcc00;outline-offset:2px;}
+    .nota-overlay.dot-mode:active{background:rgba(255,200,0,.3);}
+    .nota-overlay.acc-mode{cursor:crosshair;background:rgba(180,100,255,.12);outline:2px dashed #b464ff;outline-offset:2px;}
+    .nota-overlay.acc-mode:active{background:rgba(180,100,255,.3);}
+    body.tie-active #pentagrama svg{pointer-events:none;}
+    .nota-overlay.liga-sel{outline:2px solid #ffcc00;outline-offset:2px;border-radius:4px;cursor:pointer;}
+    .nota-overlay.liga-sel.picked{outline-color:#00ffcc;background:rgba(0,255,204,.2);}
+    /* Indicador de modo activo en barra */
+    #modo-activo{font-size:.78rem;color:#00ffcc;background:rgba(0,255,204,.1);border:1px solid #00ffcc44;border-radius:6px;padding:.3rem .7rem;display:none;align-items:center;gap:.4rem;white-space:nowrap;}
+    #modo-activo.visible{display:flex;}
+  </style>
+</head>
+<body>
+<header>
+  <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian">
+  <h1>Laboratorio Musical</h1>
+  <div id="creado-por">Creado por Manuel</div>
+</header>
+
+<div class="titulo-container">
+  <div id="titulo-partitura">
+    <input type="text" id="titulo-editable" value="Mi Partitura">
+  </div>
+  <div id="autor-container">
+    <label id="autor-label">Autor:</label>
+    <input type="text" id="autor-input" placeholder="Tu nombre" value="">
+  </div>
+</div>
+
+<div id="barra-opciones">
+  <!-- Archivo -->
+  <div class="acciones-dropdown">
+    <button class="dd-btn" id="acciones-btn"><i class="fas fa-file"></i> Archivo</button>
+    <div class="dd-menu" id="acciones-menu">
+      <button id="abrir"><i class="fas fa-folder-open"></i> Abrir</button>
+      <button id="guardar"><i class="fas fa-save"></i> Guardar</button>
+      <button id="export-pdf"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+      <button id="limpiar"><i class="fas fa-trash"></i> Limpiar</button>
+    </div>
+    <input type="file" id="file-input" accept=".json" style="display:none">
+  </div>
+  <!-- Lecciones -->
+  <div class="acciones-dropdown">
+    <button class="dd-btn" id="lecciones-btn"><i class="fas fa-graduation-cap"></i> Lecciones</button>
+    <div class="dd-menu" id="lecciones-menu">
+      <button id="lec1-btn"><i class="fas fa-music"></i> Lección 1</button>
+    </div>
+  </div>
+
+  <label>Clave:</label>
+  <select id="clave">
+    <option value="treble" selected>Sol</option>
+    <option value="bass">Fa</option>
+  </select>
+
+  <label>Armadura:</label>
+  <select id="armadura">
+    <option value="" selected>Do M / La m</option>
+    <option value="G">Sol M / Mi m  (1♯)</option>
+    <option value="D">Re M / Si m  (2♯)</option>
+    <option value="A">La M / Fa♯m (3♯)</option>
+    <option value="E">Mi M / Do♯m (4♯)</option>
+    <option value="B">Si M / Sol♯m (5♯)</option>
+    <option value="F#">Fa♯M / Re♯m (6♯)</option>
+    <option value="C#">Do♯M / La♯m (7♯)</option>
+    <option value="F">Fa M / Re m  (1♭)</option>
+    <option value="Bb">Si♭M / Sol m (2♭)</option>
+    <option value="Eb">Mi♭M / Do m (3♭)</option>
+    <option value="Ab">La♭M / Fa m (4♭)</option>
+    <option value="Db">Re♭M / Si♭m (5♭)</option>
+    <option value="Gb">Sol♭M / Mi♭m (6♭)</option>
+    <option value="Cb">Do♭M / La♭m (7♭)</option>
+  </select>
+
+  <label>Compás:</label>
+  <select id="compas">
+    <option value="" selected>---</option>
+    <option value="2/4">2/4</option>
+    <option value="3/4">3/4</option>
+    <option value="4/4">4/4</option>
+    <option value="6/8">6/8</option>
+  </select>
+
+  <label>Velocidad:</label>
+  <select id="velocidad">
+    <option value="" selected>---</option>
+    <option value="40">Grave (40)</option>
+    <option value="50">Largo (50)</option>
+    <option value="60">Larghetto (60)</option>
+    <option value="66">Adagio (66)</option>
+    <option value="76">Andante (76)</option>
+    <option value="88">Andantino (88)</option>
+    <option value="100">Moderato (100)</option>
+    <option value="112">Allegretto (112)</option>
+    <option value="120">Allegro (120)</option>
+    <option value="140">Vivace (140)</option>
+    <option value="160">Presto (160)</option>
+    <option value="184">Prestissimo (184)</option>
+  </select>
+
+  <div id="modo-activo"><i class="fas fa-info-circle"></i> <span id="modo-texto"></span></div>
+</div>
+
+<div class="main-layout">
+  <div class="sidebar-left" id="figuras">
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="w" title="Redonda (4 tiempos)"><span class="glyph">𝅝</span></div>
+      <div class="figura" data-tipo="silencio" data-duracion="w" title="Silencio redonda">
+        <svg viewBox="0 0 44 34" style="width:70%;height:auto"><rect x="7" y="14" width="30" height="10" fill="#e6edf3"/><line x1="5" y1="14" x2="39" y2="14" stroke="#e6edf3" stroke-width="2.5"/></svg>
+      </div>
+    </div>
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="h" title="Blanca (2 tiempos)"><span class="glyph">𝅗𝅥</span></div>
+      <div class="figura" data-tipo="silencio" data-duracion="h" title="Silencio blanca">
+        <svg viewBox="0 0 44 34" style="width:70%;height:auto"><rect x="7" y="10" width="30" height="10" fill="#e6edf3"/><line x1="5" y1="20" x2="39" y2="20" stroke="#e6edf3" stroke-width="2.5"/></svg>
+      </div>
+    </div>
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="q" title="Negra (1 tiempo)"><span class="glyph">𝅘𝅥</span></div>
+      <div class="figura" data-tipo="silencio" data-duracion="q" title="Silencio negra"><span class="glyph">𝄽</span></div>
+    </div>
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="8" title="Corchea (½ tiempo)"><span class="glyph">𝅘𝅥𝅮</span></div>
+      <div class="figura" data-tipo="silencio" data-duracion="8" title="Silencio corchea"><span class="glyph">𝄾</span></div>
+    </div>
+    <div class="fig-pair">
+      <div class="figura" data-tipo="nota" data-duracion="16" title="Semicorchea (¼ tiempo)"><span class="glyph">𝅘𝅥𝅯</span></div>
+      <div class="figura" data-tipo="silencio" data-duracion="16" title="Silencio semicorchea"><span class="glyph">𝄿</span></div>
+    </div>
+    <div class="modo-pair">
+      <div class="figura-modo" id="btn-puntillo" title="Modo puntillo">•</div>
+      <div class="figura-modo" id="btn-ligadura" title="Modo ligadura">↝</div>
+    </div>
+    <div class="modo-pair">
+      <div class="figura-modo" id="btn-sostenido" title="Modo sostenido">♯</div>
+      <div class="figura-modo" id="btn-bemol" title="Modo bemol">♭</div>
+    </div>
+  </div>
+
+  <div class="pentagrama-wrapper" id="pentagrama-wrapper">
+    <div id="pentagrama-container">
+      <div id="tempo-display" class="tempo-text" style="display:none;"></div>
+      <div id="pentagrama"></div>
+    </div>
+  </div>
+
+  <div class="sidebar-right">
+    <button id="cerrar-compas" disabled><i class="fas fa-check"></i> Cerrar compás</button>
+    <button id="notas"><i class="fas fa-music"></i> Notas</button>
+    <button id="metronomo"><i class="fas fa-drum"></i> Metrónomo</button>
+    <button id="play-stop"><i class="fas fa-play"></i> Play</button>
+    <button id="borrar-ultimo"><i class="fas fa-backspace"></i> Borrar último</button>
+    <button id="btn-borrar-nota"><i class="fas fa-times-circle"></i> Borrar nota</button>
+    <button id="btn-fin"><i class="fas fa-flag-checkered"></i> Fin</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const VF = Vex.Flow;
+const divEl    = document.getElementById("pentagrama");
+const wrapper  = document.getElementById("pentagrama-wrapper");
+const container= document.getElementById("pentagrama-container");
+const tempoDisp= document.getElementById("tempo-display");
+const modoActivo = document.getElementById("modo-activo");
+const modoTexto  = document.getElementById("modo-texto");
+
+// ── Constantes de layout ──────────────────────────────────────────────────
+const STAVE_Y0 = 40, LINE_H = 115, BASE_CLEF_EXTRA = 95;
+const OPEN_W = 130, MIN_W = 90;
+const CTR_IDX = 9, PAD_L = 28;
+const KEY_SIG_W = 18;
+// Semiespacio VexFlow = 5px  (spacing_between_lines_px = 10)
+const HALF_STEP_PX = 5;
+
+// ── Notas del array (índice 0=grave, 16=agudo) ────────────────────────────
+// CTR_IDX=9 → b/4 en treble (3ª línea, centro del pentagrama)
+const NOTES = {
+  treble:["g/3","a/3","b/3","c/4","d/4","e/4","f/4","g/4","a/4","b/4",
+          "c/5","d/5","e/5","f/5","g/5","a/5","b/5"],
+  bass:  ["b/1","c/2","d/2","e/2","f/2","g/2","a/2","b/2","c/3","d/3",
+          "e/3","f/3","g/3","a/3","b/3","c/4","d/4"]
+};
+
+const NNAMES  = {c:"Do",d:"Re",e:"Mi",f:"Fa",g:"Sol",a:"La",b:"Si"};
+const BEATS   = {w:4,h:2,q:1,"8":.5,"16":.25};
+const TDUR    = {w:"1n",h:"2n",q:"4n","8":"8n","16":"16n"};
+const TLBLS   = {40:"Grave (40)",50:"Largo (50)",60:"Larghetto (60)",66:"Adagio (66)",
+                 76:"Andante (76)",88:"Andantino (88)",100:"Moderato (100)",
+                 112:"Allegretto (112)",120:"Allegro (120)",140:"Vivace (140)",
+                 160:"Presto (160)",184:"Prestissimo (184)"};
+const DNAMES  = {w:"redonda",h:"blanca",q:"negra","8":"corchea","16":"semicorchea"};
+const ACCNAMES= {"#":"♯",b:"♭"};
+
+// Armadura: qué accidentales corresponden a cada tonalidad
+const KEY_ACCIDENTALS = {
+  "C": [],
+  "G": [{note:"f",acc:"#"}],
+  "D": [{note:"f",acc:"#"},{note:"c",acc:"#"}],
+  "A": [{note:"f",acc:"#"},{note:"c",acc:"#"},{note:"g",acc:"#"}],
+  "E": [{note:"f",acc:"#"},{note:"c",acc:"#"},{note:"g",acc:"#"},{note:"d",acc:"#"}],
+  "B": [{note:"f",acc:"#"},{note:"c",acc:"#"},{note:"g",acc:"#"},{note:"d",acc:"#"},{note:"a",acc:"#"}],
+  "F#":[{note:"f",acc:"#"},{note:"c",acc:"#"},{note:"g",acc:"#"},{note:"d",acc:"#"},{note:"a",acc:"#"},{note:"e",acc:"#"}],
+  "C#":[{note:"f",acc:"#"},{note:"c",acc:"#"},{note:"g",acc:"#"},{note:"d",acc:"#"},{note:"a",acc:"#"},{note:"e",acc:"#"},{note:"b",acc:"#"}],
+  "F": [{note:"b",acc:"b"}],
+  "Bb":[{note:"b",acc:"b"},{note:"e",acc:"b"}],
+  "Eb":[{note:"b",acc:"b"},{note:"e",acc:"b"},{note:"a",acc:"b"}],
+  "Ab":[{note:"b",acc:"b"},{note:"e",acc:"b"},{note:"a",acc:"b"},{note:"d",acc:"b"}],
+  "Db":[{note:"b",acc:"b"},{note:"e",acc:"b"},{note:"a",acc:"b"},{note:"d",acc:"b"},{note:"g",acc:"b"}],
+  "Gb":[{note:"b",acc:"b"},{note:"e",acc:"b"},{note:"a",acc:"b"},{note:"d",acc:"b"},{note:"g",acc:"b"},{note:"c",acc:"b"}],
+  "Cb":[{note:"b",acc:"b"},{note:"e",acc:"b"},{note:"a",acc:"b"},{note:"d",acc:"b"},{note:"g",acc:"b"},{note:"c",acc:"b"},{note:"f",acc:"b"}],
+};
+
+// ── Estado ────────────────────────────────────────────────────────────────
+let svgW    = 760;
+let clef    = "treble";
+let timeSig = "";
+let bpm     = 0;
+let keySigName = "";          // "G", "Bb", etc. o "" para Do M
+let keySigAccidentals = [];   // derivado de keySigName
+let measures   = [];
