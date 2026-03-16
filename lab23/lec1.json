@@ -1,0 +1,53 @@
+{
+  "title": "Lección 1 - Mis primeras notas",
+  "author": "Maximilian 23",
+  "clef": "treble",
+  "timeSig": "4/4",
+  "bpm": 76,
+  "tempoLabel": "Andante (76)",
+  "keySigName": "",
+  "keySigAccidentals": [],
+  "finMode": true,
+  "measures": [
+    {
+      "notes": [
+        { "type": "nota",    "dur": "q", "note": "e/4", "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "g/4", "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "a/4", "dot": false, "tie": false, "acc": false },
+        { "type": "silencio","dur": "q", "note": null,  "dot": false, "tie": false, "acc": false }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        { "type": "nota",    "dur": "q", "note": "a/4", "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "g/4", "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "e/4", "dot": false, "tie": false, "acc": false },
+        { "type": "silencio","dur": "q", "note": null,  "dot": false, "tie": false, "acc": false }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        { "type": "nota",    "dur": "q", "note": "e/4", "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "e/4", "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "g/4", "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "g/4", "dot": false, "tie": false, "acc": false }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        { "type": "nota",    "dur": "q", "note": "a/4", "dot": false, "tie": false, "acc": false },
+        { "type": "silencio","dur": "q", "note": null,  "dot": false, "tie": false, "acc": false },
+        { "type": "nota",    "dur": "q", "note": "a/4", "dot": false, "tie": false, "acc": false },
+        { "type": "silencio","dur": "q", "note": null,  "dot": false, "tie": false, "acc": false }
+      ],
+      "beats": 4,
+      "closed": true
+    }
+  ]
+}
