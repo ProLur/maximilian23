@@ -201,7 +201,10 @@ const container = document.getElementById("pentagrama-container");
 const tempoDisp = document.getElementById("tempo-display");
 
 const STAVE_Y0 = 40, LINE_H = 115, BASE_CLEF_EXTRA = 95;
-const OPEN_W = 130, MIN_W = 90, NOTE_PX = 5.5, CTR_IDX = 9, PAD_L = 28;
+const OPEN_W = 130, MIN_W = 90;
+/* FIX 1: NOTE_PX corregido de 5.5 a 5 (VexFlow line spacing=10, cada paso de nota=5px) */
+const NOTE_PX = 5;
+const CTR_IDX = 9, PAD_L = 28;
 function getClefExtra(){ return BASE_CLEF_EXTRA + keySigAccidentals.length * KEY_SIG_W; }
 
 let svgW = 760, clef = "treble", timeSig = "", bpm = 0;
@@ -712,7 +715,7 @@ function shiftPitch(mi,ni,dir){
   }
 }
 
-/* ===== FIX: usar getBoundingClientRect del SVG para posición correcta ===== */
+/* FIX 3: usar ctx.svg.getBoundingClientRect() en vez de divEl.getBoundingClientRect() */
 divEl.addEventListener("click",e=>{
   if(tieMode||dotMode||finMode||accMode)return;
   if(!timeSig||!activeFig)return;
@@ -746,11 +749,12 @@ function beatsPerMeasure(){
   return num * (4 / den);
 }
 
+/* FIX 2: offset corregido de 42 a 20 (línea central B4 está a 20px del top del stave) */
 function noteFromY(y){
   const lineIdx=Math.max(0,Math.floor((y-STAVE_Y0)/LINE_H));
   const lineTopY=STAVE_Y0+lineIdx*LINE_H;
   const yInLine=y-lineTopY;
-  const steps=Math.round((42-yInLine)/NOTE_PX);
+  const steps=Math.round((20-yInLine)/NOTE_PX);
   const list=NOTES[clef];
   return list[Math.max(0,Math.min(list.length-1,CTR_IDX+steps))];
 }
