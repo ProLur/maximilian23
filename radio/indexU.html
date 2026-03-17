@@ -20,10 +20,10 @@
   <meta property="og:type" content="website" />
   
   <style>
-    :root { --glow: #00ff72; --bg: #001400; --dark: #001f00; }
+    :root { --glow: #00ffcc; --bg: #0d1117; --dark: #161b22; --text: #e6edf3; --panel: rgba(22, 27, 34, 0.82); --panel-strong: rgba(13, 17, 23, 0.92); --glow-soft: rgba(0, 255, 204, 0.16); }
     * { box-sizing: border-box; }
     body {
-      background: var(--bg); color: var(--glow); font-family: "Courier New", monospace;
+      background: var(--bg); color: var(--text); font-family: "Courier New", monospace;
       text-align: center; margin: 0; padding: 16px; min-height: 100vh;
       display: flex; flex-direction: column; justify-content: center;
       overflow-x: hidden; position: relative;
@@ -31,7 +31,7 @@
     body::before {
       content: ""; position: fixed; top: 50%; left: 50%;
       width: 200vmax; height: 200vmax;
-      background: radial-gradient(circle, rgba(0,255,114,0.25) 2%, transparent 60%);
+      background: radial-gradient(circle, rgba(0,255,204,0.18) 2%, transparent 60%);
       transform: translate(-50%, -50%); animation: radar 12s linear infinite;
       opacity: 0.08; z-index: -1; pointer-events: none;
     }
@@ -48,7 +48,7 @@
       animation: pulse-normal 3s ease-in-out infinite;
     }
     .glow-intenso {
-      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc);
+      filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px rgba(0, 255, 204, 0.7));
       animation: pulse-intenso 1.2s ease-in-out infinite;
     }
     @keyframes pulse-normal {
@@ -56,14 +56,14 @@
       50% { filter: drop-shadow(0 0 15px var(--glow)) drop-shadow(0 0 30px var(--glow)); }
     }
     @keyframes pulse-intenso {
-      0%, 100% { filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px #00ffcc); }
-      50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px #00ffcc); }
+      0%, 100% { filter: drop-shadow(0 0 20px var(--glow)) drop-shadow(0 0 40px var(--glow)) drop-shadow(0 0 60px rgba(0, 255, 204, 0.7)); }
+      50% { filter: drop-shadow(0 0 30px var(--glow)) drop-shadow(0 0 60px var(--glow)) drop-shadow(0 0 90px rgba(0, 255, 204, 0.7)); }
     }
     h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin: 0 0 18px 0; text-shadow: 0 0 6px var(--glow); line-height: 1.2; }
     .terminal-box {
       border: 1px solid var(--glow); padding: 16px; width: 100%; max-width: 420px; margin: 0 auto;
-      border-radius: 8px; box-shadow: 0 0 12px var(--glow), inset 0 0 8px rgba(0,255,114,0.1);
-      background: rgba(0, 20, 0, 0.7); backdrop-filter: blur(2px);
+      border-radius: 8px; box-shadow: 0 0 12px rgba(0,255,204,0.26), inset 0 0 8px rgba(0,255,204,0.08);
+      background: var(--panel); backdrop-filter: blur(2px);
     }
     #oscilograma { width: 100%; height: 60px; display: block; margin-bottom: 14px; image-rendering: pixelated; }
     .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
@@ -72,7 +72,7 @@
       padding: 12px 0; border-radius: 6px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
       transition: all 0.2s ease; font-weight: bold;
     }
-    button:hover { background: rgba(0, 255, 114, 0.1); box-shadow: 0 0 8px var(--glow); }
+    button:hover { background: var(--glow-soft); box-shadow: 0 0 8px var(--glow); }
     button:active { background: var(--glow); color: var(--bg); transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     #startBtn {
@@ -81,9 +81,9 @@
     #player { width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none; }
     .note { margin-top: 20px; font-size: 0.75rem; opacity: 0.7; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.4; }
     .status { font-size: 0.8rem; margin-top: 8px; opacity: 0.8; min-height: 1.2em; }
-    .listener-counter { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: rgba(0, 255, 114, 0.1); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; }
-    .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: rgba(0, 20, 0, 0.8); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .now-playing strong { color: #00ff72; text-shadow: 0 0 6px; }
+    .listener-counter { font-size: 0.9rem; margin: 8px 0; padding: 8px; background: var(--glow-soft); border: 1px solid var(--glow); border-radius: 4px; text-shadow: 0 0 4px var(--glow); animation: pulse 2s infinite; color: var(--text); }
+    .now-playing { font-size: 0.85rem; margin: 10px 0; padding: 6px; background: var(--panel-strong); border: 1px dashed var(--glow); border-radius: 4px; min-height: 2.4em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+    .now-playing strong { color: var(--glow); text-shadow: 0 0 6px; }
     @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
     @media (max-width: 480px) { .terminal-box { padding: 14px; } button { font-size: 0.9rem; padding: 10px 0; } .btn-group { gap: 6px; } .now-playing { font-size: 0.8rem; } }
   </style>
