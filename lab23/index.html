@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html> 
+<!DOCTYPE html> 
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -29,14 +29,14 @@
     #barra-opciones label{color:#00ffcc;white-space:nowrap;font-size:.88rem;}
     .opciones-centro{display:flex;align-items:center;justify-content:center;gap:1rem;min-width:0;flex-wrap:wrap;}
     select{padding:.45rem .7rem;background:rgba(30,45,61,.5);border:1px solid #00ffcc66;border-radius:8px;color:#e6edf3;font-size:.88rem;font-family:"Courier New",Courier,monospace;white-space:nowrap;}
-    .acciones-dropdown{position:relative;z-index:10020;justify-self:start;}
+    .acciones-dropdown{position:relative;z-index:10020;justify-self:center;}
     #acciones-btn{padding:.45rem 1rem;background:rgba(0,255,204,.18);border:1px solid #00ffcc88;border-radius:8px;color:#00ffcc;cursor:pointer;font-weight:bold;display:flex;align-items:center;gap:.4rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;white-space:nowrap;}
     #acciones-btn:hover{background:rgba(0,255,204,.28);box-shadow:0 0 10px rgba(0,255,204,.4);}
     #acciones-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;background:rgba(13,17,23,.99);border:2px solid #00ffcc88;border-radius:8px;min-width:210px;z-index:9999;box-shadow:0 10px 28px rgba(0,255,204,.5);backdrop-filter:blur(8px);}
     #acciones-menu.show{display:block;}
     #acciones-menu button{width:100%;text-align:left;padding:.7rem 1.2rem;background:none;border:none;color:#e6edf3;cursor:pointer;display:flex;align-items:center;gap:.7rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;}
     #acciones-menu button:hover{background:rgba(0,255,204,.22);}
-    .lecciones-dropdown{position:relative;z-index:10020;justify-self:end;}
+    .lecciones-dropdown{position:relative;z-index:10020;justify-self:center;}
     #lecciones-btn{padding:.45rem 1rem;background:rgba(0,255,204,.18);border:1px solid #00ffcc88;border-radius:8px;color:#00ffcc;cursor:pointer;font-weight:bold;display:flex;align-items:center;gap:.4rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;white-space:nowrap;}
     #lecciones-btn:hover{background:rgba(0,255,204,.28);box-shadow:0 0 10px rgba(0,255,204,.4);}
     #lecciones-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;background:rgba(13,17,23,.99);border:2px solid #00ffcc88;border-radius:8px;min-width:210px;z-index:10021;box-shadow:0 10px 28px rgba(0,255,204,.5);backdrop-filter:blur(8px);}
@@ -48,29 +48,6 @@
       .acciones-dropdown,.lecciones-dropdown{justify-self:center;}
       .opciones-centro{justify-content:center;}
       #lecciones-menu{right:auto;left:0;}
-    }
-    @media print{
-      body{background:#fff!important;color:#000!important;display:block;}
-      header,.titulo-container,#barra-opciones,.sidebar-left,.sidebar-right{display:none!important;}
-      .main-layout{display:block!important;max-width:none!important;padding:0!important;}
-      .pentagrama-wrapper{
-        max-width:none!important;
-        width:100%!important;
-        min-height:0!important;
-        height:auto!important;
-        overflow:visible!important;
-        border:none!important;
-        box-shadow:none!important;
-        background:#fff!important;
-      }
-      #pentagrama-container{
-        height:auto!important;
-        overflow:visible!important;
-      }
-      #pentagrama{
-        width:100%!important;
-      }
-      .note-label,.nota-overlay,.page-indicator,.tempo-text{display:none!important;}
     }
     .main-layout{width:100%;max-width:1200px;display:flex;justify-content:center;gap:1.2rem;padding:0 1.5rem 2rem;align-items:flex-start;}
     .sidebar-left{width:136px;flex-shrink:0;position:sticky;top:110px;align-self:flex-start;padding:.9rem .6rem;background:rgba(30,45,61,.3);border-radius:12px;border:1px solid #00ffcc33;backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:1rem;}
@@ -379,6 +356,14 @@ const playNote = (note, dur) => {
   const p = letter.toUpperCase() + acc + parts[1];
   Tone.start().then(()=>{ try{ synth.triggerAttackRelease(p, dur); }catch(e){} });
 };
+
+function normalizeStoredNote(note){
+  if(!note) return note;
+  const clean = String(note).trim().replace(/\/\//g, "/");
+  const m = clean.match(/^([a-gA-G])(#{1,2}|b{1,2})?\/(\d+)$/);
+  if(!m) return clean;
+  return `${m[1].toLowerCase()}/${m[3]}`;
+}
 
 // â”€â”€â”€ CREAR NOTA VEXFLOW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function mkNote(note, dur, dot, isRest, acc, clefArg = clef){
@@ -780,7 +765,7 @@ function shiftPitch(mi, ni, dir){
   const idx  = list.indexOf(n.note);
   if(idx < 0){
     // Intentar recuperar si se colÃ³ un accidental en n.note
-    const clean = n.note.replace(/[#b]/g,"");
+    const clean = normalizeStoredNote(n.note);
     const idx2  = list.indexOf(clean);
     if(idx2>=0) n.note = clean; // reparar
     else return;
@@ -828,13 +813,13 @@ divEl.addEventListener("click", e=>{
   }
   const isRest = activeFig.type==="silencio";
   try{
-    const vn = mkNote(isRest?null:note, activeFig.dur, false, isRest, false);
+    const vn = mkNote(isRest?null:note, activeFig.dur, dotMode, isRest, false);
     cur.notes.push({
       type:activeFig.type, dur:activeFig.dur,
       note:isRest?null:note,
-      vn, dot:false, tie:false, acc:false
+      vn, dot:dotMode, tie:false, acc:false
     });
-    cur.beats += BEATS[activeFig.dur];
+    cur.beats += bv;
     draw();
     wrapper.scrollLeft = wrapper.scrollWidth;
     if(!isRest) playNote(note, TDUR[activeFig.dur]);
@@ -844,8 +829,12 @@ divEl.addEventListener("click", e=>{
 });
 
 function beatsPerMeasure(){
-  if(!timeSig) return 0;
-  const [num,den] = timeSig.split("/").map(Number);
+  return beatsForTimeSig(timeSig);
+}
+
+function beatsForTimeSig(sig){
+  if(!sig) return 0;
+  const [num,den] = sig.split("/").map(Number);
   return num * (4/den);
 }
 
@@ -1096,21 +1085,51 @@ function exportPDF(){
   const svgH2    = +ctx.svg.getAttribute("height")||200;
   const lines    = layoutLines();
   const totalLines = lines.length;
-  const printContentW = 182;
-  const printFooterH  = 18;
-  const printHeaderH  = 20;
-  const printMargin   = 14;
-  const printLineHmm  = LINE_H * (printContentW / svgW2);
-  const printAvailFirst = 297 - printMargin - printHeaderH - printFooterH;
-  const printAvailNext  = 297 - printMargin*2 - printFooterH;
-  const printLinesFirst = Math.max(1, Math.floor(printAvailFirst / printLineHmm));
-  const printLinesNext  = Math.max(1, Math.floor(printAvailNext / printLineHmm));
-  const pageLineGroups = [];
-  let remainingLineIdx = [...Array(totalLines).keys()];
-  pageLineGroups.push(remainingLineIdx.splice(0, printLinesFirst));
-  while(remainingLineIdx.length>0) pageLineGroups.push(remainingLineIdx.splice(0, printLinesNext));
 
-  function renderLinesSlice(lineIndices){
+  const jsPDFCtor = (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+  if(!jsPDFCtor){
+    const clone = ctx.svg.cloneNode(true);
+    clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+    const bgRect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    bgRect.setAttribute("width","100%"); bgRect.setAttribute("height","100%");
+    bgRect.setAttribute("fill","white"); bgRect.setAttribute("stroke","none");
+    clone.insertBefore(bgRect,clone.firstChild);
+    const svgStr  = new XMLSerializer().serializeToString(clone);
+    const svgB64  = "data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(svgStr)));
+    const win     = window.open();
+    win.document.write(`<html><body style="margin:0;background:#fff"><div style="font-family:serif;padding:30px 40px">
+      <h2 style="text-align:center;color:#006644">${title}</h2>
+      ${author?`<p style="text-align:right;color:#006644;margin-top:-10px">Autor: ${author}</p>`:""}
+      <img src="${svgB64}" style="width:100%;display:block;margin-top:10px">
+      <p style="text-align:center;font-size:10px;color:#aaa;margin-top:16px">Hecho con Laboratorio Musical Maximilian 23 · www.maximilian23.com</p>
+      </div></body></html>`);
+    win.document.close();
+    setTimeout(()=>win.print(),800);
+    return;
+  }
+
+  const doc      = new jsPDFCtor({unit:"mm",format:"a4",orientation:"portrait"});
+  const pageW    = doc.internal.pageSize.getWidth();
+  const pageH    = doc.internal.pageSize.getHeight();
+  const margin   = 14;
+  const contentW = pageW - margin*2;
+  const footerH  = 18;
+  const headerH  = 20;
+  const svgScale = contentW/svgW2;
+  const lineHmm  = LINE_H*svgScale;
+
+  const availFirstPage = pageH-margin-headerH-footerH;
+  const availNextPage  = pageH-margin*2-footerH;
+  const linesFirstPage = Math.max(1, Math.floor(availFirstPage/lineHmm));
+  const linesPerPage   = Math.max(1, Math.floor(availNextPage/lineHmm));
+
+  const pages=[];
+  let remaining = [...Array(totalLines).keys()];
+  pages.push(remaining.splice(0,linesFirstPage));
+  while(remaining.length>0) pages.push(remaining.splice(0,linesPerPage));
+  const totalPages = pages.length;
+
+  function renderLines(lineIndices){
     return new Promise((resolve,reject)=>{
       if(!lineIndices.length){ resolve(null); return; }
       const firstLine = lineIndices[0];
@@ -1150,56 +1169,7 @@ function exportPDF(){
     });
   }
 
-  const jsPDFCtor = (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
-  if(!jsPDFCtor){
-    Promise.all(pageLineGroups.map(p=>renderLinesSlice(p))).then(results=>{
-      const pagesHtml = results.map((r,pi)=>{
-        if(!r) return "";
-        return `<section class="print-page">
-          ${pi===0?`<h2>${title}</h2>${author?`<p class="author">Autor: ${author}</p>`:""}`:""}
-          <img src="${r.png}" alt="Partitura página ${pi+1}">
-          <p class="footer">Hecho con Laboratorio Musical Maximilian 23 · www.maximilian23.com</p>
-        </section>`;
-      }).join("");
-      const win = window.open();
-      win.document.write(`<html><head><style>
-        @page{size:A4 portrait;margin:14mm;}
-        body{margin:0;background:#fff;color:#006644;font-family:serif;}
-        .print-page{break-after:page;page-break-after:always;padding:0;}
-        .print-page:last-child{break-after:auto;page-break-after:auto;}
-        h2{text-align:center;margin:0 0 6mm 0;}
-        .author{text-align:right;margin:0 0 4mm 0;}
-        img{display:block;width:100%;height:auto;}
-        .footer{text-align:center;font-size:10px;color:#666;margin:4mm 0 0 0;}
-      </style></head><body>${pagesHtml}</body></html>`);
-      win.document.close();
-      setTimeout(()=>win.print(),800);
-    }).catch(err=>{ console.error("Error exportando PDF:",err); alert("Error al generar el PDF."); });
-    return;
-  }
-
-  const doc      = new jsPDFCtor({unit:"mm",format:"a4",orientation:"portrait"});
-  const pageW    = doc.internal.pageSize.getWidth();
-  const pageH    = doc.internal.pageSize.getHeight();
-  const margin   = 14;
-  const contentW = pageW - margin*2;
-  const footerH  = 18;
-  const headerH  = 20;
-  const svgScale = contentW/svgW2;
-  const lineHmm  = LINE_H*svgScale;
-
-  const availFirstPage = pageH-margin-headerH-footerH;
-  const availNextPage  = pageH-margin*2-footerH;
-  const linesFirstPage = Math.max(1, Math.floor(availFirstPage/lineHmm));
-  const linesPerPage   = Math.max(1, Math.floor(availNextPage/lineHmm));
-
-  const pages=[];
-  let remaining = [...Array(totalLines).keys()];
-  pages.push(remaining.splice(0,linesFirstPage));
-  while(remaining.length>0) pages.push(remaining.splice(0,linesPerPage));
-  const totalPages = pages.length;
-
-  Promise.all(pages.map(p=>renderLinesSlice(p))).then(results=>{
+  Promise.all(pages.map(p=>renderLines(p))).then(results=>{
     results.forEach((r,pi)=>{
       if(!r) return;
       if(pi>0) doc.addPage();
@@ -1265,12 +1235,56 @@ function loadJson(e){
   document.getElementById("acciones-menu").classList.remove("show");
 }
 
+function pushLoadIssue(issues, measureIndex, noteIndex, noteData, err){
+  const rawType = noteData && (noteData.tipo || noteData.type) || "nota";
+  const rawDur  = noteData && (noteData.duracion || noteData.dur) || "?";
+  const rawNote = noteData && (
+    noteData.noteName !== undefined ? noteData.noteName :
+    noteData.note !== undefined ? noteData.note :
+    null
+  );
+  issues.push({
+    measure: measureIndex + 1,
+    note: noteIndex + 1,
+    type: rawType,
+    dur: rawDur,
+    rawNote: rawNote,
+    message: err && err.message ? err.message : String(err)
+  });
+}
+
+function reportLoadIssues(issues){
+  if(!issues.length) return;
+  console.group("Incidencias al cargar partitura");
+  issues.forEach(issue=>console.warn(
+    `Compás ${issue.measure}, elemento ${issue.note}:`,
+    issue
+  ));
+  console.groupEnd();
+
+  const preview = issues
+    .slice(0, 4)
+    .map(issue=>{
+      const noteTxt = issue.rawNote==null ? "silencio" : issue.rawNote;
+      return `Compás ${issue.measure}, elemento ${issue.note}: ${issue.type} ${noteTxt} (${issue.dur})`;
+    })
+    .join("\n");
+  const extra = issues.length > 4 ? `\n...y ${issues.length - 4} más.` : "";
+  alert(
+    `La partitura se ha cargado con ${issues.length} incidencia(s).\n` +
+    `Se han omitido algunos elementos que no se pudieron reconstruir.\n\n` +
+    `${preview}${extra}\n\n` +
+    `Abre la consola del navegador para ver el detalle técnico.`
+  );
+}
+
 function applyLoadedData(d){
   // â”€â”€ Detectar y normalizar formato antiguo â”€â”€
   const isLegacy = (d.titulo !== undefined || d.clave !== undefined || d.compas !== undefined || d.lines !== undefined);
 
   let loadedTitle, loadedAuthor, loadedClef, loadedTimeSig, loadedBpm,
       loadedKeySig, loadedMeasures;
+  const loadIssues = [];
 
   finMode = false;
   document.getElementById("btn-fin").innerHTML = '<i class="fas fa-flag-checkered"></i> Fin';
@@ -1285,6 +1299,7 @@ function applyLoadedData(d){
     loadedKeySig  = d.keySigAccidentals || [];
 
     loadedMeasures = [];
+    const expectedBeats = beatsForTimeSig(loadedTimeSig);
     const rawMeasures = [];
 
     if(Array.isArray(d.lines)){
@@ -1296,11 +1311,11 @@ function applyLoadedData(d){
       d.measures.forEach(m=>rawMeasures.push(m));
     }
 
-    rawMeasures.forEach(m=>{
+    rawMeasures.forEach((m, measureIndex)=>{
       const rawNotes = m.notas || m.notes || [];
       const ms = {notes:[], beats:+(m.beats)||0, closed:!!(m.closed)};
 
-      rawNotes.forEach(n=>{
+      rawNotes.forEach((n, noteIndex)=>{
         const type = n.tipo     || n.type || "nota";
         const dur  = n.duracion || n.dur  || "q";
         let note   = n.noteName || n.note || null;
@@ -1308,20 +1323,21 @@ function applyLoadedData(d){
         const tie  = n.tie || false;
         const acc  = n.acc || false;
 
-        if(note) note = note.replace(/[#b]/g,"").replace(/\/\//,"/");
+        if(note) note = normalizeStoredNote(note);
 
         const isRest = (type==="silencio");
         let vn;
         try{
           vn = mkNote(note, dur, dot, isRest, acc||false, loadedClef);
         }catch(err){
-          console.warn("Error creando nota al cargar:", note, dur, err);
+          pushLoadIssue(loadIssues, measureIndex, noteIndex, n, err);
           return;
         }
         ms.notes.push({type, dur, note:isRest?null:note, vn, dot, tie, acc});
       });
 
       ms.beats = ms.notes.reduce((s,n)=>s+BEATS[n.dur]*(n.dot?1.5:1),0);
+      ms.closed = ms.closed || ms.beats >= expectedBeats - 0.01;
       loadedMeasures.push(ms);
     });
 
@@ -1333,11 +1349,12 @@ function applyLoadedData(d){
     loadedBpm     = +(d.bpm)  || 0;
     loadedKeySig  = d.keySigAccidentals || [];
 
-    loadedMeasures = (d.measures||[]).map(m=>{
+    const expectedBeats = beatsForTimeSig(loadedTimeSig);
+    loadedMeasures = (d.measures||[]).map((m, measureIndex)=>{
       const ms = {notes:[], beats:m.beats, closed:m.closed};
-      (m.notes||[]).forEach(n=>{
+      (m.notes||[]).forEach((n, noteIndex)=>{
         let note = n.note;
-        if(note) note = note.replace(/[#b]/g,"").replace(/\/\//,"/");
+        if(note) note = normalizeStoredNote(note);
         const isRest = (n.type==="silencio");
         try{
           ms.notes.push({
@@ -1345,8 +1362,12 @@ function applyLoadedData(d){
             vn:mkNote(note, n.dur, n.dot, isRest, n.acc||false, loadedClef),
             dot:n.dot, tie:n.tie, acc:n.acc||false
           });
-        }catch(err){ console.warn("Error recreando nota:", n, err); }
+        }catch(err){
+          pushLoadIssue(loadIssues, measureIndex, noteIndex, n, err);
+        }
       });
+      ms.beats = ms.notes.reduce((s,n)=>s+BEATS[n.dur]*(n.dot?1.5:1),0);
+      ms.closed = ms.closed || ms.beats >= expectedBeats - 0.01;
       return ms;
     });
   }
@@ -1378,6 +1399,7 @@ function applyLoadedData(d){
   }
 
   draw();
+  reportLoadIssues(loadIssues);
 }
 
 async function loadLessonFromFile(fileName){
