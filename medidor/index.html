@@ -16,7 +16,6 @@ body{
   align-items:center;
 }
 
-/* CABECERA */
 header{
   width:100%;
   background:#161b22;
@@ -34,28 +33,13 @@ header img{
   box-shadow:0 0 10px #00ffcc;
 }
 
-header h1{
-  margin:0;
-  font-size:1.6rem;
-  text-shadow:0 0 10px #00ffcc;
-}
-
-/* CONTENIDO */
-.container{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  margin-top:20px;
-}
-
 canvas{
+  margin-top:20px;
   background:#020606;
   border:2px solid #00ffcc55;
   border-radius:50%;
-  box-shadow:0 0 20px #00ffcc33;
 }
 
-/* BARRA */
 .barra{
   width:300px;
   height:14px;
@@ -69,27 +53,19 @@ canvas{
   height:100%;
   width:0%;
   background:#00ffcc;
-  transition:width 0.1s;
 }
 
-/* TEXTO */
 .estado{
   margin-top:15px;
   font-size:1.2rem;
 }
 
-.puntos{
+.nota{
   margin-top:10px;
-  font-size:1.3rem;
-  color:#00ffcc;
+  font-size:2rem;
+  font-weight:bold;
 }
 
-.record{
-  font-size:0.9rem;
-  color:#00ffcc88;
-}
-
-/* BOTON */
 button{
   margin-top:20px;
   padding:10px 20px;
@@ -99,9 +75,6 @@ button{
   cursor:pointer;
   border-radius:8px;
 }
-button:hover{
-  background:#00ffcc44;
-}
 </style>
 </head>
 
@@ -109,10 +82,8 @@ button:hover{
 
 <header>
   <img src="https://maximilian23.com/Cabeza.png">
-  <h1>RADAR DE SILENCIO</h1>
+  <h2>RADAR DE SILENCIO</h2>
 </header>
-
-<div class="container">
 
 <canvas id="radar" width="300" height="300"></canvas>
 
@@ -121,28 +92,29 @@ button:hover{
 </div>
 
 <div class="estado" id="estado">Pulsa iniciar</div>
+<div class="nota" id="nota"></div>
 
-<div class="puntos" id="puntos">Puntos: 0</div>
-<div class="record" id="record">Récord: 0</div>
-
-<button onclick="iniciar()">INICIAR</button>
-
-</div>
+<button id="btn" onclick="toggle()">INICIAR</button>
 
 <script>
 let audioContext, analyser, dataArray;
 let running = false;
 let angle = 0;
 
-let puntos = 0;
-let record = localStorage.getItem("recordRuido") || 0;
+let sumaVolumen = 0;
+let muestras = 0;
 
-document.getElementById("record").textContent = "Récord: " + record;
+async function toggle(){
+  if(!running){
+    iniciar();
+  }else{
+    parar();
+  }
+}
 
 async function iniciar(){
-  if(running) return;
-
-  puntos = 0;
+  sumaVolumen = 0;
+  muestras = 0;
 
   const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -155,7 +127,25 @@ async function iniciar(){
   dataArray = new Uint8Array(analyser.frequencyBinCount);
 
   running = true;
+  document.getElementById("btn").textContent = "STOP";
+  document.getElementById("nota").textContent = "";
+
   loop();
+}
+
+function parar(){
+  running = false;
+
+  const media = sumaVolumen / muestras;
+
+  // Convertir volumen en nota (ajustado fino)
+  let nota = 10 - (media / 10);
+  nota = Math.max(1, Math.min(10, nota));
+  nota = nota.toFixed(1);
+
+  document.getElementById("nota").textContent = "Nota: " + nota;
+
+  document.getElementById("btn").textContent = "INICIAR";
 }
 
 function loop(){
@@ -167,32 +157,17 @@ function loop(){
   for(let i=0;i<dataArray.length;i++){
     sum += dataArray[i];
   }
+
   let volumen = sum / dataArray.length;
+
+  sumaVolumen += volumen;
+  muestras++;
 
   dibujarRadar(volumen);
   actualizarBarra(volumen);
   actualizarEstado(volumen);
-  actualizarPuntos(volumen);
 
   requestAnimationFrame(loop);
-}
-
-function actualizarPuntos(volumen){
-  if(volumen < 30){
-    puntos += 1; // silencio suma
-  } else if(volumen > 60){
-    puntos -= 2; // ruido resta fuerte
-  }
-
-  if(puntos < 0) puntos = 0;
-
-  document.getElementById("puntos").textContent = "Puntos: " + puntos;
-
-  if(puntos > record){
-    record = puntos;
-    localStorage.setItem("recordRuido", record);
-    document.getElementById("record").textContent = "Récord: " + record;
-  }
 }
 
 function dibujarRadar(volumen){
@@ -218,8 +193,6 @@ function dibujarRadar(volumen){
   else if(volumen < 60) ctx.strokeStyle="#ffff00";
   else ctx.strokeStyle="#ff4444";
 
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = ctx.strokeStyle;
   ctx.stroke();
 
   angle += 0.03;
@@ -227,7 +200,6 @@ function dibujarRadar(volumen){
   ctx.moveTo(cx,cy);
   ctx.lineTo(cx + Math.cos(angle)*120, cy + Math.sin(angle)*120);
   ctx.strokeStyle="#00ffcc";
-  ctx.shadowBlur = 0;
   ctx.stroke();
 }
 
