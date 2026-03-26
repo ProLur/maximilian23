@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detector de Ruido • Maximilian 23</title>
+<title>Radar de Silencio • Maximilian 23</title>
 
 <style>
 body{
@@ -14,12 +14,38 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center;
-  height:100vh;
 }
 
-h1{
+/* CABECERA */
+header{
+  width:100%;
+  background:#161b22;
+  border-bottom:2px solid #00ffcc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:10px;
+}
+
+header img{
+  height:50px;
+  border-radius:50%;
+  box-shadow:0 0 10px #00ffcc;
+}
+
+header h1{
+  margin:0;
+  font-size:1.6rem;
   text-shadow:0 0 10px #00ffcc;
+}
+
+/* CONTENIDO */
+.container{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:20px;
 }
 
 canvas{
@@ -29,6 +55,7 @@ canvas{
   box-shadow:0 0 20px #00ffcc33;
 }
 
+/* BARRA */
 .barra{
   width:300px;
   height:14px;
@@ -45,12 +72,24 @@ canvas{
   transition:width 0.1s;
 }
 
+/* TEXTO */
 .estado{
   margin-top:15px;
   font-size:1.2rem;
-  text-shadow:0 0 6px #00ffcc;
 }
 
+.puntos{
+  margin-top:10px;
+  font-size:1.3rem;
+  color:#00ffcc;
+}
+
+.record{
+  font-size:0.9rem;
+  color:#00ffcc88;
+}
+
+/* BOTON */
 button{
   margin-top:20px;
   padding:10px 20px;
@@ -68,7 +107,12 @@ button:hover{
 
 <body>
 
-<h1>RADAR DE SILENCIO</h1>
+<header>
+  <img src="https://maximilian23.com/Cabeza.png">
+  <h1>RADAR DE SILENCIO</h1>
+</header>
+
+<div class="container">
 
 <canvas id="radar" width="300" height="300"></canvas>
 
@@ -78,15 +122,27 @@ button:hover{
 
 <div class="estado" id="estado">Pulsa iniciar</div>
 
+<div class="puntos" id="puntos">Puntos: 0</div>
+<div class="record" id="record">Récord: 0</div>
+
 <button onclick="iniciar()">INICIAR</button>
+
+</div>
 
 <script>
 let audioContext, analyser, dataArray;
 let running = false;
 let angle = 0;
 
+let puntos = 0;
+let record = localStorage.getItem("recordRuido") || 0;
+
+document.getElementById("record").textContent = "Récord: " + record;
+
 async function iniciar(){
   if(running) return;
+
+  puntos = 0;
 
   const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -116,27 +172,45 @@ function loop(){
   dibujarRadar(volumen);
   actualizarBarra(volumen);
   actualizarEstado(volumen);
+  actualizarPuntos(volumen);
 
   requestAnimationFrame(loop);
+}
+
+function actualizarPuntos(volumen){
+  if(volumen < 30){
+    puntos += 1; // silencio suma
+  } else if(volumen > 60){
+    puntos -= 2; // ruido resta fuerte
+  }
+
+  if(puntos < 0) puntos = 0;
+
+  document.getElementById("puntos").textContent = "Puntos: " + puntos;
+
+  if(puntos > record){
+    record = puntos;
+    localStorage.setItem("recordRuido", record);
+    document.getElementById("record").textContent = "Récord: " + record;
+  }
 }
 
 function dibujarRadar(volumen){
   const canvas = document.getElementById("radar");
   const ctx = canvas.getContext("2d");
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0,0,300,300);
 
-  const cx = canvas.width/2;
-  const cy = canvas.height/2;
+  const cx = 150;
+  const cy = 150;
 
-  // círculo base
   ctx.beginPath();
   ctx.arc(cx,cy,120,0,Math.PI*2);
   ctx.strokeStyle="#00ffcc33";
   ctx.stroke();
 
-  // onda según volumen
   const radio = 40 + volumen;
+
   ctx.beginPath();
   ctx.arc(cx,cy,radio,0,Math.PI*2);
 
@@ -148,7 +222,6 @@ function dibujarRadar(volumen){
   ctx.shadowColor = ctx.strokeStyle;
   ctx.stroke();
 
-  // línea radar girando
   angle += 0.03;
   ctx.beginPath();
   ctx.moveTo(cx,cy);
