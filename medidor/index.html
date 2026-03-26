@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detector de Ruido • Maximilian 23</title>
+
+<style>
+body{
+  margin:0;
+  font-family:"Courier New", monospace;
+  background:#0d1117;
+  color:#00ffcc;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+
+h1{
+  text-shadow:0 0 10px #00ffcc;
+}
+
+canvas{
+  background:#020606;
+  border:2px solid #00ffcc55;
+  border-radius:50%;
+  box-shadow:0 0 20px #00ffcc33;
+}
+
+.barra{
+  width:300px;
+  height:14px;
+  border:1px solid #00ffcc;
+  margin-top:20px;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.barra-inner{
+  height:100%;
+  width:0%;
+  background:#00ffcc;
+  transition:width 0.1s;
+}
+
+.estado{
+  margin-top:15px;
+  font-size:1.2rem;
+  text-shadow:0 0 6px #00ffcc;
+}
+
+button{
+  margin-top:20px;
+  padding:10px 20px;
+  background:#00ffcc22;
+  border:1px solid #00ffcc;
+  color:#00ffcc;
+  cursor:pointer;
+  border-radius:8px;
+}
+button:hover{
+  background:#00ffcc44;
+}
+</style>
+</head>
+
+<body>
+
+<h1>RADAR DE SILENCIO</h1>
+
+<canvas id="radar" width="300" height="300"></canvas>
+
+<div class="barra">
+  <div class="barra-inner" id="barra"></div>
+</div>
+
+<div class="estado" id="estado">Pulsa iniciar</div>
+
+<button onclick="iniciar()">INICIAR</button>
+
+<script>
+let audioContext, analyser, dataArray;
+let running = false;
+let angle = 0;
+
+async function iniciar(){
+  if(running) return;
+
+  const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioContext.createAnalyser();
+
+  const source = audioContext.createMediaStreamSource(stream);
+  source.connect(analyser);
+
+  analyser.fftSize = 256;
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  running = true;
+  loop();
+}
+
+function loop(){
+  if(!running) return;
+
+  analyser.getByteFrequencyData(dataArray);
+
+  let sum = 0;
+  for(let i=0;i<dataArray.length;i++){
+    sum += dataArray[i];
+  }
+  let volumen = sum / dataArray.length;
+
+  dibujarRadar(volumen);
+  actualizarBarra(volumen);
+  actualizarEstado(volumen);
+
+  requestAnimationFrame(loop);
+}
+
+function dibujarRadar(volumen){
+  const canvas = document.getElementById("radar");
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const cx = canvas.width/2;
+  const cy = canvas.height/2;
+
+  // círculo base
+  ctx.beginPath();
+  ctx.arc(cx,cy,120,0,Math.PI*2);
+  ctx.strokeStyle="#00ffcc33";
+  ctx.stroke();
+
+  // onda según volumen
+  const radio = 40 + volumen;
+  ctx.beginPath();
+  ctx.arc(cx,cy,radio,0,Math.PI*2);
+
+  if(volumen < 30) ctx.strokeStyle="#00ffcc";
+  else if(volumen < 60) ctx.strokeStyle="#ffff00";
+  else ctx.strokeStyle="#ff4444";
+
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = ctx.strokeStyle;
+  ctx.stroke();
+
+  // línea radar girando
+  angle += 0.03;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx + Math.cos(angle)*120, cy + Math.sin(angle)*120);
+  ctx.strokeStyle="#00ffcc";
+  ctx.shadowBlur = 0;
+  ctx.stroke();
+}
+
+function actualizarBarra(volumen){
+  const barra = document.getElementById("barra");
+  let porcentaje = Math.min(volumen*1.5,100);
+  barra.style.width = porcentaje + "%";
+
+  if(volumen < 30) barra.style.background="#00ffcc";
+  else if(volumen < 60) barra.style.background="#ffff00";
+  else barra.style.background="#ff4444";
+}
+
+function actualizarEstado(volumen){
+  const estado = document.getElementById("estado");
+
+  if(volumen < 30){
+    estado.textContent = "Silencio óptimo";
+    estado.style.color="#00ffcc";
+  }
+  else if(volumen < 60){
+    estado.textContent = "Nivel normal";
+    estado.style.color="#ffff00";
+  }
+  else{
+    estado.textContent = "Demasiado ruido";
+    estado.style.color="#ff4444";
+  }
+}
+</script>
+
+</body>
+</html>
