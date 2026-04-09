@@ -74,7 +74,7 @@ box-shadow:0 0 10px rgba(255,0,0,0.6);
 </div>
 
 <div class="chart-card" data-type="wind_speed" onclick="openModalChart(this)">
-<h3>Velocidad del viento (km/h)</h3>
+<h3>Velocidad del viento (m/s)</h3>
 <div class="chart-container">
 <canvas id="chart-wind-speed"></canvas>
 </div>
@@ -146,7 +146,7 @@ temp_indoor:{label:"Temperatura interior",color:"#00ffcc",unit:"°C"},
 temp_outdoor:{label:"Temperatura exterior",color:"#ffaa00",unit:"°C"},
 hum_indoor:{label:"Humedad interior",color:"#88ddff",unit:"%"},
 hum_outdoor:{label:"Humedad exterior",color:"#aaff88",unit:"%"},
-wind_speed:{label:"Velocidad del viento",color:"#ff66aa",unit:"km/h"}
+wind_speed:{label:"Velocidad del viento",color:"#ff66aa",unit:"m/s"}
 
 };
 
@@ -224,8 +224,8 @@ const campos=[
 ["Temperatura exterior","temp_outdoor","°C"],
 ["Humedad exterior","hum_outdoor","%"],
 ["Presión","pressure","hPa"],
-["Viento","wind_speed","km/h"],
-["Ráfaga","wind_gust","km/h"],
+["Viento","wind_speed","m/s"],
+["Ráfaga","wind_gust","m/s"],
 ["Dirección del viento","wind_direction","°"],
 ["Sensación térmica","wind_chill","°C"],
 ["Lluvia","rain","mm"]
