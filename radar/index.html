@@ -236,11 +236,14 @@ function parar(){
 
   const media = muestras > 0 ? sumaVolumen / muestras : 0;
 
-  let nota = media < 20 ? 10 :
-             media < 30 ? 9 :
-             media < 40 ? 7 :
-             media < 50 ? 5 :
-             media < 60 ? 3 : 1;
+  let nota;
+
+if(media < 8) nota = 10;
+else if(media < 12) nota = 9;
+else if(media < 18) nota = 7;
+else if(media < 25) nota = 5;
+else if(media < 35) nota = 3;
+else nota = 1;
 
   document.getElementById("nota").textContent = "Nota: " + nota;
   document.getElementById("btn").textContent = "INICIAR";
