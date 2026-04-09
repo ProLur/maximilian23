@@ -17,7 +17,6 @@ body{
   overflow:hidden;
 }
 
-/* HEADER */
 header{
   width:100%;
   background:#161b22;
@@ -27,7 +26,6 @@ header{
   justify-content:center;
   gap:8px;
   padding:6px;
-  flex-shrink:0;
 }
 
 header img{
@@ -41,14 +39,12 @@ header h2{
   margin:0;
 }
 
-/* MAIN */
 .main{
   flex:1;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:space-evenly;
-  padding:5px 0;
 }
 
 /* RADAR */
@@ -124,15 +120,26 @@ button{
   opacity:1;
 }
 
-/* SLIDER */
+/* SLIDER + VALOR */
 .slider{
   width:min(80vw, 320px);
   font-size:0.9rem;
-  text-align:center;
+}
+
+.slider-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
 input[type=range]{
-  width:100%;
+  flex:1;
+}
+
+.valor{
+  width:45px;
+  text-align:right;
+  font-size:0.9rem;
 }
 </style>
 </head>
@@ -171,7 +178,10 @@ input[type=range]{
 
 <div class="slider">
   Sensibilidad
-  <input type="range" min="0.5" max="3" step="0.1" value="1.4" id="sensibilidad">
+  <div class="slider-row">
+    <input type="range" min="0.5" max="3" step="0.1" value="1.4" id="sensibilidad">
+    <div class="valor" id="valorSens">1.4x</div>
+  </div>
 </div>
 
 </div>
@@ -187,8 +197,12 @@ let muestras = 0;
 let volumenSuave = 0;
 let sensibilidad = 1.4;
 
-document.getElementById("sensibilidad").addEventListener("input", (e)=>{
+const slider = document.getElementById("sensibilidad");
+const valor = document.getElementById("valorSens");
+
+slider.addEventListener("input", (e)=>{
   sensibilidad = parseFloat(e.target.value);
+  valor.textContent = sensibilidad.toFixed(1) + "x";
 });
 
 async function toggle(){
