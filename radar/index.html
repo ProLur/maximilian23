@@ -11,7 +11,6 @@ body{
   font-family:"Courier New", monospace;
   background:#0d1117;
   color:#00ffcc;
-
   height:100vh;
   display:flex;
   flex-direction:column;
@@ -20,7 +19,6 @@ body{
   overflow:hidden;
 }
 
-/* HEADER */
 header{
   width:100%;
   background:#161b22;
@@ -43,7 +41,14 @@ header h2{
   font-size:1.1rem;
 }
 
-/* RADAR */
+.main{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+/* radar */
 canvas{
   width:260px;
   height:260px;
@@ -52,7 +57,7 @@ canvas{
   border-radius:50%;
 }
 
-/* BARRA */
+/* barra */
 .barra{
   width:260px;
   height:12px;
@@ -67,20 +72,20 @@ canvas{
   background:#00ffcc;
 }
 
-/* TEXTOS */
+/* textos */
 .estado{
+  height:20px;
   font-size:1rem;
   text-align:center;
-  height:20px;
 }
 
 .nota{
+  height:30px;
   font-size:1.6rem;
   font-weight:bold;
-  height:30px;
 }
 
-/* CONTROLES */
+/* botones */
 .controles{
   display:flex;
   gap:10px;
@@ -99,7 +104,7 @@ button{
   justify-content:center;
 }
 
-/* BOTÓN MICRO */
+/* micro */
 .mute-btn svg{
   width:24px;
   height:24px;
@@ -118,23 +123,15 @@ button{
   opacity:1;
 }
 
-/* SLIDER */
+/* slider */
 .slider{
   width:260px;
-  text-align:center;
   font-size:0.9rem;
+  text-align:center;
 }
 
 input[type=range]{
   width:100%;
-}
-
-/* CONTENEDOR CENTRAL */
-.main{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
 }
 </style>
 </head>
@@ -173,7 +170,7 @@ input[type=range]{
 
 <div class="slider">
   Sensibilidad
-  <input type="range" min="0.5" max="3" step="0.1" value="1" id="sensibilidad">
+  <input type="range" min="0.5" max="3" step="0.1" value="1.4" id="sensibilidad">
 </div>
 
 </div>
@@ -187,7 +184,7 @@ let angle = 0;
 let sumaVolumen = 0;
 let muestras = 0;
 let volumenSuave = 0;
-let sensibilidad = 1;
+let sensibilidad = 1.4;
 
 document.getElementById("sensibilidad").addEventListener("input", (e)=>{
   sensibilidad = parseFloat(e.target.value);
@@ -236,14 +233,10 @@ function parar(){
 
   const media = muestras > 0 ? sumaVolumen / muestras : 0;
 
-  let nota;
-
-if(media < 8) nota = 10;
-else if(media < 12) nota = 9;
-else if(media < 18) nota = 7;
-else if(media < 25) nota = 5;
-else if(media < 35) nota = 3;
-else nota = 1;
+  // fórmula continua (ajustada)
+  let nota = 10 - (media / 6);
+  nota = Math.max(1, Math.min(10, nota));
+  nota = nota.toFixed(1);
 
   document.getElementById("nota").textContent = "Nota: " + nota;
   document.getElementById("btn").textContent = "INICIAR";
