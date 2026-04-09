@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar de Silencio • Maximilian 23</title>
+
+<style>
+body{
+  margin:0;
+  font-family:"Courier New", monospace;
+  background:#0d1117;
+  color:#00ffcc;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+header{
+  width:100%;
+  background:#161b22;
+  border-bottom:2px solid #00ffcc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:8px;
+}
+
+header img{
+  height:34px;
+  border-radius:50%;
+  box-shadow:0 0 8px #00ffcc;
+}
+
+header h2{
+  font-size:1.1rem;
+  margin:0;
+}
+
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-evenly;
+  padding:10px;
+}
+
+/* RADAR */
+canvas{
+  width:min(85vw, 340px);
+  height:min(85vw, 340px);
+  background:#020606;
+  border:3px solid #00ffcc55;
+  border-radius:50%;
+}
+
+/* BARRA */
+.barra{
+  width:min(85vw, 340px);
+  height:14px;
+  border:1px solid #00ffcc;
+  border-radius:10px;
+  overflow:hidden;
+  margin:10px 0;
+}
+
+.barra-inner{
+  height:100%;
+  width:0%;
+  background:#00ffcc;
+  transition: width 0.1s linear;
+}
+
+/* TEXTOS */
+.estado{
+  font-size:1.1rem;
+  text-align:center;
+  min-height:1.5em;
+}
+
+.nota{
+  font-size:2rem;
+  font-weight:bold;
+  margin:10px 0;
+}
+
+/* CONTROLES */
+.controles{
+  display:flex;
+  gap:12px;
+  flex-wrap: wrap;
+  justify-content:center;
+}
+
+button{
+  width:130px;
+  height:48px;
+  background:#00ffcc22;
+  border:1px solid #00ffcc;
+  color:#00ffcc;
+  cursor:pointer;
+  border-radius:8px;
+  font-family:"Courier New", monospace;
+  font-size:0.95rem;
+}
+
+button:hover{
+  background:#00ffcc33;
+}
+
+.mute-btn svg{
+  width:24px;
+  height:24px;
+}
+
+.mute-btn.active{
+  border-color:#ff4444;
+  background:#ff444422;
+}
+
+.mute-btn .mic-slash{
+  opacity:0;
+}
+
+.mute-btn.active .mic-slash{
+  opacity:1;
+}
+
+/* SLIDER */
+.slider{
+  width:min(85vw, 340px);
+  font-size:0.95rem;
+  margin-top:10px;
+}
+
+.slider-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+input[type=range]{
+  flex:1;
+}
+
+.valor{
+  width:50px;
+  text-align:right;
+  font-size:1rem;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="https://maximilian23.com/Cabeza.png">
+  <h2>RADAR DE SILENCIO</h2>
+</header>
+
+<div class="main">
+
+<canvas id="radar" width="340" height="340"></canvas>
+
+<div class="barra">
+  <div class="barra-inner" id="barra"></div>
+</div>
+
+<div class="estado" id="estado">Pulsa Iniciar</div>
+<div class="nota" id="nota"></div>
+
+<div class="controles">
+  <button id="btn" onclick="toggle()">INICIAR</button>
+  <button onclick="calibrar()" id="calBtn">CALIBRAR</button>
+  
+  <button onclick="toggleMute()" id="muteBtn" class="mute-btn">
+    <svg viewBox="0 0 64 64">
+      <rect x="22" y="10" width="20" height="28" rx="10" fill="none" stroke="#00ffcc" stroke-width="3"/>
+      <line x1="32" y1="38" x2="32" y2="49" stroke="#00ffcc" stroke-width="3"/>
+      <line x1="22" y1="54" x2="42" y2="54" stroke="#00ffcc" stroke-width="3"/>
+      <path d="M16 28c0 9 7 16 16 16s16-7 16-16" fill="none" stroke="#00ffcc" stroke-width="3"/>
+      <line class="mic-slash" x1="14" y1="50" x2="50" y2="14" stroke="#ff4444" stroke-width="4"/>
+    </svg>
+  </button>
+</div>
+
+<div class="slider">
+  Sensibilidad
+  <div class="slider-row">
+    <input type="range" min="0.5" max="3" step="0.1" value="1.2" id="sensibilidad">
+    <div class="valor" id="valorSens">1.2x</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+let audioContext, analyser, dataArray, streamGlobal;
+let running = false;
+let mute = false;
+let angle = 0;
+
+let sumaVolumen = 0;
+let muestras = 0;
+let volumenSuave = 0;
+let sensibilidad = 1.2;
+
+let ruidoDeFondo = 0;
+let calibrando = false;
+let tiempoCalibracion = 0;
+const DURACION_CALIBRACION = 3000;
+
+const slider = document.getElementById("sensibilidad");
+const valor = document.getElementById("valorSens");
+
+slider.addEventListener("input", (e) => {
+  sensibilidad = parseFloat(e.target.value);
+  valor.textContent = sensibilidad.toFixed(1) + "x";
+});
+
+async function toggle() {
+  if (!running) {
+    iniciar();
+  } else {
+    parar();
+  }
+}
+
+async function iniciar() {
+  sumaVolumen = 0;
+  muestras = 0;
+  volumenSuave = 0;
+
+  try {
+    streamGlobal = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+
+    const source = audioContext.createMediaStreamSource(streamGlobal);
+    source.connect(analyser);
+
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    running = true;
+    document.getElementById("btn").textContent = "PARAR";
+    document.getElementById("estado").textContent = "Midiendo...";
+
+    loop();
+  } catch (err) {
+    alert("Error al acceder al micrófono: " + err.message);
+  }
+}
+
+function parar() {
+  running = false;
+  if (streamGlobal) {
+    streamGlobal.getTracks().forEach(t => t.stop());
+  }
+  if (audioContext) {
+    audioContext.close();
+  }
+
+  const media = muestras > 0 ? sumaVolumen / muestras : 0;
+  let nota = 10 - (media / 8.5);           // Ajustado para que sea más realista
+  nota = Math.max(1, Math.min(10, nota)).toFixed(1);
+
+  document.getElementById("nota").textContent = "Nota: " + nota;
+  document.getElementById("btn").textContent = "INICIAR";
+  document.getElementById("estado").textContent = "Sesión terminada";
+}
+
+async function calibrar() {
+  if (calibrando || running) {
+    alert("Detén la medición primero o espera a que termine la calibración.");
+    return;
+  }
+
+  if (!confirm("Asegúrate de que el aula o sala esté lo más silenciosa posible.\n\n¿Quieres calibrar ahora durante 3 segundos?")) return;
+
+  calibrando = true;
+  document.getElementById("calBtn").textContent = "CALIBRANDO...";
+  document.getElementById("estado").textContent = "Calibrando silencio... (3s)";
+
+  let suma = 0;
+  let muestrasCal = 0;
+  tiempoCalibracion = Date.now();
+
+  // Iniciamos temporalmente el audio para calibrar
+  try {
+    streamGlobal = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaStreamSource(streamGlobal);
+    source.connect(analyser);
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const tempLoop = () => {
+      if (!calibrando) return;
+
+      analyser.getByteTimeDomainData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        let v = (dataArray[i] - 128) / 128;
+        sum += v * v;
+      }
+      let vol = Math.sqrt(sum / dataArray.length) * 100 * sensibilidad;
+      suma += Math.min(vol, 100);
+      muestrasCal++;
+
+      if (Date.now() - tiempoCalibracion < DURACION_CALIBRACION) {
+        requestAnimationFrame(tempLoop);
+      } else {
+        ruidoDeFondo = suma / muestrasCal;
+        calibrando = false;
+
+        // Limpiamos el audio
+        streamGlobal.getTracks().forEach(t => t.stop());
+        audioContext.close();
+
+        document.getElementById("calBtn").textContent = "CALIBRAR";
+        document.getElementById("estado").textContent = `Calibrado ✓ Ruido fondo: ${ruidoDeFondo.toFixed(1)}`;
+        alert(`¡Calibración terminada!\nRuido de fondo detectado: ${ruidoDeFondo.toFixed(1)}`);
+      }
+    };
+
+    tempLoop();
+  } catch (err) {
+    alert("Error durante la calibración: " + err.message);
+    calibrando = false;
+    document.getElementById("calBtn").textContent = "CALIBRAR";
+  }
+}
+
+function toggleMute() {
+  mute = !mute;
+  document.getElementById("muteBtn").classList.toggle("active", mute);
+}
+
+function loop() {
+  if (!running) return;
+
+  analyser.getByteTimeDomainData(dataArray);
+
+  let sum = 0;
+  for (let i = 0; i < dataArray.length; i++) {
+    let v = (dataArray[i] - 128) / 128;
+    sum += v * v;
+  }
+
+  let volumenRaw = Math.sqrt(sum / dataArray.length) * 100 * sensibilidad;
+  volumenRaw = Math.min(volumenRaw, 100);
+
+  // Restamos ruido de fondo y evitamos valores negativos
+  let volumen = Math.max(0, volumenRaw - ruidoDeFondo);
+  volumen = Math.min(volumen, 100);
+
+  volumenSuave = volumenSuave * 0.75 + volumen * 0.25;
+
+  if (!mute && !calibrando) {
+    sumaVolumen += volumenSuave;
+    muestras++;
+  }
+
+  dibujarRadar(mute ? 0 : volumenSuave);
+  actualizarBarra(mute ? 0 : volumenSuave);
+  actualizarEstado(mute ? 0 : volumenSuave);
+
+  requestAnimationFrame(loop);
+}
+
+function dibujarRadar(vol) {
+  const c = document.getElementById("radar");
+  const ctx = c.getContext("2d");
+
+  ctx.fillStyle = "rgba(2,6,6,0.25)";
+  ctx.fillRect(0, 0, 340, 340);
+
+  const cx = 170, cy = 170;
+
+  // Círculos de fondo
+  for (let i = 1; i <= 4; i++) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 35 * i, 0, Math.PI * 2);
+    ctx.strokeStyle = "#00ffcc22";
+    ctx.stroke();
+  }
+
+  // Círculo principal según volumen
+  ctx.beginPath();
+  ctx.arc(cx, cy, 40 + vol * 1.1, 0, Math.PI * 2);
+  ctx.strokeStyle = vol < 25 ? "#00ffcc" : vol < 55 ? "#ffff00" : "#ff4444";
+  ctx.lineWidth = 6;
+  ctx.stroke();
+  ctx.lineWidth = 1;
+
+  // Línea barrida
+  angle += 0.04;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.cos(angle) * 155, cy + Math.sin(angle) * 155);
+  ctx.strokeStyle = "#00ffcc";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function actualizarBarra(vol) {
+  const b = document.getElementById("barra");
+  b.style.width = Math.min(vol * 1.4, 100) + "%";
+  b.style.background = vol < 25 ? "#00ffcc" : vol < 55 ? "#ffff00" : "#ff4444";
+}
+
+function actualizarEstado(vol) {
+  const e = document.getElementById("estado");
+  if (mute) {
+    e.textContent = "Micrófono pausado";
+    return;
+  }
+  if (calibrando) return;
+
+  e.textContent = vol < 25 ? "Silencio óptimo ✓" :
+                  vol < 55 ? "Nivel aceptable" : "Demasiado ruido ✗";
+}
+</script>
+
+</body>
+  </html>
