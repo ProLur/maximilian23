@@ -14,11 +14,10 @@ body{
   height:100vh;
   display:flex;
   flex-direction:column;
-  align-items:center;
-  justify-content:space-between;
   overflow:hidden;
 }
 
+/* HEADER */
 header{
   width:100%;
   background:#161b22;
@@ -26,40 +25,44 @@ header{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
-  padding:8px;
+  gap:8px;
+  padding:6px;
+  flex-shrink:0;
 }
 
 header img{
-  height:40px;
+  height:34px;
   border-radius:50%;
-  box-shadow:0 0 10px #00ffcc;
+  box-shadow:0 0 8px #00ffcc;
 }
 
 header h2{
+  font-size:1rem;
   margin:0;
-  font-size:1.1rem;
 }
 
+/* MAIN */
 .main{
+  flex:1;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:10px;
+  justify-content:space-evenly;
+  padding:5px 0;
 }
 
-/* radar */
+/* RADAR */
 canvas{
-  width:260px;
-  height:260px;
+  width:min(80vw, 320px);
+  height:min(80vw, 320px);
   background:#020606;
   border:2px solid #00ffcc55;
   border-radius:50%;
 }
 
-/* barra */
+/* BARRA */
 .barra{
-  width:260px;
+  width:min(80vw, 320px);
   height:12px;
   border:1px solid #00ffcc;
   border-radius:10px;
@@ -72,20 +75,18 @@ canvas{
   background:#00ffcc;
 }
 
-/* textos */
+/* TEXTOS */
 .estado{
-  height:20px;
   font-size:1rem;
   text-align:center;
 }
 
 .nota{
-  height:30px;
   font-size:1.6rem;
   font-weight:bold;
 }
 
-/* botones */
+/* CONTROLES */
 .controles{
   display:flex;
   gap:10px;
@@ -104,7 +105,7 @@ button{
   justify-content:center;
 }
 
-/* micro */
+/* MICRO */
 .mute-btn svg{
   width:24px;
   height:24px;
@@ -123,9 +124,9 @@ button{
   opacity:1;
 }
 
-/* slider */
+/* SLIDER */
 .slider{
-  width:260px;
+  width:min(80vw, 320px);
   font-size:0.9rem;
   text-align:center;
 }
@@ -233,7 +234,6 @@ function parar(){
 
   const media = muestras > 0 ? sumaVolumen / muestras : 0;
 
-  // fórmula continua (ajustada)
   let nota = 10 - (media / 6);
   nota = Math.max(1, Math.min(10, nota));
   nota = nota.toFixed(1);
