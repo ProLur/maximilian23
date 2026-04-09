@@ -11,11 +11,16 @@ body{
   font-family:"Courier New", monospace;
   background:#0d1117;
   color:#00ffcc;
+
+  height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
+  justify-content:space-between;
+  overflow:hidden;
 }
 
+/* HEADER */
 header{
   width:100%;
   background:#161b22;
@@ -24,168 +29,112 @@ header{
   align-items:center;
   justify-content:center;
   gap:10px;
-  padding:10px;
-  box-sizing:border-box;
+  padding:8px;
 }
 
 header img{
-  height:50px;
+  height:40px;
   border-radius:50%;
   box-shadow:0 0 10px #00ffcc;
 }
 
+header h2{
+  margin:0;
+  font-size:1.1rem;
+}
+
+/* RADAR */
 canvas{
-  margin-top:20px;
+  width:260px;
+  height:260px;
   background:#020606;
   border:2px solid #00ffcc55;
   border-radius:50%;
-  box-shadow:0 0 18px rgba(0,255,204,0.08);
 }
 
+/* BARRA */
 .barra{
-  width:300px;
-  height:14px;
+  width:260px;
+  height:12px;
   border:1px solid #00ffcc;
-  margin-top:20px;
   border-radius:10px;
   overflow:hidden;
-  box-shadow:0 0 10px rgba(0,255,204,0.1);
 }
 
 .barra-inner{
   height:100%;
   width:0%;
   background:#00ffcc;
-  transition:width 0.08s linear, background 0.15s ease;
 }
 
+/* TEXTOS */
 .estado{
-  margin-top:15px;
-  font-size:1.2rem;
-  min-height:1.5em;
+  font-size:1rem;
   text-align:center;
+  height:20px;
 }
 
 .nota{
-  margin-top:10px;
-  font-size:2rem;
+  font-size:1.6rem;
   font-weight:bold;
-  min-height:1.5em;
-  text-align:center;
+  height:30px;
 }
 
+/* CONTROLES */
 .controles{
-  margin-top:18px;
   display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  justify-content:center;
-  align-items:center;
+  gap:10px;
 }
 
 button{
-  padding:10px 20px;
+  width:120px;
+  height:45px;
   background:#00ffcc22;
   border:1px solid #00ffcc;
   color:#00ffcc;
   cursor:pointer;
   border-radius:8px;
-  font-family:inherit;
-  transition:background 0.2s ease, box-shadow 0.2s ease, transform 0.08s ease;
-}
-
-button:hover{
-  background:#00ffcc2f;
-  box-shadow:0 0 10px rgba(0,255,204,0.15);
-}
-
-button:active{
-  transform:scale(0.98);
-}
-
-.mute-btn{
-  width:62px;
-  height:62px;
-  padding:0;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 
+/* BOTÓN MICRO */
 .mute-btn svg{
-  width:32px;
-  height:32px;
-  overflow:visible;
-}
-
-.mute-btn .mic-body,
-.mute-btn .mic-stem,
-.mute-btn .mic-base,
-.mute-btn .mic-ring{
-  stroke:#00ffcc;
-  transition:stroke 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
-}
-
-.mute-btn .mic-slash{
-  stroke:#ff4444;
-  opacity:0;
-  transition:opacity 0.2s ease;
+  width:24px;
+  height:24px;
 }
 
 .mute-btn.active{
   border-color:#ff4444;
-  background:rgba(255,68,68,0.12);
-  box-shadow:0 0 12px rgba(255,68,68,0.15);
+  background:#ff444422;
 }
 
-.mute-btn.active .mic-body,
-.mute-btn.active .mic-stem,
-.mute-btn.active .mic-base,
-.mute-btn.active .mic-ring{
-  stroke:#ff8888;
+.mute-btn .mic-slash{
+  opacity:0;
 }
 
 .mute-btn.active .mic-slash{
   opacity:1;
 }
 
+/* SLIDER */
 .slider{
-  margin-top:14px;
+  width:260px;
   text-align:center;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-}
-
-.slider label{
-  font-size:1rem;
+  font-size:0.9rem;
 }
 
 input[type=range]{
-  width:220px;
-  accent-color:#00ffcc;
+  width:100%;
 }
 
-.valor-sensibilidad{
-  font-size:0.95rem;
-  opacity:0.9;
-}
-
-@media (max-width:480px){
-  canvas{
-    width:280px;
-    height:280px;
-  }
-
-  .barra{
-    width:280px;
-  }
-
-  header h2{
-    font-size:1.1rem;
-    margin:0;
-  }
+/* CONTENEDOR CENTRAL */
+.main{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
 }
 </style>
 </head>
@@ -193,9 +142,11 @@ input[type=range]{
 <body>
 
 <header>
-  <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
+  <img src="https://maximilian23.com/Cabeza.png">
   <h2>RADAR DE SILENCIO</h2>
 </header>
+
+<div class="main">
 
 <canvas id="radar" width="300" height="300"></canvas>
 
@@ -209,29 +160,26 @@ input[type=range]{
 <div class="controles">
   <button id="btn" onclick="toggle()">INICIAR</button>
 
-  <button onclick="toggleMute()" id="muteBtn" class="mute-btn" aria-label="Activar o desactivar mute" title="Mute">
-    <svg viewBox="0 0 64 64" aria-hidden="true">
-      <rect class="mic-body" x="22" y="10" width="20" height="28" rx="10" ry="10" fill="none" stroke-width="3"/>
-      <line class="mic-stem" x1="32" y1="38" x2="32" y2="49" stroke-width="3" stroke-linecap="round"/>
-      <line class="mic-base" x1="22" y1="54" x2="42" y2="54" stroke-width="3" stroke-linecap="round"/>
-      <path class="mic-ring" d="M16 28c0 9 7 16 16 16s16-7 16-16" fill="none" stroke-width="3" stroke-linecap="round"/>
-      <line class="mic-slash" x1="14" y1="50" x2="50" y2="14" stroke-width="4" stroke-linecap="round"/>
+  <button onclick="toggleMute()" id="muteBtn" class="mute-btn">
+    <svg viewBox="0 0 64 64">
+      <rect x="22" y="10" width="20" height="28" rx="10" fill="none" stroke="#00ffcc" stroke-width="3"/>
+      <line x1="32" y1="38" x2="32" y2="49" stroke="#00ffcc" stroke-width="3"/>
+      <line x1="22" y1="54" x2="42" y2="54" stroke="#00ffcc" stroke-width="3"/>
+      <path d="M16 28c0 9 7 16 16 16s16-7 16-16" fill="none" stroke="#00ffcc" stroke-width="3"/>
+      <line class="mic-slash" x1="14" y1="50" x2="50" y2="14" stroke="#ff4444" stroke-width="4"/>
     </svg>
   </button>
 </div>
 
 <div class="slider">
-  <label for="sensibilidad">Sensibilidad</label>
+  Sensibilidad
   <input type="range" min="0.5" max="3" step="0.1" value="1" id="sensibilidad">
-  <div class="valor-sensibilidad" id="valorSensibilidad">1.0x</div>
+</div>
+
 </div>
 
 <script>
-let audioContext = null;
-let analyser = null;
-let dataArray = null;
-let streamGlobal = null;
-
+let audioContext, analyser, dataArray, streamGlobal;
 let running = false;
 let mute = false;
 let angle = 0;
@@ -241,122 +189,66 @@ let muestras = 0;
 let volumenSuave = 0;
 let sensibilidad = 1;
 
-const btn = document.getElementById("btn");
-const muteBtn = document.getElementById("muteBtn");
-const barra = document.getElementById("barra");
-const estado = document.getElementById("estado");
-const nota = document.getElementById("nota");
-const slider = document.getElementById("sensibilidad");
-const valorSensibilidad = document.getElementById("valorSensibilidad");
-const canvas = document.getElementById("radar");
-const ctx = canvas.getContext("2d");
-
-slider.addEventListener("input", (e) => {
+document.getElementById("sensibilidad").addEventListener("input", (e)=>{
   sensibilidad = parseFloat(e.target.value);
-  valorSensibilidad.textContent = sensibilidad.toFixed(1) + "x";
 });
 
 async function toggle(){
   if(!running){
-    await iniciar();
+    iniciar();
   }else{
     parar();
   }
 }
 
 async function iniciar(){
-  try{
-    sumaVolumen = 0;
-    muestras = 0;
-    volumenSuave = 0;
-    angle = 0;
-    nota.textContent = "";
-    estado.textContent = "Preparados...";
+  sumaVolumen = 0;
+  muestras = 0;
+  volumenSuave = 0;
 
-    for(let i = 3; i > 0; i--){
-      nota.textContent = i;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+  streamGlobal = await navigator.mediaDevices.getUserMedia({ audio:true });
 
-    nota.textContent = "";
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioContext.createAnalyser();
 
-    streamGlobal = await navigator.mediaDevices.getUserMedia({ audio:true });
+  const source = audioContext.createMediaStreamSource(streamGlobal);
+  source.connect(analyser);
 
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioContext.createAnalyser();
+  analyser.fftSize = 256;
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    const source = audioContext.createMediaStreamSource(streamGlobal);
-    source.connect(analyser);
+  running = true;
+  document.getElementById("btn").textContent = "STOP";
 
-    analyser.fftSize = 256;
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    running = true;
-    btn.textContent = "STOP";
-
-    loop();
-  }catch(error){
-    estado.textContent = "No se pudo acceder al micrófono";
-    nota.textContent = "";
-    running = false;
-    btn.textContent = "INICIAR";
-    console.error(error);
-  }
+  loop();
 }
 
 function parar(){
   running = false;
 
   if(streamGlobal){
-    streamGlobal.getTracks().forEach(track => track.stop());
-    streamGlobal = null;
+    streamGlobal.getTracks().forEach(t => t.stop());
   }
 
   if(audioContext){
     audioContext.close();
-    audioContext = null;
   }
 
-  const media = muestras > 0 ? (sumaVolumen / muestras) : 0;
+  const media = muestras > 0 ? sumaVolumen / muestras : 0;
 
-  let notaFinal;
-  if(media < 20) notaFinal = 10;
-  else if(media < 30) notaFinal = 9;
-  else if(media < 40) notaFinal = 7;
-  else if(media < 50) notaFinal = 5;
-  else if(media < 60) notaFinal = 3;
-  else notaFinal = 1;
+  let nota = media < 20 ? 10 :
+             media < 30 ? 9 :
+             media < 40 ? 7 :
+             media < 50 ? 5 :
+             media < 60 ? 3 : 1;
 
-  nota.textContent = "Nota: " + notaFinal;
-
-  if(notaFinal >= 9){
-    estado.textContent = "Excelente silencio";
-    estado.style.color = "#00ffcc";
-  }else if(notaFinal >= 7){
-    estado.textContent = "Buen trabajo";
-    estado.style.color = "#aaff66";
-  }else if(notaFinal >= 5){
-    estado.textContent = "Mejorable";
-    estado.style.color = "#ffff00";
-  }else{
-    estado.textContent = "Mucho ruido";
-    estado.style.color = "#ff4444";
-  }
-
-  btn.textContent = "INICIAR";
+  document.getElementById("nota").textContent = "Nota: " + nota;
+  document.getElementById("btn").textContent = "INICIAR";
 }
 
 function toggleMute(){
   mute = !mute;
-  muteBtn.classList.toggle("active", mute);
-
-  if(mute){
-    estado.textContent = "Micrófono en pausa";
-    estado.style.color = "#ff8888";
-  }else{
-    estado.textContent = "Medición reanudada";
-    estado.style.color = "#00ffcc";
-  }
+  document.getElementById("muteBtn").classList.toggle("active", mute);
 }
 
 function loop(){
@@ -365,112 +257,71 @@ function loop(){
   analyser.getByteTimeDomainData(dataArray);
 
   let sum = 0;
-  for(let i = 0; i < dataArray.length; i++){
-    const v = (dataArray[i] - 128) / 128;
-    sum += v * v;
+  for(let i=0;i<dataArray.length;i++){
+    let v = (dataArray[i]-128)/128;
+    sum += v*v;
   }
 
-  let volumen = Math.sqrt(sum / dataArray.length) * 100 * sensibilidad;
-  volumen = Math.min(volumen, 100);
+  let volumen = Math.sqrt(sum/dataArray.length)*100*sensibilidad;
+  volumen = Math.min(volumen,100);
 
-  volumenSuave = volumenSuave * 0.8 + volumen * 0.2;
+  volumenSuave = volumenSuave*0.8 + volumen*0.2;
 
-  if(mute){
-    dibujarRadar(0, true);
-    actualizarBarra(0);
-    actualizarEstado(0, true);
-    requestAnimationFrame(loop);
-    return;
+  if(!mute){
+    sumaVolumen += volumenSuave;
+    muestras++;
   }
 
-  sumaVolumen += volumenSuave;
-  muestras++;
-
-  dibujarRadar(volumenSuave, false);
-  actualizarBarra(volumenSuave);
-  actualizarEstado(volumenSuave, false);
+  dibujarRadar(mute ? 0 : volumenSuave);
+  actualizarBarra(mute ? 0 : volumenSuave);
+  actualizarEstado(mute ? 0 : volumenSuave);
 
   requestAnimationFrame(loop);
 }
 
-function dibujarRadar(volumen, enMute){
-  ctx.fillStyle = "rgba(2,6,6,0.22)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+function dibujarRadar(vol){
+  const c = document.getElementById("radar");
+  const ctx = c.getContext("2d");
 
-  const cx = canvas.width / 2;
-  const cy = canvas.height / 2;
+  ctx.fillStyle="rgba(2,6,6,0.2)";
+  ctx.fillRect(0,0,300,300);
 
-  for(let i = 1; i <= 3; i++){
+  const cx=150, cy=150;
+
+  for(let i=1;i<=3;i++){
     ctx.beginPath();
-    ctx.arc(cx, cy, 40 * i, 0, Math.PI * 2);
-    ctx.strokeStyle = enMute ? "#66666633" : "#00ffcc22";
-    ctx.lineWidth = 1.5;
+    ctx.arc(cx,cy,40*i,0,Math.PI*2);
+    ctx.strokeStyle="#00ffcc22";
     ctx.stroke();
   }
 
-  if(!enMute){
-    const radio = 40 + volumen;
+  ctx.beginPath();
+  ctx.arc(cx,cy,40+vol,0,Math.PI*2);
+  ctx.strokeStyle=vol<30?"#00ffcc":vol<60?"#ffff00":"#ff4444";
+  ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(cx, cy, radio, 0, Math.PI * 2);
-
-    if(volumen < 30) ctx.strokeStyle = "#00ffcc";
-    else if(volumen < 60) ctx.strokeStyle = "#ffff00";
-    else ctx.strokeStyle = "#ff4444";
-
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    angle += 0.03;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(
-      cx + Math.cos(angle) * 120,
-      cy + Math.sin(angle) * 120
-    );
-    ctx.strokeStyle = "#00ffcc";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }else{
-    ctx.beginPath();
-    ctx.arc(cx, cy, 40, 0, Math.PI * 2);
-    ctx.strokeStyle = "#88888855";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
+  angle+=0.03;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+Math.cos(angle)*120, cy+Math.sin(angle)*120);
+  ctx.strokeStyle="#00ffcc";
+  ctx.stroke();
 }
 
-function actualizarBarra(volumen){
-  const porcentaje = Math.min(volumen * 1.5, 100);
-  barra.style.width = porcentaje + "%";
-
-  if(volumen < 30) barra.style.background = "#00ffcc";
-  else if(volumen < 60) barra.style.background = "#ffff00";
-  else barra.style.background = "#ff4444";
+function actualizarBarra(vol){
+  const b=document.getElementById("barra");
+  b.style.width=Math.min(vol*1.5,100)+"%";
+  b.style.background=vol<30?"#00ffcc":vol<60?"#ffff00":"#ff4444";
 }
 
-function actualizarEstado(volumen, enMute){
-  if(enMute){
-    estado.textContent = "Micrófono en pausa";
-    estado.style.color = "#ff8888";
+function actualizarEstado(vol){
+  const e=document.getElementById("estado");
+  if(mute){
+    e.textContent="Micrófono en pausa";
     return;
   }
-
-  if(volumen < 30){
-    estado.textContent = "Silencio óptimo";
-    estado.style.color = "#00ffcc";
-  }
-  else if(volumen < 60){
-    estado.textContent = "Nivel regular";
-    estado.style.color = "#ffff00";
-  }
-  else{
-    estado.textContent = "Demasiado ruido";
-    estado.style.color = "#ff4444";
-  }
+  e.textContent=vol<30?"Silencio óptimo":vol<60?"Nivel regular":"Demasiado ruido";
 }
-
-dibujarRadar(0, false);
 </script>
 
 </body>
