@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+
+<title>Admin • Estación Meteorológica Maximilian 23</title>
+
+<link rel="icon" href="https://maximilian23.com/Cabeza.png">
+<link rel="stylesheet" href="styles.css">
+
+<style>
+
+.admin-specific{
+padding:1.5rem 1rem;
+max-width:1200px;
+margin:auto;
+}
+
+.month-selector{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:1rem;
+margin:2rem 0;
+flex-wrap:wrap;
+}
+
+.month-selector select,
+.month-selector button{
+background:rgba(0,255,204,0.12);
+border:2px solid #00ffcc77;
+color:#00ffcc;
+font-size:1.2rem;
+padding:0.7rem 1.2rem;
+border-radius:10px;
+cursor:pointer;
+}
+
+.month-selector button{
+width:56px;
+height:56px;
+border-radius:50%;
+font-size:1.8rem;
+}
+
+.calendar{
+gap:10px !important;
+}
+
+.day{
+min-height:80px;
+padding:22px;
+font-size:1.3rem;
+box-shadow:0 4px 14px rgba(0,0,0,0.35);
+}
+
+.day-name{
+color:#00ffcc;
+font-size:1.3rem;
+font-weight:bold;
+padding:1rem 0 0.5rem;
+text-align:center;
+}
+
+.day.today{
+background:#ff4444;
+color:white;
+border:2px solid #ff8888;
+font-weight:bold;
+box-shadow:0 0 10px #ff4444aa;
+}
+
+#password-screen{
+position:fixed;
+inset:0;
+background:#0d1117;
+z-index:9999;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:2rem;
+}
+
+#password-form{
+display:flex;
+flex-direction:column;
+gap:1rem;
+width:100%;
+max-width:350px;
+}
+
+#password-input{
+padding:1.2rem;
+font-size:1.3rem;
+background:#161b22;
+border:2px solid #00ffcc66;
+border-radius:10px;
+color:#e6edf3;
+text-align:center;
+}
+
+#password-btn{
+padding:1.2rem;
+font-size:1.3rem;
+background:#00ffcc;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+#password-error{
+color:#ff6666;
+font-size:1.2rem;
+text-align:center;
+min-height:1.4rem;
+}
+
+.modal-content{
+max-width:700px;
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:1rem;
+margin-top:1rem;
+}
+
+input{
+padding:1rem;
+font-size:1.2rem;
+background:#161b22;
+border:2px solid #00ffcc66;
+border-radius:10px;
+color:#e6edf3;
+}
+
+button[type="submit"]{
+margin-top:1rem;
+padding:1.2rem;
+font-size:1.3rem;
+background:#00ffcc;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.message{
+margin-top:0.7rem;
+font-size:1.2rem;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="password-screen">
+
+<h1 style="color:#00ffcc;text-align:center;">
+Panel de<br>administración
+</h1>
+
+<form id="password-form">
+<input type="password" id="password-input" placeholder="Password">
+<button type="submit" id="password-btn">Login</button>
+<div id="password-error"></div>
+</form>
+
+</div>
+
+<div class="admin-specific" id="main-content" style="display:none;">
+
+<div class="month-selector">
+<button onclick="cambiarMes(-1)">←</button>
+<select id="mesSelect" onchange="cambiarMesSelect()"></select>
+<select id="anioSelect" onchange="cambiarAnioSelect()"></select>
+<button onclick="cambiarMes(1)">→</button>
+</div>
+
+<div class="calendar" id="calendar"></div>
+
+</div>
+
+<div class="modal" id="dataModal">
+<div class="modal-content">
+
+<span class="close-btn" onclick="cerrarModal()">×</span>
+
+<h3 id="fecha-title">Date</h3>
+
+<form id="form">
+
+<div class="form-grid">
+
+<input id="temp_indoor" placeholder="Temp Indoor °C" type="number" step="0.1">
+<input id="hum_indoor" placeholder="Hum Indoor %" type="number">
+
+<input id="temp_outdoor" placeholder="Temp Outdoor °C" type="number" step="0.1">
+<input id="hum_outdoor" placeholder="Hum Outdoor %" type="number">
+
+<input id="pressure" placeholder="Pressure hPa" type="number">
+
+<input id="wind_speed" placeholder="Wind Speed m/s" type="number" step="0.1">
+<input id="wind_gust" placeholder="Wind Gust m/s" type="number" step="0.1">
+
+<input id="wind_direction" placeholder="Wind Direction °">
+
+<input id="wind_chill" placeholder="Wind Chill °C" type="number">
+
+<input id="rain" placeholder="Rain mm" type="number">
+
+</div>
+
+<button type="submit">Guardar</button>
+
+</form>
+
+<div id="message" class="message"></div>
+
+</div>
+</div>
+
+<script>
+
+const BIN_ID="69aaa6b0d0ea881f40f4bc92";
+const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
+
+const PASSWORD="SextoSexto";
+const STORAGE_KEY="meteo_admin_access";
+
+let currentDate=new Date();
+let currentFecha="";
+
+function num(id){
+let v=document.getElementById(id).value.trim();
+if(!v) return null;
+v=v.replace(",",".");
+const n=parseFloat(v);
+return isNaN(n)?null:n;
+}
+
+const passwordScreen=document.getElementById("password-screen");
+const mainContent=document.getElementById("main-content");
+
+if(localStorage.getItem(STORAGE_KEY)==="true"){
+passwordScreen.style.display="none";
+mainContent.style.display="block";
+initAdmin();
+}else{
+document.getElementById("password-form").onsubmit=e=>{
+e.preventDefault();
+const input=document.getElementById("password-input").value;
+if(input===PASSWORD){
+localStorage.setItem(STORAGE_KEY,"true");
+passwordScreen.style.display="none";
+mainContent.style.display="block";
+initAdmin();
+}else{
+document.getElementById("password-error").textContent="Wrong password";
+}
+}
+}
+
+function initAdmin(){
+
+const mesSelect=document.getElementById("mesSelect");
+const anioSelect=document.getElementById("anioSelect");
+
+const meses=[
+"Enero","Febrero","Marzo","Abril","Mayo","Junio",
+"Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+meses.forEach((m,i)=>{
+const opt=document.createElement("option");
+opt.value=i;
+opt.textContent=m;
+mesSelect.appendChild(opt);
+});
+
+const añoActual=new Date().getFullYear();
+
+for(let y=añoActual-3;y<=añoActual+3;y++){
+const opt=document.createElement("option");
+opt.value=y;
+opt.textContent=y;
+anioSelect.appendChild(opt);
+}
+
+mesSelect.value=currentDate.getMonth();
+anioSelect.value=currentDate.getFullYear();
+
+crearCalendario();
+}
+
+function cambiarMes(dir){
+currentDate.setMonth(currentDate.getMonth()+dir);
+document.getElementById("mesSelect").value=currentDate.getMonth();
+document.getElementById("anioSelect").value=currentDate.getFullYear();
+crearCalendario();
+}
+
+function cambiarMesSelect(){
+currentDate.setMonth(document.getElementById("mesSelect").value);
+crearCalendario();
+}
+
+function cambiarAnioSelect(){
+currentDate.setFullYear(document.getElementById("anioSelect").value);
+crearCalendario();
+}
+
+function crearCalendario(){
+
+const cal=document.getElementById("calendar");
+cal.innerHTML="";
+
+const year=currentDate.getFullYear();
+const month=currentDate.getMonth();
+
+["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"].forEach(d=>{
+const div=document.createElement("div");
+div.className="day-name";
+div.textContent=d;
+cal.appendChild(div);
+});
+
+const hoy=new Date();
+const hoyStr=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;
+
+fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${Date.now()}`,{
+headers:{"X-Master-Key":KEY}
+})
+.then(r=>r.json())
+.then(data=>{
+
+const meteo=data?.record?.meteo || [];
+const conDatos=new Set(meteo.map(d=>d.fecha));
+
+const primerDia=new Date(year,month,1).getDay()||7;
+const diasMes=new Date(year,month+1,0).getDate();
+
+for(let i=1;i<primerDia;i++){
+const v=document.createElement("div");
+v.className="day";
+cal.appendChild(v);
+}
+
+for(let i=1;i<=diasMes;i++){
+
+const fecha=`${year}-${String(month+1).padStart(2,"0")}-${String(i).padStart(2,"0")}`;
+
+const d=document.createElement("div");
+d.className="day";
+d.textContent=i;
+
+if(fecha===hoyStr) d.classList.add("today");
+if(conDatos.has(fecha)) d.classList.add("hasdata");
+
+d.onclick=()=>abrirModal(fecha,meteo);
+
+cal.appendChild(d);
+}
+
+});
+
+}
+
+function abrirModal(fecha,datos){
+
+currentFecha=fecha;
+
+document.getElementById("fecha-title").textContent=`Edit: ${fecha}`;
+document.getElementById("dataModal").style.display="flex";
+
+const dato=datos.find(d=>d.fecha===fecha) || {};
+
+["temp_indoor","hum_indoor","temp_outdoor","hum_outdoor","pressure","wind_speed","wind_gust","wind_direction","wind_chill","rain"]
+
+.forEach(id=>{
+document.getElementById(id).value=dato[id] ?? "";
+});
+
+}
+
+function cerrarModal(){
+document.getElementById("dataModal").style.display="none";
+}
+
+document.getElementById("form").onsubmit=async e=>{
+
+e.preventDefault();
+
+const msg=document.getElementById("message");
+msg.textContent="Guardando...";
+
+const nuevo={
+
+fecha:currentFecha,
+
+temp_indoor:num("temp_indoor"),
+hum_indoor:num("hum_indoor"),
+
+temp_outdoor:num("temp_outdoor"),
+hum_outdoor:num("hum_outdoor"),
+
+pressure:num("pressure"),
+
+wind_speed:num("wind_speed"),
+wind_gust:num("wind_gust"),
+
+wind_direction:num("wind_direction"),
+
+wind_chill:num("wind_chill"),
+
+rain:num("rain")
+
+};
+
+try{
+
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
+headers:{"X-Master-Key":KEY}
+});
+
+const data=await res.json();
+let meteo=data.record.meteo || [];
+
+const idx=meteo.findIndex(d=>d.fecha===currentFecha);
+
+if(idx!==-1){
+meteo[idx]={...meteo[idx],...nuevo};
+}else{
+meteo.push(nuevo);
+}
+
+await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+"X-Master-Key":KEY
+},
+body:JSON.stringify({meteo})
+});
+
+msg.textContent="¡Guardado!";
+
+setTimeout(()=>{
+cerrarModal();
+crearCalendario();
+},900);
+
+}catch(err){
+msg.textContent="Error saving";
+}
+
+};
+
+</script>
+
+</body>
+</html>
