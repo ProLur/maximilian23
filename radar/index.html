@@ -47,7 +47,6 @@
         box-shadow: 0 0 25px #00ffcc88;
     }
 
-    /* Contador de intervenciones */
     .contador {
         display: flex;
         align-items: center;
@@ -198,6 +197,26 @@
         cursor: pointer;
         z-index: 1010;
     }
+
+    /* Pentagrama realista */
+    #pizarra-pentagrama .pizarra-content {
+        background: #f9f6eb;
+    }
+
+    .pentagrama {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        height: 130px;
+    }
+
+    .linea {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #222;
+    }
 </style>
 </head>
 <body>
@@ -208,7 +227,6 @@
         <div class="card" id="card-trabajo" onclick="setModo(1)">✍️ Trabajo</div>
         <div class="card" id="card-preguntas" onclick="setModo(2)">❓ Turno de preguntas</div>
         
-        <!-- Contador de intervenciones -->
         <div class="contador">
             <button onclick="cambiarIntervenciones(-1)">−</button>
             <span id="intervenciones">0</span>
@@ -262,16 +280,45 @@
         </div>
     </div>
 
+    <!-- PENTAGRAMA REAL (Opción 1) -->
     <div id="pizarra-pentagrama" class="pizarra">
         <div class="pizarra-content">
             <span class="cerrar" onclick="cerrarPizarra()">×</span>
-            <div style="position:absolute; top:18%; left:8%; right:8%; height:15%; border-bottom:4px solid #111;"></div>
-            <div style="position:absolute; top:42%; left:8%; right:8%; height:15%; border-bottom:4px solid #111;"></div>
-            <div style="position:absolute; top:66%; left:8%; right:8%; height:15%; border-bottom:4px solid #111;"></div>
+            
+            <!-- Pentagrama 1 -->
+            <div class="pentagrama" style="top: 12%;">
+                <div class="linea" style="top: 0%;"></div>
+                <div class="linea" style="top: 25%;"></div>
+                <div class="linea" style="top: 50%;"></div>
+                <div class="linea" style="top: 75%;"></div>
+                <div class="linea" style="top: 100%;"></div>
+                <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
+            </div>
+
+            <!-- Pentagrama 2 -->
+            <div class="pentagrama" style="top: 39%;">
+                <div class="linea" style="top: 0%;"></div>
+                <div class="linea" style="top: 25%;"></div>
+                <div class="linea" style="top: 50%;"></div>
+                <div class="linea" style="top: 75%;"></div>
+                <div class="linea" style="top: 100%;"></div>
+                <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
+            </div>
+
+            <!-- Pentagrama 3 -->
+            <div class="pentagrama" style="top: 66%;">
+                <div class="linea" style="top: 0%;"></div>
+                <div class="linea" style="top: 25%;"></div>
+                <div class="linea" style="top: 50%;"></div>
+                <div class="linea" style="top: 75%;"></div>
+                <div class="linea" style="top: 100%;"></div>
+                <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
+            </div>
         </div>
     </div>
 
 <script>
+// ==================== LÓGICA PRINCIPAL ====================
 let audioContext, analyser, dataArray;
 let running = false;
 let angle = 0;
@@ -288,9 +335,7 @@ const modos = [
 
 function setModo(modo) {
     modoActual = modo;
-    document.querySelectorAll('.card').forEach((card, i) => {
-        card.classList.toggle('activo', i === modo);
-    });
+    document.querySelectorAll('.card').forEach((card, i) => card.classList.toggle('activo', i === modo));
 }
 
 function cambiarIntervenciones(cambio) {
@@ -306,7 +351,7 @@ async function toggle() {
 async function iniciar() {
     sumaVolumen = 0;
     muestras = 0;
-    intervenciones = 0;                    // Reinicia contador al iniciar
+    intervenciones = 0;
     document.getElementById("intervenciones").textContent = "0";
 
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -330,18 +375,15 @@ function parar() {
     let nota = 10 - (media / 10);
     nota = Math.max(1, Math.min(10, nota));
 
-    // Aplicar penalización solo en Explicación y Turno de preguntas
     if (modos[modoActual].afectaPenalizacion) {
         nota -= intervenciones * 0.10;
     }
 
     nota = Math.max(1, Math.min(10, nota)).toFixed(1);
-
     document.getElementById("nota").textContent = `Nota: ${nota}`;
     document.getElementById("btn").textContent = "INICIAR";
 }
 
-// Funciones del radar (sin cambios)
 function loop() {
     if (!running) return;
     analyser.getByteFrequencyData(dataArray);
