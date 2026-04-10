@@ -39,6 +39,7 @@
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s;
+        box-sizing: border-box;
     }
 
     .card.activo {
@@ -57,6 +58,7 @@
         border-radius: 12px;
         padding: 14px;
         width: 210px;
+        box-sizing: border-box;
     }
 
     .contador button {
@@ -96,6 +98,7 @@
         padding: 10px 15px;
         margin-bottom: 22px;
         border-radius: 10px;
+        box-sizing: border-box;
     }
 
     header img {
@@ -107,6 +110,7 @@
     header h2 {
         margin: 0;
         font-size: 1.55rem;
+        text-align: center;
     }
 
     canvas {
@@ -123,6 +127,7 @@
         margin-top: 20px;
         border-radius: 10px;
         overflow: hidden;
+        box-sizing: border-box;
     }
 
     .barra-inner {
@@ -132,8 +137,20 @@
         transition: width 0.1s;
     }
 
-    .estado { margin-top: 16px; font-size: 1.35rem; min-height: 30px; }
-    .nota { margin-top: 6px; font-size: 2.35rem; font-weight: bold; min-height: 65px; }
+    .estado {
+        margin-top: 16px;
+        font-size: 1.35rem;
+        min-height: 30px;
+        text-align: center;
+    }
+
+    .nota {
+        margin-top: 6px;
+        font-size: 2.35rem;
+        font-weight: bold;
+        min-height: 65px;
+        text-align: center;
+    }
 
     #btn {
         margin-top: 28px;
@@ -152,7 +169,7 @@
         display: flex;
         flex-direction: column;
         gap: 15px;
-        min-width: 225px;
+        min-width: 250px;
     }
 
     .pizarra-btn {
@@ -162,10 +179,11 @@
         color: #00ffcc;
         cursor: pointer;
         border-radius: 12px;
-        font-size: 1.23rem;
+        font-size: 1.18rem;
         font-weight: bold;
         transition: all 0.3s;
         text-align: center;
+        box-sizing: border-box;
     }
 
     .pizarra-btn:hover {
@@ -178,8 +196,9 @@
     .pizarra {
         display: none;
         position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
+        inset: 0;
+        width: 100%;
+        height: 100%;
         background: rgba(0,0,0,0.96);
         z-index: 1000;
         align-items: center;
@@ -197,19 +216,70 @@
         border: 4px solid #00ffcc;
         position: relative;
         box-shadow: 0 0 40px #00ffcc88;
+        overflow: hidden;
+        box-sizing: border-box;
     }
 
     .cerrar {
         position: absolute;
-        top: 15px;
-        right: 25px;
-        font-size: 3.2rem;
+        top: 14px;
+        right: 22px;
+        font-size: 3rem;
         color: #ff5555;
         cursor: pointer;
         z-index: 1010;
+        font-weight: bold;
+        user-select: none;
     }
 
-    /* PENTAGRAMA CORREGIDO - 3 pentagramas de 5 líneas cada uno */
+    /* PIZARRA BLANCA */
+    #pizarra-blanca .pizarra-content {
+        background: #ffffff;
+    }
+
+    /* PIZARRA NEGRA */
+    #pizarra-negra .pizarra-content {
+        background: #111111;
+    }
+
+    /* PIZARRA CUADRICULADA */
+    #pizarra-cuadros .pizarra-content {
+        background-color: #ffffff;
+        background-image:
+            linear-gradient(#cfcfcf 1px, transparent 1px),
+            linear-gradient(90deg, #cfcfcf 1px, transparent 1px);
+        background-size: 25px 25px;
+    }
+
+    /* PIZARRA CUADERNILLO */
+    #pizarra-cuadernillo .pizarra-content {
+        background-color: #fffdf7;
+        background-image:
+            repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 34px,
+                #6aa6ff 34px,
+                #6aa6ff 36px,
+                transparent 36px,
+                transparent 52px,
+                #6aa6ff 52px,
+                #6aa6ff 54px
+            );
+    }
+
+    #pizarra-cuadernillo .pizarra-content::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 70px;
+        width: 2px;
+        background: #ff7a7a;
+        opacity: 0.8;
+    }
+
+    /* PENTAGRAMA */
     #pizarra-pentagrama .pizarra-content {
         background: #f9f6eb;
     }
@@ -228,6 +298,28 @@
         height: 2px;
         background: #222;
     }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+        body {
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .left,
+        .right {
+            width: 100%;
+            max-width: 340px;
+            min-width: unset;
+        }
+
+        .card,
+        .contador,
+        .pizarra-btn {
+            width: 100%;
+        }
+    }
 </style>
 </head>
 <body>
@@ -237,7 +329,7 @@
         <div class="card" id="card-explicacion" onclick="setModo(0)">📖 Explicación</div>
         <div class="card" id="card-trabajo" onclick="setModo(1)">✍️ Trabajo</div>
         <div class="card" id="card-preguntas" onclick="setModo(2)">❓ Turno de preguntas</div>
-        
+
         <div class="contador">
             <button onclick="cambiarIntervenciones(-1)">−</button>
             <span id="intervenciones">0</span>
@@ -248,19 +340,19 @@
     <!-- CENTRO -->
     <div class="center">
         <header>
-            <img src="https://maximilian23.com/Cabeza.png">
+            <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
             <h2>RADAR DE SILENCIO</h2>
         </header>
-        
+
         <canvas id="radar" width="300" height="300"></canvas>
-        
+
         <div class="barra">
             <div class="barra-inner" id="barra"></div>
         </div>
-        
+
         <div class="estado" id="estado">Pulsa iniciar</div>
         <div class="nota" id="nota"></div>
-        
+
         <button id="btn" onclick="toggle()">INICIAR</button>
     </div>
 
@@ -269,27 +361,40 @@
         <div class="pizarra-btn" onclick="abrirPizarra('blanca')">📄 Pizarra Blanca</div>
         <div class="pizarra-btn" onclick="abrirPizarra('negra')">⬛ Pizarra Negra</div>
         <div class="pizarra-btn" onclick="abrirPizarra('cuadros')">📐 Pizarra Cuadriculada</div>
+        <div class="pizarra-btn" onclick="abrirPizarra('cuadernillo')">✏️ Pizarra Cuadernillo</div>
         <div class="pizarra-btn" onclick="abrirPizarra('pentagrama')">🎵 Pentagrama</div>
     </div>
 
     <!-- PIZARRAS -->
     <div id="pizarra-blanca" class="pizarra">
-        <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
     </div>
 
     <div id="pizarra-negra" class="pizarra">
-        <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
     </div>
 
     <div id="pizarra-cuadros" class="pizarra">
-        <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
     </div>
 
-    <!-- PENTAGRAMA - 3 grupos de 5 líneas -->
+    <div id="pizarra-cuadernillo" class="pizarra">
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
+    </div>
+
+    <!-- PENTAGRAMA -->
     <div id="pizarra-pentagrama" class="pizarra">
         <div class="pizarra-content">
             <span class="cerrar" onclick="cerrarPizarra()">×</span>
-            
+
             <!-- Pentagrama 1 -->
             <div class="pentagrama" style="top: 12%;">
                 <div class="linea" style="top: 0%;"></div>
@@ -320,8 +425,7 @@
     </div>
 
 <script>
-// Script completo (sin cambios respecto a la versión anterior)
-let audioContext, analyser, dataArray;
+let audioContext, analyser, dataArray, mediaStream;
 let running = false;
 let angle = 0;
 let sumaVolumen = 0;
@@ -337,7 +441,9 @@ const modos = [
 
 function setModo(modo) {
     modoActual = modo;
-    document.querySelectorAll('.card').forEach((card, i) => card.classList.toggle('activo', i === modo));
+    document.querySelectorAll('.card').forEach((card, i) => {
+        card.classList.toggle('activo', i === modo);
+    });
 }
 
 function cambiarIntervenciones(cambio) {
@@ -346,30 +452,47 @@ function cambiarIntervenciones(cambio) {
 }
 
 async function toggle() {
-    if (!running) iniciar();
-    else parar();
+    if (!running) {
+        await iniciar();
+    } else {
+        parar();
+    }
 }
 
 async function iniciar() {
-    sumaVolumen = 0; muestras = 0; intervenciones = 0;
-    document.getElementById("intervenciones").textContent = "0";
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaStreamSource(stream);
-    source.connect(analyser);
-    analyser.fftSize = 256;
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-    
-    running = true;
-    document.getElementById("btn").textContent = "STOP";
-    document.getElementById("nota").textContent = "";
-    loop();
+    try {
+        sumaVolumen = 0;
+        muestras = 0;
+        intervenciones = 0;
+        document.getElementById("intervenciones").textContent = "0";
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        source.connect(analyser);
+
+        analyser.fftSize = 256;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        running = true;
+        document.getElementById("btn").textContent = "STOP";
+        document.getElementById("nota").textContent = "";
+        document.getElementById("estado").textContent = "Escuchando...";
+        document.getElementById("estado").style.color = "#00ffcc";
+
+        loop();
+    } catch (error) {
+        document.getElementById("estado").textContent = "No se pudo acceder al micrófono";
+        document.getElementById("estado").style.color = "#ff4444";
+    }
 }
 
 function parar() {
     running = false;
-    const media = sumaVolumen / muestras || 0;
+
+    const media = muestras > 0 ? (sumaVolumen / muestras) : 0;
     let nota = 10 - (media / 10);
     nota = Math.max(1, Math.min(10, nota));
 
@@ -378,15 +501,33 @@ function parar() {
     }
 
     nota = Math.max(1, Math.min(10, nota)).toFixed(1);
+
     document.getElementById("nota").textContent = `Nota: ${nota}`;
     document.getElementById("btn").textContent = "INICIAR";
+    document.getElementById("estado").textContent = "Medición detenida";
+    document.getElementById("estado").style.color = "#00ffcc";
+    document.getElementById("barra").style.width = "0%";
+
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+    }
+
+    if (audioContext && audioContext.state !== "closed") {
+        audioContext.close();
+    }
 }
 
 function loop() {
     if (!running) return;
+
     analyser.getByteFrequencyData(dataArray);
+
     let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+    for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+    }
+
     let volumen = sum / dataArray.length;
 
     sumaVolumen += volumen;
@@ -395,42 +536,80 @@ function loop() {
     dibujarRadar(volumen);
     actualizarBarra(volumen);
     actualizarEstado(volumen);
+
     requestAnimationFrame(loop);
 }
 
 function dibujarRadar(volumen) {
     const canvas = document.getElementById("radar");
     const ctx = canvas.getContext("2d");
-    ctx.clearRect(0,0,300,300);
-    const cx = 150, cy = 150;
-    ctx.beginPath(); ctx.arc(cx,cy,120,0,Math.PI*2); ctx.strokeStyle="#00ffcc33"; ctx.stroke();
-    const radio = 40 + volumen;
-    ctx.beginPath(); ctx.arc(cx,cy,radio,0,Math.PI*2);
-    ctx.strokeStyle = volumen < 30 ? "#00ffcc" : volumen < 60 ? "#ffff00" : "#ff4444";
+    const cx = 150;
+    const cy = 150;
+
+    ctx.clearRect(0, 0, 300, 300);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 120, 0, Math.PI * 2);
+    ctx.strokeStyle = "#00ffcc33";
+    ctx.lineWidth = 2;
     ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+    ctx.strokeStyle = "#00ffcc22";
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+    ctx.strokeStyle = "#00ffcc18";
+    ctx.stroke();
+
+    const radio = Math.min(40 + volumen, 120);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radio, 0, Math.PI * 2);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = volumen < 30 ? "#00ffcc" : (volumen < 60 ? "#ffff00" : "#ff4444");
+    ctx.stroke();
+
     angle += 0.03;
-    ctx.beginPath(); ctx.moveTo(cx,cy);
-    ctx.lineTo(cx + Math.cos(angle)*120, cy + Math.sin(angle)*120);
-    ctx.strokeStyle="#00ffcc"; ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(
+        cx + Math.cos(angle) * 120,
+        cy + Math.sin(angle) * 120
+    );
+    ctx.strokeStyle = "#00ffcc";
+    ctx.lineWidth = 2;
+    ctx.stroke();
 }
 
 function actualizarBarra(volumen) {
     const barra = document.getElementById("barra");
-    let porcentaje = Math.min(volumen * 1.5, 100);
+    const porcentaje = Math.min(volumen * 1.5, 100);
+
     barra.style.width = porcentaje + "%";
-    barra.style.background = volumen < 30 ? "#00ffcc" : volumen < 60 ? "#ffff00" : "#ff4444";
+    barra.style.background = volumen < 30 ? "#00ffcc" : (volumen < 60 ? "#ffff00" : "#ff4444");
 }
 
 function actualizarEstado(volumen) {
     const estado = document.getElementById("estado");
-    if (volumen < 30) { estado.textContent = "Silencio óptimo"; estado.style.color = "#00ffcc"; }
-    else if (volumen < 60) { estado.textContent = "Nivel regular"; estado.style.color = "#ffff00"; }
-    else { estado.textContent = "Demasiado ruido"; estado.style.color = "#ff4444"; }
+
+    if (volumen < 30) {
+        estado.textContent = "Silencio óptimo";
+        estado.style.color = "#00ffcc";
+    } else if (volumen < 60) {
+        estado.textContent = "Nivel regular";
+        estado.style.color = "#ffff00";
+    } else {
+        estado.textContent = "Demasiado ruido";
+        estado.style.color = "#ff4444";
+    }
 }
 
 function abrirPizarra(tipo) {
     document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
-    document.getElementById(`pizarra-${tipo}`).classList.add('activa');
+    const destino = document.getElementById(`pizarra-${tipo}`);
+    if (destino) destino.classList.add('activa');
 }
 
 function cerrarPizarra() {
