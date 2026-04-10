@@ -372,7 +372,13 @@
     value="1"
     style="width:300px; margin-top:5px;"
     oninput="actualizarSens(this.value)"
+   
 >
+    <button 
+    onclick="calibrarAula()" 
+    style="margin-top:8px; padding:8px 16px; background:#00ffcc22; border:2px solid #00ffcc; color:#00ffcc; border-radius:8px; cursor:pointer;">
+    Calibrar aula
+</button>     
       
         <div class="estado" id="estado">Pulsa iniciar</div>
         <div class="nota" id="nota"></div>
@@ -457,6 +463,7 @@ let muestras = 0;
 let modoActual = 1;
 let intervenciones = 0;
 let sensibilidad = 1;
+let calibrando = false;
 
 const modos = [
     { nombre: "Explicación", afectaPenalizacion: false },
@@ -649,7 +656,78 @@ function abrirPizarra(tipo) {
 function cerrarPizarra() {
     document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
 }
+async function calibrarAula() {
+    if (calibrando) return;
 
+    calibrando = true;
+
+    document.getElementById("estado").textContent = "Calibrando...";
+    document.getElementById("estado").style.color = "#ffff00";
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const analyserTemp = ctx.createAnalyser();
+        const source = ctx.createMediaStreamSource(stream);
+
+        source.connect(analyserTemp);
+
+        analyserTemp.fftSize = 256;
+        const data = new Uint8Array(analyserTemp.frequencyBinCount);
+
+        let suma = 0;
+        let muestrasCal = 0;
+
+        const inicio = Date.now();
+
+        function medir() {
+            analyserTemp.getByteFrequencyData(data);
+
+            let s = 0;
+            for (let i = 0; i < data.length; i++) {
+                s += data[i];
+            }
+
+            let vol = s / data.length;
+
+            suma += vol;
+            muestrasCal++;
+
+            if (Date.now() - inicio < 3000) {
+                requestAnimationFrame(medir);
+            } else {
+                finalizar();
+            }
+        }
+
+        function finalizar() {
+            const media = suma / muestrasCal;
+
+            let nuevaSens = 30 / media;
+            nuevaSens = Math.max(0.5, Math.min(2, nuevaSens));
+
+            sensibilidad = nuevaSens;
+
+            document.getElementById("sensibilidad").value = nuevaSens;
+            document.getElementById("sensValor").textContent = nuevaSens.toFixed(1);
+
+            document.getElementById("estado").textContent = "Calibrado";
+            document.getElementById("estado").style.color = "#00ffcc";
+
+            stream.getTracks().forEach(t => t.stop());
+            ctx.close();
+
+            calibrando = false;
+        }
+
+        medir();
+
+    } catch (e) {
+        document.getElementById("estado").textContent = "Error en calibración";
+        document.getElementById("estado").style.color = "#ff4444";
+        calibrando = false;
+    }
+}
 setModo(1);
 </script>
 <div class="credito">Creado por Manuel</div>
