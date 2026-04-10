@@ -1144,6 +1144,7 @@ async function calibrarAula() {
    - resto: azul, negro, rojo                      */
 const COLORS_NORMAL = { azul: '#1a6ef5', negro: '#111111', rojo: '#e63232' };
 const COLORS_NEGRA  = { azul: '#1a6ef5', blanco: '#ffffff', rojo: '#e63232' };
+const PIZARRAS_STORAGE_KEY = "radar_pizarras_v1";
 
 function getColorsForTipo(tipo) {
     return tipo === 'negra' ? COLORS_NEGRA : COLORS_NORMAL;
@@ -1152,6 +1153,49 @@ function getColorsForTipo(tipo) {
 const pizarraData = {};
 let pizarraMinimizada = null;
 let tipoParaCerrar    = null;
+
+function persistPizarras() {
+    try {
+        const serializable = {};
+        Object.entries(pizarraData).forEach(([tipo, pd]) => {
+            serializable[tipo] = {
+                paginas: pd.paginas,
+                paginaActual: pd.paginaActual,
+                hayTrazos: pd.hayTrazos,
+                state: {
+                    color: pd.state.color,
+                    size: pd.state.size,
+                    mode: pd.state.mode
+                }
+            };
+        });
+        localStorage.setItem(PIZARRAS_STORAGE_KEY, JSON.stringify(serializable));
+    } catch {}
+}
+
+function cargarPizarrasPersistidas() {
+    try {
+        const raw = localStorage.getItem(PIZARRAS_STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        Object.entries(saved).forEach(([tipo, pd]) => {
+            const cols = getColorsForTipo(tipo);
+            pizarraData[tipo] = {
+                paginas: Array.isArray(pd.paginas) && pd.paginas.length ? pd.paginas : [null],
+                paginaActual: Math.max(0, Math.min(pd.paginaActual ?? 0, (pd.paginas?.length ?? 1) - 1)),
+                hayTrazos: !!pd.hayTrazos,
+                state: {
+                    color: pd.state?.color ?? cols.azul,
+                    size: pd.state?.size ?? 4,
+                    mode: pd.state?.mode ?? 'draw',
+                    drawing: false,
+                    lastX: 0,
+                    lastY: 0
+                }
+            };
+        });
+    } catch {}
+}
 
 function getPD(tipo) {
     if (!pizarraData[tipo]) {
@@ -1210,7 +1254,13 @@ function buildToolbar(tipo) {
 
     tb.appendChild(mkBtn('🗑 Limpiar', () => {
         const c = getCanvas(tipo);
-        if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+        if (c) {
+            c.getContext('2d').clearRect(0, 0, c.width, c.height);
+            const pd = getPD(tipo);
+            pd.paginas[pd.paginaActual] = null;
+            pd.hayTrazos = false;
+            persistPizarras();
+        }
     }));
 
     sep(tb);
@@ -1262,7 +1312,8 @@ function buildPagBar(tipo) {
 function saveCurrentPage(tipo) {
     const cvs = getCanvas(tipo); if (!cvs) return;
     const pd = getPD(tipo);
-    pd.paginas[pd.paginaActual] = cvs.getContext('2d').getImageData(0, 0, cvs.width, cvs.height);
+    pd.paginas[pd.paginaActual] = cvs.toDataURL('image/png');
+    persistPizarras();
 }
 
 function cambiarPagina(tipo, idx) {
@@ -1279,6 +1330,7 @@ function añadirPagina(tipo) {
     pd.paginaActual = pd.paginas.length - 1;
     buildPagBar(tipo);
     restorePage(tipo);
+    persistPizarras();
 }
 
 function restorePage(tipo) {
@@ -1287,7 +1339,11 @@ function restorePage(tipo) {
     const ctx = cvs.getContext('2d');
     ctx.clearRect(0, 0, cvs.width, cvs.height);
     const img = pd.paginas[pd.paginaActual];
-    if (img) ctx.putImageData(img, 0, 0);
+    if (img) {
+        const image = new Image();
+        image.onload = () => ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+        image.src = img;
+    }
 }
 
 function getCanvas(tipo) {
@@ -1333,7 +1389,9 @@ function guardarPagina(tipo) {
     link.download = `pizarra-${tipo}-p${pd.paginaActual + 1}.png`;
     link.href = tmp.toDataURL('image/png');
     link.click();
+    saveCurrentPage(tipo);
     getPD(tipo).hayTrazos = false;
+    persistPizarras();
 }
 
 /* ── Canvas de dibujo ── */
@@ -1393,7 +1451,11 @@ function initDrawCanvas(tipo) {
         pd.hayTrazos = true;
     }
 
-    function stopDraw() { st.drawing = false; }
+    function stopDraw() {
+        if (!st.drawing) return;
+        st.drawing = false;
+        saveCurrentPage(tipo);
+    }
 
     cvs.addEventListener('mousedown',  startDraw);
     cvs.addEventListener('mousemove',  doDraw);
@@ -1486,10 +1548,12 @@ function cerrarPizarraDefinitivo(tipo) {
 }
 
 window.addEventListener("beforeunload", () => {
+    Object.keys(pizarraData).forEach(saveCurrentPage);
     mediaStream?.getTracks().forEach(t => t.stop());
     if (audioContext?.state && audioContext.state !== "closed") audioContext.close();
 });
 
+cargarPizarrasPersistidas();
 resetApp();
 </script>
 </body>
