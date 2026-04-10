@@ -20,7 +20,7 @@
         box-sizing: border-box;
     }
 
-    /* ====================== IZQUIERDA ====================== */
+    /* IZQUIERDA */
     .left {
         display: flex;
         flex-direction: column;
@@ -77,7 +77,7 @@
         text-align: center;
     }
 
-    /* ====================== CENTRO ====================== */
+    /* CENTRO */
     .center {
         display: flex;
         flex-direction: column;
@@ -99,7 +99,7 @@
     }
 
     header img {
-        height: 48px;           /* Reducido para que no quede grande */
+        height: 48px;
         border-radius: 50%;
         box-shadow: 0 0 12px #00ffcc;
     }
@@ -132,18 +132,8 @@
         transition: width 0.1s;
     }
 
-    .estado { 
-        margin-top: 16px; 
-        font-size: 1.35rem; 
-        min-height: 30px; 
-    }
-
-    .nota { 
-        margin-top: 6px; 
-        font-size: 2.35rem; 
-        font-weight: bold; 
-        min-height: 65px; 
-    }
+    .estado { margin-top: 16px; font-size: 1.35rem; min-height: 30px; }
+    .nota { margin-top: 6px; font-size: 2.35rem; font-weight: bold; min-height: 65px; }
 
     #btn {
         margin-top: 28px;
@@ -157,7 +147,7 @@
         font-weight: bold;
     }
 
-    /* ====================== DERECHA ====================== */
+    /* DERECHA */
     .right {
         display: flex;
         flex-direction: column;
@@ -184,7 +174,7 @@
         transform: translateX(8px);
     }
 
-    /* ====================== PIZARRAS ====================== */
+    /* PIZARRAS */
     .pizarra {
         display: none;
         position: fixed;
@@ -219,7 +209,7 @@
         z-index: 1010;
     }
 
-    /* Pentagrama realista */
+    /* PENTAGRAMA CORREGIDO - 3 pentagramas de 5 líneas cada uno */
     #pizarra-pentagrama .pizarra-content {
         background: #f9f6eb;
     }
@@ -228,7 +218,7 @@
         position: absolute;
         left: 8%;
         right: 8%;
-        height: 130px;
+        height: 110px;
     }
 
     .linea {
@@ -282,7 +272,7 @@
         <div class="pizarra-btn" onclick="abrirPizarra('pentagrama')">🎵 Pentagrama</div>
     </div>
 
-    <!-- PIZARRAS (mismo que antes) -->
+    <!-- PIZARRAS -->
     <div id="pizarra-blanca" class="pizarra">
         <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
     </div>
@@ -295,41 +285,42 @@
         <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
     </div>
 
+    <!-- PENTAGRAMA - 3 grupos de 5 líneas -->
     <div id="pizarra-pentagrama" class="pizarra">
         <div class="pizarra-content">
             <span class="cerrar" onclick="cerrarPizarra()">×</span>
             
+            <!-- Pentagrama 1 -->
             <div class="pentagrama" style="top: 12%;">
                 <div class="linea" style="top: 0%;"></div>
                 <div class="linea" style="top: 25%;"></div>
                 <div class="linea" style="top: 50%;"></div>
                 <div class="linea" style="top: 75%;"></div>
                 <div class="linea" style="top: 100%;"></div>
-                <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
             </div>
 
-            <div class="pentagrama" style="top: 39%;">
+            <!-- Pentagrama 2 -->
+            <div class="pentagrama" style="top: 42%;">
                 <div class="linea" style="top: 0%;"></div>
                 <div class="linea" style="top: 25%;"></div>
                 <div class="linea" style="top: 50%;"></div>
                 <div class="linea" style="top: 75%;"></div>
                 <div class="linea" style="top: 100%;"></div>
-                <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
             </div>
 
-            <div class="pentagrama" style="top: 66%;">
+            <!-- Pentagrama 3 -->
+            <div class="pentagrama" style="top: 72%;">
                 <div class="linea" style="top: 0%;"></div>
                 <div class="linea" style="top: 25%;"></div>
                 <div class="linea" style="top: 50%;"></div>
                 <div class="linea" style="top: 75%;"></div>
                 <div class="linea" style="top: 100%;"></div>
-                <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
             </div>
         </div>
     </div>
 
 <script>
-// (El script es exactamente el mismo que te di en el mensaje anterior - sin cambios)
+// Script completo (sin cambios respecto a la versión anterior)
 let audioContext, analyser, dataArray;
 let running = false;
 let angle = 0;
