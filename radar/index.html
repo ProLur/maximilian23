@@ -15,20 +15,21 @@
         align-items: flex-start;
         justify-content: center;
         gap: 40px;
-        padding: 30px 20px;
+        padding: 25px 20px;
         min-height: 100vh;
+        box-sizing: border-box;
     }
 
-    /* === IZQUIERDA: Tarjetas === */
+    /* IZQUIERDA */
     .left {
         display: flex;
         flex-direction: column;
         gap: 16px;
-        min-width: 200px;
+        min-width: 205px;
     }
 
     .card {
-        width: 200px;
+        width: 205px;
         padding: 20px 15px;
         border: 2px solid #00ffcc55;
         border-radius: 12px;
@@ -46,7 +47,39 @@
         box-shadow: 0 0 25px #00ffcc88;
     }
 
-    /* === CENTRO: Radar === */
+    /* Contador de intervenciones */
+    .contador {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: #161b22;
+        border: 2px solid #00ffcc55;
+        border-radius: 12px;
+        padding: 15px;
+        width: 205px;
+        margin-top: 8px;
+    }
+
+    .contador button {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+        background: #00ffcc22;
+        border: 2px solid #00ffcc;
+        color: #00ffcc;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .contador span {
+        font-size: 2rem;
+        font-weight: bold;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    /* CENTRO */
     .center {
         display: flex;
         flex-direction: column;
@@ -65,12 +98,6 @@
         padding: 12px;
         margin-bottom: 25px;
         border-radius: 10px;
-    }
-
-    header img {
-        height: 52px;
-        border-radius: 50%;
-        box-shadow: 0 0 12px #00ffcc;
     }
 
     canvas {
@@ -92,35 +119,25 @@
         height: 100%;
         width: 0%;
         background: #00ffcc;
-        transition: width 0.1s linear;
+        transition: width 0.1s;
     }
 
-    .estado {
-        margin-top: 18px;
-        font-size: 1.4rem;
-        min-height: 30px;
-    }
-
-    .nota {
-        margin-top: 8px;
-        font-size: 2.4rem;
-        font-weight: bold;
-        min-height: 60px;
-    }
+    .estado { margin-top: 18px; font-size: 1.4rem; min-height: 32px; }
+    .nota { margin-top: 8px; font-size: 2.4rem; font-weight: bold; min-height: 65px; }
 
     #btn {
         margin-top: 30px;
-        padding: 14px 40px;
+        padding: 14px 45px;
         background: #00ffcc22;
         border: 2px solid #00ffcc;
         color: #00ffcc;
         cursor: pointer;
         border-radius: 10px;
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         font-weight: bold;
     }
 
-    /* === DERECHA: Botones de pizarra === */
+    /* DERECHA */
     .right {
         display: flex;
         flex-direction: column;
@@ -147,7 +164,7 @@
         transform: translateX(8px);
     }
 
-    /* === PIZARRAS OVERLAY === */
+    /* PIZARRAS */
     .pizarra {
         display: none;
         position: fixed;
@@ -165,7 +182,7 @@
 
     .pizarra-content {
         width: 94%;
-        max-width: 1150px;
+        max-width: 1180px;
         height: 88vh;
         border: 4px solid #00ffcc;
         position: relative;
@@ -176,25 +193,10 @@
         position: absolute;
         top: 15px;
         right: 25px;
-        font-size: 3rem;
+        font-size: 3.2rem;
         color: #ff5555;
         cursor: pointer;
         z-index: 1010;
-        text-shadow: 0 0 15px black;
-    }
-
-    /* Fondos de pizarras */
-    #pizarra-blanca .pizarra-content { background: #fdfdfd; }
-    #pizarra-negra .pizarra-content { background: #0a0a0a; }
-    #pizarra-cuadros .pizarra-content { 
-        background: #f8f8f8;
-        background-image: linear-gradient(#ccc 1px, transparent 1px),
-                          linear-gradient(90deg, #ccc 1px, transparent 1px);
-        background-size: 35px 35px;
-    }
-    #pizarra-pentagrama .pizarra-content {
-        background: #f9f9f0;
-        position: relative;
     }
 </style>
 </head>
@@ -205,6 +207,13 @@
         <div class="card" id="card-explicacion" onclick="setModo(0)">📖 Explicación</div>
         <div class="card" id="card-trabajo" onclick="setModo(1)">✍️ Trabajo</div>
         <div class="card" id="card-preguntas" onclick="setModo(2)">❓ Turno de preguntas</div>
+        
+        <!-- Contador de intervenciones -->
+        <div class="contador">
+            <button onclick="cambiarIntervenciones(-1)">−</button>
+            <span id="intervenciones">0</span>
+            <button onclick="cambiarIntervenciones(1)">+</button>
+        </div>
     </div>
 
     <!-- CENTRO -->
@@ -256,7 +265,6 @@
     <div id="pizarra-pentagrama" class="pizarra">
         <div class="pizarra-content">
             <span class="cerrar" onclick="cerrarPizarra()">×</span>
-            <!-- 3 Pentagramas -->
             <div style="position:absolute; top:18%; left:8%; right:8%; height:15%; border-bottom:4px solid #111;"></div>
             <div style="position:absolute; top:42%; left:8%; right:8%; height:15%; border-bottom:4px solid #111;"></div>
             <div style="position:absolute; top:66%; left:8%; right:8%; height:15%; border-bottom:4px solid #111;"></div>
@@ -264,18 +272,18 @@
     </div>
 
 <script>
-// ==================== LÓGICA RADAR ====================
 let audioContext, analyser, dataArray;
 let running = false;
 let angle = 0;
 let sumaVolumen = 0;
 let muestras = 0;
 let modoActual = 1;
+let intervenciones = 0;
 
 const modos = [
-    { nombre: "Explicación", afectaNota: false },
-    { nombre: "Trabajo", afectaNota: true },
-    { nombre: "Turno de preguntas", afectaNota: false }
+    { nombre: "Explicación", afectaPenalizacion: true },
+    { nombre: "Trabajo", afectaPenalizacion: false },
+    { nombre: "Turno de preguntas", afectaPenalizacion: true }
 ];
 
 function setModo(modo) {
@@ -283,6 +291,11 @@ function setModo(modo) {
     document.querySelectorAll('.card').forEach((card, i) => {
         card.classList.toggle('activo', i === modo);
     });
+}
+
+function cambiarIntervenciones(cambio) {
+    intervenciones = Math.max(0, intervenciones + cambio);
+    document.getElementById("intervenciones").textContent = intervenciones;
 }
 
 async function toggle() {
@@ -293,6 +306,9 @@ async function toggle() {
 async function iniciar() {
     sumaVolumen = 0;
     muestras = 0;
+    intervenciones = 0;                    // Reinicia contador al iniciar
+    document.getElementById("intervenciones").textContent = "0";
+
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioContext.createAnalyser();
@@ -309,17 +325,23 @@ async function iniciar() {
 
 function parar() {
     running = false;
-    if (modos[modoActual].afectaNota) {
-        const media = sumaVolumen / muestras || 0;
-        let nota = 10 - (media / 10);
-        nota = Math.max(1, Math.min(10, nota)).toFixed(1);
-        document.getElementById("nota").textContent = `Nota: ${nota}`;
-    } else {
-        document.getElementById("nota").textContent = `Sin nota (${modos[modoActual].nombre})`;
+    
+    const media = sumaVolumen / muestras || 0;
+    let nota = 10 - (media / 10);
+    nota = Math.max(1, Math.min(10, nota));
+
+    // Aplicar penalización solo en Explicación y Turno de preguntas
+    if (modos[modoActual].afectaPenalizacion) {
+        nota -= intervenciones * 0.10;
     }
+
+    nota = Math.max(1, Math.min(10, nota)).toFixed(1);
+
+    document.getElementById("nota").textContent = `Nota: ${nota}`;
     document.getElementById("btn").textContent = "INICIAR";
 }
 
+// Funciones del radar (sin cambios)
 function loop() {
     if (!running) return;
     analyser.getByteFrequencyData(dataArray);
@@ -342,18 +364,14 @@ function dibujarRadar(volumen) {
     ctx.clearRect(0,0,300,300);
     const cx = 150, cy = 150;
     ctx.beginPath(); ctx.arc(cx,cy,120,0,Math.PI*2); ctx.strokeStyle="#00ffcc33"; ctx.stroke();
-    
     const radio = 40 + volumen;
     ctx.beginPath(); ctx.arc(cx,cy,radio,0,Math.PI*2);
     ctx.strokeStyle = volumen < 30 ? "#00ffcc" : volumen < 60 ? "#ffff00" : "#ff4444";
     ctx.stroke();
-
     angle += 0.03;
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
+    ctx.beginPath(); ctx.moveTo(cx,cy);
     ctx.lineTo(cx + Math.cos(angle)*120, cy + Math.sin(angle)*120);
-    ctx.strokeStyle="#00ffcc";
-    ctx.stroke();
+    ctx.strokeStyle="#00ffcc"; ctx.stroke();
 }
 
 function actualizarBarra(volumen) {
@@ -365,19 +383,11 @@ function actualizarBarra(volumen) {
 
 function actualizarEstado(volumen) {
     const estado = document.getElementById("estado");
-    if (volumen < 30) {
-        estado.textContent = "Silencio óptimo";
-        estado.style.color = "#00ffcc";
-    } else if (volumen < 60) {
-        estado.textContent = "Nivel regular";
-        estado.style.color = "#ffff00";
-    } else {
-        estado.textContent = "Demasiado ruido";
-        estado.style.color = "#ff4444";
-    }
+    if (volumen < 30) { estado.textContent = "Silencio óptimo"; estado.style.color = "#00ffcc"; }
+    else if (volumen < 60) { estado.textContent = "Nivel regular"; estado.style.color = "#ffff00"; }
+    else { estado.textContent = "Demasiado ruido"; estado.style.color = "#ff4444"; }
 }
 
-// ==================== PIZARRAS ====================
 function abrirPizarra(tipo) {
     document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
     document.getElementById(`pizarra-${tipo}`).classList.add('activa');
@@ -387,7 +397,6 @@ function cerrarPizarra() {
     document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
 }
 
-// Iniciar con "Trabajo" activo
 setModo(1);
 </script>
 </body>
