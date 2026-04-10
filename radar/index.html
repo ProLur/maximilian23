@@ -7,6 +7,7 @@
 <style>
     body {
         margin: 0;
+        padding: 20px;
         font-family: "Courier New", monospace;
         background: #0d1117;
         color: #00ffcc;
@@ -14,28 +15,27 @@
         flex-direction: row;
         align-items: flex-start;
         justify-content: center;
-        gap: 40px;
-        padding: 25px 20px;
+        gap: 45px;
         min-height: 100vh;
         box-sizing: border-box;
     }
 
-    /* IZQUIERDA */
+    /* ====================== IZQUIERDA ====================== */
     .left {
         display: flex;
         flex-direction: column;
-        gap: 16px;
-        min-width: 205px;
+        gap: 18px;
+        min-width: 210px;
     }
 
     .card {
-        width: 205px;
-        padding: 20px 15px;
+        width: 210px;
+        padding: 19px 15px;
         border: 2px solid #00ffcc55;
         border-radius: 12px;
         background: #161b22;
         text-align: center;
-        font-size: 1.35rem;
+        font-size: 1.32rem;
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s;
@@ -51,19 +51,18 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 12px;
+        gap: 15px;
         background: #161b22;
         border: 2px solid #00ffcc55;
         border-radius: 12px;
-        padding: 15px;
-        width: 205px;
-        margin-top: 8px;
+        padding: 14px;
+        width: 210px;
     }
 
     .contador button {
-        width: 50px;
-        height: 50px;
-        font-size: 1.8rem;
+        width: 48px;
+        height: 48px;
+        font-size: 1.9rem;
         background: #00ffcc22;
         border: 2px solid #00ffcc;
         color: #00ffcc;
@@ -72,44 +71,56 @@
     }
 
     .contador span {
-        font-size: 2rem;
+        font-size: 2.1rem;
         font-weight: bold;
-        min-width: 40px;
+        min-width: 45px;
         text-align: center;
     }
 
-    /* CENTRO */
+    /* ====================== CENTRO ====================== */
     .center {
         display: flex;
         flex-direction: column;
         align-items: center;
+        max-width: 340px;
     }
 
     header {
         width: 100%;
-        max-width: 320px;
         background: #161b22;
         border-bottom: 2px solid #00ffcc;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 12px;
-        padding: 12px;
-        margin-bottom: 25px;
+        padding: 10px 15px;
+        margin-bottom: 22px;
         border-radius: 10px;
+    }
+
+    header img {
+        height: 48px;           /* Reducido para que no quede grande */
+        border-radius: 50%;
+        box-shadow: 0 0 12px #00ffcc;
+    }
+
+    header h2 {
+        margin: 0;
+        font-size: 1.55rem;
     }
 
     canvas {
         background: #020606;
         border: 3px solid #00ffcc55;
         border-radius: 50%;
+        margin-bottom: 10px;
     }
 
     .barra {
         width: 300px;
         height: 16px;
         border: 2px solid #00ffcc;
-        margin-top: 25px;
+        margin-top: 20px;
         border-radius: 10px;
         overflow: hidden;
     }
@@ -121,37 +132,47 @@
         transition: width 0.1s;
     }
 
-    .estado { margin-top: 18px; font-size: 1.4rem; min-height: 32px; }
-    .nota { margin-top: 8px; font-size: 2.4rem; font-weight: bold; min-height: 65px; }
+    .estado { 
+        margin-top: 16px; 
+        font-size: 1.35rem; 
+        min-height: 30px; 
+    }
+
+    .nota { 
+        margin-top: 6px; 
+        font-size: 2.35rem; 
+        font-weight: bold; 
+        min-height: 65px; 
+    }
 
     #btn {
-        margin-top: 30px;
-        padding: 14px 45px;
+        margin-top: 28px;
+        padding: 14px 50px;
         background: #00ffcc22;
         border: 2px solid #00ffcc;
         color: #00ffcc;
         cursor: pointer;
         border-radius: 10px;
-        font-size: 1.25rem;
+        font-size: 1.22rem;
         font-weight: bold;
     }
 
-    /* DERECHA */
+    /* ====================== DERECHA ====================== */
     .right {
         display: flex;
         flex-direction: column;
-        gap: 14px;
-        min-width: 220px;
+        gap: 15px;
+        min-width: 225px;
     }
 
     .pizarra-btn {
-        padding: 18px 20px;
+        padding: 17px 20px;
         background: #161b22;
         border: 2px solid #00ffcc55;
         color: #00ffcc;
         cursor: pointer;
         border-radius: 12px;
-        font-size: 1.25rem;
+        font-size: 1.23rem;
         font-weight: bold;
         transition: all 0.3s;
         text-align: center;
@@ -163,13 +184,13 @@
         transform: translateX(8px);
     }
 
-    /* PIZARRAS */
+    /* ====================== PIZARRAS ====================== */
     .pizarra {
         display: none;
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0,0,0,0.95);
+        background: rgba(0,0,0,0.96);
         z-index: 1000;
         align-items: center;
         justify-content: center;
@@ -261,31 +282,23 @@
         <div class="pizarra-btn" onclick="abrirPizarra('pentagrama')">🎵 Pentagrama</div>
     </div>
 
-    <!-- PIZARRAS -->
+    <!-- PIZARRAS (mismo que antes) -->
     <div id="pizarra-blanca" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
-        </div>
+        <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
     </div>
 
     <div id="pizarra-negra" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
-        </div>
+        <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
     </div>
 
     <div id="pizarra-cuadros" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
-        </div>
+        <div class="pizarra-content"><span class="cerrar" onclick="cerrarPizarra()">×</span></div>
     </div>
 
-    <!-- PENTAGRAMA REAL (Opción 1) -->
     <div id="pizarra-pentagrama" class="pizarra">
         <div class="pizarra-content">
             <span class="cerrar" onclick="cerrarPizarra()">×</span>
             
-            <!-- Pentagrama 1 -->
             <div class="pentagrama" style="top: 12%;">
                 <div class="linea" style="top: 0%;"></div>
                 <div class="linea" style="top: 25%;"></div>
@@ -295,7 +308,6 @@
                 <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
             </div>
 
-            <!-- Pentagrama 2 -->
             <div class="pentagrama" style="top: 39%;">
                 <div class="linea" style="top: 0%;"></div>
                 <div class="linea" style="top: 25%;"></div>
@@ -305,7 +317,6 @@
                 <div style="position:absolute; left:25px; top:-22px; font-size:92px; color:#222;">𝄞</div>
             </div>
 
-            <!-- Pentagrama 3 -->
             <div class="pentagrama" style="top: 66%;">
                 <div class="linea" style="top: 0%;"></div>
                 <div class="linea" style="top: 25%;"></div>
@@ -318,7 +329,7 @@
     </div>
 
 <script>
-// ==================== LÓGICA PRINCIPAL ====================
+// (El script es exactamente el mismo que te di en el mensaje anterior - sin cambios)
 let audioContext, analyser, dataArray;
 let running = false;
 let angle = 0;
@@ -349,11 +360,8 @@ async function toggle() {
 }
 
 async function iniciar() {
-    sumaVolumen = 0;
-    muestras = 0;
-    intervenciones = 0;
+    sumaVolumen = 0; muestras = 0; intervenciones = 0;
     document.getElementById("intervenciones").textContent = "0";
-
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioContext.createAnalyser();
@@ -370,7 +378,6 @@ async function iniciar() {
 
 function parar() {
     running = false;
-    
     const media = sumaVolumen / muestras || 0;
     let nota = 10 - (media / 10);
     nota = Math.max(1, Math.min(10, nota));
