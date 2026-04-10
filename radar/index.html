@@ -434,9 +434,9 @@ let modoActual = 1;
 let intervenciones = 0;
 
 const modos = [
-    { nombre: "Explicación", afectaPenalizacion: true },
-    { nombre: "Trabajo", afectaPenalizacion: false },
-    { nombre: "Turno de preguntas", afectaPenalizacion: true }
+    { nombre: "Explicación", afectaPenalizacion: false },
+    { nombre: "Trabajo", afectaPenalizacion: true },
+    { nombre: "Turno de preguntas", afectaPenalizacion: false }
 ];
 
 function setModo(modo) {
@@ -530,8 +530,10 @@ function loop() {
 
     let volumen = sum / dataArray.length;
 
+    if (modoActual === 1) { // SOLO en modo Trabajo
     sumaVolumen += volumen;
     muestras++;
+}
 
     dibujarRadar(volumen);
     actualizarBarra(volumen);
