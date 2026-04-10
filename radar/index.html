@@ -4,272 +4,619 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radar de Silencio • Maximilian 23</title>
-
 <style>
-body {
-    margin: 0;
-    padding: 20px;
-    font-family: "Courier New", monospace;
-    background: #0d1117;
-    color: #00ffcc;
-    display: flex;
-    gap: 40px;
-    justify-content: center;
-}
+    body {
+        margin: 0;
+        padding: 20px;
+        font-family: "Courier New", monospace;
+        background: #0d1117;
+        color: #00ffcc;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 45px;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
 
-/* IZQUIERDA */
-.left {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
+    /* IZQUIERDA */
+    .left {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-width: 210px;
+    }
 
-.card {
-    width: 210px;
-    padding: 18px;
-    border: 2px solid #00ffcc55;
-    border-radius: 12px;
-    background: #161b22;
-    text-align: center;
-    font-weight: bold;
-    cursor: pointer;
-}
+    .card {
+        width: 210px;
+        padding: 19px 15px;
+        border: 2px solid #00ffcc55;
+        border-radius: 12px;
+        background: #161b22;
+        text-align: center;
+        font-size: 1.32rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
 
-.card.activo {
-    border-color: #00ffcc;
-    background: #00ffcc22;
-}
+    .card.activo {
+        border-color: #00ffcc;
+        background: #00ffcc22;
+        box-shadow: 0 0 25px #00ffcc88;
+    }
 
-/* CENTRO */
-.center {
-    text-align: center;
-}
+    .contador {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        background: #161b22;
+        border: 2px solid #00ffcc55;
+        border-radius: 12px;
+        padding: 14px;
+        width: 210px;
+        box-sizing: border-box;
+    }
 
-canvas {
-    background: #020606;
-    border-radius: 50%;
-    border: 3px solid #00ffcc55;
-}
+    .contador button {
+        width: 48px;
+        height: 48px;
+        font-size: 1.9rem;
+        background: #00ffcc22;
+        border: 2px solid #00ffcc;
+        color: #00ffcc;
+        border-radius: 10px;
+        cursor: pointer;
+    }
 
-.barra {
-    width: 300px;
-    height: 16px;
-    border: 2px solid #00ffcc;
-    margin-top: 15px;
-}
+    .contador span {
+        font-size: 2.1rem;
+        font-weight: bold;
+        min-width: 45px;
+        text-align: center;
+    }
 
-.barra-inner {
-    height: 100%;
-    width: 0%;
-    background: #00ffcc;
-}
+    /* CENTRO */
+    .center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 340px;
+    }
 
-.estado { margin-top: 10px; }
-.nota { font-size: 2rem; margin-top: 10px; }
+    header {
+        width: 100%;
+        background: #161b22;
+        border-bottom: 2px solid #00ffcc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 10px 15px;
+        margin-bottom: 22px;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
 
-#btn {
-    margin-top: 20px;
-    padding: 10px 30px;
-    border: 2px solid #00ffcc;
-    background: #00ffcc22;
-    color: #00ffcc;
-    cursor: pointer;
-}
+    header img {
+        height: 48px;
+        border-radius: 50%;
+        box-shadow: 0 0 12px #00ffcc;
+    }
 
-/* PIZARRAS */
-.pizarra {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: black;
-    align-items: center;
-    justify-content: center;
-}
+    header h2 {
+        margin: 0;
+        font-size: 1.55rem;
+        text-align: center;
+    }
 
-.pizarra.activa {
-    display: flex;
-}
+    canvas {
+        background: #020606;
+        border: 3px solid #00ffcc55;
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
 
-.pizarra-content {
-    width: 90%;
-    height: 90%;
-    border: 4px solid #00ffcc;
-    position: relative;
-}
+    .barra {
+        width: 300px;
+        height: 16px;
+        border: 2px solid #00ffcc;
+        margin-top: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
 
-.cerrar {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 40px;
-    color: red;
-    cursor: pointer;
-}
+    .barra-inner {
+        height: 100%;
+        width: 0%;
+        background: #00ffcc;
+        transition: width 0.1s;
+    }
 
-/* FONDOS */
-#pizarra-blanca .pizarra-content { background: white; }
-#pizarra-negra .pizarra-content { background: #111; }
+    .estado {
+        margin-top: 16px;
+        font-size: 1.35rem;
+        min-height: 30px;
+        text-align: center;
+    }
 
-#pizarra-cuadros .pizarra-content {
-    background: white;
-    background-image:
-        linear-gradient(#ccc 1px, transparent 1px),
-        linear-gradient(90deg, #ccc 1px, transparent 1px);
-    background-size: 25px 25px;
-}
+    .nota {
+        margin-top: 6px;
+        font-size: 2.35rem;
+        font-weight: bold;
+        min-height: 65px;
+        text-align: center;
+    }
 
-/* CUADERNILLO */
-#pizarra-cuadernillo .pizarra-content {
-    background: #fffdf7;
-    background-image:
-        repeating-linear-gradient(
-            to bottom,
-            transparent 0px,
-            transparent 34px,
-            #6aa6ff 34px,
-            #6aa6ff 36px,
-            transparent 36px,
-            transparent 52px,
-            #6aa6ff 52px,
-            #6aa6ff 54px
-        );
-}
+    #btn {
+        margin-top: 28px;
+        padding: 14px 50px;
+        background: #00ffcc22;
+        border: 2px solid #00ffcc;
+        color: #00ffcc;
+        cursor: pointer;
+        border-radius: 10px;
+        font-size: 1.22rem;
+        font-weight: bold;
+    }
 
-#pizarra-cuadernillo .pizarra-content::before {
-    content: "";
-    position: absolute;
-    left: 70px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: red;
-}
+    /* DERECHA */
+    .right {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-width: 250px;
+    }
 
-/* PENTAGRAMA */
-#pizarra-pentagrama .pizarra-content { background: #f9f6eb; }
+    .pizarra-btn {
+        padding: 17px 20px;
+        background: #161b22;
+        border: 2px solid #00ffcc55;
+        color: #00ffcc;
+        cursor: pointer;
+        border-radius: 12px;
+        font-size: 1.18rem;
+        font-weight: bold;
+        transition: all 0.3s;
+        text-align: center;
+        box-sizing: border-box;
+    }
 
-.pentagrama {
-    position: absolute;
-    left: 10%;
-    right: 10%;
-    height: 100px;
-}
+    .pizarra-btn:hover {
+        background: #00ffcc22;
+        border-color: #00ffcc;
+        transform: translateX(8px);
+    }
 
-.linea {
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    background: black;
-}
-</style>
-</head>
+    /* PIZARRAS */
+    .pizarra {
+        display: none;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.96);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
 
-<body>
+    .pizarra.activa {
+        display: flex;
+    }
 
-<div class="left">
-    <div class="card" onclick="setModo(0)">Explicación</div>
-    <div class="card" onclick="setModo(1)">Trabajo</div>
-    <div class="card" onclick="setModo(2)">Turno preguntas</div>
-</div>
+    .pizarra-content {
+        width: 94%;
+        max-width: 1180px;
+        height: 88vh;
+        border: 4px solid #00ffcc;
+        position: relative;
+        box-shadow: 0 0 40px #00ffcc88;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
 
-<div class="center">
-    <canvas id="radar" width="300" height="300"></canvas>
+    .cerrar {
+        position: absolute;
+        top: 14px;
+        right: 22px;
+        font-size: 3rem;
+        color: #ff5555;
+        cursor: pointer;
+        z-index: 1010;
+        font-weight: bold;
+        user-select: none;
+    }
 
-    <div class="barra">
-        <div id="barra" class="barra-inner"></div>
-    </div>
+    /* PIZARRA BLANCA */
+    #pizarra-blanca .pizarra-content {
+        background: #ffffff;
+    }
 
-    <div id="estado">Pulsa iniciar</div>
-    <div id="nota"></div>
+    /* PIZARRA NEGRA */
+    #pizarra-negra .pizarra-content {
+        background: #111111;
+    }
 
-    <button id="btn" onclick="toggle()">INICIAR</button>
-</div>
+    /* PIZARRA CUADRICULADA */
+    #pizarra-cuadros .pizarra-content {
+        background-color: #ffffff;
+        background-image:
+            linear-gradient(#cfcfcf 1px, transparent 1px),
+            linear-gradient(90deg, #cfcfcf 1px, transparent 1px);
+        background-size: 25px 25px;
+    }
 
-<div class="left">
-    <div onclick="abrirPizarra('blanca')">Blanca</div>
-    <div onclick="abrirPizarra('negra')">Negra</div>
-    <div onclick="abrirPizarra('cuadros')">Cuadriculada</div>
-    <div onclick="abrirPizarra('cuadernillo')">Cuadernillo</div>
-</div>
+    /* PIZARRA CUADERNILLO */
+    #pizarra-cuadernillo .pizarra-content {
+        background-color: #fffdf7;
+        background-image:
+            repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 34px,
+                #6aa6ff 34px,
+                #6aa6ff 36px,
+                transparent 36px,
+                transparent 52px,
+                #6aa6ff 52px,
+                #6aa6ff 54px
+            );
+    }
 
-<!-- PIZARRAS -->
-<div id="pizarra-blanca" class="pizarra"><div class="pizarra-content"><span class="cerrar" onclick="cerrar()">×</span></div></div>
-<div id="pizarra-negra" class="pizarra"><div class="pizarra-content"><span class="cerrar" onclick="cerrar()">×</span></div></div>
-<div id="pizarra-cuadros" class="pizarra"><div class="pizarra-content"><span class="cerrar" onclick="cerrar()">×</span></div></div>
-<div id="pizarra-cuadernillo" class="pizarra"><div class="pizarra-content"><span class="cerrar" onclick="cerrar()">×</span></div></div>
+    #pizarra-cuadernillo .pizarra-content::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 70px;
+        width: 2px;
+        background: #ff7a7a;
+        opacity: 0.8;
+    }
 
-<script>
-let running=false;
-let sumaVolumen=0;
-let muestras=0;
-let modoActual=1;
+    /* PENTAGRAMA */
+    #pizarra-pentagrama .pizarra-content {
+        background: #f9f6eb;
+    }
 
-const modos=[
-    {nombre:"Explicación", cuenta:false},
-    {nombre:"Trabajo", cuenta:true},
-    {nombre:"Turno preguntas", cuenta:false}
-];
+    .pentagrama {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        height: 110px;
+    }
 
-function setModo(m){
-    modoActual=m;
-}
+    .linea {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #222;
+    }
 
-async function toggle(){
-    if(!running) iniciar();
-    else parar();
-}
-
-async function iniciar(){
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    const ctx=new AudioContext();
-    const analyser=ctx.createAnalyser();
-    const source=ctx.createMediaStreamSource(stream);
-    source.connect(analyser);
-
-    const data=new Uint8Array(analyser.frequencyBinCount);
-
-    running=true;
-    loop();
-
-    function loop(){
-        if(!running) return;
-
-        analyser.getByteFrequencyData(data);
-        let sum=0;
-        for(let i=0;i<data.length;i++) sum+=data[i];
-        let volumen=sum/data.length;
-
-        /* 🔥 SOLO CUENTA EN MODO TRABAJO */
-        if(modos[modoActual].cuenta){
-            sumaVolumen+=volumen;
-            muestras++;
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+        body {
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
         }
 
-        document.getElementById("barra").style.width=Math.min(volumen*1.5,100)+"%";
+        .left,
+        .right {
+            width: 100%;
+            max-width: 340px;
+            min-width: unset;
+        }
 
-        requestAnimationFrame(loop);
+        .card,
+        .contador,
+        .pizarra-btn {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <!-- IZQUIERDA -->
+    <div class="left">
+        <div class="card" id="card-explicacion" onclick="setModo(0)">📖 Explicación</div>
+        <div class="card" id="card-trabajo" onclick="setModo(1)">✍️ Trabajo</div>
+        <div class="card" id="card-preguntas" onclick="setModo(2)">❓ Turno de preguntas</div>
+
+        <div class="contador">
+            <button onclick="cambiarIntervenciones(-1)">−</button>
+            <span id="intervenciones">0</span>
+            <button onclick="cambiarIntervenciones(1)">+</button>
+        </div>
+    </div>
+
+    <!-- CENTRO -->
+    <div class="center">
+        <header>
+            <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
+            <h2>RADAR DE SILENCIO</h2>
+        </header>
+
+        <canvas id="radar" width="300" height="300"></canvas>
+
+        <div class="barra">
+            <div class="barra-inner" id="barra"></div>
+        </div>
+
+        <div class="estado" id="estado">Pulsa iniciar</div>
+        <div class="nota" id="nota"></div>
+
+        <button id="btn" onclick="toggle()">INICIAR</button>
+    </div>
+
+    <!-- DERECHA -->
+    <div class="right">
+        <div class="pizarra-btn" onclick="abrirPizarra('blanca')">📄 Pizarra Blanca</div>
+        <div class="pizarra-btn" onclick="abrirPizarra('negra')">⬛ Pizarra Negra</div>
+        <div class="pizarra-btn" onclick="abrirPizarra('cuadros')">📐 Pizarra Cuadriculada</div>
+        <div class="pizarra-btn" onclick="abrirPizarra('cuadernillo')">✏️ Pizarra Cuadernillo</div>
+        <div class="pizarra-btn" onclick="abrirPizarra('pentagrama')">🎵 Pentagrama</div>
+    </div>
+
+    <!-- PIZARRAS -->
+    <div id="pizarra-blanca" class="pizarra">
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
+    </div>
+
+    <div id="pizarra-negra" class="pizarra">
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
+    </div>
+
+    <div id="pizarra-cuadros" class="pizarra">
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
+    </div>
+
+    <div id="pizarra-cuadernillo" class="pizarra">
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+        </div>
+    </div>
+
+    <!-- PENTAGRAMA -->
+    <div id="pizarra-pentagrama" class="pizarra">
+        <div class="pizarra-content">
+            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+
+            <!-- Pentagrama 1 -->
+            <div class="pentagrama" style="top: 12%;">
+                <div class="linea" style="top: 0%;"></div>
+                <div class="linea" style="top: 25%;"></div>
+                <div class="linea" style="top: 50%;"></div>
+                <div class="linea" style="top: 75%;"></div>
+                <div class="linea" style="top: 100%;"></div>
+            </div>
+
+            <!-- Pentagrama 2 -->
+            <div class="pentagrama" style="top: 42%;">
+                <div class="linea" style="top: 0%;"></div>
+                <div class="linea" style="top: 25%;"></div>
+                <div class="linea" style="top: 50%;"></div>
+                <div class="linea" style="top: 75%;"></div>
+                <div class="linea" style="top: 100%;"></div>
+            </div>
+
+            <!-- Pentagrama 3 -->
+            <div class="pentagrama" style="top: 72%;">
+                <div class="linea" style="top: 0%;"></div>
+                <div class="linea" style="top: 25%;"></div>
+                <div class="linea" style="top: 50%;"></div>
+                <div class="linea" style="top: 75%;"></div>
+                <div class="linea" style="top: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+let audioContext, analyser, dataArray, mediaStream;
+let running = false;
+let angle = 0;
+let sumaVolumen = 0;
+let muestras = 0;
+let modoActual = 1;
+let intervenciones = 0;
+
+const modos = [
+    { nombre: "Explicación", afectaPenalizacion: true },
+    { nombre: "Trabajo", afectaPenalizacion: false },
+    { nombre: "Turno de preguntas", afectaPenalizacion: true }
+];
+
+function setModo(modo) {
+    modoActual = modo;
+    document.querySelectorAll('.card').forEach((card, i) => {
+        card.classList.toggle('activo', i === modo);
+    });
+}
+
+function cambiarIntervenciones(cambio) {
+    intervenciones = Math.max(0, intervenciones + cambio);
+    document.getElementById("intervenciones").textContent = intervenciones;
+}
+
+async function toggle() {
+    if (!running) {
+        await iniciar();
+    } else {
+        parar();
     }
 }
 
-function parar(){
-    running=false;
+async function iniciar() {
+    try {
+        sumaVolumen = 0;
+        muestras = 0;
+        intervenciones = 0;
+        document.getElementById("intervenciones").textContent = "0";
 
-    let media=sumaVolumen/muestras||0;
-    let nota=10-(media/10);
-    nota=Math.max(1,Math.min(10,nota)).toFixed(1);
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
 
-    document.getElementById("nota").textContent="Nota: "+nota;
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        source.connect(analyser);
+
+        analyser.fftSize = 256;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        running = true;
+        document.getElementById("btn").textContent = "STOP";
+        document.getElementById("nota").textContent = "";
+        document.getElementById("estado").textContent = "Escuchando...";
+        document.getElementById("estado").style.color = "#00ffcc";
+
+        loop();
+    } catch (error) {
+        document.getElementById("estado").textContent = "No se pudo acceder al micrófono";
+        document.getElementById("estado").style.color = "#ff4444";
+    }
 }
 
-function abrirPizarra(t){
-    document.querySelectorAll('.pizarra').forEach(p=>p.classList.remove('activa'));
-    document.getElementById("pizarra-"+t).classList.add('activa');
+function parar() {
+    running = false;
+
+    const media = muestras > 0 ? (sumaVolumen / muestras) : 0;
+    let nota = 10 - (media / 10);
+    nota = Math.max(1, Math.min(10, nota));
+
+    if (modos[modoActual].afectaPenalizacion) {
+        nota -= intervenciones * 0.10;
+    }
+
+    nota = Math.max(1, Math.min(10, nota)).toFixed(1);
+
+    document.getElementById("nota").textContent = `Nota: ${nota}`;
+    document.getElementById("btn").textContent = "INICIAR";
+    document.getElementById("estado").textContent = "Medición detenida";
+    document.getElementById("estado").style.color = "#00ffcc";
+    document.getElementById("barra").style.width = "0%";
+
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+    }
+
+    if (audioContext && audioContext.state !== "closed") {
+        audioContext.close();
+    }
 }
 
-function cerrar(){
-    document.querySelectorAll('.pizarra').forEach(p=>p.classList.remove('activa'));
+function loop() {
+    if (!running) return;
+
+    analyser.getByteFrequencyData(dataArray);
+
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+    }
+
+    let volumen = sum / dataArray.length;
+
+    sumaVolumen += volumen;
+    muestras++;
+
+    dibujarRadar(volumen);
+    actualizarBarra(volumen);
+    actualizarEstado(volumen);
+
+    requestAnimationFrame(loop);
 }
+
+function dibujarRadar(volumen) {
+    const canvas = document.getElementById("radar");
+    const ctx = canvas.getContext("2d");
+    const cx = 150;
+    const cy = 150;
+
+    ctx.clearRect(0, 0, 300, 300);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 120, 0, Math.PI * 2);
+    ctx.strokeStyle = "#00ffcc33";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+    ctx.strokeStyle = "#00ffcc22";
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+    ctx.strokeStyle = "#00ffcc18";
+    ctx.stroke();
+
+    const radio = Math.min(40 + volumen, 120);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radio, 0, Math.PI * 2);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = volumen < 30 ? "#00ffcc" : (volumen < 60 ? "#ffff00" : "#ff4444");
+    ctx.stroke();
+
+    angle += 0.03;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(
+        cx + Math.cos(angle) * 120,
+        cy + Math.sin(angle) * 120
+    );
+    ctx.strokeStyle = "#00ffcc";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function actualizarBarra(volumen) {
+    const barra = document.getElementById("barra");
+    const porcentaje = Math.min(volumen * 1.5, 100);
+
+    barra.style.width = porcentaje + "%";
+    barra.style.background = volumen < 30 ? "#00ffcc" : (volumen < 60 ? "#ffff00" : "#ff4444");
+}
+
+function actualizarEstado(volumen) {
+    const estado = document.getElementById("estado");
+
+    if (volumen < 30) {
+        estado.textContent = "Silencio óptimo";
+        estado.style.color = "#00ffcc";
+    } else if (volumen < 60) {
+        estado.textContent = "Nivel regular";
+        estado.style.color = "#ffff00";
+    } else {
+        estado.textContent = "Demasiado ruido";
+        estado.style.color = "#ff4444";
+    }
+}
+
+function abrirPizarra(tipo) {
+    document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
+    const destino = document.getElementById(`pizarra-${tipo}`);
+    if (destino) destino.classList.add('activa');
+}
+
+function cerrarPizarra() {
+    document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
+}
+
+setModo(1);
 </script>
-
 </body>
 </html>
