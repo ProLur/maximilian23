@@ -2,69 +2,133 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Radar de Silencio • Maximilian 23</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-    margin: 0; padding: 0;
-    width: 100%; height: 100%; overflow: hidden;
+    width: 100%; height: 100%;
     font-family: "Courier New", monospace;
     background: #0d1117;
     color: #00ffcc;
+    overflow: hidden;
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+}
+
+body.modo-explicacion {
+    background:
+        radial-gradient(circle at top center, rgba(36, 103, 122, 0.35), transparent 48%),
+        linear-gradient(180deg, #0d1820 0%, #0d1117 72%);
+}
+
+body.modo-trabajo {
+    background:
+        radial-gradient(circle at top center, rgba(0, 255, 204, 0.18), transparent 44%),
+        linear-gradient(180deg, #102b29 0%, #0d1117 72%);
+}
+
+body.modo-preguntas {
+    background:
+        radial-gradient(circle at top center, rgba(132, 96, 36, 0.28), transparent 48%),
+        linear-gradient(180deg, #1c1710 0%, #0d1117 72%);
 }
 
 /* ══════════════════════════════
-   LAYOUT PRINCIPAL
+   LAYOUT PRINCIPAL – 3 columnas
 ══════════════════════════════ */
 .main {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 18px;
+    display: grid;
+    grid-template-columns: minmax(240px, 290px) minmax(390px, 430px) minmax(220px, 250px);
+    gap: 12px;
+    width: 100%;
     height: 100vh;
     padding: 12px 16px;
     overflow: hidden;
+    align-items: stretch;
+    justify-content: center;
 }
 
 /* ── COLUMNA IZQUIERDA ── */
 .left {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    width: 190px;
-    flex-shrink: 0;
+    gap: 10px;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 280px;
     height: 100%;
-    overflow: hidden;
+    justify-self: end;
+    min-height: 0;
+}
+
+.left-top,
+.left-bottom,
+.center-top,
+.center-middle,
+.center-bottom,
+.right-top {
+    display: flex;
+    flex-direction: column;
+}
+
+.left-top {
+    flex: 1;
+    gap: 12px;
+    justify-content: space-between;
+    min-height: 0;
+}
+
+.left-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 6px;
+}
+
+.score-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .card {
     width: 100%;
-    padding: 11px 10px;
+    min-height: clamp(84px, 12vh, 116px);
+    max-height: 116px;
+    padding: 16px 14px;
     border: 2px solid #00ffcc55;
-    border-radius: 10px;
+    border-radius: 14px;
     background: #161b22;
     text-align: center;
-    font-size: 1.05rem;
+    font-size: clamp(1rem, 1.45vw, 1.28rem);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+    flex: 1 1 0;
+}
+.card:hover {
+    border-color: #00ffcc99;
+    background: #00ffcc11;
 }
 .card.activo {
     border-color: #00ffcc;
-    background: #00ffcc22;
-    box-shadow: 0 0 18px #00ffcc88;
+    background: linear-gradient(180deg, rgba(0,255,204,0.28), rgba(0,255,204,0.12));
+    box-shadow: 0 0 22px #00ffcc88, inset 0 0 0 1px rgba(255,255,255,0.08);
+    transform: translateY(-2px) scale(1.01);
 }
 
 .bloque-label {
     text-align: center;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     letter-spacing: 1px;
     color: #00ffcc99;
-    margin-top: 4px;
-    margin-bottom: 2px;
+    margin-top: 8px;
     text-transform: uppercase;
 }
 
@@ -72,78 +136,31 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     background: #161b22;
     border: 2px solid #00ffcc55;
-    border-radius: 10px;
-    padding: 10px 8px;
+    border-radius: 14px;
+    padding: 12px 10px;
     width: 100%;
+    min-height: 82px;
 }
 .contador button {
-    width: 40px; height: 40px;
-    font-size: 1.6rem;
+    width: 42px; height: 42px;
+    font-size: 1.5rem;
     background: #00ffcc22;
     border: 2px solid #00ffcc;
     color: #00ffcc;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     line-height: 1;
+    transition: background 0.2s;
 }
+.contador button:hover { background: #00ffcc44; }
 .contador span {
-    font-size: 1.8rem;
+    font-size: 1.85rem;
     font-weight: bold;
-    min-width: 36px;
+    min-width: 34px;
     text-align: center;
-}
-
-.btn-calibrar {
-    width: 100%;
-    padding: 10px 6px;
-    background: #00ffcc22;
-    border: 2px solid #00ffcc;
-    color: #00ffcc;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: "Courier New", monospace;
-    font-size: 0.95rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-}
-.btn-calibrar:hover { background: #00ffcc44; }
-
-.sens-wrap {
-    background: #161b22;
-    border: 2px solid #00ffcc33;
-    border-radius: 10px;
-    padding: 8px 10px;
-    text-align: center;
-}
-.sens-wrap .sens-label {
-    font-size: 0.78rem;
-    color: #00ffcc99;
-    margin-bottom: 4px;
-    display: block;
-}
-.sens-wrap .sens-val {
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 4px;
-    display: block;
-}
-.size-slider-main {
-    -webkit-appearance: none;
-    width: 100%; height: 5px;
-    border-radius: 4px;
-    background: #00ffcc44;
-    outline: none; cursor: pointer;
-}
-.size-slider-main::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 15px; height: 15px;
-    border-radius: 50%;
-    background: #00ffcc;
-    cursor: pointer;
 }
 
 /* ── COLUMNA CENTRAL ── */
@@ -151,10 +168,37 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex-shrink: 0;
-    width: 300px;
+    justify-content: space-between;
+    width: min(100%, 430px);
     height: 100%;
-    overflow: hidden;
+    min-height: 0;
+}
+
+.center-top,
+.center-middle,
+.center-bottom {
+    width: 100%;
+    align-items: center;
+}
+
+.center-top {
+    padding-top: 0;
+}
+
+.center-middle {
+    flex: 1;
+    justify-content: center;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.center-bottom {
+    gap: 5px;
+    padding-bottom: 0;
+    width: 100%;
 }
 
 .header-box {
@@ -164,30 +208,31 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 7px 12px;
-    margin-bottom: 10px;
-    border-radius: 10px;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 12px;
 }
 .header-box img {
-    height: 38px;
+    height: 32px;
     border-radius: 50%;
     box-shadow: 0 0 10px #00ffcc;
 }
-.header-box h2 { margin: 0; font-size: 1.2rem; text-align: center; }
+.header-box h2 { font-size: clamp(0.85rem, 1.4vw, 1.15rem); text-align: center; }
 
 #radar {
     background: #020606;
     border: 3px solid #00ffcc55;
     border-radius: 50%;
     flex-shrink: 0;
+    width: min(100%, 330px);
+    height: auto;
+    aspect-ratio: 1;
 }
 
 .barra {
     width: 100%;
-    height: 13px;
+    height: 12px;
     border: 2px solid #00ffcc;
-    margin-top: 8px;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -198,31 +243,29 @@ html, body {
 }
 
 .estado {
-    margin-top: 8px;
-    font-size: 1.1rem;
-    min-height: 24px;
+    font-size: clamp(0.92rem, 1.15vw, 1.05rem);
+    min-height: 22px;
     text-align: center;
 }
 .nota {
-    margin-top: 4px;
-    font-size: 2rem;
+    font-size: clamp(1.15rem, 1.6vw, 1.45rem);
     font-weight: bold;
-    min-height: 50px;
+    min-height: 24px;
     text-align: center;
 }
 
 #btn {
-    margin-top: 8px;
     width: 100%;
-    padding: 12px;
+    padding: 13px;
     background: #00ffcc22;
     border: 2px solid #00ffcc;
     color: #00ffcc;
     cursor: pointer;
-    border-radius: 10px;
-    font-size: 1.15rem;
+    border-radius: 12px;
+    font-size: clamp(1rem, 1.25vw, 1.18rem);
     font-weight: bold;
     font-family: "Courier New", monospace;
+    transition: background 0.2s;
 }
 #btn:hover { background: #00ffcc44; }
 
@@ -230,36 +273,166 @@ html, body {
 .right {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    width: 220px;
-    flex-shrink: 0;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 240px;
     height: 100%;
-    overflow: hidden;
+    justify-self: start;
+    min-height: 0;
+}
+
+.right-top {
+    flex: 1;
+    gap: 10px;
+    justify-content: space-between;
+    min-height: 0;
 }
 
 .pizarra-btn {
-    padding: 14px 16px;
+    padding: 12px 12px;
+    min-height: clamp(58px, 10vh, 82px);
+    max-height: 82px;
     background: #161b22;
     border: 2px solid #00ffcc55;
     color: #00ffcc;
     cursor: pointer;
-    border-radius: 12px;
-    font-size: 1.05rem;
+    border-radius: 14px;
+    font-size: clamp(0.92rem, 1.05vw, 1.04rem);
     font-weight: bold;
     transition: all 0.3s;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.15;
+    flex: 1 1 0;
 }
 .pizarra-btn:hover {
     background: #00ffcc22;
     border-color: #00ffcc;
-    transform: translateX(6px);
+    transform: translateX(4px);
+}
+
+/* Controles calibrar/sensibilidad — debajo de pizarras */
+.right-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.center-controls {
+    display: none !important;
+}
+
+.control-card {
+    background: #161b22;
+    border: 2px solid #00ffcc44;
+    border-radius: 14px;
+    padding: 10px;
+}
+
+.control-card .btn-calibrar,
+.control-card .sens-wrap,
+.control-card .panic-btn {
+    width: 100%;
+}
+
+.btn-calibrar {
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 8px;
+    background: #00ffcc22;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+}
+.btn-calibrar::after {
+    content: "CALIBRAR";
+    font-size: clamp(0.8rem, 1vw, 0.95rem);
+}
+.btn-calibrar:hover { background: #00ffcc44; }
+
+.panic-btn {
+    min-height: 48px;
+    padding: 8px 10px;
+    background: rgba(255, 68, 68, 0.18);
+    border: 2px solid #ff4444;
+    color: #ff8d8d;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+}
+.panic-btn:hover {
+    background: rgba(255, 68, 68, 0.28);
+    box-shadow: 0 0 18px rgba(255, 68, 68, 0.25);
+}
+
+.sens-wrap {
+    background: #161b22;
+    border: 2px solid #00ffcc33;
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 5px 10px 6px;
+    text-align: center;
+}
+.sens-wrap .sens-label {
+    font-size: 0.72rem;
+    color: #00ffcc99;
+    margin-bottom: 1px;
+    display: block;
+}
+.sens-wrap .sens-val {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 2px;
+    display: block;
+}
+.size-slider-main {
+    -webkit-appearance: none;
+    width: 100%; height: 4px;
+    border-radius: 4px;
+    background: #00ffcc44;
+    outline: none; cursor: pointer;
+}
+.size-slider-main::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #00ffcc;
+    cursor: pointer;
+}
+
+.modo-info {
+    font-size: 0.7rem;
+    color: #00ffcc66;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #00ffcc22;
+    border-radius: 8px;
+    background: #161b22;
+    line-height: 1.4;
+}
+
+.right-controls .modo-info {
+    display: none;
 }
 
 .credito {
     position: fixed;
-    bottom: 8px; right: 14px;
-    font-size: 0.7rem;
-    color: #00ffcc44;
+    bottom: 6px; right: 12px;
+    font-size: 0.68rem;
+    color: #00ffcc33;
     letter-spacing: 1px;
 }
 
@@ -272,7 +445,7 @@ html, body {
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    padding: 12px 28px;
+    padding: 14px 30px;
     background: #161b22;
     border: 2px solid #00ffcc;
     color: #00ffcc;
@@ -288,7 +461,7 @@ html, body {
 #restore-btn:hover { background: #00ffcc22; }
 @keyframes pulse {
     0%,100% { box-shadow: 0 0 20px #00ffcc66; }
-    50%      { box-shadow: 0 0 35px #00ffccaa; }
+    50%     { box-shadow: 0 0 35px #00ffccaa; }
 }
 
 /* ══════════════════════════════
@@ -327,7 +500,7 @@ html, body {
 }
 
 .color-btn {
-    width: 28px; height: 28px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     border: 3px solid transparent;
     cursor: pointer;
@@ -336,9 +509,10 @@ html, body {
 }
 .color-btn:hover { transform: scale(1.15); }
 .color-btn.selected { border-color: #fff; box-shadow: 0 0 7px rgba(255,255,255,.6); transform: scale(1.2); }
-.color-btn.azul  { background: #1a6ef5; }
-.color-btn.negro { background: #111; border-color: #555; }
-.color-btn.rojo  { background: #e63232; }
+.color-btn.azul   { background: #1a6ef5; }
+.color-btn.negro  { background: #111; border-color: #555; }
+.color-btn.blanco { background: #ffffff; border-color: #888; }
+.color-btn.rojo   { background: #e63232; }
 
 .size-slider {
     -webkit-appearance: none;
@@ -370,7 +544,7 @@ html, body {
 .tool-btn:hover      { background: #00ffcc22; border-color: #00ffcc; }
 .tool-btn.active-tool { background: #00ffcc22; border-color: #00ffcc; box-shadow: 0 0 7px #00ffcc55; }
 
-/* Botones de ventana (minimizar / cerrar) */
+/* Botones ventana */
 .win-btns {
     display: flex;
     align-items: center;
@@ -464,6 +638,18 @@ html, body {
         linear-gradient(90deg, #cfcfcf 1px, transparent 1px);
     background-size: 25px 25px;
 }
+
+.bg-cuadros::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 68px;
+    width: 2px;
+    background: rgba(239, 106, 106, 0.9);
+    z-index: 1;
+    pointer-events: none;
+}
 .bg-cuadernillo {
     background-color: #fffdf7;
     background-image: repeating-linear-gradient(
@@ -502,10 +688,10 @@ html, body {
     background: #161b22;
     border: 2px solid #00ffcc;
     border-radius: 14px;
-    padding: 28px 32px;
+    padding: 24px 24px;
     text-align: center;
     box-shadow: 0 0 30px #00ffcc66;
-    max-width: 340px;
+    max-width: 460px;
     width: 90%;
 }
 .dialog-box p {
@@ -514,9 +700,17 @@ html, body {
     color: #00ffcc;
     line-height: 1.5;
 }
-.dialog-btns { display: flex; gap: 12px; justify-content: center; }
+.dialog-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 .dialog-btns button {
-    padding: 10px 22px;
+    flex: 1 1 118px;
+    max-width: 140px;
+    min-width: 118px;
+    padding: 12px 18px;
     border-radius: 8px;
     border: 2px solid;
     cursor: pointer;
@@ -532,18 +726,45 @@ html, body {
 .btn-cancelar    { background: #44444422; border-color: #888; color: #aaa; }
 .btn-cancelar:hover    { background: #44444444; }
 
-/* ── RESPONSIVE ── */
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
 @media (max-width: 900px) {
     html, body { overflow: auto; }
     .main {
+        display: flex;
         flex-direction: column;
         align-items: center;
         height: auto;
+        min-height: 100vh;
         overflow: auto;
-        padding: 12px;
+        padding: 14px;
+        gap: 14px;
     }
-    .left, .right, .center { width: 100%; max-width: 360px; height: auto; }
-    #radar { width: 220px !important; height: 220px !important; }
+    .left, .right, .center {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+    }
+    .left { justify-self: center; }
+    .right { justify-self: center; }
+    .left-top .card,
+    .right-top .pizarra-btn {
+        flex: none;
+    }
+    #radar { width: 200px !important; height: 200px !important; }
+    .dialog-box {
+        max-width: 340px;
+        padding: 20px 18px;
+    }
+    .dialog-btns {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .dialog-btns button {
+        max-width: none;
+        width: 100%;
+    }
 }
 </style>
 </head>
@@ -553,51 +774,85 @@ html, body {
 
     <!-- ── IZQUIERDA ── -->
     <div class="left">
+        <div class="left-top">
         <div class="card" id="card-explicacion" onclick="setModo(0)">📖 Explicación</div>
         <div class="card" id="card-trabajo"     onclick="setModo(1)">✍️ Trabajo</div>
         <div class="card" id="card-preguntas"   onclick="setModo(2)">❓ Turno de preguntas</div>
 
+        </div>
+
+        <div class="left-bottom">
         <div class="bloque-label">Fallos</div>
         <div class="contador">
             <button onclick="cambiarIntervenciones(-1)">−</button>
             <span id="intervenciones">0</span>
             <button onclick="cambiarIntervenciones(1)">+</button>
         </div>
-
-        <button class="btn-calibrar" onclick="calibrarAula()">⊙ CALIBRAR</button>
-
-        <div class="sens-wrap">
-            <span class="sens-label">Sensibilidad</span>
-            <span class="sens-val" id="sensValor">1.0</span>
-            <input type="range" id="sensibilidad" class="size-slider-main"
-                min="0.5" max="2" step="0.1" value="1"
-                oninput="actualizarSens(this.value)">
+        <div class="score-block">
+            <div class="bloque-label">Aciertos</div>
+            <div class="contador">
+                <button onclick="cambiarAciertos(-1)">-</button>
+                <span id="aciertos">0</span>
+                <button onclick="cambiarAciertos(1)">+</button>
+            </div>
+        </div>
         </div>
     </div>
 
     <!-- ── CENTRO ── -->
     <div class="center">
-        <div class="header-box">
-            <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
-            <h2>RADAR DE SILENCIO</h2>
+        <div class="center-top">
+            <div class="header-box">
+                <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
+                <h2>RADAR DE SILENCIO</h2>
+            </div>
         </div>
 
-        <canvas id="radar" width="240" height="240"></canvas>
+        <div class="center-middle">
+            <canvas id="radar" width="320" height="320"></canvas>
+        </div>
 
-        <div class="barra"><div class="barra-inner" id="barra"></div></div>
+        <div class="center-bottom">
+            <div class="barra"><div class="barra-inner" id="barra"></div></div>
 
-        <div class="estado" id="estado">Pulsa iniciar</div>
-        <div class="nota"   id="nota"></div>
-        <button id="btn" onclick="toggle()">INICIAR</button>
+            <div class="estado" id="estado">Pulsa iniciar</div>
+            <div class="nota"   id="nota"></div>
+            <button id="btn" onclick="toggle()">INICIAR</button>
+
+            <div class="center-controls">
+                <button class="btn-calibrar" onclick="calibrarAula()">âŠ™ CALIBRAR</button>
+                <div class="sens-wrap">
+                    <span class="sens-label">Sensibilidad</span>
+                    <span class="sens-val" id="sensValor">1.0</span>
+                    <input type="range" id="sensibilidad" class="size-slider-main"
+                        min="0.5" max="2" step="0.1" value="1"
+                        oninput="actualizarSens(this.value)">
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ── DERECHA ── -->
     <div class="right">
+        <div class="right-top">
         <div class="pizarra-btn" onclick="abrirPizarra('blanca')">📄 Pizarra Blanca</div>
         <div class="pizarra-btn" onclick="abrirPizarra('negra')">⬛ Pizarra Negra</div>
         <div class="pizarra-btn" onclick="abrirPizarra('cuadros')">📐 Cuadriculada</div>
         <div class="pizarra-btn" onclick="abrirPizarra('cuadernillo')">✏️ Cuadernillo</div>
         <div class="pizarra-btn" onclick="abrirPizarra('pentagrama')">🎵 Pentagrama</div>
+
+        <div class="right-controls" aria-hidden="true">
+            <button class="btn-calibrar" onclick="calibrarAula()">⊙ CALIBRAR</button>
+            <div class="sens-wrap">
+                <span class="sens-label">Sensibilidad</span>
+                <span class="sens-val" id="sensValorSide">1.0</span>
+                <input type="range" id="sensibilidadSide" class="size-slider-main"
+                    min="0.5" max="2" step="0.1" value="1"
+                    oninput="actualizarSens(this.value)">
+            </div>
+            <div class="modo-info" id="modoInfo">Modo Trabajo — sensibilidad normal</div>
+        </div>
+        </div>
     </div>
 </div>
 
@@ -656,22 +911,38 @@ html, body {
 let audioContext, analyser, dataArray, mediaStream;
 let running = false, angle = 0;
 let sumaVolumen = 0, muestras = 0, modoActual = 1;
-let intervenciones = 0, sensibilidad = 1, calibrando = false, picoRuido = 0;
+let intervenciones = 0, aciertos = 0, sensibilidad = 1, calibrando = false, picoRuido = 0;
+
+/* Factor de tolerancia por modo:
+   - Explicación (0) y Preguntas (2): el volumen se divide → más tolerante
+   - Trabajo (1): se queda igual (factor 1)                                */
+const TOLERANCIA = { 0: 0.35, 1: 1, 2: 0.35 };
 
 const modos = [
-    { nombre: "Explicación",        afectaPenalizacion: false },
-    { nombre: "Trabajo",            afectaPenalizacion: true  },
-    { nombre: "Turno de preguntas", afectaPenalizacion: false }
+    { nombre: "Explicación",        factorNota: 0.70, maxNota: 9.2 },
+    { nombre: "Trabajo",            factorNota: 1.00, maxNota: 10 },
+    { nombre: "Turno de preguntas", factorNota: 0.70, maxNota: 9.2 }
+];
+
+const modoInfoTextos = [
+    "Modo Explicación — alta tolerancia",
+    "Modo Trabajo — sensibilidad normal",
+    "Modo Preguntas — alta tolerancia"
 ];
 
 function actualizarSens(v) {
     sensibilidad = parseFloat(v);
-    document.getElementById("sensValor").textContent = sensibilidad.toFixed(1);
+    const sensValor = document.getElementById("sensValor");
+    if (sensValor) sensValor.textContent = sensibilidad.toFixed(1);
 }
 
 function setModo(m) {
     modoActual = m;
     document.querySelectorAll('.card').forEach((c, i) => c.classList.toggle('activo', i === m));
+    document.body.classList.remove("modo-explicacion", "modo-trabajo", "modo-preguntas");
+    document.body.classList.add(m === 0 ? "modo-explicacion" : m === 1 ? "modo-trabajo" : "modo-preguntas");
+    const modoInfo = document.getElementById("modoInfo");
+    if (modoInfo) modoInfo.textContent = modoInfoTextos[m];
 }
 
 function cambiarIntervenciones(d) {
@@ -679,13 +950,22 @@ function cambiarIntervenciones(d) {
     document.getElementById("intervenciones").textContent = intervenciones;
 }
 
+function cambiarAciertos(d) {
+    aciertos = Math.max(0, aciertos + d);
+    const el = document.getElementById("aciertos");
+    if (el) el.textContent = aciertos;
+}
+
 async function toggle() { running ? parar() : await iniciar(); }
 
 async function iniciar() {
     try {
+        mediaStream?.getTracks().forEach(t => t.stop());
+        mediaStream = null;
+        if (audioContext?.state && audioContext.state !== "closed") {
+            await audioContext.close();
+        }
         sumaVolumen = muestras = picoRuido = 0;
-        intervenciones = 0;
-        document.getElementById("intervenciones").textContent = "0";
         mediaStream  = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser     = audioContext.createAnalyser();
@@ -707,13 +987,14 @@ async function iniciar() {
 function parar() {
     running = false;
     const media = muestras > 0 ? sumaVolumen / muestras : 0;
-    let nota = 10 - (media / 10);
-    if (modos[modoActual].afectaPenalizacion) {
-        if      (picoRuido > 80) nota -= 1.5;
-        else if (picoRuido > 60) nota -= 0.75;
-        nota -= intervenciones * 0.10;
-    }
-    nota = Math.max(1, Math.min(10, nota)).toFixed(1);
+    const modo = modos[modoActual];
+    const factorNota = modo?.factorNota ?? 1;
+    let nota = (modo?.maxNota ?? 10) - ((media / 10) * factorNota);
+    if      (picoRuido > 80) nota -= 1.5 * factorNota;
+    else if (picoRuido > 60) nota -= 0.75 * factorNota;
+    nota -= intervenciones * 0.20;
+    nota += aciertos * 0.20;
+    nota = Math.max(1, Math.min(modo?.maxNota ?? 10, nota)).toFixed(1);
     document.getElementById("nota").textContent    = `Nota: ${nota}`;
     document.getElementById("btn").textContent     = "INICIAR";
     document.getElementById("estado").textContent  = "Medición detenida";
@@ -724,13 +1005,61 @@ function parar() {
     if (audioContext?.state !== "closed") audioContext?.close();
 }
 
+function resetApp() {
+    running = false;
+    angle = 0;
+    sumaVolumen = 0;
+    muestras = 0;
+    picoRuido = 0;
+    intervenciones = 0;
+    aciertos = 0;
+    sensibilidad = 1;
+    calibrando = false;
+
+    mediaStream?.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+    if (audioContext?.state && audioContext.state !== "closed") audioContext.close();
+    audioContext = null;
+    analyser = null;
+    dataArray = null;
+
+    document.getElementById("intervenciones").textContent = "0";
+    const aciertosEl = document.getElementById("aciertos");
+    if (aciertosEl) aciertosEl.textContent = "0";
+    const sensEl = document.getElementById("sensibilidad");
+    if (sensEl) sensEl.value = "1";
+    const sensValorEl = document.getElementById("sensValor");
+    if (sensValorEl) sensValorEl.textContent = "1.0";
+    document.getElementById("nota").textContent = "";
+    document.getElementById("estado").textContent = "Pulsa iniciar";
+    document.getElementById("estado").style.color = "#00ffcc";
+    document.getElementById("barra").style.width = "0%";
+    document.getElementById("barra").style.background = "#00ffcc";
+    document.getElementById("btn").textContent = "INICIAR";
+
+    const radar = document.getElementById("radar");
+    if (radar) {
+        const ctx = radar.getContext("2d");
+        ctx.clearRect(0, 0, radar.width, radar.height);
+    }
+
+    setModo(1);
+}
+
 function loop() {
     if (!running) return;
     analyser.getByteFrequencyData(dataArray);
     let sum = 0;
     for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-    let vol = Math.min((sum / dataArray.length) * sensibilidad, 120);
-    if (modoActual === 1) { sumaVolumen += vol; muestras++; if (vol > picoRuido) picoRuido = vol; }
+
+    /* Aplicar sensibilidad + tolerancia del modo */
+    let rawVol = (sum / dataArray.length) * sensibilidad;
+    let tol    = TOLERANCIA[modoActual] ?? 1;
+    let vol    = Math.min(rawVol * tol, 120);
+
+    sumaVolumen += vol;
+    muestras++;
+    if (vol > picoRuido) picoRuido = vol;
     dibujarRadar(vol); actualizarBarra(vol); actualizarEstado(vol);
     requestAnimationFrame(loop);
 }
@@ -810,17 +1139,30 @@ async function calibrarAula() {
 /* ═══════════════════════════════════════
    PIZARRAS
 ═══════════════════════════════════════ */
-const COLORS = { azul: '#1a6ef5', negro: '#111111', rojo: '#e63232' };
+/* Colores por tipo de pizarra:
+   - negra: azul, BLANCO (sustituye negro), rojo
+   - resto: azul, negro, rojo                      */
+const COLORS_NORMAL = { azul: '#1a6ef5', negro: '#111111', rojo: '#e63232' };
+const COLORS_NEGRA  = { azul: '#1a6ef5', blanco: '#ffffff', rojo: '#e63232' };
+
+function getColorsForTipo(tipo) {
+    return tipo === 'negra' ? COLORS_NEGRA : COLORS_NORMAL;
+}
+
 const pizarraData = {};
-let pizarraMinimizada = null;   // tipo de la pizarra minimizada
-let tipoParaCerrar    = null;   // para el diálogo
+let pizarraMinimizada = null;
+let tipoParaCerrar    = null;
 
 function getPD(tipo) {
-    if (!pizarraData[tipo]) pizarraData[tipo] = {
-        paginas: [null], paginaActual: 0,
-        hayTrazos: false,
-        state: { color: COLORS.azul, size: 4, mode: 'draw', drawing: false, lastX: 0, lastY: 0 }
-    };
+    if (!pizarraData[tipo]) {
+        const cols = getColorsForTipo(tipo);
+        const defaultColor = cols.azul;
+        pizarraData[tipo] = {
+            paginas: [null], paginaActual: 0,
+            hayTrazos: false,
+            state: { color: defaultColor, size: 4, mode: 'draw', drawing: false, lastX: 0, lastY: 0 }
+        };
+    }
     return pizarraData[tipo];
 }
 
@@ -830,14 +1172,19 @@ function buildToolbar(tipo) {
     if (!tb || tb.dataset.built) return;
     tb.dataset.built = "1";
     const st = getPD(tipo).state;
+    const cols = getColorsForTipo(tipo);
 
-    // Colores
-    ['azul', 'negro', 'rojo'].forEach(n => {
+    // Colores dinámicos según tipo
+    const colorEntries = Object.entries(cols); // e.g. [['azul','#1a6ef5'], ['blanco','#fff'], ...]
+    colorEntries.forEach(([name, hex], idx) => {
         const btn = document.createElement('button');
-        btn.className = `color-btn ${n}${n === 'azul' ? ' selected' : ''}`;
-        btn.title = n;
+        btn.className = `color-btn ${name}${idx === 0 ? ' selected' : ''}`;
+        btn.title = name;
+        btn.style.background = hex;
+        if (name === 'negro') btn.style.borderColor = '#555';
+        if (name === 'blanco') btn.style.borderColor = '#888';
         btn.onclick = () => {
-            st.color = COLORS[n]; st.mode = 'draw';
+            st.color = hex; st.mode = 'draw';
             tb.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             tb.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active-tool'));
@@ -869,7 +1216,6 @@ function buildToolbar(tipo) {
     sep(tb);
     tb.appendChild(mkBtn('💾 Guardar', () => guardarPagina(tipo)));
 
-    // Botones ventana (minimizar / cerrar) — al final, a la derecha
     const winDiv = document.createElement('div');
     winDiv.className = 'win-btns';
 
@@ -995,7 +1341,6 @@ function initDrawCanvas(tipo) {
     const wrap = document.getElementById(`wrap-${tipo}`); if (!wrap) return;
     if (wrap.querySelector('.draw-canvas[data-init]')) { resizeFull(tipo); restorePage(tipo); return; }
 
-    // SVG pentagramas
     if (tipo === 'pentagrama' && !wrap.querySelector('svg')) {
         let s = `<svg class="pentagramas-svg" viewBox="0 0 1000 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
         [0.12, 0.42, 0.72].forEach(tp => {
@@ -1072,13 +1417,11 @@ function resizeFull(tipo) {
 
 /* ── Abrir pizarra ── */
 function abrirPizarra(tipo) {
-    // Si hay una minimizada que no es esta, avisamos? No, simplemente abrimos la nueva
     document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
     const modal = document.getElementById(`pizarra-${tipo}`); if (!modal) return;
     modal.classList.add('activa');
     buildToolbar(tipo);
     buildPagBar(tipo);
-    // Ocultar restore si volvemos a la minimizada
     if (pizarraMinimizada === tipo) {
         pizarraMinimizada = null;
         document.getElementById('restore-btn').style.display = 'none';
@@ -1121,7 +1464,6 @@ function dialogAccion(accion) {
     } else if (accion === 'descartar') {
         cerrarPizarraDefinitivo(tipoParaCerrar);
     }
-    // 'cancelar' no hace nada
     tipoParaCerrar = null;
 }
 
@@ -1131,12 +1473,9 @@ function cerrarPizarraDefinitivo(tipo) {
         pizarraMinimizada = null;
         document.getElementById('restore-btn').style.display = 'none';
     }
-    // Limpiar datos
     delete pizarraData[tipo];
-    // Resetear toolbar para reconstruirse la próxima vez
     const tb = document.getElementById(`tb-${tipo}`);
     if (tb) { tb.innerHTML = ''; delete tb.dataset.built; }
-    // Quitar canvas
     const wrap = document.getElementById(`wrap-${tipo}`);
     if (wrap) {
         const cvs = wrap.querySelector('.draw-canvas');
@@ -1146,7 +1485,12 @@ function cerrarPizarraDefinitivo(tipo) {
     }
 }
 
-setModo(1);
+window.addEventListener("beforeunload", () => {
+    mediaStream?.getTracks().forEach(t => t.stop());
+    if (audioContext?.state && audioContext.state !== "closed") audioContext.close();
+});
+
+resetApp();
 </script>
 </body>
 </html>
