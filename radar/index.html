@@ -5,524 +5,700 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radar de Silencio • Maximilian 23</title>
 <style>
-    body {
-        margin: 0;
-        padding: 20px;
-        font-family: "Courier New", monospace;
-        background: #0d1117;
-        color: #00ffcc;
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: center;
-        gap: 45px;
-        min-height: 100vh;
-        box-sizing: border-box;
-    }
+*, *::before, *::after { box-sizing: border-box; }
 
-    /* IZQUIERDA */
-    .left {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-        min-width: 210px;
-    }
-
-    .card {
-        width: 210px;
-        padding: 19px 15px;
-        border: 2px solid #00ffcc55;
-        border-radius: 12px;
-        background: #161b22;
-        text-align: center;
-        font-size: 1.32rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-sizing: border-box;
-    }
-
-    .card.activo {
-        border-color: #00ffcc;
-        background: #00ffcc22;
-        box-shadow: 0 0 25px #00ffcc88;
-    }
-
-    .contador {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        background: #161b22;
-        border: 2px solid #00ffcc55;
-        border-radius: 12px;
-        padding: 14px;
-        width: 210px;
-        box-sizing: border-box;
-    }
-
-    .contador button {
-        width: 48px;
-        height: 48px;
-        font-size: 1.9rem;
-        background: #00ffcc22;
-        border: 2px solid #00ffcc;
-        color: #00ffcc;
-        border-radius: 10px;
-        cursor: pointer;
-    }
-
-    .contador span {
-        font-size: 2.1rem;
-        font-weight: bold;
-        min-width: 45px;
-        text-align: center;
-    }
-
-    /* CENTRO */
-    .center {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 340px;
-    }
-
-    header {
-        width: 100%;
-        background: #161b22;
-        border-bottom: 2px solid #00ffcc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        padding: 10px 15px;
-        margin-bottom: 22px;
-        border-radius: 10px;
-        box-sizing: border-box;
-    }
-
-    header img {
-        height: 48px;
-        border-radius: 50%;
-        box-shadow: 0 0 12px #00ffcc;
-    }
-
-    header h2 {
-        margin: 0;
-        font-size: 1.55rem;
-        text-align: center;
-    }
-
-    canvas {
-        background: #020606;
-        border: 3px solid #00ffcc55;
-        border-radius: 50%;
-        margin-bottom: 10px;
-    }
-
-    .credito {
-    position: fixed;
-    bottom: 12px;
-    right: 18px;
-    font-size: 0.75rem;
-    color: #00ffcc55;
-    letter-spacing: 1px;
-    opacity: 0.7;
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%; overflow: hidden;
+    font-family: "Courier New", monospace;
+    background: #0d1117;
+    color: #00ffcc;
 }
-    
-    .barra {
-        width: 300px;
-        height: 16px;
-        border: 2px solid #00ffcc;
-        margin-top: 20px;
-        border-radius: 10px;
-        overflow: hidden;
-        box-sizing: border-box;
-    }
 
-    .barra-inner {
-        height: 100%;
-        width: 0%;
-        background: #00ffcc;
-        transition: width 0.1s;
-    }
+/* ══════════════════════════════
+   LAYOUT PRINCIPAL
+══════════════════════════════ */
+.main {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 18px;
+    height: 100vh;
+    padding: 12px 16px;
+    overflow: hidden;
+}
 
-    .estado {
-        margin-top: 16px;
-        font-size: 1.35rem;
-        min-height: 30px;
-        text-align: center;
-    }
+/* ── COLUMNA IZQUIERDA ── */
+.left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 190px;
+    flex-shrink: 0;
+    height: 100%;
+    overflow: hidden;
+}
 
-    .nota {
-        margin-top: 6px;
-        font-size: 2.35rem;
-        font-weight: bold;
-        min-height: 65px;
-        text-align: center;
-    }
+.card {
+    width: 100%;
+    padding: 11px 10px;
+    border: 2px solid #00ffcc55;
+    border-radius: 10px;
+    background: #161b22;
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.card.activo {
+    border-color: #00ffcc;
+    background: #00ffcc22;
+    box-shadow: 0 0 18px #00ffcc88;
+}
 
-    #btn {
-        margin-top: 12px;
-        padding: 14px 50px;
-        background: #00ffcc22;
-        border: 2px solid #00ffcc;
-        color: #00ffcc;
-        cursor: pointer;
-        border-radius: 10px;
-        font-size: 1.22rem;
-        font-weight: bold;
-    }
+.bloque-label {
+    text-align: center;
+    font-size: 0.78rem;
+    letter-spacing: 1px;
+    color: #00ffcc99;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+}
 
-    /* DERECHA */
-    .right {
-        display: flex;
+.contador {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #161b22;
+    border: 2px solid #00ffcc55;
+    border-radius: 10px;
+    padding: 10px 8px;
+    width: 100%;
+}
+.contador button {
+    width: 40px; height: 40px;
+    font-size: 1.6rem;
+    background: #00ffcc22;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    border-radius: 8px;
+    cursor: pointer;
+    line-height: 1;
+}
+.contador span {
+    font-size: 1.8rem;
+    font-weight: bold;
+    min-width: 36px;
+    text-align: center;
+}
+
+.btn-calibrar {
+    width: 100%;
+    padding: 10px 6px;
+    background: #00ffcc22;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+}
+.btn-calibrar:hover { background: #00ffcc44; }
+
+.sens-wrap {
+    background: #161b22;
+    border: 2px solid #00ffcc33;
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: center;
+}
+.sens-wrap .sens-label {
+    font-size: 0.78rem;
+    color: #00ffcc99;
+    margin-bottom: 4px;
+    display: block;
+}
+.sens-wrap .sens-val {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    display: block;
+}
+.size-slider-main {
+    -webkit-appearance: none;
+    width: 100%; height: 5px;
+    border-radius: 4px;
+    background: #00ffcc44;
+    outline: none; cursor: pointer;
+}
+.size-slider-main::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: #00ffcc;
+    cursor: pointer;
+}
+
+/* ── COLUMNA CENTRAL ── */
+.center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 300px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.header-box {
+    width: 100%;
+    background: #161b22;
+    border: 2px solid #00ffcc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 7px 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+.header-box img {
+    height: 38px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ffcc;
+}
+.header-box h2 { margin: 0; font-size: 1.2rem; text-align: center; }
+
+#radar {
+    background: #020606;
+    border: 3px solid #00ffcc55;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.barra {
+    width: 100%;
+    height: 13px;
+    border: 2px solid #00ffcc;
+    margin-top: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.barra-inner {
+    height: 100%; width: 0%;
+    background: #00ffcc;
+    transition: width 0.1s;
+}
+
+.estado {
+    margin-top: 8px;
+    font-size: 1.1rem;
+    min-height: 24px;
+    text-align: center;
+}
+.nota {
+    margin-top: 4px;
+    font-size: 2rem;
+    font-weight: bold;
+    min-height: 50px;
+    text-align: center;
+}
+
+#btn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 12px;
+    background: #00ffcc22;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 1.15rem;
+    font-weight: bold;
+    font-family: "Courier New", monospace;
+}
+#btn:hover { background: #00ffcc44; }
+
+/* ── COLUMNA DERECHA ── */
+.right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 220px;
+    flex-shrink: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.pizarra-btn {
+    padding: 14px 16px;
+    background: #161b22;
+    border: 2px solid #00ffcc55;
+    color: #00ffcc;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    transition: all 0.3s;
+    text-align: center;
+}
+.pizarra-btn:hover {
+    background: #00ffcc22;
+    border-color: #00ffcc;
+    transform: translateX(6px);
+}
+
+.credito {
+    position: fixed;
+    bottom: 8px; right: 14px;
+    font-size: 0.7rem;
+    color: #00ffcc44;
+    letter-spacing: 1px;
+}
+
+/* ══════════════════════════════
+   BOTÓN RESTAURAR (minimizado)
+══════════════════════════════ */
+#restore-btn {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 28px;
+    background: #161b22;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    border-radius: 12px;
+    font-family: "Courier New", monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 500;
+    box-shadow: 0 0 20px #00ffcc66;
+    animation: pulse 2s infinite;
+}
+#restore-btn:hover { background: #00ffcc22; }
+@keyframes pulse {
+    0%,100% { box-shadow: 0 0 20px #00ffcc66; }
+    50%      { box-shadow: 0 0 35px #00ffccaa; }
+}
+
+/* ══════════════════════════════
+   MODAL PIZARRA
+══════════════════════════════ */
+.pizarra {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.97);
+    z-index: 1000;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 8px;
+}
+.pizarra.activa { display: flex; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    background: #1a1a2e;
+    border: 2px solid #00ffcc55;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    width: 98%;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+.toolbar label {
+    color: #00ffcc;
+    font-family: "Courier New", monospace;
+    font-size: 0.82rem;
+}
+
+.color-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+.color-btn:hover { transform: scale(1.15); }
+.color-btn.selected { border-color: #fff; box-shadow: 0 0 7px rgba(255,255,255,.6); transform: scale(1.2); }
+.color-btn.azul  { background: #1a6ef5; }
+.color-btn.negro { background: #111; border-color: #555; }
+.color-btn.rojo  { background: #e63232; }
+
+.size-slider {
+    -webkit-appearance: none;
+    width: 90px; height: 5px;
+    border-radius: 4px;
+    background: #00ffcc44;
+    outline: none; cursor: pointer;
+}
+.size-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #00ffcc;
+    cursor: pointer;
+}
+
+.tool-btn {
+    padding: 5px 11px;
+    background: transparent;
+    border: 2px solid #00ffcc55;
+    color: #00ffcc;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.tool-btn:hover      { background: #00ffcc22; border-color: #00ffcc; }
+.tool-btn.active-tool { background: #00ffcc22; border-color: #00ffcc; box-shadow: 0 0 7px #00ffcc55; }
+
+/* Botones de ventana (minimizar / cerrar) */
+.win-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.win-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+}
+.win-btn.minimizar { background: #ffaa00; color: #000; }
+.win-btn.minimizar:hover { background: #ffcc44; }
+.win-btn.cerrar    { background: #ff4444; color: #fff; }
+.win-btn.cerrar:hover { background: #ff6666; }
+
+.sep { width: 1px; height: 25px; background: #00ffcc33; flex-shrink: 0; }
+
+/* ── BARRA PÁGINAS ── */
+.pag-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    width: 98%;
+}
+.pag-btn {
+    padding: 4px 12px;
+    background: #161b22;
+    border: 2px solid #00ffcc44;
+    color: #00ffcc;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+.pag-btn.activa-pag { background: #00ffcc22; border-color: #00ffcc; font-weight: bold; }
+.pag-btn:hover { background: #00ffcc22; border-color: #00ffcc; }
+.pag-add {
+    padding: 4px 10px;
+    background: #00ffcc22;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+.pag-add:hover { background: #00ffcc44; }
+
+/* ── ÁREA DE DIBUJO ── */
+.pizarra-wrap {
+    width: 98%;
+    flex: 1;
+    position: relative;
+    border: 3px solid #00ffcc;
+    box-shadow: 0 0 25px #00ffcc55;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.draw-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: transparent !important;
+    cursor: crosshair;
+    touch-action: none;
+    z-index: 10;
+    display: block;
+}
+
+/* Fondos */
+.bg-blanca { background: #ffffff; }
+.bg-negra  { background: #111111; }
+.bg-cuadros {
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(#cfcfcf 1px, transparent 1px),
+        linear-gradient(90deg, #cfcfcf 1px, transparent 1px);
+    background-size: 25px 25px;
+}
+.bg-cuadernillo {
+    background-color: #fffdf7;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 34px,
+        #6aa6ff 34px, #6aa6ff 36px,
+        transparent 36px, transparent 52px,
+        #6aa6ff 52px, #6aa6ff 54px
+    );
+}
+.bg-cuadernillo::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 70px;
+    width: 2px; background: #ff7a7a; opacity: 0.8; z-index: 1;
+}
+.bg-pentagrama { background: #f9f6eb; }
+
+.pentagramas-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    z-index: 1; pointer-events: none;
+}
+
+/* ── DIÁLOGO GUARDAR ── */
+.dialog-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+.dialog-overlay.activo { display: flex; }
+.dialog-box {
+    background: #161b22;
+    border: 2px solid #00ffcc;
+    border-radius: 14px;
+    padding: 28px 32px;
+    text-align: center;
+    box-shadow: 0 0 30px #00ffcc66;
+    max-width: 340px;
+    width: 90%;
+}
+.dialog-box p {
+    margin: 0 0 20px;
+    font-size: 1.1rem;
+    color: #00ffcc;
+    line-height: 1.5;
+}
+.dialog-btns { display: flex; gap: 12px; justify-content: center; }
+.dialog-btns button {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 2px solid;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.95rem;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+.btn-guardar-si  { background: #00ffcc22; border-color: #00ffcc; color: #00ffcc; }
+.btn-guardar-si:hover  { background: #00ffcc44; }
+.btn-guardar-no  { background: #ff444422; border-color: #ff4444; color: #ff4444; }
+.btn-guardar-no:hover  { background: #ff444444; }
+.btn-cancelar    { background: #44444422; border-color: #888; color: #aaa; }
+.btn-cancelar:hover    { background: #44444444; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+    html, body { overflow: auto; }
+    .main {
         flex-direction: column;
-        gap: 15px;
-        min-width: 250px;
-    }
-
-    .pizarra-btn {
-        padding: 17px 20px;
-        background: #161b22;
-        border: 2px solid #00ffcc55;
-        color: #00ffcc;
-        cursor: pointer;
-        border-radius: 12px;
-        font-size: 1.18rem;
-        font-weight: bold;
-        transition: all 0.3s;
-        text-align: center;
-        box-sizing: border-box;
-    }
-
-    .pizarra-btn:hover {
-        background: #00ffcc22;
-        border-color: #00ffcc;
-        transform: translateX(8px);
-    }
-
-    /* PIZARRAS */
-    .pizarra {
-        display: none;
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.96);
-        z-index: 1000;
         align-items: center;
-        justify-content: center;
+        height: auto;
+        overflow: auto;
+        padding: 12px;
     }
-
-    .pizarra.activa {
-        display: flex;
-    }
-
-    .pizarra-content {
-        width: 94%;
-        max-width: 1180px;
-        height: 88vh;
-        border: 4px solid #00ffcc;
-        position: relative;
-        box-shadow: 0 0 40px #00ffcc88;
-        overflow: hidden;
-        box-sizing: border-box;
-    }
-
-    .cerrar {
-        position: absolute;
-        top: 14px;
-        right: 22px;
-        font-size: 3rem;
-        color: #ff5555;
-        cursor: pointer;
-        z-index: 1010;
-        font-weight: bold;
-        user-select: none;
-    }
-
-    /* PIZARRA BLANCA */
-    #pizarra-blanca .pizarra-content {
-        background: #ffffff;
-    }
-
-    /* PIZARRA NEGRA */
-    #pizarra-negra .pizarra-content {
-        background: #111111;
-    }
-
-    /* PIZARRA CUADRICULADA */
-    #pizarra-cuadros .pizarra-content {
-        background-color: #ffffff;
-        background-image:
-            linear-gradient(#cfcfcf 1px, transparent 1px),
-            linear-gradient(90deg, #cfcfcf 1px, transparent 1px);
-        background-size: 25px 25px;
-    }
-
-    /* PIZARRA CUADERNILLO */
-    #pizarra-cuadernillo .pizarra-content {
-        background-color: #fffdf7;
-        background-image:
-            repeating-linear-gradient(
-                to bottom,
-                transparent 0px,
-                transparent 34px,
-                #6aa6ff 34px,
-                #6aa6ff 36px,
-                transparent 36px,
-                transparent 52px,
-                #6aa6ff 52px,
-                #6aa6ff 54px
-            );
-    }
-
-    #pizarra-cuadernillo .pizarra-content::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 70px;
-        width: 2px;
-        background: #ff7a7a;
-        opacity: 0.8;
-    }
-
-    /* PENTAGRAMA */
-    #pizarra-pentagrama .pizarra-content {
-        background: #f9f6eb;
-    }
-
-    .pentagrama {
-        position: absolute;
-        left: 8%;
-        right: 8%;
-        height: 110px;
-    }
-
-    .linea {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: #222;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 1100px) {
-        body {
-            flex-direction: column;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .left,
-        .right {
-            width: 100%;
-            max-width: 340px;
-            min-width: unset;
-        }
-
-        .card,
-        .contador,
-        .pizarra-btn {
-            width: 100%;
-        }
-    }
+    .left, .right, .center { width: 100%; max-width: 360px; height: auto; }
+    #radar { width: 220px !important; height: 220px !important; }
+}
 </style>
 </head>
 <body>
 
-    <!-- IZQUIERDA -->
+<div class="main">
+
+    <!-- ── IZQUIERDA ── -->
     <div class="left">
         <div class="card" id="card-explicacion" onclick="setModo(0)">📖 Explicación</div>
-        <div class="card" id="card-trabajo" onclick="setModo(1)">✍️ Trabajo</div>
-        <div class="card" id="card-preguntas" onclick="setModo(2)">❓ Turno de preguntas</div>
+        <div class="card" id="card-trabajo"     onclick="setModo(1)">✍️ Trabajo</div>
+        <div class="card" id="card-preguntas"   onclick="setModo(2)">❓ Turno de preguntas</div>
 
+        <div class="bloque-label">Fallos</div>
         <div class="contador">
             <button onclick="cambiarIntervenciones(-1)">−</button>
             <span id="intervenciones">0</span>
             <button onclick="cambiarIntervenciones(1)">+</button>
         </div>
+
+        <button class="btn-calibrar" onclick="calibrarAula()">⊙ CALIBRAR</button>
+
+        <div class="sens-wrap">
+            <span class="sens-label">Sensibilidad</span>
+            <span class="sens-val" id="sensValor">1.0</span>
+            <input type="range" id="sensibilidad" class="size-slider-main"
+                min="0.5" max="2" step="0.1" value="1"
+                oninput="actualizarSens(this.value)">
+        </div>
     </div>
 
-    <!-- CENTRO -->
+    <!-- ── CENTRO ── -->
     <div class="center">
-        <header>
+        <div class="header-box">
             <img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23">
             <h2>RADAR DE SILENCIO</h2>
-        </header>
-
-        <canvas id="radar" width="300" height="300"></canvas>
-
-        <div class="barra">
-            <div class="barra-inner" id="barra"></div>
         </div>
-<div style="margin-top:10px; font-size:0.85rem; text-align:center;">
-    Sensibilidad: <span id="sensValor">1.0</span>
-</div>
 
-<input 
-    type="range" 
-    id="sensibilidad" 
-    min="0.5" 
-    max="2" 
-    step="0.1" 
-    value="1"
-    style="width:300px; margin-top:5px;"
-    oninput="actualizarSens(this.value)"
-   
->
-    <button 
-    onclick="calibrarAula()" 
-    style="margin-top:6px; width:300px; padding:10px; background:#00ffcc22; border:2px solid #00ffcc; color:#00ffcc; border-radius:8px; cursor:pointer;">
-    Calibrar aula
-</button>
-      
+        <canvas id="radar" width="240" height="240"></canvas>
+
+        <div class="barra"><div class="barra-inner" id="barra"></div></div>
+
         <div class="estado" id="estado">Pulsa iniciar</div>
-        <div class="nota" id="nota"></div>
-
+        <div class="nota"   id="nota"></div>
         <button id="btn" onclick="toggle()">INICIAR</button>
     </div>
 
-    <!-- DERECHA -->
+    <!-- ── DERECHA ── -->
     <div class="right">
         <div class="pizarra-btn" onclick="abrirPizarra('blanca')">📄 Pizarra Blanca</div>
         <div class="pizarra-btn" onclick="abrirPizarra('negra')">⬛ Pizarra Negra</div>
-        <div class="pizarra-btn" onclick="abrirPizarra('cuadros')">📐 Pizarra Cuadriculada</div>
-        <div class="pizarra-btn" onclick="abrirPizarra('cuadernillo')">✏️ Pizarra Cuadernillo</div>
+        <div class="pizarra-btn" onclick="abrirPizarra('cuadros')">📐 Cuadriculada</div>
+        <div class="pizarra-btn" onclick="abrirPizarra('cuadernillo')">✏️ Cuadernillo</div>
         <div class="pizarra-btn" onclick="abrirPizarra('pentagrama')">🎵 Pentagrama</div>
     </div>
+</div>
 
-    <!-- PIZARRAS -->
-    <div id="pizarra-blanca" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
+<!-- Botón restaurar pizarra minimizada -->
+<button id="restore-btn" onclick="restaurarPizarra()">↑ Volver a la pizarra</button>
+
+<!-- ═══ PIZARRAS ═══ -->
+<div id="pizarra-blanca"      class="pizarra">
+    <div class="toolbar" id="tb-blanca"></div>
+    <div class="pag-bar" id="pagbar-blanca"></div>
+    <div class="pizarra-wrap bg-blanca" id="wrap-blanca"></div>
+</div>
+
+<div id="pizarra-negra"       class="pizarra">
+    <div class="toolbar" id="tb-negra"></div>
+    <div class="pag-bar" id="pagbar-negra"></div>
+    <div class="pizarra-wrap bg-negra" id="wrap-negra"></div>
+</div>
+
+<div id="pizarra-cuadros"     class="pizarra">
+    <div class="toolbar" id="tb-cuadros"></div>
+    <div class="pag-bar" id="pagbar-cuadros"></div>
+    <div class="pizarra-wrap bg-cuadros" id="wrap-cuadros"></div>
+</div>
+
+<div id="pizarra-cuadernillo" class="pizarra">
+    <div class="toolbar" id="tb-cuadernillo"></div>
+    <div class="pag-bar" id="pagbar-cuadernillo"></div>
+    <div class="pizarra-wrap bg-cuadernillo" id="wrap-cuadernillo"></div>
+</div>
+
+<div id="pizarra-pentagrama"  class="pizarra">
+    <div class="toolbar" id="tb-pentagrama"></div>
+    <div class="pag-bar" id="pagbar-pentagrama"></div>
+    <div class="pizarra-wrap bg-pentagrama" id="wrap-pentagrama"></div>
+</div>
+
+<!-- Diálogo guardar -->
+<div class="dialog-overlay" id="dialog-guardar">
+    <div class="dialog-box">
+        <p>¿Deseas guardar la pizarra<br>antes de cerrar?</p>
+        <div class="dialog-btns">
+            <button class="btn-guardar-si"  onclick="dialogAccion('guardar')">💾 Guardar</button>
+            <button class="btn-guardar-no"  onclick="dialogAccion('descartar')">🗑 Descartar</button>
+            <button class="btn-cancelar"    onclick="dialogAccion('cancelar')">✕ Cancelar</button>
         </div>
     </div>
+</div>
 
-    <div id="pizarra-negra" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
-        </div>
-    </div>
-
-    <div id="pizarra-cuadros" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
-        </div>
-    </div>
-
-    <div id="pizarra-cuadernillo" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
-        </div>
-    </div>
-
-    <!-- PENTAGRAMA -->
-    <div id="pizarra-pentagrama" class="pizarra">
-        <div class="pizarra-content">
-            <span class="cerrar" onclick="cerrarPizarra()">×</span>
-
-            <!-- Pentagrama 1 -->
-            <div class="pentagrama" style="top: 12%;">
-                <div class="linea" style="top: 0%;"></div>
-                <div class="linea" style="top: 25%;"></div>
-                <div class="linea" style="top: 50%;"></div>
-                <div class="linea" style="top: 75%;"></div>
-                <div class="linea" style="top: 100%;"></div>
-            </div>
-
-            <!-- Pentagrama 2 -->
-            <div class="pentagrama" style="top: 42%;">
-                <div class="linea" style="top: 0%;"></div>
-                <div class="linea" style="top: 25%;"></div>
-                <div class="linea" style="top: 50%;"></div>
-                <div class="linea" style="top: 75%;"></div>
-                <div class="linea" style="top: 100%;"></div>
-            </div>
-
-            <!-- Pentagrama 3 -->
-            <div class="pentagrama" style="top: 72%;">
-                <div class="linea" style="top: 0%;"></div>
-                <div class="linea" style="top: 25%;"></div>
-                <div class="linea" style="top: 50%;"></div>
-                <div class="linea" style="top: 75%;"></div>
-                <div class="linea" style="top: 100%;"></div>
-            </div>
-        </div>
-    </div>
+<div class="credito">Creado por Manuel</div>
 
 <script>
+/* ═══════════════════════════════════════
+   AUDIO
+═══════════════════════════════════════ */
 let audioContext, analyser, dataArray, mediaStream;
-let running = false;
-let angle = 0;
-let sumaVolumen = 0;
-let muestras = 0;
-let modoActual = 1;
-let intervenciones = 0;
-let sensibilidad = 1;
-let calibrando = false;
+let running = false, angle = 0;
+let sumaVolumen = 0, muestras = 0, modoActual = 1;
+let intervenciones = 0, sensibilidad = 1, calibrando = false, picoRuido = 0;
 
 const modos = [
-    { nombre: "Explicación", afectaPenalizacion: false },
-    { nombre: "Trabajo", afectaPenalizacion: true },
+    { nombre: "Explicación",        afectaPenalizacion: false },
+    { nombre: "Trabajo",            afectaPenalizacion: true  },
     { nombre: "Turno de preguntas", afectaPenalizacion: false }
 ];
 
-
-function actualizarSens(valor) {
-    sensibilidad = parseFloat(valor);
+function actualizarSens(v) {
+    sensibilidad = parseFloat(v);
     document.getElementById("sensValor").textContent = sensibilidad.toFixed(1);
 }
 
-
-function setModo(modo) {
-    modoActual = modo;
-    document.querySelectorAll('.card').forEach((card, i) => {
-        card.classList.toggle('activo', i === modo);
-    });
+function setModo(m) {
+    modoActual = m;
+    document.querySelectorAll('.card').forEach((c, i) => c.classList.toggle('activo', i === m));
 }
 
-function cambiarIntervenciones(cambio) {
-    intervenciones = Math.max(0, intervenciones + cambio);
+function cambiarIntervenciones(d) {
+    intervenciones = Math.max(0, intervenciones + d);
     document.getElementById("intervenciones").textContent = intervenciones;
 }
 
-async function toggle() {
-    if (!running) {
-        await iniciar();
-    } else {
-        parar();
-    }
-}
+async function toggle() { running ? parar() : await iniciar(); }
 
 async function iniciar() {
     try {
-        sumaVolumen = 0;
-        muestras = 0;
+        sumaVolumen = muestras = picoRuido = 0;
         intervenciones = 0;
         document.getElementById("intervenciones").textContent = "0";
-
-        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStream  = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-
-        const source = audioContext.createMediaStreamSource(mediaStream);
-        source.connect(analyser);
-
+        analyser     = audioContext.createAnalyser();
+        audioContext.createMediaStreamSource(mediaStream).connect(analyser);
         analyser.fftSize = 256;
         dataArray = new Uint8Array(analyser.frequencyBinCount);
-
         running = true;
-        document.getElementById("btn").textContent = "STOP";
-        document.getElementById("nota").textContent = "";
+        document.getElementById("btn").textContent    = "STOP";
+        document.getElementById("nota").textContent   = "";
         document.getElementById("estado").textContent = "Escuchando...";
         document.getElementById("estado").style.color = "#00ffcc";
-
         loop();
-    } catch (error) {
+    } catch {
         document.getElementById("estado").textContent = "No se pudo acceder al micrófono";
         document.getElementById("estado").style.color = "#ff4444";
     }
@@ -530,206 +706,447 @@ async function iniciar() {
 
 function parar() {
     running = false;
-
-    const media = muestras > 0 ? (sumaVolumen / muestras) : 0;
+    const media = muestras > 0 ? sumaVolumen / muestras : 0;
     let nota = 10 - (media / 10);
-    nota = Math.max(1, Math.min(10, nota));
-
     if (modos[modoActual].afectaPenalizacion) {
+        if      (picoRuido > 80) nota -= 1.5;
+        else if (picoRuido > 60) nota -= 0.75;
         nota -= intervenciones * 0.10;
     }
-
     nota = Math.max(1, Math.min(10, nota)).toFixed(1);
-
-    document.getElementById("nota").textContent = `Nota: ${nota}`;
-    document.getElementById("btn").textContent = "INICIAR";
-    document.getElementById("estado").textContent = "Medición detenida";
-    document.getElementById("estado").style.color = "#00ffcc";
-    document.getElementById("barra").style.width = "0%";
-
-    if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-        mediaStream = null;
-    }
-
-    if (audioContext && audioContext.state !== "closed") {
-        audioContext.close();
-    }
+    document.getElementById("nota").textContent    = `Nota: ${nota}`;
+    document.getElementById("btn").textContent     = "INICIAR";
+    document.getElementById("estado").textContent  = "Medición detenida";
+    document.getElementById("estado").style.color  = "#00ffcc";
+    document.getElementById("barra").style.width   = "0%";
+    mediaStream?.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+    if (audioContext?.state !== "closed") audioContext?.close();
 }
 
 function loop() {
     if (!running) return;
-
     analyser.getByteFrequencyData(dataArray);
-
     let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
-    }
-
-let volumen = Math.min((sum / dataArray.length) * sensibilidad, 120);
-    
-    if (modoActual === 1) { // SOLO en modo Trabajo
-    sumaVolumen += volumen;
-    muestras++;
-}
-
-    dibujarRadar(volumen);
-    actualizarBarra(volumen);
-    actualizarEstado(volumen);
-
+    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+    let vol = Math.min((sum / dataArray.length) * sensibilidad, 120);
+    if (modoActual === 1) { sumaVolumen += vol; muestras++; if (vol > picoRuido) picoRuido = vol; }
+    dibujarRadar(vol); actualizarBarra(vol); actualizarEstado(vol);
     requestAnimationFrame(loop);
 }
 
-function dibujarRadar(volumen) {
-    const canvas = document.getElementById("radar");
-    const ctx = canvas.getContext("2d");
-    const cx = 150;
-    const cy = 150;
-
-    ctx.clearRect(0, 0, 300, 300);
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, 120, 0, Math.PI * 2);
-    ctx.strokeStyle = "#00ffcc33";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, 80, 0, Math.PI * 2);
-    ctx.strokeStyle = "#00ffcc22";
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, 40, 0, Math.PI * 2);
-    ctx.strokeStyle = "#00ffcc18";
-    ctx.stroke();
-
-    const radio = Math.min(40 + volumen, 120);
-    ctx.beginPath();
-    ctx.arc(cx, cy, radio, 0, Math.PI * 2);
+function dibujarRadar(v) {
+    const c = document.getElementById("radar");
+    const ctx = c.getContext("2d");
+    const W = c.width, H = c.height;
+    const cx = W / 2, cy = H / 2, maxR = W / 2 - 5;
+    ctx.clearRect(0, 0, W, H);
+    [[maxR, "#00ffcc33"], [maxR * 0.67, "#00ffcc22"], [maxR * 0.33, "#00ffcc18"]].forEach(([r, col]) => {
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+    });
+    const radio = Math.min(maxR * 0.33 + v * (maxR / 120), maxR);
+    ctx.beginPath(); ctx.arc(cx, cy, radio, 0, Math.PI * 2);
     ctx.lineWidth = 3;
-    ctx.strokeStyle = volumen < 30 ? "#00ffcc" : (volumen < 60 ? "#ffff00" : "#ff4444");
+    ctx.strokeStyle = v < 30 ? "#00ffcc" : v < 60 ? "#ffff00" : "#ff4444";
     ctx.stroke();
-
     angle += 0.03;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(
-        cx + Math.cos(angle) * 120,
-        cy + Math.sin(angle) * 120
-    );
-    ctx.strokeStyle = "#00ffcc";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(angle) * maxR, cy + Math.sin(angle) * maxR);
+    ctx.strokeStyle = "#00ffcc"; ctx.lineWidth = 2; ctx.stroke();
 }
 
-function actualizarBarra(volumen) {
-    const barra = document.getElementById("barra");
-    const porcentaje = Math.min(volumen * 1.5, 100);
-
-    barra.style.width = porcentaje + "%";
-    barra.style.background = volumen < 30 ? "#00ffcc" : (volumen < 60 ? "#ffff00" : "#ff4444");
+function actualizarBarra(v) {
+    const b = document.getElementById("barra");
+    b.style.width      = Math.min(v * 1.5, 100) + "%";
+    b.style.background = v < 30 ? "#00ffcc" : v < 60 ? "#ffff00" : "#ff4444";
 }
 
-function actualizarEstado(volumen) {
-    const estado = document.getElementById("estado");
-
-    if (volumen < 30) {
-        estado.textContent = "Silencio óptimo";
-        estado.style.color = "#00ffcc";
-    } else if (volumen < 60) {
-        estado.textContent = "Nivel regular";
-        estado.style.color = "#ffff00";
-    } else {
-        estado.textContent = "Demasiado ruido";
-        estado.style.color = "#ff4444";
-    }
+function actualizarEstado(v) {
+    const e = document.getElementById("estado");
+    if (v < 30)      { e.textContent = "Silencio óptimo"; e.style.color = "#00ffcc"; }
+    else if (v < 60) { e.textContent = "Nivel regular";   e.style.color = "#ffff00"; }
+    else             { e.textContent = "Demasiado ruido"; e.style.color = "#ff4444"; }
 }
 
-function abrirPizarra(tipo) {
-    document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
-    const destino = document.getElementById(`pizarra-${tipo}`);
-    if (destino) destino.classList.add('activa');
-}
-
-function cerrarPizarra() {
-    document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
-}
 async function calibrarAula() {
     if (calibrando) return;
-
     calibrando = true;
-
     document.getElementById("estado").textContent = "Calibrando...";
     document.getElementById("estado").style.color = "#ffff00";
-
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const analyserTemp = ctx.createAnalyser();
-        const source = ctx.createMediaStreamSource(stream);
-
-        source.connect(analyserTemp);
-
-        analyserTemp.fftSize = 256;
-        const data = new Uint8Array(analyserTemp.frequencyBinCount);
-
-        let suma = 0;
-        let muestrasCal = 0;
-
-        const inicio = Date.now();
-
+        const ctx    = new (window.AudioContext || window.webkitAudioContext)();
+        const at     = ctx.createAnalyser();
+        ctx.createMediaStreamSource(stream).connect(at);
+        at.fftSize = 256;
+        const data = new Uint8Array(at.frequencyBinCount);
+        let suma = 0, n = 0;
+        const t0 = Date.now();
         function medir() {
-            analyserTemp.getByteFrequencyData(data);
-
-            let s = 0;
-            for (let i = 0; i < data.length; i++) {
-                s += data[i];
-            }
-
-            let vol = s / data.length;
-
-            suma += vol;
-            muestrasCal++;
-
-            if (Date.now() - inicio < 3000) {
-                requestAnimationFrame(medir);
-            } else {
-                finalizar();
+            at.getByteFrequencyData(data);
+            let s = 0; for (let i = 0; i < data.length; i++) s += data[i];
+            suma += s / data.length; n++;
+            if (Date.now() - t0 < 3000) requestAnimationFrame(medir);
+            else {
+                let ns = Math.max(0.5, Math.min(2, 30 / (suma / n)));
+                sensibilidad = ns;
+                document.getElementById("sensibilidad").value      = ns;
+                document.getElementById("sensValor").textContent   = ns.toFixed(1);
+                document.getElementById("estado").textContent      = "Calibrado ✓";
+                document.getElementById("estado").style.color      = "#00ffcc";
+                stream.getTracks().forEach(t => t.stop());
+                ctx.close(); calibrando = false;
             }
         }
-
-        function finalizar() {
-            const media = suma / muestrasCal;
-
-            let nuevaSens = 30 / media;
-            nuevaSens = Math.max(0.5, Math.min(2, nuevaSens));
-
-            sensibilidad = nuevaSens;
-
-            document.getElementById("sensibilidad").value = nuevaSens;
-            document.getElementById("sensValor").textContent = nuevaSens.toFixed(1);
-
-            document.getElementById("estado").textContent = "Calibrado";
-            document.getElementById("estado").style.color = "#00ffcc";
-
-            stream.getTracks().forEach(t => t.stop());
-            ctx.close();
-
-            calibrando = false;
-        }
-
         medir();
-
-    } catch (e) {
+    } catch {
         document.getElementById("estado").textContent = "Error en calibración";
         document.getElementById("estado").style.color = "#ff4444";
         calibrando = false;
     }
 }
+
+/* ═══════════════════════════════════════
+   PIZARRAS
+═══════════════════════════════════════ */
+const COLORS = { azul: '#1a6ef5', negro: '#111111', rojo: '#e63232' };
+const pizarraData = {};
+let pizarraMinimizada = null;   // tipo de la pizarra minimizada
+let tipoParaCerrar    = null;   // para el diálogo
+
+function getPD(tipo) {
+    if (!pizarraData[tipo]) pizarraData[tipo] = {
+        paginas: [null], paginaActual: 0,
+        hayTrazos: false,
+        state: { color: COLORS.azul, size: 4, mode: 'draw', drawing: false, lastX: 0, lastY: 0 }
+    };
+    return pizarraData[tipo];
+}
+
+/* ── Toolbar ── */
+function buildToolbar(tipo) {
+    const tb = document.getElementById(`tb-${tipo}`);
+    if (!tb || tb.dataset.built) return;
+    tb.dataset.built = "1";
+    const st = getPD(tipo).state;
+
+    // Colores
+    ['azul', 'negro', 'rojo'].forEach(n => {
+        const btn = document.createElement('button');
+        btn.className = `color-btn ${n}${n === 'azul' ? ' selected' : ''}`;
+        btn.title = n;
+        btn.onclick = () => {
+            st.color = COLORS[n]; st.mode = 'draw';
+            tb.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            tb.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active-tool'));
+        };
+        tb.appendChild(btn);
+    });
+
+    sep(tb);
+    lbl(tb, 'Grosor:');
+    const sl = document.createElement('input');
+    sl.type = 'range'; sl.min = 1; sl.max = 30; sl.value = 4; sl.className = 'size-slider';
+    sl.oninput = () => { st.size = parseInt(sl.value); };
+    tb.appendChild(sl);
+    sep(tb);
+
+    const eraser = mkBtn('⌫ Borrador', () => {
+        st.mode = 'erase';
+        tb.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active-tool'));
+        eraser.classList.add('active-tool');
+        tb.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+    });
+    tb.appendChild(eraser);
+
+    tb.appendChild(mkBtn('🗑 Limpiar', () => {
+        const c = getCanvas(tipo);
+        if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    }));
+
+    sep(tb);
+    tb.appendChild(mkBtn('💾 Guardar', () => guardarPagina(tipo)));
+
+    // Botones ventana (minimizar / cerrar) — al final, a la derecha
+    const winDiv = document.createElement('div');
+    winDiv.className = 'win-btns';
+
+    const minBtn = document.createElement('button');
+    minBtn.className = 'win-btn minimizar';
+    minBtn.title = 'Minimizar';
+    minBtn.textContent = '−';
+    minBtn.onclick = () => minimizarPizarra(tipo);
+    winDiv.appendChild(minBtn);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'win-btn cerrar';
+    closeBtn.title = 'Cerrar';
+    closeBtn.textContent = '×';
+    closeBtn.onclick = () => pedirCerrar(tipo);
+    winDiv.appendChild(closeBtn);
+
+    tb.appendChild(winDiv);
+}
+
+function sep(p) { const s = document.createElement('div'); s.className = 'sep'; p.appendChild(s); }
+function lbl(p, t) { const l = document.createElement('label'); l.textContent = t; p.appendChild(l); }
+function mkBtn(t, fn) { const b = document.createElement('button'); b.className = 'tool-btn'; b.textContent = t; b.onclick = fn; return b; }
+
+/* ── Páginas ── */
+function buildPagBar(tipo) {
+    const bar = document.getElementById(`pagbar-${tipo}`);
+    if (!bar) return;
+    bar.innerHTML = '';
+    const pd = getPD(tipo);
+    pd.paginas.forEach((_, i) => {
+        const btn = document.createElement('button');
+        btn.className = `pag-btn${i === pd.paginaActual ? ' activa-pag' : ''}`;
+        btn.textContent = `Pág ${i + 1}`;
+        btn.onclick = () => cambiarPagina(tipo, i);
+        bar.appendChild(btn);
+    });
+    const add = document.createElement('button');
+    add.className = 'pag-add'; add.textContent = '＋ Página';
+    add.onclick = () => añadirPagina(tipo);
+    bar.appendChild(add);
+}
+
+function saveCurrentPage(tipo) {
+    const cvs = getCanvas(tipo); if (!cvs) return;
+    const pd = getPD(tipo);
+    pd.paginas[pd.paginaActual] = cvs.getContext('2d').getImageData(0, 0, cvs.width, cvs.height);
+}
+
+function cambiarPagina(tipo, idx) {
+    saveCurrentPage(tipo);
+    getPD(tipo).paginaActual = idx;
+    buildPagBar(tipo);
+    restorePage(tipo);
+}
+
+function añadirPagina(tipo) {
+    saveCurrentPage(tipo);
+    const pd = getPD(tipo);
+    pd.paginas.push(null);
+    pd.paginaActual = pd.paginas.length - 1;
+    buildPagBar(tipo);
+    restorePage(tipo);
+}
+
+function restorePage(tipo) {
+    const cvs = getCanvas(tipo); if (!cvs) return;
+    const pd = getPD(tipo);
+    const ctx = cvs.getContext('2d');
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    const img = pd.paginas[pd.paginaActual];
+    if (img) ctx.putImageData(img, 0, 0);
+}
+
+function getCanvas(tipo) {
+    return document.querySelector(`#wrap-${tipo} .draw-canvas`);
+}
+
+/* ── Guardar PNG ── */
+function guardarPagina(tipo) {
+    const cvs = getCanvas(tipo); if (!cvs) return;
+    const pd = getPD(tipo);
+    const tmp = document.createElement('canvas');
+    tmp.width = cvs.width; tmp.height = cvs.height;
+    const tctx = tmp.getContext('2d');
+
+    if      (tipo === 'blanca')      { tctx.fillStyle = '#ffffff'; tctx.fillRect(0, 0, tmp.width, tmp.height); }
+    else if (tipo === 'negra')       { tctx.fillStyle = '#111111'; tctx.fillRect(0, 0, tmp.width, tmp.height); }
+    else if (tipo === 'cuadros') {
+        tctx.fillStyle = '#ffffff'; tctx.fillRect(0, 0, tmp.width, tmp.height);
+        tctx.strokeStyle = '#cfcfcf'; tctx.lineWidth = 1;
+        for (let x = 0; x <= tmp.width;  x += 25) { tctx.beginPath(); tctx.moveTo(x, 0); tctx.lineTo(x, tmp.height); tctx.stroke(); }
+        for (let y = 0; y <= tmp.height; y += 25) { tctx.beginPath(); tctx.moveTo(0, y); tctx.lineTo(tmp.width, y); tctx.stroke(); }
+    }
+    else if (tipo === 'cuadernillo') {
+        tctx.fillStyle = '#fffdf7'; tctx.fillRect(0, 0, tmp.width, tmp.height);
+        tctx.strokeStyle = '#6aa6ff'; tctx.lineWidth = 2;
+        for (let y = 35; y < tmp.height; y += 18) { tctx.beginPath(); tctx.moveTo(0, y); tctx.lineTo(tmp.width, y); tctx.stroke(); }
+        tctx.strokeStyle = '#ff7a7a'; tctx.lineWidth = 2;
+        tctx.beginPath(); tctx.moveTo(70, 0); tctx.lineTo(70, tmp.height); tctx.stroke();
+    }
+    else if (tipo === 'pentagrama') {
+        tctx.fillStyle = '#f9f6eb'; tctx.fillRect(0, 0, tmp.width, tmp.height);
+        [0.12, 0.42, 0.72].forEach(tp => {
+            for (let i = 0; i < 5; i++) {
+                const y = (tp + i * 0.028) * tmp.height;
+                tctx.beginPath(); tctx.moveTo(tmp.width * 0.08, y); tctx.lineTo(tmp.width * 0.92, y);
+                tctx.strokeStyle = '#333'; tctx.lineWidth = 1.5; tctx.stroke();
+            }
+        });
+    }
+
+    tctx.drawImage(cvs, 0, 0);
+    const link = document.createElement('a');
+    link.download = `pizarra-${tipo}-p${pd.paginaActual + 1}.png`;
+    link.href = tmp.toDataURL('image/png');
+    link.click();
+    getPD(tipo).hayTrazos = false;
+}
+
+/* ── Canvas de dibujo ── */
+function initDrawCanvas(tipo) {
+    const wrap = document.getElementById(`wrap-${tipo}`); if (!wrap) return;
+    if (wrap.querySelector('.draw-canvas[data-init]')) { resizeFull(tipo); restorePage(tipo); return; }
+
+    // SVG pentagramas
+    if (tipo === 'pentagrama' && !wrap.querySelector('svg')) {
+        let s = `<svg class="pentagramas-svg" viewBox="0 0 1000 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
+        [0.12, 0.42, 0.72].forEach(tp => {
+            for (let i = 0; i < 5; i++) {
+                const y = ((tp + i * 0.028) * 600).toFixed(1);
+                s += `<line x1="80" y1="${y}" x2="920" y2="${y}" stroke="#333" stroke-width="1.5"/>`;
+            }
+        });
+        s += `</svg>`;
+        wrap.insertAdjacentHTML('beforeend', s);
+    }
+
+    const cvs = document.createElement('canvas');
+    cvs.className = 'draw-canvas'; cvs.dataset.init = "1";
+    wrap.appendChild(cvs);
+
+    const pd = getPD(tipo);
+    const st = pd.state;
+
+    function doResize() {
+        cvs.width  = wrap.clientWidth;
+        cvs.height = wrap.clientHeight;
+        restorePage(tipo);
+    }
+
+    function getPos(e) {
+        const r = cvs.getBoundingClientRect();
+        const src = e.touches ? e.touches[0] : e;
+        return {
+            x: (src.clientX - r.left) * (cvs.width  / r.width),
+            y: (src.clientY - r.top)  * (cvs.height / r.height)
+        };
+    }
+
+    function startDraw(e) {
+        e.preventDefault(); st.drawing = true;
+        const p = getPos(e); st.lastX = p.x; st.lastY = p.y;
+    }
+
+    function doDraw(e) {
+        if (!st.drawing) return; e.preventDefault();
+        const ctx = cvs.getContext('2d'); const p = getPos(e);
+        ctx.beginPath(); ctx.moveTo(st.lastX, st.lastY); ctx.lineTo(p.x, p.y);
+        ctx.lineWidth   = st.mode === 'erase' ? st.size * 4 : st.size;
+        ctx.lineCap     = 'round'; ctx.lineJoin = 'round';
+        ctx.globalCompositeOperation = st.mode === 'erase' ? 'destination-out' : 'source-over';
+        ctx.strokeStyle = st.color;
+        ctx.stroke();
+        st.lastX = p.x; st.lastY = p.y;
+        pd.hayTrazos = true;
+    }
+
+    function stopDraw() { st.drawing = false; }
+
+    cvs.addEventListener('mousedown',  startDraw);
+    cvs.addEventListener('mousemove',  doDraw);
+    cvs.addEventListener('mouseup',    stopDraw);
+    cvs.addEventListener('mouseleave', stopDraw);
+    cvs.addEventListener('touchstart', startDraw, { passive: false });
+    cvs.addEventListener('touchmove',  doDraw,    { passive: false });
+    cvs.addEventListener('touchend',   stopDraw);
+
+    new ResizeObserver(doResize).observe(wrap);
+    doResize();
+}
+
+function resizeFull(tipo) {
+    const cvs = getCanvas(tipo); if (!cvs) return;
+    const wrap = document.getElementById(`wrap-${tipo}`);
+    cvs.width  = wrap.clientWidth;
+    cvs.height = wrap.clientHeight;
+    restorePage(tipo);
+}
+
+/* ── Abrir pizarra ── */
+function abrirPizarra(tipo) {
+    // Si hay una minimizada que no es esta, avisamos? No, simplemente abrimos la nueva
+    document.querySelectorAll('.pizarra').forEach(p => p.classList.remove('activa'));
+    const modal = document.getElementById(`pizarra-${tipo}`); if (!modal) return;
+    modal.classList.add('activa');
+    buildToolbar(tipo);
+    buildPagBar(tipo);
+    // Ocultar restore si volvemos a la minimizada
+    if (pizarraMinimizada === tipo) {
+        pizarraMinimizada = null;
+        document.getElementById('restore-btn').style.display = 'none';
+    }
+    setTimeout(() => initDrawCanvas(tipo), 60);
+}
+
+/* ── Minimizar ── */
+function minimizarPizarra(tipo) {
+    saveCurrentPage(tipo);
+    document.getElementById(`pizarra-${tipo}`).classList.remove('activa');
+    pizarraMinimizada = tipo;
+    const rb = document.getElementById('restore-btn');
+    rb.textContent = `↑ Volver a la pizarra`;
+    rb.style.display = 'block';
+}
+
+function restaurarPizarra() {
+    if (!pizarraMinimizada) return;
+    abrirPizarra(pizarraMinimizada);
+}
+
+/* ── Cerrar con diálogo ── */
+function pedirCerrar(tipo) {
+    const pd = getPD(tipo);
+    if (pd.hayTrazos) {
+        tipoParaCerrar = tipo;
+        document.getElementById('dialog-guardar').classList.add('activo');
+    } else {
+        cerrarPizarraDefinitivo(tipo);
+    }
+}
+
+function dialogAccion(accion) {
+    document.getElementById('dialog-guardar').classList.remove('activo');
+    if (!tipoParaCerrar) return;
+    if (accion === 'guardar') {
+        guardarPagina(tipoParaCerrar);
+        cerrarPizarraDefinitivo(tipoParaCerrar);
+    } else if (accion === 'descartar') {
+        cerrarPizarraDefinitivo(tipoParaCerrar);
+    }
+    // 'cancelar' no hace nada
+    tipoParaCerrar = null;
+}
+
+function cerrarPizarraDefinitivo(tipo) {
+    document.getElementById(`pizarra-${tipo}`).classList.remove('activa');
+    if (pizarraMinimizada === tipo) {
+        pizarraMinimizada = null;
+        document.getElementById('restore-btn').style.display = 'none';
+    }
+    // Limpiar datos
+    delete pizarraData[tipo];
+    // Resetear toolbar para reconstruirse la próxima vez
+    const tb = document.getElementById(`tb-${tipo}`);
+    if (tb) { tb.innerHTML = ''; delete tb.dataset.built; }
+    // Quitar canvas
+    const wrap = document.getElementById(`wrap-${tipo}`);
+    if (wrap) {
+        const cvs = wrap.querySelector('.draw-canvas');
+        if (cvs) cvs.remove();
+        const svg = wrap.querySelector('svg');
+        if (svg) svg.remove();
+    }
+}
+
 setModo(1);
 </script>
-<div class="credito">Creado por Manuel</div>
 </body>
 </html>
