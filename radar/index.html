@@ -560,8 +560,8 @@ function loop() {
         sum += dataArray[i];
     }
 
-let volumen = (sum / dataArray.length) * sensibilidad;
-  
+let volumen = Math.min((sum / dataArray.length) * sensibilidad, 120);
+    
     if (modoActual === 1) { // SOLO en modo Trabajo
     sumaVolumen += volumen;
     muestras++;
