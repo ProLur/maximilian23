@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar de Silencio • Maximilian 23</title>
+<style>
+    body {
+        margin: 0;
+        font-family: "Courier New", monospace;
+        background: #0d1117;
+        color: #00ffcc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        gap: 20px;
+    }
+
+    /* Contenedor de las tarjetas */
+    .modo-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .card {
+        padding: 18px 15px;
+        border: 2px solid #00ffcc55;
+        border-radius: 12px;
+        background: #161b22;
+        text-align: center;
+        font-size: 1.35rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .card:hover, .card.activo {
+        border-color: #00ffcc;
+        background: #00ffcc22;
+        box-shadow: 0 0 20px #00ffcc88;
+    }
+
+    /* Contenedor del radar */
+    .radar-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 340px;
+    }
+
+    header {
+        width: 100%;
+        background: #161b22;
+        border-bottom: 2px solid #00ffcc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    header img {
+        height: 48px;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #00ffcc;
+    }
+
+    canvas {
+        background: #020606;
+        border: 2px solid #00ffcc55;
+        border-radius: 50%;
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+    }
+
+    .barra {
+        width: 100%;
+        max-width: 300px;
+        height: 14px;
+        border: 1px solid #00ffcc;
+        margin-top: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .barra-inner {
+        height: 100%;
+        width: 0%;
+        background: #00ffcc;
+    }
+
+    .estado {
+        margin-top: 15px;
+        font-size: 1.3rem;
+    }
+
+    .nota {
+        margin-top: 10px;
+        font-size: 2.1rem;
+        font-weight: bold;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 14px 30px;
+        background: #00ffcc22;
+        border: 2px solid #00ffcc;
+        color: #00ffcc;
+        cursor: pointer;
+        border-radius: 8px;
+        font-size: 1.15rem;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    /* ================== MEDIA QUERIES ================== */
+    @media (min-width: 768px) {
+        body {
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 50px;
+            padding: 30px;
+        }
+
+        .modo-container {
+            width: auto;
+            max-width: none;
+        }
+
+        .radar-container {
+            max-width: none;
+        }
+
+        canvas {
+            width: 300px;
+            height: 300px;
+        }
+
+        button {
+            width: auto;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <!-- Tarjetas -->
+    <div class="modo-container">
+        <div class="card" id="card-explicacion" onclick="setModo(0)">📖 Explicación</div>
+        <div class="card" id="card-trabajo" onclick="setModo(1)">✍️ Trabajo</div>
+        <div class="card" id="card-preguntas" onclick="setModo(2)">❓ Turno de preguntas</div>
+    </div>
+
+    <!-- Radar -->
+    <div class="radar-container">
+        <header>
+            <img src="https://maximilian23.com/Cabeza.png">
+            <h2>RADAR DE SILENCIO</h2>
+        </header>
+        
+        <canvas id="radar" width="300" height="300"></canvas>
+        <div class="barra">
+            <div class="barra-inner" id="barra"></div>
+        </div>
+        <div class="estado" id="estado">Pulsa iniciar</div>
+        <div class="nota" id="nota"></div>
+        <button id="btn" onclick="toggle()">INICIAR</button>
+    </div>
+
+<script>
+// === El script es exactamente el mismo que te di antes ===
+let audioContext, analyser, dataArray;
+let running = false;
+let angle = 0;
+let sumaVolumen = 0;
+let muestras = 0;
+let modoActual = 1;
+
+const modos = [
+    { nombre: "Explicación", afectaNota: false },
+    { nombre: "Trabajo", afectaNota: true },
+    { nombre: "Turno de preguntas", afectaNota: false }
+];
+
+function setModo(modo) {
+    modoActual = modo;
+    document.querySelectorAll('.card').forEach((card, index) => {
+        card.classList.toggle('activo', index === modo);
+    });
+}
+
+async function toggle(){
+    if(!running) iniciar();
+    else parar();
+}
+
+async function iniciar(){
+    sumaVolumen = 0;
+    muestras = 0;
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    
+    running = true;
+    document.getElementById("btn").textContent = "STOP";
+    document.getElementById("nota").textContent = "";
+    loop();
+}
+
+function parar(){
+    running = false;
+    if (modos[modoActual].afectaNota) {
+        const media = sumaVolumen / muestras || 0;
+        let nota = 10 - (media / 10);
+        nota = Math.max(1, Math.min(10, nota)).toFixed(1);
+        document.getElementById("nota").textContent = `Nota: ${nota} (${modos[modoActual].nombre})`;
+    } else {
+        document.getElementById("nota").textContent = `Sin nota (${modos[modoActual].nombre})`;
+    }
+    document.getElementById("btn").textContent = "INICIAR";
+}
+
+function loop(){
+    if(!running) return;
+    analyser.getByteFrequencyData(dataArray);
+    let sum = 0;
+    for(let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+    let volumen = sum / dataArray.length;
+
+    sumaVolumen += volumen;
+    muestras++;
+
+    dibujarRadar(volumen);
+    actualizarBarra(volumen);
+    actualizarEstado(volumen);
+    requestAnimationFrame(loop);
+}
+
+function dibujarRadar(volumen){ /* igual que antes */ 
+    const canvas = document.getElementById("radar");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,300,300);
+    const cx = 150, cy = 150;
+    ctx.beginPath(); ctx.arc(cx,cy,120,0,Math.PI*2); ctx.strokeStyle="#00ffcc33"; ctx.stroke();
+    
+    const radio = 40 + volumen;
+    ctx.beginPath(); ctx.arc(cx,cy,radio,0,Math.PI*2);
+    ctx.strokeStyle = volumen < 30 ? "#00ffcc" : volumen < 60 ? "#ffff00" : "#ff4444";
+    ctx.stroke();
+
+    angle += 0.03;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx + Math.cos(angle)*120, cy + Math.sin(angle)*120);
+    ctx.strokeStyle="#00ffcc";
+    ctx.stroke();
+}
+
+function actualizarBarra(volumen){ /* igual */ 
+    const barra = document.getElementById("barra");
+    let porcentaje = Math.min(volumen * 1.5, 100);
+    barra.style.width = porcentaje + "%";
+    barra.style.background = volumen < 30 ? "#00ffcc" : volumen < 60 ? "#ffff00" : "#ff4444";
+}
+
+function actualizarEstado(volumen){ /* igual */ 
+    const estado = document.getElementById("estado");
+    if(volumen < 30){
+        estado.textContent = "Silencio óptimo"; estado.style.color = "#00ffcc";
+    } else if(volumen < 60){
+        estado.textContent = "Nivel regular"; estado.style.color = "#ffff00";
+    } else {
+        estado.textContent = "Demasiado ruido"; estado.style.color = "#ff4444";
+    }
+}
+
+setModo(1); // Trabajo por defecto
+</script>
+</body>
+</html>
