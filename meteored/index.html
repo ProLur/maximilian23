@@ -43,6 +43,10 @@ letter-spacing:0.02em;
 }
 .loading-inline{
 display:none;
+position:absolute;
+inset:0;
+margin:0;
+z-index:2;
 }
 .loading-inline.visible{
 display:flex;
@@ -55,7 +59,7 @@ opacity:0.28;
 position:relative;
 }
 .calendar-loading{
-min-height:220px;
+min-height:0;
 }
 .day-data-table{
 width:100%;
@@ -119,6 +123,30 @@ border:2px solid #ff8888;
 font-weight:bold;
 box-shadow:0 0 10px rgba(255,0,0,0.6);
 }
+.header-credit{
+position:fixed;
+top:39px;
+right:18px;
+font-size:0.82rem;
+color:#00ffcc;
+background:rgba(0,255,204,0.08);
+border:1px solid rgba(0,255,204,0.18);
+padding:6px 10px;
+border-radius:999px;
+backdrop-filter:blur(6px);
+z-index:20;
+pointer-events:none;
+transform:translateY(-50%);
+}
+@media (max-width: 700px){
+.header-credit{
+top:auto;
+right:12px;
+bottom:12px;
+font-size:0.76rem;
+transform:none;
+}
+}
 @keyframes spin{
 to{transform:rotate(360deg);}
 }
@@ -132,6 +160,8 @@ to{transform:rotate(360deg);}
 <img src="https://maximilian23.com/Cabeza.png">
 <h1>Estación Meteorológica Maximilian 23 (Meteoescuela)</h1>
 </header>
+
+<div class="header-credit">Creado por Manuel</div>
 
 <div class="main-container">
 <div class="content-wrapper">
