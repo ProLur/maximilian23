@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<title>Meteo • Zafra • Maximilian23</title>
+
+<link rel="icon" href="https://maximilian23.com/Cabeza.png">
+<link rel="stylesheet" href="styles.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+.loading-box{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:14px;
+padding:24px 16px;
+border-radius:18px;
+background:rgba(12,18,32,0.38);
+color:#ffffff;
+text-align:center;
+}
+.loading-spinner{
+width:42px;
+height:42px;
+border:5px solid rgba(255,255,255,0.2);
+border-top-color:#00ffcc;
+border-radius:50%;
+animation:spin 0.8s linear infinite;
+}
+.loading-text{
+font-size:0.98rem;
+letter-spacing:0.02em;
+}
+.loading-inline{
+display:none;
+}
+.loading-inline.visible{
+display:flex;
+}
+.chart-container.loading canvas,
+.calendar.loading{
+opacity:0.28;
+}
+.calendar-wrap{
+position:relative;
+}
+.calendar-loading{
+min-height:220px;
+}
+.day-data-table{
+width:100%;
+border-collapse:separate;
+border-spacing:0 10px;
+margin-top:14px;
+}
+.day-data-table td{
+padding:10px 14px;
+vertical-align:middle;
+}
+.day-data-label{
+font-weight:bold;
+color:#00ffccaa;
+padding-right:22px;
+}
+.day-data-value{
+text-align:right;
+white-space:nowrap;
+padding-left:22px;
+}
+.month-nav{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:12px;
+margin-bottom:14px;
+}
+.month-nav button{
+width:46px;
+height:46px;
+border:none;
+border-radius:50%;
+background:#1f6feb;
+color:#fff;
+font-size:1.5rem;
+cursor:pointer;
+box-shadow:0 8px 18px rgba(31,111,235,0.28);
+}
+.month-nav button:hover{
+background:#388bfd;
+}
+.month-label{
+min-width:220px;
+text-align:center;
+font-size:1.2rem;
+font-weight:bold;
+color:#e6edf3;
+}
+.day.hasdata{
+background:#1f6feb;
+border:2px solid #6cb6ff;
+color:white;
+font-weight:bold;
+box-shadow:0 0 12px rgba(31,111,235,0.4);
+}
+.day.today{
+background:#ff4444;
+color:white;
+border:2px solid #ff8888;
+font-weight:bold;
+box-shadow:0 0 10px rgba(255,0,0,0.6);
+}
+@keyframes spin{
+to{transform:rotate(360deg);}
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<img src="https://maximilian23.com/Cabeza.png">
+<h1>Estación Meteorológica Maximilian 23 (Meteoescuela)</h1>
+</header>
+
+<div class="main-container">
+<div class="content-wrapper">
+
+<div class="charts-grid">
+
+<div class="chart-card" data-type="temp_indoor" onclick="openModalChart(this)">
+<h3>Temperatura interior (°C)</h3>
+<div class="chart-container loading"><canvas id="chart-temp-indoor"></canvas><div class="loading-box loading-inline visible"><div class="loading-spinner" aria-hidden="true"></div><div class="loading-text">Cargando gráfica...</div></div></div>
+</div>
+
+<div class="chart-card" data-type="temp_outdoor" onclick="openModalChart(this)">
+<h3>Temperatura exterior (°C)</h3>
+<div class="chart-container loading"><canvas id="chart-temp-outdoor"></canvas><div class="loading-box loading-inline visible"><div class="loading-spinner" aria-hidden="true"></div><div class="loading-text">Cargando gráfica...</div></div></div>
+</div>
+
+<div class="chart-card" data-type="hum_outdoor" onclick="openModalChart(this)">
+<h3>Humedad exterior (%)</h3>
+<div class="chart-container loading"><canvas id="chart-hum-outdoor"></canvas><div class="loading-box loading-inline visible"><div class="loading-spinner" aria-hidden="true"></div><div class="loading-text">Cargando gráfica...</div></div></div>
+</div>
+
+<div class="chart-card" data-type="wind_speed" onclick="openModalChart(this)">
+<h3>Velocidad del viento (m/s)</h3>
+<div class="chart-container loading"><canvas id="chart-wind-speed"></canvas><div class="loading-box loading-inline visible"><div class="loading-spinner" aria-hidden="true"></div><div class="loading-text">Cargando gráfica...</div></div></div>
+</div>
+
+</div>
+
+<div class="calendar-box">
+<div class="month-nav">
+<button type="button" onclick="cambiarMes(-1)" aria-label="Mes anterior">‹</button>
+<div class="month-label" id="monthYear"></div>
+<button type="button" onclick="cambiarMes(1)" aria-label="Mes siguiente">›</button>
+</div>
+<div class="calendar-wrap">
+<div class="calendar loading" id="calendar"></div>
+<div class="loading-box loading-inline visible calendar-loading" id="calendarLoading"><div class="loading-spinner" aria-hidden="true"></div><div class="loading-text">Cargando calendario...</div></div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- MODAL DIA -->
+<div class="modal" id="dayModal">
+<div class="modal-content" style="max-width:420px;height:auto;">
+<span class="close-btn" onclick="document.getElementById('dayModal').style.display='none'">×</span>
+<h3 id="modalTitle">Datos del día</h3>
+<table id="dayDataTable" class="day-data-table"><tbody></tbody></table>
+</div>
+</div>
+
+<!-- MODAL GRAFICO -->
+<div class="modal" id="chartModal">
+<div class="modal-content">
+<span class="close-btn" onclick="document.getElementById('chartModal').style.display='none'">×</span>
+<div class="modal-title" id="modalChartTitle"></div>
+<div class="modal-chart-container">
+<canvas id="modalChartCanvas"></canvas>
+</div>
+</div>
+</div>
+
+<script>
+
+const BIN_ID="69aaa6b0d0ea881f40f4bc92";
+const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
+
+let allData=[];
+let smallCharts={};
+let modalChart=null;
+const calendarLoading=document.getElementById("calendarLoading");
+
+// 👉 Parseo robusto (clave)
+function parseValue(v){
+if(v===undefined || v===null) return null;
+if(typeof v==="string"){
+v=v.replace(",",".").trim();
+}
+const num=parseFloat(v);
+return isNaN(num) ? null : num;
+}
+
+function parseText(v){
+if(v===undefined || v===null) return null;
+const text=String(v).trim();
+return text==="" ? null : text;
+}
+
+function formatDateEs(fecha){
+if(!fecha) return "";
+const [year,month,day]=fecha.split("-").map(Number);
+if(!year || !month || !day) return fecha;
+const date=new Date(year,month-1,day);
+return date.toLocaleDateString("es-ES",{
+day:"numeric",
+month:"long",
+year:"numeric"
+});
+}
+
+function formatShortDateEs(fecha){
+if(!fecha) return "";
+const [year,month,day]=fecha.split("-").map(Number);
+if(!year || !month || !day) return fecha;
+const date=new Date(year,month-1,day);
+return date.toLocaleDateString("es-ES",{
+day:"2-digit",
+month:"2-digit"
+});
+}
+
+const hoy=new Date();
+let currentDate=new Date(hoy.getFullYear(),hoy.getMonth(),1);
+
+const meses=[
+"Enero","Febrero","Marzo","Abril","Mayo","Junio",
+"Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+function updateMonthTitle(){
+document.getElementById("monthYear").textContent=`${meses[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+}
+
+const chartConfigs={
+temp_indoor:{label:"Temperatura interior",color:"#00ffcc",unit:"°C"},
+temp_outdoor:{label:"Temperatura exterior",color:"#ffaa00",unit:"°C"},
+hum_outdoor:{label:"Humedad exterior",color:"#aaff88",unit:"%"},
+wind_speed:{label:"Velocidad del viento",color:"#ff66aa",unit:"m/s"}
+};
+
+function crearCalendario(datos){
+const cal=document.getElementById("calendar");
+cal.innerHTML="";
+const diasConDatos=new Set(datos.map(d=>d.fecha));
+const year=currentDate.getFullYear();
+const month=currentDate.getMonth();
+const primerDia=new Date(year,month,1).getDay()||7;
+const diasMes=new Date(year,month+1,0).getDate();
+
+for(let i=1;i<primerDia;i++){
+const vacio=document.createElement("div");
+vacio.className="day";
+cal.appendChild(vacio);
+}
+
+for(let i=1;i<=diasMes;i++){
+const fecha=`${year}-${(month+1).toString().padStart(2,"0")}-${i.toString().padStart(2,"0")}`;
+const d=document.createElement("div");
+d.className="day";
+d.textContent=i;
+
+if(diasConDatos.has(fecha)) d.classList.add("hasdata");
+if(
+year===hoy.getFullYear() &&
+month===hoy.getMonth() &&
+i===hoy.getDate()
+) d.classList.add("today");
+
+d.onclick=()=>mostrarDatosDia(fecha,datos);
+cal.appendChild(d);
+}
+}
+
+function cambiarMes(dir){
+currentDate=new Date(currentDate.getFullYear(),currentDate.getMonth()+dir,1);
+updateMonthTitle();
+crearCalendario(allData);
+}
+
+function mostrarDatosDia(fecha,datos){
+const dato = datos.find(d => d.fecha === fecha);
+const tbody = document.getElementById("dayDataTable").querySelector("tbody");
+tbody.innerHTML="";
+document.getElementById("modalTitle").textContent=`Datos: ${formatDateEs(fecha)}`;
+
+if(!dato){
+tbody.innerHTML='<tr><td colspan="2" style="text-align:center;padding:1.5rem;">Sin datos</td></tr>';
+document.getElementById("dayModal").style.display="flex";
+return;
+}
+
+const campos=[
+["Temperatura interior","temp_indoor","°C"],
+["Temperatura exterior","temp_outdoor","°C"],
+["Humedad exterior","hum_outdoor","%"],
+["Viento","wind_speed","m/s"],
+["Dirección del viento","wind_direction",""],
+["Lluvia","rain","mm"]
+];
+
+campos.forEach(([label,campo,unit])=>{
+let value=campo==="wind_direction" ? parseText(dato[campo]) : parseValue(dato[campo]);
+
+if(value!==null){
+if(campo==="wind_speed"){
+value=value.toFixed(1);
+}
+const tr=document.createElement("tr");
+tr.innerHTML=`
+<td class="day-data-label">${label}</td>
+<td class="day-data-value">${unit ? `${value} ${unit}` : value}</td>
+`;
+tbody.appendChild(tr);
+}
+});
+
+document.getElementById("dayModal").style.display="flex";
+}
+
+function createSmallChart(canvasId,type){
+const canvas=document.getElementById(canvasId);
+if(!canvas) return;
+
+const ctx=canvas.getContext("2d");
+const cfg=chartConfigs[type];
+
+const data=allData.map(d=>parseValue(d[type])).filter(v=>v!==null);
+const labels=allData.map(d=>formatShortDateEs(d.fecha||""));
+
+if(data.length===0) return;
+
+return new Chart(ctx,{
+type:"line",
+data:{
+labels,
+datasets:[{
+label:cfg.label,
+data,
+borderColor:cfg.color,
+backgroundColor:cfg.color+"22",
+tension:0.3,
+pointRadius:2,
+borderWidth:2
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}}
+}
+});
+}
+
+function openModalChart(card){
+const type=card.dataset.type;
+const cfg=chartConfigs[type];
+
+document.getElementById("modalChartTitle").textContent=cfg.label;
+
+if(modalChart) modalChart.destroy();
+
+const ctx=document.getElementById("modalChartCanvas").getContext("2d");
+
+const data=allData.map(d=>parseValue(d[type])).filter(v=>v!==null);
+const labels=allData.map(d=>formatDateEs(d.fecha));
+
+modalChart=new Chart(ctx,{
+type:"line",
+data:{
+labels,
+datasets:[{
+label:cfg.label,
+data,
+borderColor:cfg.color,
+backgroundColor:cfg.color+"33",
+tension:0.3,
+pointRadius:3,
+borderWidth:3
+}]
+}
+});
+
+document.getElementById("chartModal").style.display="flex";
+}
+
+function setLoading(isLoading){
+document.querySelectorAll(".chart-container").forEach(el=>{
+el.classList.toggle("loading",isLoading);
+const loader=el.querySelector(".loading-inline");
+if(loader) loader.classList.toggle("visible",isLoading);
+});
+document.getElementById("calendar").classList.toggle("loading",isLoading);
+calendarLoading.classList.toggle("visible",isLoading);
+}
+
+async function cargar(){
+setLoading(true);
+try{
+const url=`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${Date.now()}`;
+
+const res=await fetch(url,{
+cache:"no-store",
+headers:{"X-Master-Key":KEY}
+});
+
+const json=await res.json();
+
+allData=(json?.record?.meteo || json?.record || [])
+.filter(d=>d && d.fecha)
+.sort((a,b)=>(a.fecha||"").localeCompare(b.fecha||""));
+
+updateMonthTitle();
+crearCalendario(allData);
+
+Object.keys(chartConfigs).forEach(type=>{
+const canvasId=`chart-${type.replace(/_/g,'-')}`;
+smallCharts[type]=createSmallChart(canvasId,type);
+});
+
+}catch(e){
+console.error(e);
+document.querySelector(".main-container").innerHTML+=
+"<p style='text-align:center;padding:3rem;color:#ff6666;font-size:1.3rem;'>Error al cargar datos meteorológicos</p>";
+}finally{
+setLoading(false);
+}
+}
+
+cargar();
+
+window.onclick=function(event){
+if(event.target.classList.contains('modal')){
+event.target.style.display="none";
+}
+}
+
+</script>
+
+</body>
+</html>
