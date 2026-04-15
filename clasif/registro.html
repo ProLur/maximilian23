@@ -1,0 +1,461 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro • Juego del Silencio (Privado)</title>
+  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <style>
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100dvh;
+      background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,255,204,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, rgba(0,255,204,0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      background: rgba(22,27,34,0.92);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 2px solid #00ffcc;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc88;
+      box-shadow: 0 0 12px #00ffcc55;
+    }
+    header h1 {
+      font-size: 1.7rem;
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffccaa;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .classification {
+      background: rgba(30,45,61,0.35);
+      border: 2px solid #00ffcc55;
+      border-radius: 14px;
+      padding: 1.8rem;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      margin-bottom: 2rem;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #00ffcc66 rgba(13,17,23,0.35);
+    }
+    table {
+      border-collapse: collapse;
+      background: rgba(13,17,23,0.85);
+      border: 3px solid #00ffcc;
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: max-content;
+    }
+    th {
+      background: linear-gradient(#00ffcc22, transparent);
+      color: #00ffcc;
+      padding: 14px 10px;
+      font-size: 1.15rem;
+      border-bottom: 3px solid #00ffcc66;
+      white-space: nowrap;
+      transition: all 0.2s;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+    th.semana-pasada {
+      color: #ff5555 !important;
+      background: linear-gradient(#ff444422, transparent) !important;
+      text-shadow: 0 0 7px #ff444488 !important;
+    }
+    th.semana-cuarentena {
+      color: #ff7b7b !important;
+      background: linear-gradient(rgba(255, 85, 85, 0.3), rgba(255, 85, 85, 0.08)) !important;
+      text-shadow: 0 0 7px rgba(255, 85, 85, 0.55) !important;
+    }
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #00ffcc33;
+    }
+    td.quarantine-cell {
+      background: rgba(255, 85, 85, 0.08);
+      border-left: 1px solid rgba(255, 85, 85, 0.18);
+      border-right: 1px solid rgba(255, 85, 85, 0.18);
+    }
+    .team-name {
+      text-align: left;
+      padding-left: 2rem;
+      color: #00ffcc;
+      font-size: 1.35rem;
+      font-weight: bold;
+      min-width: 140px;
+    }
+    .total-cell {
+      background: rgba(13,17,23,1) !important;
+      color: #00ffcc;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-left: 3px solid #00ffcc;
+      min-width: 100px;
+    }
+    .sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 4;
+      box-shadow: 6px 0 10px rgba(0,0,0,0.22);
+      background: rgba(13,17,23,0.96);
+    }
+    .sticky-right {
+      position: sticky;
+      right: 0;
+      z-index: 4;
+      box-shadow: -6px 0 10px rgba(0,0,0,0.22);
+      background: rgba(13,17,23,1);
+    }
+    select {
+      background: #161b22;
+      color: #e6edf3;
+      border: 2px solid #00ffcc66;
+      border-radius: 8px;
+      padding: 6px 4px;
+      font-size: 1.1rem;
+      width: 100%;
+      text-align: center;
+      min-width: 60px;
+      transition: border-color 0.2s;
+    }
+    select.past-week {
+      border-color: #ff555588;
+      background: #2a1a1a;
+    }
+    select.quarantine-week {
+      border-color: #ff7b7b;
+      background: rgba(60, 20, 20, 0.92);
+      color: #ffd6d6;
+      box-shadow: inset 0 0 0 1px rgba(255, 123, 123, 0.18);
+    }
+    .score-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+    .score-select {
+      min-width: 48px;
+      width: 48px;
+      padding: 6px 2px;
+    }
+    .score-decimal-separator {
+      color: #00ffcc;
+      font-weight: bold;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .btn-guardar {
+      display: block;
+      margin: 2rem auto;
+      padding: 1rem 4rem;
+      background: rgba(0,255,204,0.2);
+      color: #00ffcc;
+      border: 3px solid #00ffcc;
+      border-radius: 999px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-guardar:hover {
+      background: rgba(0,255,204,0.35);
+      transform: scale(1.05);
+    }
+    .mobile-hidden-week {
+      display: table-cell;
+    }
+    @media (max-width: 600px) {
+      th, td { padding: 8px; font-size: 0.95rem; }
+      .team-name { padding-left: 1.2rem; font-size: 1.15rem; }
+      .total-cell { min-width: 84px; }
+      select { font-size: 1rem; padding: 5px; }
+      .score-select {
+        min-width: 42px;
+        width: 42px;
+        padding: 5px 2px;
+      }
+      .mobile-hidden-week {
+        display: none !important;
+      }
+      .table-wrapper {
+        overflow-x: visible;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://maximilian23.com/Cabeza.png" alt="Logo">
+    <h1>Registro Privado • Juego del Silencio</h1>
+  </header>
+  <div class="container">
+    <div class="classification">
+      <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="sticky-left">Equipo</th>
+            <th class="week-header" data-week="1">S1</th>
+            <th class="week-header" data-week="2">S2</th>
+            <th class="week-header" data-week="3">S3</th>
+            <th class="week-header" data-week="4">S4</th>
+            <th class="week-header" data-week="5">S5</th>
+            <th class="week-header" data-week="6">S6</th>
+            <th class="week-header" data-week="7">S7</th>
+            <th class="week-header" data-week="8">S8</th>
+            <th class="week-header" data-week="9">S9</th>
+            <th class="week-header" data-week="10">S10</th>
+            <th class="week-header" data-week="11">S11</th>
+            <th class="week-header" data-week="12">S12</th>
+            <th class="week-header" data-week="13">S13</th>
+            <th class="week-header" data-week="14">S14</th>
+            <th class="week-header" data-week="15">S15</th>
+            <th class="week-header" data-week="16">S16</th>
+            <th class="week-header" data-week="17">S17</th>
+            <th class="week-header" data-week="18">S18</th>
+            <th class="sticky-right">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      </div>
+    </div>
+    <button class="btn-guardar" onclick="guardarDatos()">GUARDAR</button>
+  </div>
+
+  <script>
+    const STORAGE_URL = 'https://api.jsonbin.io/v3/b/699588baae596e708f33e153';
+    const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';
+
+    const TOTAL_WEEKS = 18;
+    const teams = ["3º A", "3º B", "4º A", "4º B"];
+    const TEAM_ALIASES = {
+      "3º A": "3º A",
+      "3Âº A": "3º A",
+      "3º B": "3º B",
+      "3Âº B": "3º B",
+      "4º A": "4º A",
+      "4Âº A": "4º A",
+      "4º B": "4º B",
+      "4Âº B": "4º B"
+    };
+    let scores = {
+      "3º A": Array(TOTAL_WEEKS).fill(0),
+      "3º B": Array(TOTAL_WEEKS).fill(0),
+      "4º A": Array(TOTAL_WEEKS).fill(0),
+      "4º B": Array(TOTAL_WEEKS).fill(0)
+    };
+
+    // Fecha de inicio (importante: mes 1 = febrero)
+    const FECHA_INICIO = new Date(2026, 1, 16); // 16 feb 2026
+    const QUARANTINE_WEEKS = [8, 9];
+
+    function normalizeScore(value) {
+      const numericValue = Number(value);
+      if (!Number.isFinite(numericValue)) return 0;
+      const rounded = Math.round(numericValue * 10) / 10;
+      return Math.max(0, Math.min(9.9, rounded));
+    }
+
+    function scoreToTenths(value) {
+      return Math.round(normalizeScore(value) * 10);
+    }
+
+    function sumScores(values) {
+      return values.reduce((sum, value) => sum + scoreToTenths(value), 0) / 10;
+    }
+
+    function formatScore(value) {
+      return normalizeScore(value).toFixed(1);
+    }
+
+    function getScoreParts(value) {
+      const tenths = scoreToTenths(value);
+      return {
+        integer: Math.floor(tenths / 10),
+        decimal: tenths % 10
+      };
+    }
+
+    function calcularSemanaActual() {
+      const hoy = new Date();
+      const diffMs = hoy - FECHA_INICIO;
+      const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const semanasCompletas = Math.floor(diffDias / 7);
+      return Math.min(semanasCompletas + 1, TOTAL_WEEKS);
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(STORAGE_URL, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          const loaded = data.record.scores;
+          if (loaded) {
+            Object.keys(loaded).forEach(team => {
+              const normalizedTeam = TEAM_ALIASES[team];
+              if (normalizedTeam) {
+                scores[normalizedTeam] = [
+                  ...loaded[team].slice(0, TOTAL_WEEKS),
+                  ...Array(TOTAL_WEEKS).fill(0)
+                ].slice(0, TOTAL_WEEKS).map(normalizeScore);
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Error al cargar:', e);
+      }
+    }
+
+    function renderEditableTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      const semanaActual = calcularSemanaActual();
+
+      // Resaltar headers de semanas pasadas
+      document.querySelectorAll('.week-header').forEach(th => {
+        const weekNum = parseInt(th.dataset.week);
+        th.classList.toggle('semana-pasada', weekNum < semanaActual);
+        th.classList.toggle('semana-cuarentena', QUARANTINE_WEEKS.includes(weekNum));
+        th.classList.toggle('mobile-hidden-week', weekNum !== semanaActual);
+      });
+
+      teams.forEach(team => {
+        const row = document.createElement('tr');
+        let html = `<td class="team-name sticky-left">${team}</td>`;
+
+        for (let w = 0; w < TOTAL_WEEKS; w++) {
+          const weekNum = w + 1;
+          const isPast = weekNum < semanaActual;
+          const isQuarantine = QUARANTINE_WEEKS.includes(weekNum);
+          const parts = getScoreParts(scores[team][w]);
+          const selectClasses = [
+            isPast ? 'past-week' : '',
+            isQuarantine ? 'quarantine-week' : ''
+          ].filter(Boolean).join(' ');
+          const selectHTML = `
+            <div class="score-inputs" data-original="${formatScore(scores[team][w])}">
+              <select data-team="${team}" data-week="${w}" data-part="integer"
+                      class="score-select ${selectClasses}">
+                ${Array.from({length:10},(_,i) => 
+                  `<option value="${i}" ${parts.integer===i ? 'selected' : ''}>${i}</option>`
+                ).join('')}
+              </select>
+              <span class="score-decimal-separator">.</span>
+              <select data-team="${team}" data-week="${w}" data-part="decimal"
+                      class="score-select ${selectClasses}">
+                ${Array.from({length:10},(_,i) => 
+                  `<option value="${i}" ${parts.decimal===i ? 'selected' : ''}>${i}</option>`
+                ).join('')}
+              </select>
+            </div>`;
+          const cellClasses = [
+            isQuarantine ? 'quarantine-cell' : '',
+            weekNum !== semanaActual ? 'mobile-hidden-week' : ''
+          ].filter(Boolean).join(' ');
+          html += `<td class="${cellClasses}">${selectHTML}</td>`;
+        }
+
+        const total = sumScores(scores[team]);
+        html += `<td class="total-cell sticky-right">${formatScore(total)}</td>`;
+        row.innerHTML = html;
+        tbody.appendChild(row);
+      });
+
+      // Listener para aviso en semanas pasadas
+      document.querySelectorAll('select.past-week').forEach(sel => {
+        sel.addEventListener('change', function(e) {
+          const wrapper = this.closest('.score-inputs');
+          const integerSelect = wrapper.querySelector('select[data-part="integer"]');
+          const decimalSelect = wrapper.querySelector('select[data-part="decimal"]');
+          const original = normalizeScore(wrapper.dataset.original);
+          const nuevo = normalizeScore(`${integerSelect.value}.${decimalSelect.value}`);
+          if (nuevo !== original) {
+            const confirmed = confirm(
+              `¡ATENCIÓN!\nEstás modificando la Semana ${parseInt(this.dataset.week)+1}, que YA HA PASADO.\n\n` +
+              `Valor original: ${formatScore(original)}\nNuevo valor: ${formatScore(nuevo)}\n\n` +
+              `¿Confirmas el cambio? (Solo hazlo si es una corrección autorizada)`
+            );
+            if (!confirmed) {
+              const originalParts = getScoreParts(original);
+              integerSelect.value = originalParts.integer;
+              decimalSelect.value = originalParts.decimal;
+            } else {
+              // Actualiza el original por si cambian varias veces
+              wrapper.dataset.original = formatScore(nuevo);
+            }
+          }
+        });
+      });
+    }
+
+    async function guardarDatos() {
+      document.querySelectorAll('.score-inputs').forEach(wrapper => {
+        const integerSelect = wrapper.querySelector('select[data-part="integer"]');
+        const decimalSelect = wrapper.querySelector('select[data-part="decimal"]');
+        const team = integerSelect.dataset.team;
+        const week = parseInt(integerSelect.dataset.week);
+        scores[team][week] = normalizeScore(`${integerSelect.value}.${decimalSelect.value}`);
+      });
+
+      try {
+        const res = await fetch(STORAGE_URL, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': MASTER_KEY
+          },
+          body: JSON.stringify({ 
+            scores,
+            lastUpdate: new Date().toISOString() 
+          })
+        });
+
+        if (res.ok) {
+          alert('¡Guardado correctamente!\n\nRecargando la tabla...');
+          await loadData();
+          renderEditableTable();
+        } else {
+          alert(`Error al guardar: ${res.status}\n${await res.text()}`);
+        }
+      } catch (e) {
+        alert('Error de conexión: ' + e.message);
+      }
+    }
+
+    window.onload = async () => {
+      await loadData();
+      renderEditableTable();
+    };
+  </script>
+</body>
+</html>
+
+
+
+
