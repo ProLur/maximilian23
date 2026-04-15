@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -252,6 +252,7 @@
     const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';
 
     const TOTAL_WEEKS = 18;
+    const MAX_SCORE = 10;
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     const TEAM_ALIASES = {
       "3º A": "3º A",
@@ -278,7 +279,7 @@
       const numericValue = Number(value);
       if (!Number.isFinite(numericValue)) return 0;
       const rounded = Math.round(numericValue * 10) / 10;
-      return Math.max(0, Math.min(9.9, rounded));
+      return Math.max(0, Math.min(MAX_SCORE, rounded));
     }
 
     function scoreToTenths(value) {
@@ -299,6 +300,19 @@
         integer: Math.floor(tenths / 10),
         decimal: tenths % 10
       };
+    }
+
+    function syncDecimalSelectState(wrapper) {
+      const integerSelect = wrapper.querySelector('select[data-part="integer"]');
+      const decimalSelect = wrapper.querySelector('select[data-part="decimal"]');
+      if (!integerSelect || !decimalSelect) return;
+
+      const integerValue = parseInt(integerSelect.value, 10) || 0;
+      const shouldDisableDecimal = integerValue >= MAX_SCORE;
+      if (shouldDisableDecimal) {
+        decimalSelect.value = '0';
+      }
+      decimalSelect.disabled = shouldDisableDecimal;
     }
 
     function calcularSemanaActual() {
@@ -362,7 +376,7 @@
             <div class="score-inputs" data-original="${formatScore(scores[team][w])}">
               <select data-team="${team}" data-week="${w}" data-part="integer"
                       class="score-select ${selectClasses}">
-                ${Array.from({length:10},(_,i) => 
+                ${Array.from({length:11},(_,i) => 
                   `<option value="${i}" ${parts.integer===i ? 'selected' : ''}>${i}</option>`
                 ).join('')}
               </select>
@@ -388,6 +402,16 @@
       });
 
       // Listener para aviso en semanas pasadas
+      document.querySelectorAll('.score-inputs').forEach(wrapper => {
+        syncDecimalSelectState(wrapper);
+      });
+
+      document.querySelectorAll('select[data-part="integer"]').forEach(sel => {
+        sel.addEventListener('change', function() {
+          syncDecimalSelectState(this.closest('.score-inputs'));
+        });
+      });
+
       document.querySelectorAll('select.past-week').forEach(sel => {
         sel.addEventListener('change', function(e) {
           const wrapper = this.closest('.score-inputs');
@@ -405,6 +429,7 @@
               const originalParts = getScoreParts(original);
               integerSelect.value = originalParts.integer;
               decimalSelect.value = originalParts.decimal;
+              syncDecimalSelectState(wrapper);
             } else {
               // Actualiza el original por si cambian varias veces
               wrapper.dataset.original = formatScore(nuevo);
