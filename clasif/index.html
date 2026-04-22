@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -134,9 +134,20 @@
       color: #ff7b7b !important;
       text-shadow: 0 0 7px rgba(255, 85, 85, 0.55) !important;
     }
+    .semana-actual-col {
+      background: linear-gradient(rgba(0, 255, 204, 0.42), rgba(0, 255, 204, 0.14)) !important;
+      color: #b9fff0 !important;
+      text-shadow: 0 0 10px rgba(0, 255, 204, 0.75) !important;
+      box-shadow: inset 0 0 0 1px rgba(0, 255, 204, 0.26);
+    }
     td.quarantine-col {
       border-left: 1px solid rgba(255, 85, 85, 0.18);
       border-right: 1px solid rgba(255, 85, 85, 0.18);
+      font-weight: bold;
+    }
+    td.semana-actual-col {
+      border-left: 1px solid rgba(0, 255, 204, 0.26);
+      border-right: 1px solid rgba(0, 255, 204, 0.26);
       font-weight: bold;
     }
     .total-col { 
@@ -149,6 +160,13 @@
     }
 
     tr:hover td { background: rgba(0,255,204,0.11); }
+    tr:hover td.pos-col.sticky-left,
+    tr:hover td.team-col.sticky-left {
+      background: rgba(13,17,23,1);
+    }
+    tr:hover td.total-col.sticky-right {
+      background: rgba(13,17,23,1);
+    }
 
     .intro {
       text-align: center;
@@ -350,6 +368,7 @@
     function renderTable() {
       const tableBody = document.getElementById('table-body');
       tableBody.innerHTML = '';
+      const semanaActual = calcularSemanaActual();
 
       const rankedTeams = [...teams].sort((a,b) => {
         const ta = scoreToTenths(sumScores(scores[a]));
@@ -374,17 +393,18 @@
         scores[team].forEach((puntos, idx) => {
           const weekNum = idx + 1;
           const quarantineClass = QUARANTINE_WEEKS.includes(weekNum) ? ' quarantine-col' : '';
-          rowHTML += `<td class="week-col${quarantineClass}">${formatScore(puntos)}</td>`;
+          const currentWeekClass = weekNum === semanaActual ? ' semana-actual-col' : '';
+          rowHTML += `<td class="week-col${quarantineClass}${currentWeekClass}">${formatScore(puntos)}</td>`;
         });
         rowHTML += `<td class="total-col sticky-right">${formatScore(total)}</td></tr>`;
         tableBody.innerHTML += rowHTML;
       });
 
-      const semanaActual = calcularSemanaActual();
       document.querySelectorAll('thead th.week-col').forEach((th, idx) => {
         const week = idx + 1;
         th.classList.toggle('semana-pasada', week < semanaActual);
         th.classList.toggle('quarantine-col', QUARANTINE_WEEKS.includes(week));
+        th.classList.toggle('semana-actual-col', week === semanaActual);
       });
 
       document.getElementById('semana-actual').textContent = `Semana ${semanaActual}`;
