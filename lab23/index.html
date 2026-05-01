@@ -939,7 +939,7 @@ function toggleDotOn(mi, ni){
     deactivateDotMode(); draw(); return;
   }
   const extra = BEATS[n.dur]*0.5;
-  if(measures[mi].beats+extra > bPer+0.01){ alert("No cabe el puntillo: el compÃ¡s se llenarÃ­a."); return; }
+  if(measures[mi].beats+extra > bPer+0.01){ alert("No cabe el puntillo."); return; }
   const prevVn    = n.vn;
   const prevBeats = measures[mi].beats;
   try{
