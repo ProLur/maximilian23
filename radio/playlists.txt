@@ -3,8 +3,8 @@ serenata.mp3 - Mozart - Pequeña Serenata Nocturna
 sinfonia.mp3 - Mozart - Sinfonía No. 40
 flauta.mp3 - Mozart - La flauta mágica - Obertura
 bodas.mp3 - Mozart - Las bodas de Fígaro
-musica-Tchaikovsky-El-cascanueces-Danza-de-las-flautas.mp3 - Tchaikovsky - El cascanueces - Danza de las flautas
-musica-Tchaikovsky-El-cascanueces-Marcha.mp3 - Tchaikovsky - El cascanueces - Marcha
+musica-Tchaikovsky-El-cascanueces-Danza-de-las-flautas.mp3 - Tchaikovsky - EC - Danza de las flautas
+musica-Tchaikovsky-El-cascanueces-Marcha.mp3 - Tchaikovsky - EC - Marcha
 musica-Tchaikovsky-El-lago-de-los-cisnes.mp3 - Tchaikovsky - El lago de los cisnes
 
 primavera.mp3 - Vivaldi - L4E: La Primavera
