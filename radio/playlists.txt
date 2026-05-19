@@ -3,9 +3,13 @@ serenata.mp3 - Mozart - Pequeña Serenata Nocturna
 sinfonia.mp3 - Mozart - Sinfonía No. 40
 flauta.mp3 - Mozart - La flauta mágica - Obertura
 bodas.mp3 - Mozart - Las bodas de Fígaro
-musica-Tchaikovsky-El-cascanueces-Danza-de-las-flautas.mp3 - Tchaikovsky - EC - Danza de las flautas
-musica-Tchaikovsky-El-cascanueces-Marcha.mp3 - Tchaikovsky - EC - Marcha
+musica-Tchaikovsky-El-cascanueces-Danza-de-las-flautas.mp3 - Tchaikovsky - El cascanueces - Danza de las flautas
+musica-Tchaikovsky-El-cascanueces-Marcha.mp3 - Tchaikovsky - El cascanueces - Marcha
 musica-Tchaikovsky-El-lago-de-los-cisnes.mp3 - Tchaikovsky - El lago de los cisnes
+musica-beethoven-moonlight-sonata.mp3 - Beethoven - Moonlight Sonata
+musica-Frédéric-Chopin-Waltz-in-A-minor.mp3 - Frédéric Chopin - Waltz in A minor
+musica-Kevin-MacLeod-Canon-in-D-Major.mp3 - Pachelbel - Canon en Re mayor
+Musica-Kevin-MacLeod-J-S-Bach-Brandenburg-Concerto-No4-1-BWV1049.mp3 - J. S. Bach / Kevin MacLeod - Brandenburg Concerto No. 4 BWV 1049
 
 primavera.mp3 - Vivaldi - L4E: La Primavera
 verano.mp3 - Vivaldi - L4E: El Verano

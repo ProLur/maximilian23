@@ -249,13 +249,14 @@
       modeBtn: document.getElementById('modeBtn')
     };
 
-    let mode = "all"; // "all" | "vivaldi" | "mozart" | "tchaikovsky"
-    const modeOrder = ["all", "vivaldi", "mozart", "tchaikovsky"];
+    let mode = "all"; // "all" | "vivaldi" | "mozart" | "tchaikovsky" | "otros"
+    const modeOrder = ["all", "vivaldi", "mozart", "tchaikovsky", "otros"];
     const modeLabels = {
       all:     "TODO",
       vivaldi: "VIVALDI",
       mozart:  "MOZART",
-      tchaikovsky: "TCHAIKOVSKY"
+      tchaikovsky: "TCHAIKOVSKY",
+      otros: "OTROS"
     };
 
     let allItems = [];
@@ -310,7 +311,16 @@
     }
 
     function isMozartFile(file) {
-      return !isVivaldiFile(file) && !isTchaikovskyFile(file);
+      return file.toLowerCase().includes("mozart") ||
+        file.includes("lacrimosa") ||
+        file.includes("serenata") ||
+        file.includes("sinfonia") ||
+        file.includes("flauta") ||
+        file.includes("bodas");
+    }
+
+    function isOtrosFile(file) {
+      return !isVivaldiFile(file) && !isTchaikovskyFile(file) && !isMozartFile(file);
     }
 
     function updateFilteredPlaylist() {
@@ -322,6 +332,8 @@
         items = allItems.filter(item => isMozartFile(item.file));
       } else if (mode === "tchaikovsky") {
         items = allItems.filter(item => isTchaikovskyFile(item.file));
+      } else if (mode === "otros") {
+        items = allItems.filter(item => isOtrosFile(item.file));
       }
 
       if (items.length === 0 && mode !== "all") {
