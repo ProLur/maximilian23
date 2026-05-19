@@ -9,7 +9,7 @@ musica-Tchaikovsky-El-lago-de-los-cisnes.mp3 - Tchaikovsky - El lago de los cisn
 musica-beethoven-moonlight-sonata.mp3 - Beethoven - Moonlight Sonata
 musica-Frédéric-Chopin-Waltz-in-A-minor.mp3 - Frédéric Chopin - Waltz in A minor
 musica-Kevin-MacLeod-Canon-in-D-Major.mp3 - Pachelbel - Canon en Re mayor
-Musica-Kevin-MacLeod-J-S-Bach-Brandenburg-Concerto-No4-1-BWV1049.mp3 - J. S. Bach / Kevin MacLeod - Brandenburg Concerto No. 4 BWV 1049
+Musica-Kevin-MacLeod-J-S-Bach-Brandenburg-Concerto-No4-1-BWV1049.mp3 - Bach - Concierto de Brandeburgo n.º 4 BWV 1049
 
 primavera.mp3 - Vivaldi - L4E: La Primavera
 verano.mp3 - Vivaldi - L4E: El Verano

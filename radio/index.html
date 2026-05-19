@@ -249,15 +249,9 @@
       modeBtn: document.getElementById('modeBtn')
     };
 
-    let mode = "all"; // "all" | "vivaldi" | "mozart" | "tchaikovsky" | "otros"
-    const modeOrder = ["all", "vivaldi", "mozart", "tchaikovsky", "otros"];
-    const modeLabels = {
-      all:     "TODO",
-      vivaldi: "VIVALDI",
-      mozart:  "MOZART",
-      tchaikovsky: "TCHAIKOVSKY",
-      otros: "OTROS"
-    };
+    let mode = "all";
+    let modeOrder = ["all"];
+    let modeLabels = { all: "TODO" };
 
     let allItems = [];
     let items = [];
@@ -299,41 +293,45 @@
     });
 
     // Modos
-    function isVivaldiFile(file) {
-      return file.includes("invierno") ||
-        file.includes("verano") ||
-        file.includes("otono") ||
-        file.includes("primavera");
+    function normalizeComposerName(name) {
+      return name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
     }
 
-    function isTchaikovskyFile(file) {
-      return file.toLowerCase().includes("tchaikovsky");
+    function getComposerFromTitle(title) {
+      return title.split(' - ')[0].trim() || "Sin autor";
     }
 
-    function isMozartFile(file) {
-      return file.toLowerCase().includes("mozart") ||
-        file.includes("lacrimosa") ||
-        file.includes("serenata") ||
-        file.includes("sinfonia") ||
-        file.includes("flauta") ||
-        file.includes("bodas");
-    }
+    function buildModesFromPlaylist() {
+      const composers = [];
+      const seen = new Set();
 
-    function isOtrosFile(file) {
-      return !isVivaldiFile(file) && !isTchaikovskyFile(file) && !isMozartFile(file);
+      for (const item of allItems) {
+        const composer = getComposerFromTitle(item.title);
+        const key = normalizeComposerName(composer);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        composers.push({ key, label: composer.toUpperCase() });
+      }
+
+      modeOrder = ["all", ...composers.map(c => c.key)];
+      modeLabels = { all: "TODO" };
+
+      for (const composer of composers) {
+        modeLabels[composer.key] = composer.label;
+      }
     }
 
     function updateFilteredPlaylist() {
       if (mode === "all") {
         items = [...allItems];
-      } else if (mode === "vivaldi") {
-        items = allItems.filter(item => isVivaldiFile(item.file));
-      } else if (mode === "mozart") {
-        items = allItems.filter(item => isMozartFile(item.file));
-      } else if (mode === "tchaikovsky") {
-        items = allItems.filter(item => isTchaikovskyFile(item.file));
-      } else if (mode === "otros") {
-        items = allItems.filter(item => isOtrosFile(item.file));
+      } else {
+        items = allItems.filter(item =>
+          normalizeComposerName(getComposerFromTitle(item.title)) === mode
+        );
       }
 
       if (items.length === 0 && mode !== "all") {
@@ -387,6 +385,7 @@
 
         if (allItems.length === 0) throw new Error('No hay MP3 válidos');
 
+        buildModesFromPlaylist();
         updateFilteredPlaylist();
 
       } catch (err) {
