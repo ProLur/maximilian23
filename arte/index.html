@@ -119,6 +119,19 @@
       opacity: 0.9;
       line-height: 1.35;
     }
+    .download-link {
+      display: inline-block;
+      margin-top: 0.55rem;
+      color: #00ffcc;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 1px solid #00ffcc88;
+    }
+    .download-link:hover,
+    .download-link:focus {
+      color: #ffffff;
+      border-bottom-color: #ffffff;
+    }
     /* MODAL */
     #modal {
       display: none;
@@ -150,8 +163,8 @@
     }
     #modal-close {
       position: absolute;
-      top: -12px;
-      right: -12px;
+      top: 8px;
+      right: 8px;
       font-size: 3.2rem;
       color: #00ffcc;
       cursor: pointer;
@@ -168,6 +181,32 @@
     }
     #modal-close:hover,
     #modal-close:active {
+      transform: scale(1.15);
+      background: rgba(0,255,204,0.3);
+    }
+    #modal-print {
+      display: none;
+      position: absolute;
+      top: 11px;
+      right: 76px;
+      color: #00ffcc;
+      cursor: pointer;
+      text-shadow: 0 0 12px #00ffccaa;
+      z-index: 1010;
+      width: 54px;
+      height: 54px;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      font-family: inherit;
+      font-size: 2rem;
+      line-height: 1;
+      transition: all 0.25s ease;
+    }
+    #modal-print:hover,
+    #modal-print:active {
       transform: scale(1.15);
       background: rgba(0,255,204,0.3);
     }
@@ -203,18 +242,62 @@
       #modal { padding: 1rem; }
       #modal-content { max-width: 96vw; }
       #modal-close {
-        top: -16px;
-        right: -16px;
+        top: 8px;
+        right: 8px;
         font-size: 2.8rem;
         width: 52px;
         height: 52px;
         background: rgba(0,0,0,0.6);
       }
+      #modal-print {
+        top: 10px;
+        right: 66px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.7rem;
+        background: rgba(0,0,0,0.6);
+      }
     }
     @media (min-width: 1200px) {
       #modal-close {
-        top: -10px;
-        right: -10px;
+        top: 8px;
+        right: 8px;
+      }
+      #modal-print {
+        top: 11px;
+        right: 76px;
+      }
+    }
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #modal,
+      #modal * {
+        visibility: visible !important;
+      }
+      #modal {
+        position: static;
+        display: block !important;
+        padding: 0;
+        background: #ffffff !important;
+        backdrop-filter: none;
+      }
+      #modal-content {
+        max-width: none;
+        max-height: none;
+      }
+      #modal-content img {
+        width: 100%;
+        max-width: 100%;
+        max-height: none;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      #modal-close,
+      #modal-print {
+        display: none !important;
       }
     }
   </style>
@@ -236,7 +319,9 @@
               </div>
               <div class="card-info">
                 <h3>Composición</h3>
-                <p>Elegimos los elementos que queramos para dibujar y crear nuestra propia composici&oacute;n.</p>
+                <p>Elegimos los elementos que queramos para dibujar y crear nuestra propia composici&oacute;n.<br>
+                  <a class="download-link" href="composecolorear.jpg" onclick="openPrintableModal(event, 'composecolorear.jpg', 'Composición para colorear')">Abrir para colorear</a>
+                </p>
               </div>
             </div>
       <div class="card" onclick="openModal('atardecer.jpg', 'Atardecer')">
@@ -371,6 +456,7 @@
   <!-- Modal -->
   <div id="modal">
     <span id="modal-close" onclick="closeModal()">×</span>
+    <button id="modal-print" type="button" onclick="printModalImage(event)" aria-label="Imprimir imagen" title="Imprimir">⎙</button>
     <div id="modal-content">
       <img id="modal-image" src="" alt="Imagen ampliada">
     </div>
@@ -382,6 +468,7 @@
     const modal = document.getElementById('modal');
     const modalContent = document.getElementById('modal-content');
     const modalImg = document.getElementById('modal-image');
+    const modalPrint = document.getElementById('modal-print');
     let currentGifSrc = null;
     let originalImgSrc = null;
     let returnTimer = null;
@@ -395,8 +482,30 @@
       modalContent.innerHTML = '';
       modalContent.appendChild(modalImg.cloneNode(true));
       modal.style.display = 'flex';
+      modalPrint.style.display = 'none';
       document.body.style.overflow = 'hidden';
       if (returnTimer) clearTimeout(returnTimer);
+    }
+
+    function openPrintableModal(event, src, altText) {
+      event.preventDefault();
+      event.stopPropagation();
+      currentGifSrc = null;
+      originalImgSrc = src;
+      modalImg.src = src;
+      modalImg.alt = altText;
+      modalImg.style.display = 'block';
+      modalContent.innerHTML = '';
+      modalContent.appendChild(modalImg.cloneNode(true));
+      modal.style.display = 'flex';
+      modalPrint.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (returnTimer) clearTimeout(returnTimer);
+    }
+
+    function printModalImage(event) {
+      event.stopPropagation();
+      window.print();
     }
 
     modalContent.addEventListener('click', function(e) {
@@ -428,6 +537,7 @@
     function closeModal() {
       if (returnTimer) clearTimeout(returnTimer);
       modal.style.display = 'none';
+      modalPrint.style.display = 'none';
       document.body.style.overflow = '';
       currentGifSrc = null;
       originalImgSrc = null;
