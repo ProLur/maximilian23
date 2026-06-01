@@ -455,9 +455,9 @@
   </div>
   <!-- Modal -->
   <div id="modal">
-    <span id="modal-close" onclick="closeModal()">×</span>
-    <button id="modal-print" type="button" onclick="printModalImage(event)" aria-label="Imprimir imagen" title="Imprimir">⎙</button>
     <div id="modal-content">
+      <span id="modal-close" onclick="closeModal()">×</span>
+      <button id="modal-print" type="button" onclick="printModalImage(event)" aria-label="Imprimir imagen" title="Imprimir">⎙</button>
       <img id="modal-image" src="" alt="Imagen ampliada">
     </div>
   </div>
@@ -479,8 +479,6 @@
       modalImg.src = src;
       modalImg.alt = altText;
       modalImg.style.display = 'block';
-      modalContent.innerHTML = '';
-      modalContent.appendChild(modalImg.cloneNode(true));
       modal.style.display = 'flex';
       modalPrint.style.display = 'none';
       document.body.style.overflow = 'hidden';
@@ -495,8 +493,6 @@
       modalImg.src = src;
       modalImg.alt = altText;
       modalImg.style.display = 'block';
-      modalContent.innerHTML = '';
-      modalContent.appendChild(modalImg.cloneNode(true));
       modal.style.display = 'flex';
       modalPrint.style.display = 'flex';
       document.body.style.overflow = 'hidden';
@@ -511,23 +507,11 @@
     modalContent.addEventListener('click', function(e) {
       if (currentGifSrc && e.target.tagName === 'IMG') {
         e.stopPropagation();
-        modalContent.innerHTML = '';
-        const gif = document.createElement('img');
-        gif.src = currentGifSrc + '?t=' + new Date().getTime();
-        gif.alt = 'Animación';
-        gif.style.width = '100%';
-        gif.style.height = 'auto';
-        gif.style.objectFit = 'contain';
-        modalContent.appendChild(gif);
+        modalImg.src = currentGifSrc + '?t=' + new Date().getTime();
+        modalImg.alt = 'Animación';
         returnTimer = setTimeout(() => {
-          modalContent.innerHTML = '';
-          const imgBack = document.createElement('img');
-          imgBack.src = originalImgSrc;
-          imgBack.alt = 'Imagen original';
-          imgBack.style.width = '100%';
-          imgBack.style.height = 'auto';
-          imgBack.style.objectFit = 'contain';
-          modalContent.appendChild(imgBack);
+          modalImg.src = originalImgSrc;
+          modalImg.alt = 'Imagen original';
           currentGifSrc = null;
         }, 8000);
         currentGifSrc = null;
@@ -541,7 +525,8 @@
       document.body.style.overflow = '';
       currentGifSrc = null;
       originalImgSrc = null;
-      modalContent.innerHTML = '<img id="modal-image" src="" alt="Imagen ampliada">';
+      modalImg.src = '';
+      modalImg.alt = 'Imagen ampliada';
     }
 
     modal.addEventListener('click', e => {
