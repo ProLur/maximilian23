@@ -171,6 +171,10 @@
       border-left: 3px solid #00ffcc99;
     }
 
+    .mobile-toggle {
+      display: none;
+    }
+
     .quarantine-col {
       background: linear-gradient(rgba(255,85,85,0.24), rgba(255,85,85,0.08)) !important;
       color: #ff7b7b !important;
@@ -335,6 +339,11 @@
         padding-left: 0;
         color: #00ffcc;
         font-size: 1.2rem;
+        flex-wrap: wrap;
+      }
+
+      .team-col::before {
+        content: none;
       }
 
       .total-col {
@@ -345,6 +354,38 @@
         border-radius: 8px;
         background: rgba(0,255,204,0.16);
         font-size: 1.18rem;
+      }
+
+      .week-col {
+        display: none;
+      }
+
+      tr.is-open .week-col {
+        display: flex;
+      }
+
+      .mobile-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 0 0.7rem;
+        border: 1px solid #00ffcc66;
+        border-radius: 8px;
+        background: rgba(0,255,204,0.12);
+        color: #00ffcc;
+        font-family: inherit;
+        font-size: 0.86rem;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .team-main {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        width: 100%;
       }
 
       .semana-actual-col,
@@ -535,7 +576,12 @@
         let rowHTML = `
           <tr>
             <td class="pos-col sticky-left" data-label="Pos">${getPuesto(pos)}</td>
-            <td class="team-col sticky-left" data-label="Equipo">${team}</td>
+            <td class="team-col sticky-left" data-label="Equipo">
+              <span class="team-main">
+                <span>${team}</span>
+                <button class="mobile-toggle" type="button" aria-expanded="false">Ver puntos</button>
+              </span>
+            </td>
         `;
 
         scores[team].forEach((puntos, idx) => {
@@ -559,6 +605,16 @@
       document.getElementById('semana-actual').textContent = `Semana ${semanaActual}`;
       document.getElementById('rango-fechas').textContent = getRangoSemana(semanaActual);
     }
+
+    document.addEventListener('click', event => {
+      const button = event.target.closest('.mobile-toggle');
+      if (!button) return;
+
+      const row = button.closest('tr');
+      const isOpen = row.classList.toggle('is-open');
+      button.setAttribute('aria-expanded', String(isOpen));
+      button.textContent = isOpen ? 'Ocultar puntos' : 'Ver puntos';
+    });
 
     window.onload = async () => {
       await loadData();
