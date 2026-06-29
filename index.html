@@ -347,34 +347,29 @@
             const chat = document.getElementById("chat");
             chat.scrollTop = chat.scrollHeight;
         }
-        function escapeHtml(text) {
-            return String(text || "")
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#39;");
-        }
         function linkify(text) {
-            let safe = escapeHtml(text);
+            if (!text) return "";
+            if (text.includes("<a ")) return text;
+
             const savedLinks = [];
-            safe = safe.replace(/\[([^\]]+)\]\(((?:https?:\/\/|www\.)[^\s)<>"']+)\)/gi, (_, label, url) => {
-                let clean = url.startsWith("www.") ? "https://" + url : url;
+            text = text.replace(/\[([^\]]+)\]\(((?:https?:\/\/|www\.)[^\s)<>"']+)\)/gi, (match, label, url) => {
+                const clean = /^https?:\/\//i.test(url) ? url : "https://" + url;
                 const token = `@@LINK_${savedLinks.length}@@`;
                 savedLinks.push(`<a href="${clean}" target="_blank" rel="noopener noreferrer">${label}</a>`);
                 return token;
             });
-            safe = safe.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-            safe = safe.replace(/\b((?:https?:\/\/|www\.)[^\s<>()"']*[^\s<>().,"'!?:;])/gi, (match) => {
-                const clean = match.startsWith("www.") ? "https://" + match : match;
+
+            const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<>()"']+)/gi;
+            text = text.replace(urlRegex, (match) => {
+                let clean = match.trim().replace(/[.,!?;:]+$/, "");
+                if (!/^https?:\/\//i.test(clean)) clean = "https://" + clean;
                 return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${match}</a>`;
             });
-            safe = safe.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
-            safe = safe.replace(/\b(\d{9})\b/g, '<a href="tel:$1">$1</a>');
+
             savedLinks.forEach((link, index) => {
-                safe = safe.replace(`@@LINK_${index}@@`, link);
+                text = text.replace(`@@LINK_${index}@@`, link);
             });
-            return safe;
+            return text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
         }
         function typeWriterEffect(el, text, delay = 30, done = null) {
             let i = 0;
