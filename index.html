@@ -352,19 +352,24 @@
             if (text.includes("<a ")) return text;
 
             const savedLinks = [];
-            text = text.replace(/\[([^\]]+)\]\(((?:https?:\/\/|www\.)[^\s)<>"']+)\)/gi, (match, label, url) => {
-                const clean = /^https?:\/\//i.test(url) ? url : "https://" + url;
+            const saveLink = (url, label = null) => {
+                let clean = url.trim().replace(/[.,!?;:]+$/, "");
+                if (!/^https?:\/\//i.test(clean)) clean = "https://" + clean;
                 const token = `@@LINK_${savedLinks.length}@@`;
-                savedLinks.push(`<a href="${clean}" target="_blank" rel="noopener noreferrer">${label}</a>`);
+                savedLinks.push(`<a href="${clean}" target="_blank" rel="noopener noreferrer">${label || clean}</a>`);
                 return token;
+            };
+
+            text = text.replace(/\[([^\]]+)\]\(((?:https?:\/\/|www\.)[^\s)<>"']+)\)/gi, (match, label, url) => {
+                return saveLink(url, label);
+            });
+
+            text = text.replace(/<((?:https?:\/\/|www\.)[^\s<>"']+)>[;:]?/gi, (match, url) => {
+                return saveLink(url);
             });
 
             const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<>()"']+)/gi;
-            text = text.replace(urlRegex, (match) => {
-                let clean = match.trim().replace(/[.,!?;:]+$/, "");
-                if (!/^https?:\/\//i.test(clean)) clean = "https://" + clean;
-                return `<a href="${clean}" target="_blank" rel="noopener noreferrer">${match}</a>`;
-            });
+            text = text.replace(urlRegex, (match) => saveLink(match));
 
             savedLinks.forEach((link, index) => {
                 text = text.replace(`@@LINK_${index}@@`, link);
