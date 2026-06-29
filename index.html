@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -220,6 +220,46 @@
         .bot { background: #1e2d3d; color: #00ffcc; border: 1px solid #00ffcc; }
         .bot a { color: #00ffcc; text-decoration: underline; text-shadow: 0 0 6px #00ffccaa; font-weight: bold; transition: all 0.2s ease-in-out; }
         .bot a:hover { color: #33ffee; text-shadow: 0 0 10px #00fff0, 0 0 20px #00fff066; }
+        .bot .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            margin: 10px 0 4px;
+            white-space: normal;
+        }
+        .bot table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 520px;
+            color: #d9fff7;
+            background: rgba(13,17,23,0.35);
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.35;
+        }
+        .bot th, .bot td {
+            border: 1px solid #00ffcc88;
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            word-break: normal;
+        }
+        .bot th {
+            background: rgba(0,255,204,0.16);
+            color: #00ffcc;
+            font-weight: 700;
+        }
+        .bot tr:nth-child(even) td {
+            background: rgba(0,255,204,0.045);
+        }
+        @media (max-width: 767px) {
+            .bot table {
+                min-width: 460px;
+                font-size: 14px;
+            }
+            .bot th, .bot td {
+                padding: 7px 8px;
+            }
+        }
         .typing { display: inline-block; }
         .typing span { display: inline-block; width: 6px; height: 6px; margin: 0 2px; background: #00ffcc; border-radius: 50%; animation: blink 1.4s infinite both; }
         .typing span:nth-child(2){animation-delay:.2s;}
@@ -347,9 +387,16 @@
             const chat = document.getElementById("chat");
             chat.scrollTop = chat.scrollHeight;
         }
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
         function linkify(text) {
             if (!text) return "";
-            if (text.includes("<a ")) return text;
 
             const savedLinks = [];
             const saveLink = (url, label = null) => {
@@ -364,7 +411,7 @@
                 return saveLink(url, label);
             });
 
-            text = text.replace(/<((?:https?:\/\/|www\.)[^\s<>"']+)>[;:]?/gi, (match, url) => {
+            text = text.replace(/&lt;((?:https?:\/\/|www\.)[^\s&lt;&gt;"']+)&gt;[;:]?/gi, (match, url) => {
                 return saveLink(url);
             });
 
@@ -376,13 +423,63 @@
             });
             return text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
         }
-        function typeWriterEffect(el, text, delay = 30, done = null) {
+        function formatInline(text) {
+            return linkify(escapeHtml(text));
+        }
+        function splitTableRow(line) {
+            return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(cell => cell.trim());
+        }
+        function isTableSeparator(line) {
+            return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+        }
+        function renderMessage(text) {
+            const lines = String(text || "").split(/\r?\n/);
+            const output = [];
+
+            for (let index = 0; index < lines.length; index++) {
+                const line = lines[index];
+                const next = lines[index + 1] || "";
+
+                if (line.includes("|") && isTableSeparator(next)) {
+                    const headers = splitTableRow(line);
+                    index += 2;
+                    const rows = [];
+
+                    while (index < lines.length && lines[index].includes("|") && lines[index].trim() !== "") {
+                        const row = splitTableRow(lines[index]);
+                        rows.push(row);
+                        index++;
+                    }
+                    index--;
+
+                    const headHtml = headers.map(header => `<th>${formatInline(header)}</th>`).join("");
+                    const bodyHtml = rows.map(row => {
+                        const cells = headers.map((_, cellIndex) => `<td>${formatInline(row[cellIndex] || "")}</td>`).join("");
+                        return `<tr>${cells}</tr>`;
+                    }).join("");
+
+                    output.push(`<div class="table-wrap"><table><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`);
+                } else {
+                    output.push(formatInline(line));
+                }
+            }
+
+            return output.join("\n");
+        }
+        function typeWriterEffect(el, html, delay = 30, done = null) {
+            const chat = document.getElementById("chat");
+            if (html.includes("<table") || html.includes("<a ") || html.includes("<strong")) {
+                el.innerHTML = html;
+                chat.scrollTop = chat.scrollHeight;
+                if (done) done();
+                return;
+            }
+
             let i = 0;
             el.innerHTML = "";
-            const chat = document.getElementById("chat");
             function step() {
-                if (i < text.length) {
-                    el.innerHTML = text.substring(0, ++i);
+                if (i < html.length) {
+                    el.innerHTML = html.substring(0, ++i);
                     if (i % 3 === 0) chat.scrollTop = chat.scrollHeight;
                     setTimeout(step, delay);
                 } else {
@@ -417,7 +514,7 @@
                     body: JSON.stringify({ message: msg })
                 });
                 const data = await r.json();
-                const reply = linkify(data.reply);
+                const reply = renderMessage(data.reply);
                 bot.innerHTML = "";
                 typeWriterEffect(bot, reply, 30, () => {
                     i.disabled = b.disabled = false;
@@ -466,3 +563,4 @@
     </script>
 </body>
 </html>
+
