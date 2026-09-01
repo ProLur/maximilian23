@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1720" />
+  <title>Maximilian · Árbitro meteorológico</title>
+
+  <style>
+    :root {
+      --bg: #071117;
+      --panel: rgba(15, 31, 40, 0.90);
+      --panel-2: rgba(20, 42, 52, 0.78);
+      --border: rgba(255,255,255,0.10);
+      --text: #f7fbfc;
+      --muted: #a8bac3;
+      --green: #31d17c;
+      --orange: #ffad3b;
+      --red: #ff5f65;
+      --blue: #65c9ff;
+      --shadow: 0 20px 55px rgba(0,0,0,.32);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(44, 130, 147, .18), transparent 34%),
+        radial-gradient(circle at 100% 100%, rgba(36, 106, 72, .17), transparent 32%),
+        linear-gradient(145deg, #061017 0%, #0b1820 48%, #08131a 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 18px;
+    }
+
+    .app {
+      width: min(100%, 820px);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .brand-mini {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      color: #eaf7fa;
+      letter-spacing: .02em;
+    }
+
+    .brand-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 15px rgba(49, 209, 124, .75);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(17,38,48,.96), rgba(10,25,33,.94));
+      box-shadow: var(--shadow);
+      border-radius: 26px;
+      padding: 26px;
+      margin-bottom: 16px;
+    }
+
+    .hero::after {
+      content: "⚽";
+      position: absolute;
+      right: -18px;
+      top: -30px;
+      font-size: 150px;
+      opacity: .055;
+      transform: rotate(-16deg);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: #86e6bc;
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 8vw, 3.6rem);
+      line-height: .96;
+      letter-spacing: -.055em;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 580px;
+    }
+
+    .match-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .match-chip {
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 15px;
+      padding: 12px 13px;
+    }
+
+    .match-chip small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 3px;
+      font-size: .71rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 800;
+    }
+
+    .match-chip strong {
+      font-size: .98rem;
+    }
+
+    .section {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .section-title h2 {
+      font-size: 1.02rem;
+      margin: 0;
+      letter-spacing: -.01em;
+    }
+
+    .time-badge {
+      white-space: nowrap;
+      color: #cfe8ef;
+      background: rgba(101,201,255,.09);
+      border: 1px solid rgba(101,201,255,.18);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    .weather-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .weather-card {
+      min-height: 105px;
+      padding: 15px;
+      border-radius: 17px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .weather-icon {
+      font-size: 1.25rem;
+      margin-bottom: 9px;
+    }
+
+    .weather-label {
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 750;
+      line-height: 1.2;
+    }
+
+    .weather-value {
+      margin-top: 5px;
+      font-size: 1.28rem;
+      font-weight: 900;
+      letter-spacing: -.035em;
+    }
+
+    .weather-value.small {
+      font-size: 1rem;
+      line-height: 1.3;
+      letter-spacing: -.015em;
+    }
+
+    .verdict {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      padding: 24px 20px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: rgba(16, 33, 42, .95);
+      text-align: center;
+    }
+
+    .verdict.waiting {
+      border-color: rgba(101,201,255,.26);
+      background: linear-gradient(135deg, rgba(18,47,61,.96), rgba(12,31,41,.96));
+    }
+
+    .verdict.play {
+      border-color: rgba(49,209,124,.35);
+      background: linear-gradient(135deg, rgba(15,64,45,.96), rgba(10,37,32,.96));
+    }
+
+    .verdict.doubt {
+      border-color: rgba(255,173,59,.38);
+      background: linear-gradient(135deg, rgba(75,52,18,.96), rgba(44,34,19,.96));
+    }
+
+    .verdict.no-play {
+      border-color: rgba(255,95,101,.38);
+      background: linear-gradient(135deg, rgba(73,28,34,.96), rgba(45,24,29,.96));
+    }
+
+    .verdict.loading {
+      background: rgba(16,33,42,.95);
+    }
+
+    .verdict-kicker {
+      color: var(--muted);
+      font-size: .73rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+    }
+
+    .verdict-main {
+      margin: 8px auto 10px;
+      font-size: clamp(1.55rem, 7vw, 2.5rem);
+      font-weight: 1000;
+      line-height: 1.05;
+      letter-spacing: -.045em;
+      max-width: 680px;
+    }
+
+    .verdict-reason {
+      max-width: 640px;
+      margin: 0 auto;
+      color: #d0dde2;
+      line-height: 1.55;
+      font-size: .95rem;
+    }
+
+    .criterion-toggle {
+      cursor: pointer;
+      margin-bottom: 0;
+      user-select: none;
+    }
+
+    .criterion-plus {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      font-size: 1.55rem;
+      line-height: 1;
+      font-weight: 500;
+      color: #d9f3fa;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .criterion-toggle:hover .criterion-plus {
+      background: rgba(255,255,255,.10);
+    }
+
+    .criterion-toggle[aria-expanded="true"] .criterion-plus {
+      transform: rotate(45deg);
+    }
+
+    #criterionDetails {
+      padding-top: 15px;
+    }
+
+    .source-line, .error-line {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.45;
+    }
+
+    .error-line {
+      color: #ffc7ca;
+    }
+
+    .footer {
+      text-align: center;
+      color: #718892;
+      font-size: .72rem;
+      padding: 8px 10px 18px;
+    }
+
+    .skeleton {
+      display: inline-block;
+      min-width: 52px;
+      height: 1.15em;
+      border-radius: 6px;
+      background: linear-gradient(90deg,
+        rgba(255,255,255,.06),
+        rgba(255,255,255,.14),
+        rgba(255,255,255,.06));
+      background-size: 220% 100%;
+      animation: shimmer 1.3s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes shimmer {
+      to { background-position: -220% 0; }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .hero { padding: 22px 18px; border-radius: 22px; }
+      .section { padding: 16px; }
+      .match-strip { grid-template-columns: 1fr; }
+      .weather-grid { grid-template-columns: repeat(2, 1fr); }
+      .weather-card { min-height: 102px; }
+      .section-title { align-items: flex-start; }
+    }
+
+    @media (max-width: 380px) {
+      .weather-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <section class="hero">
+      <p class="eyebrow">Árbitro meteorológico oficial</p>
+      <h1>¿Se juega?</h1>
+      <p class="subtitle">
+        Maximilian 23 vigila el cielo de Zafra y decide si las condiciones son
+        adecuadas para el partido. Sin botones, sin discusiones con el VAR meteorológico.
+      </p>
+
+      <div class="match-strip">
+        <div class="match-chip">
+          <small>Localidad</small>
+          <strong>Zafra · Badajoz</strong>
+        </div>
+        <div class="match-chip">
+          <small>Partido</small>
+          <strong>11:45</strong>
+        </div>
+        <div class="match-chip">
+          <small>Veredicto desde</small>
+          <strong>11:30</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>Condiciones previstas</h2>
+        <div class="time-badge">11:45</div>
+      </div>
+
+      <div class="weather-grid">
+        <article class="weather-card">
+          <div class="weather-icon">🌡️</div>
+          <div class="weather-label">Temperatura</div>
+          <div class="weather-value" id="temperature"><span class="skeleton"></span></div>
+        </article>
+
+        <article class="weather-card">
+          <div class="weather-icon">🧍</div>
+          <div class="weather-label">Sensación térmica</div>
+          <div class="weather-value" id="apparent"><span class="skeleton"></span></div>
+        </article>
+
+        <article class="weather-card">
+          <div class="weather-icon">💦</div>
+          <div class="weather-label">Humedad relativa</div>
+          <div class="weather-value" id="humidity"><span class="skeleton"></span></div>
+        </article>
+
+        <article class="weather-card">
+          <div class="weather-icon">☔</div>
+          <div class="weather-label">Prob. de lluvia</div>
+          <div class="weather-value" id="rainProbability"><span class="skeleton"></span></div>
+        </article>
+
+        <article class="weather-card">
+          <div class="weather-icon">💧</div>
+          <div class="weather-label">Precipitación</div>
+          <div class="weather-value" id="precipitation"><span class="skeleton"></span></div>
+        </article>
+
+        <article class="weather-card">
+          <div class="weather-icon">💨</div>
+          <div class="weather-label">Viento</div>
+          <div class="weather-value" id="wind"><span class="skeleton"></span></div>
+        </article>
+
+        <article class="weather-card">
+          <div class="weather-icon">🌬️</div>
+          <div class="weather-label">Rachas</div>
+          <div class="weather-value" id="gusts"><span class="skeleton"></span></div>
+        </article>
+
+        <article class="weather-card">
+          <div class="weather-icon" id="conditionIcon">🌤️</div>
+          <div class="weather-label">Estado meteorológico</div>
+          <div class="weather-value small" id="condition"><span class="skeleton"></span></div>
+        </article>
+      </div>
+
+      <div class="source-line" id="forecastMeta">
+        Consultando la previsión de Maximilian 23…
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title criterion-toggle" id="criterionToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="criterionDetails">
+        <h2>Criterio Maximilian</h2>
+        <div class="criterion-plus" id="criterionPlus" aria-hidden="true">+</div>
+      </div>
+      <div id="criterionDetails" hidden>
+        <p class="subtitle" style="margin:0; max-width:none;">
+          Maximilian 23 aplica un criterio preventivo para deporte infantil. Valora la franja completa
+          de 11:30 a 13:00 y tiene en cuenta temperatura, sensación térmica, humedad, lluvia, viento,
+          rachas y fenómenos adversos. Para el calor sigue el principio recomendado por la
+          <strong>American Academy of Pediatrics (AAP)</strong>: el riesgo durante el ejercicio depende
+          del estrés térmico ambiental —temperatura, humedad y radiación— y la actividad debe modificarse
+          o aplazarse cuando las condiciones sean excesivas. También toma como referencia las recomendaciones
+          de la <strong>Asociación Española de Pediatría (AEP)</strong> sobre hidratación y ejercicio infantil.
+          Los límites de Maximilian 23 son deliberadamente conservadores y no sustituyen la valoración
+          de los adultos responsables ni una alerta meteorológica oficial.
+        </p>
+        <div class="source-line">
+          Fuentes de referencia: American Academy of Pediatrics (Pediatrics, “Climatic Heat Stress and
+          Exercising Children and Adolescents”, reafirmado en 2025) · HealthyChildren.org (AAP) ·
+          Asociación Española de Pediatría (AEP), “Hidratación y deporte”.
+        </div>
+      </div>
+    </section>
+
+    <section class="verdict loading" id="verdictBox" aria-live="polite">
+      <div class="verdict-kicker">Decisión de Maximilian 23</div>
+      <div class="verdict-main" id="verdictMain">Consultando el cielo…</div>
+      <p class="verdict-reason" id="verdictReason">
+        Recuperando la previsión para las 11:45.
+      </p>
+      <div class="error-line" id="errorLine" hidden></div>
+    </section>
+
+    <div class="footer">
+      Datos meteorológicos: Open‑Meteo · Hora oficial usada por Maximilian 23: Europe/Madrid
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    /*
+      ============================================================
+      MAXIMILIAN · CONFIGURACIÓN
+      ============================================================
+      La estructura está separada en:
+        1) configuración;
+        2) obtención de datos;
+        3) decisión automática;
+        4) renderizado.
+
+      Esto permitirá añadir más adelante una capa de administración
+      antes del renderizado final, sin tocar la consulta meteorológica.
+    */
+
+    const CONFIG = Object.freeze({
+      locationName: "Zafra",
+      latitude: 38.4254,
+      longitude: -6.4173,
+      timezone: "Europe/Madrid",
+      matchTime: "11:45",
+      decisionTime: "11:30"
+    });
+
+    /*
+      Umbrales editables.
+      NO SE JUEGA: basta una condición claramente severa.
+      DUDOSO: una condición moderadamente desfavorable o varias leves.
+    */
+    const RULES = Object.freeze({
+      noPlay: {
+        temperatureMax: 35,
+        apparentMin: 4,
+        apparentMax: 35,
+        rainProbability: 70,
+        precipitation: 0.5,  // mm en el intervalo de 15 min
+        wind: 30,            // km/h
+        gusts: 45            // km/h
+      }
+    });
+
+    const els = {
+      temperature: document.getElementById("temperature"),
+      apparent: document.getElementById("apparent"),
+      humidity: document.getElementById("humidity"),
+      rainProbability: document.getElementById("rainProbability"),
+      precipitation: document.getElementById("precipitation"),
+      wind: document.getElementById("wind"),
+      gusts: document.getElementById("gusts"),
+      condition: document.getElementById("condition"),
+      conditionIcon: document.getElementById("conditionIcon"),
+      forecastMeta: document.getElementById("forecastMeta"),
+      verdictBox: document.getElementById("verdictBox"),
+      verdictMain: document.getElementById("verdictMain"),
+      verdictReason: document.getElementById("verdictReason"),
+      errorLine: document.getElementById("errorLine")
+    };
+
+    const entryInstant = new Date();
+
+    function madridParts(date = new Date()) {
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: CONFIG.timezone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+      });
+
+      const parts = Object.fromEntries(
+        formatter.formatToParts(date)
+          .filter(p => p.type !== "literal")
+          .map(p => [p.type, p.value])
+      );
+
+      return {
+        year: parts.year,
+        month: parts.month,
+        day: parts.day,
+        hour: Number(parts.hour),
+        minute: Number(parts.minute),
+        second: Number(parts.second),
+        dateISO: `${parts.year}-${parts.month}-${parts.day}`,
+        timeHM: `${parts.hour}:${parts.minute}`,
+        timeHMS: `${parts.hour}:${parts.minute}:${parts.second}`
+      };
+    }
+
+    function timeToMinutes(hhmm) {
+      const [h, m] = hhmm.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function currentMadridMinutes() {
+      const p = madridParts();
+      return p.hour * 60 + p.minute;
+    }
+
+    function updateClock() {
+      const now = madridParts();
+    }
+
+    function buildApiUrl() {
+      const today = madridParts().dateISO;
+
+      const params = new URLSearchParams({
+        latitude: CONFIG.latitude,
+        longitude: CONFIG.longitude,
+        timezone: CONFIG.timezone,
+        start_date: today,
+        end_date: today,
+        minutely_15: [
+          "temperature_2m",
+          "apparent_temperature",
+          "relative_humidity_2m",
+          "precipitation_probability",
+          "precipitation",
+          "wind_speed_10m",
+          "wind_gusts_10m",
+          "weather_code"
+        ].join(","),
+        wind_speed_unit: "kmh",
+        precipitation_unit: "mm"
+      });
+
+      return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+    }
+
+    async function fetchForecast() {
+      const response = await fetch(buildApiUrl(), { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`La API meteorológica respondió con código ${response.status}.`);
+      }
+
+      const data = await response.json();
+
+      if (!data.minutely_15 || !Array.isArray(data.minutely_15.time)) {
+        throw new Error("La previsión recibida no contiene datos de 15 minutos.");
+      }
+
+      const m = data.minutely_15;
+      const today = madridParts().dateISO;
+
+      function sampleAt(hhmm) {
+        const index = m.time.indexOf(`${today}T${hhmm}`);
+        if (index === -1) return null;
+        return {
+          time: m.time[index],
+          temperature: numberOrNull(m.temperature_2m?.[index]),
+          apparent: numberOrNull(m.apparent_temperature?.[index]),
+          humidity: numberOrNull(m.relative_humidity_2m?.[index]),
+          rainProbability: numberOrNull(m.precipitation_probability?.[index]),
+          precipitation: numberOrNull(m.precipitation?.[index]),
+          wind: numberOrNull(m.wind_speed_10m?.[index]),
+          gusts: numberOrNull(m.wind_gusts_10m?.[index]),
+          weatherCode: numberOrNull(m.weather_code?.[index])
+        };
+      }
+
+      const display = sampleAt(CONFIG.matchTime);
+      if (!display) {
+        throw new Error(`No se encontró una previsión exacta para las ${CONFIG.matchTime}.`);
+      }
+
+      const window = [];
+      for (let minutes = timeToMinutes("11:30"); minutes <= timeToMinutes("13:00"); minutes += 15) {
+        const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+        const mm = String(minutes % 60).padStart(2, "0");
+        const sample = sampleAt(`${hh}:${mm}`);
+        if (sample) window.push(sample);
+      }
+
+      if (!window.length) {
+        throw new Error("No se encontraron datos para la franja 11:30–13:00.");
+      }
+
+      return { ...display, window };
+    }
+    function numberOrNull(value) {
+      return Number.isFinite(Number(value)) ? Number(value) : null;
+    }
+
+    function wmoInfo(code) {
+      const map = {
+        0:  ["☀️", "Cielo despejado"],
+        1:  ["🌤️", "Principalmente despejado"],
+        2:  ["⛅", "Parcialmente nuboso"],
+        3:  ["☁️", "Cubierto"],
+        45: ["🌫️", "Niebla"],
+        48: ["🌫️", "Niebla con escarcha"],
+        51: ["🌦️", "Llovizna ligera"],
+        53: ["🌦️", "Llovizna moderada"],
+        55: ["🌧️", "Llovizna intensa"],
+        56: ["🌧️", "Llovizna helada ligera"],
+        57: ["🌧️", "Llovizna helada intensa"],
+        61: ["🌦️", "Lluvia ligera"],
+        63: ["🌧️", "Lluvia moderada"],
+        65: ["🌧️", "Lluvia intensa"],
+        66: ["🌧️", "Lluvia helada ligera"],
+        67: ["🌧️", "Lluvia helada intensa"],
+        71: ["🌨️", "Nevada ligera"],
+        73: ["🌨️", "Nevada moderada"],
+        75: ["❄️", "Nevada intensa"],
+        77: ["❄️", "Granos de nieve"],
+        80: ["🌦️", "Chubascos ligeros"],
+        81: ["🌧️", "Chubascos moderados"],
+        82: ["⛈️", "Chubascos violentos"],
+        85: ["🌨️", "Chubascos de nieve ligeros"],
+        86: ["🌨️", "Chubascos de nieve intensos"],
+        95: ["⛈️", "Tormenta"],
+        96: ["⛈️", "Tormenta con granizo ligero"],
+        99: ["⛈️", "Tormenta con granizo fuerte"]
+      };
+
+      return map[code] || ["🌡️", "Estado no especificado"];
+    }
+
+    function fmt(value, decimals = 0) {
+      if (value === null) return "—";
+      return value.toLocaleString("es-ES", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function renderWeather(f) {
+      const [icon, condition] = wmoInfo(f.weatherCode);
+
+      els.temperature.textContent = `${fmt(f.temperature, 1)} °C`;
+      els.apparent.textContent = `${fmt(f.apparent, 1)} °C`;
+      els.humidity.textContent = `${fmt(f.humidity, 0)} %`;
+      els.rainProbability.textContent = `${fmt(f.rainProbability, 0)} %`;
+      els.precipitation.textContent = `${fmt(f.precipitation, 2)} mm`;
+      els.wind.textContent = `${fmt(f.wind, 0)} km/h`;
+      els.gusts.textContent = `${fmt(f.gusts, 0)} km/h`;
+      els.condition.textContent = condition;
+      els.conditionIcon.textContent = icon;
+
+      els.forecastMeta.textContent =
+        `Previsión automática para ${CONFIG.locationName} · ${CONFIG.matchTime} · ` +
+        `Datos de Open‑Meteo consultados al entrar. Maximilian 23 evalúa la franja 11:30–13:00.`;
+    }
+
+    /*
+      ============================================================
+      MOTOR DE DECISIÓN AUTOMÁTICA
+      ============================================================
+      Esta función no toca la interfaz. Devuelve un objeto neutro.
+      Más adelante, un futuro modo administrador podrá decidir si
+      usa este resultado o lo sustituye antes de llamar a renderVerdict().
+    */
+    function getAutomaticDecision(f) {
+      const reasons = [];
+      const samples = Array.isArray(f.window) && f.window.length ? f.window : [f];
+
+      for (const s of samples) {
+        const hm = s.time?.slice(-5) || "";
+        const code = s.weatherCode;
+
+        if ([95, 96, 99].includes(code)) {
+          reasons.push(`tormenta prevista${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        if ([65, 67, 75, 82, 86].includes(code)) {
+          reasons.push(`precipitación intensa${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        if (s.temperature !== null && s.temperature >= RULES.noPlay.temperatureMax) {
+          reasons.push(`temperatura de ${fmt(s.temperature,1)} °C${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        if (s.apparent !== null && s.apparent >= RULES.noPlay.apparentMax) {
+          reasons.push(`sensación térmica de ${fmt(s.apparent,1)} °C${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        if (s.apparent !== null && s.apparent <= RULES.noPlay.apparentMin) {
+          reasons.push(`sensación térmica de ${fmt(s.apparent,1)} °C${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        // La probabilidad alta de lluvia solo suspende si además
+        // hay precipitación cuantificable prevista en ese intervalo.
+        if (s.rainProbability !== null &&
+            s.rainProbability >= RULES.noPlay.rainProbability &&
+            s.precipitation !== null &&
+            s.precipitation > 0) {
+          reasons.push(`${fmt(s.rainProbability)} % de lluvia con precipitación prevista${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        if (s.precipitation !== null && s.precipitation >= RULES.noPlay.precipitation) {
+          reasons.push(`${fmt(s.precipitation,2)} mm de precipitación en 15 minutos${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        if (s.wind !== null && s.wind >= RULES.noPlay.wind) {
+          reasons.push(`viento de ${fmt(s.wind)} km/h${hm ? ` a las ${hm}` : ""}`);
+        }
+
+        if (s.gusts !== null && s.gusts >= RULES.noPlay.gusts) {
+          reasons.push(`rachas de ${fmt(s.gusts)} km/h${hm ? ` a las ${hm}` : ""}`);
+        }
+      }
+
+      const uniqueReasons = [...new Set(reasons)];
+
+      if (uniqueReasons.length) {
+        return {
+          level: "no-play",
+          title: "🔴 NO SE JUEGA",
+          reason: `Maximilian 23 suspende el partido por seguridad: ${joinReasons(uniqueReasons.slice(0, 4))}.`
+        };
+      }
+
+      return {
+        level: "play",
+        title: "🟢 SE JUEGA",
+        reason:
+          `Las condiciones previstas entre las 11:30 y las 13:00 se mantienen dentro de los límites establecidos para el partido. Maximilian 23 da el visto bueno.`
+      };
+    }
+    function joinReasons(items) {
+      if (items.length === 1) return items[0];
+      if (items.length === 2) return `${items[0]} y ${items[1]}`;
+      return `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`;
+    }
+
+    function waitingDecision() {
+      return {
+        level: "waiting",
+        title: "⏳ AÚN NO SE HA TOMADO UNA DECISIÓN",
+        reason:
+          `Maximilian 23 ya está vigilando la previsión de las ${CONFIG.matchTime}, ` +
+          `pero el veredicto oficial no se publica hasta las ${CONFIG.decisionTime}.`
+      };
+    }
+
+    function renderVerdict(decision) {
+      els.verdictBox.className = `verdict ${decision.level}`;
+      els.verdictMain.textContent = decision.title;
+      els.verdictReason.textContent = decision.reason;
+    }
+
+    function resolveAndRenderDecision(forecast) {
+      /*
+        PUNTO DE EXTENSIÓN FUTURO:
+        aquí podrá incorporarse un "modo administrador" que, si está
+        autenticado y existe una decisión manual válida, pueda sustituir
+        getAutomaticDecision(forecast).
+
+        Actualmente NO hay puerta de atrás ni control manual.
+      */
+      const canPublish =
+        currentMadridMinutes() >= timeToMinutes(CONFIG.decisionTime);
+
+      renderVerdict(
+        canPublish ? getAutomaticDecision(forecast) : waitingDecision()
+      );
+    }
+
+    let latestForecast = null;
+
+    function renderError(error) {
+      const beforeDecision =
+        currentMadridMinutes() < timeToMinutes(CONFIG.decisionTime);
+
+      els.verdictBox.className = "verdict waiting";
+
+      if (beforeDecision) {
+        els.verdictMain.textContent = "⏳ AÚN NO SE HA TOMADO UNA DECISIÓN";
+        els.verdictReason.textContent =
+          `Maximilian 23 dará su veredicto a partir de las ${CONFIG.decisionTime}. ` +
+          `Ahora mismo, además, no ha podido actualizar la previsión.`;
+      } else {
+        els.verdictMain.textContent = "⚠️ SIN DATOS METEOROLÓGICOS";
+        els.verdictReason.textContent =
+          "Maximilian 23 no puede emitir un veredicto fiable mientras no consiga consultar la previsión.";
+      }
+
+      els.errorLine.hidden = false;
+      els.errorLine.textContent = error.message || String(error);
+      els.forecastMeta.textContent = "No se ha podido actualizar la previsión.";
+    }
+
+    async function refreshForecast() {
+      try {
+        const forecast = await fetchForecast();
+        latestForecast = forecast;
+        els.errorLine.hidden = true;
+        els.errorLine.textContent = "";
+        renderWeather(forecast);
+        resolveAndRenderDecision(forecast);
+      } catch (error) {
+        console.error("Maximilian:", error);
+
+        // Si ya había una previsión válida, mantenemos esos datos visibles
+        // y avisamos del fallo de actualización sin inventar información.
+        if (latestForecast) {
+          els.errorLine.hidden = false;
+          els.errorLine.textContent =
+            "No se ha podido refrescar la previsión. Se mantienen los últimos datos disponibles.";
+          resolveAndRenderDecision(latestForecast);
+        } else {
+          renderError(error);
+        }
+      }
+    }
+
+    function toggleCriterion() {
+      const toggle = document.getElementById("criterionToggle");
+      const details = document.getElementById("criterionDetails");
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      details.hidden = expanded;
+    }
+
+    document.getElementById("criterionToggle").addEventListener("click", toggleCriterion);
+    document.getElementById("criterionToggle").addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggleCriterion();
+      }
+    });
+
+    async function init() {
+      await refreshForecast();
+
+      // Mantiene la previsión razonablemente fresca mientras la página
+      // permanece abierta, sin necesidad de ningún botón.
+      setInterval(refreshForecast, 5 * 60 * 1000);
+
+      // Reevalúa el bloqueo horario. Así, al llegar las 11:30,
+      // el veredicto aparece automáticamente sin recargar la página.
+      setInterval(() => {
+        if (latestForecast) {
+          resolveAndRenderDecision(latestForecast);
+        }
+      }, 15000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
