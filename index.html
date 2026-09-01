@@ -218,6 +218,14 @@
         }
         .user { background: #243b4a; color: #00ffcc; margin-left: auto; border: 1px solid #00ffcc; }
         .bot { background: #1e2d3d; color: #00ffcc; border: 1px solid #00ffcc; }
+        .bot.rich-enter { animation: richEnter 0.38s ease-out both; }
+        @keyframes richEnter {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .bot.rich-enter { animation: none; }
+        }
         .bot a { color: #00ffcc; text-decoration: underline; text-shadow: 0 0 6px #00ffccaa; font-weight: bold; transition: all 0.2s ease-in-out; }
         .bot a:hover { color: #33ffee; text-shadow: 0 0 10px #00fff0, 0 0 20px #00fff066; }
         .bot .table-wrap {
@@ -469,9 +477,15 @@
         function typeWriterEffect(el, html, delay = 30, done = null) {
             const chat = document.getElementById("chat");
             if (html.includes("<table") || html.includes("<a ") || html.includes("<strong")) {
+                el.classList.remove("rich-enter");
                 el.innerHTML = html;
+                void el.offsetWidth;
+                el.classList.add("rich-enter");
                 chat.scrollTop = chat.scrollHeight;
-                if (done) done();
+                setTimeout(() => {
+                    el.classList.remove("rich-enter");
+                    if (done) done();
+                }, 380);
                 return;
             }
 
