@@ -300,6 +300,15 @@
         display: none !important;
       }
     }
+  
+    .course-tabs { display:flex; justify-content:center; gap:10px; margin:0 auto 22px; flex-wrap:wrap; }
+    .course-tab { border:1px solid #00ffcc; background:rgba(0,255,204,.08); color:#00ffcc; padding:10px 18px; border-radius:999px; font-weight:700; cursor:pointer; transition:.2s ease; }
+    .course-tab:hover, .course-tab.active { background:#00ffcc; color:#07131a; box-shadow:0 0 14px rgba(0,255,204,.35); }
+    .course-empty { max-width:720px; margin:24px auto; padding:34px 22px; border:1px dashed rgba(0,255,204,.65); border-radius:16px; text-align:center; background:rgba(0,255,204,.05); }
+    .course-empty h2 { margin:0 0 10px; }
+    .course-empty p { margin:0; opacity:.85; }
+    [hidden] { display:none !important; }
+
   </style>
 </head>
 <body>
@@ -308,10 +317,18 @@
     <h1>Trabajado en clase</h1>
   </header>
   <div class="container">
-    <div class="intro">
+    <nav class="course-tabs" aria-label="Seleccionar curso">
+      <button class="course-tab active" id="arteTab2526" type="button" onclick="showArteCourse('2526')">2025-2026</button>
+      <button class="course-tab" id="arteTab2627" type="button" onclick="showArteCourse('2627')">2026-2027</button>
+    </nav>
+    <section class="course-empty" id="arteCourse2627" hidden>
+      <h2>Plástica 2026-2027</h2>
+      <p>Espacio preparado para añadir los nuevos trabajos del curso.</p>
+    </section>
+    <div class="intro" id="arteCourse2526Intro">
       <button class="close-btn" onclick="window.close()">Cerrar</button>
     </div>
-    <div class="gallery">
+    <div class="gallery" id="arteCourse2526Gallery">
       
       <div class="card" onclick="openModal('compose.jpg', 'Composición')">
               <div class="image-container">
@@ -536,6 +553,15 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeModal();
     });
-  </script>
+  
+    function showArteCourse(course) {
+      const oldCourse = course === '2526';
+      document.getElementById('arteCourse2526Intro').hidden = !oldCourse;
+      document.getElementById('arteCourse2526Gallery').hidden = !oldCourse;
+      document.getElementById('arteCourse2627').hidden = oldCourse;
+      document.getElementById('arteTab2526').classList.toggle('active', oldCourse);
+      document.getElementById('arteTab2627').classList.toggle('active', !oldCourse);
+    }
+</script>
 </body>
 </html>
