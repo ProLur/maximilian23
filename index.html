@@ -1,6 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+    <script>
+        if (location.protocol === "http:" &&
+            (location.hostname === "maximilian23.com" || location.hostname === "www.maximilian23.com")) {
+            location.replace("https://" + location.host + location.pathname + location.search + location.hash);
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maximilian 23</title>
