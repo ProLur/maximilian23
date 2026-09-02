@@ -156,6 +156,8 @@ to{transform:rotate(360deg);}
 .course-tab:hover,.course-tab.active{background:#1f78d1;color:#fff;box-shadow:0 5px 16px rgba(31,120,209,.25)}
 .course-empty{max-width:720px;margin:28px auto;padding:36px 22px;border:2px dashed #8dbce8;border-radius:16px;text-align:center;background:#f5faff}
 .course-empty h2{margin:0 0 10px;color:#125a9c}.course-empty p{margin:0;color:#526577}
+.course-archive-button{display:inline-block;margin-top:20px;border:0;border-radius:999px;padding:12px 20px;background:#1f78d1;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(31,120,209,.3);transition:.2s ease}
+.course-archive-button:hover,.course-archive-button:focus{background:#125a9c;transform:translateY(-2px);box-shadow:0 8px 22px rgba(31,120,209,.4)}
 [hidden]{display:none!important}
 
 </style>
@@ -177,7 +179,8 @@ to{transform:rotate(360deg);}
 </nav>
 <section class="course-empty" id="meteoCourse2627">
 <h2>Meteoescuela 2026-2027</h2>
-<p>Espacio preparado para registrar los datos meteorológicos del nuevo curso.</p>
+<p>Próximamente registraremos los nuevos datos. Mientras tanto, puedes visitar las mediciones y gráficas del curso pasado.</p>
+<button class="course-archive-button" type="button" onclick="showMeteoCourse('2526')">Ver datos de 2025-2026</button>
 </section>
 <div class="main-container" id="meteoCourse2526" hidden>
 <div class="content-wrapper">
