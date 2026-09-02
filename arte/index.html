@@ -307,6 +307,8 @@
     .course-empty { max-width:720px; margin:24px auto; padding:34px 22px; border:1px dashed rgba(0,255,204,.65); border-radius:16px; text-align:center; background:rgba(0,255,204,.05); }
     .course-empty h2 { margin:0 0 10px; }
     .course-empty p { margin:0; opacity:.85; }
+    .course-archive-button { display:inline-block; margin-top:20px; border:0; border-radius:999px; padding:12px 20px; background:#00ffcc; color:#07131a; font:700 1rem "Courier New", monospace; cursor:pointer; box-shadow:0 0 18px rgba(0,255,204,.35); transition:.2s ease; }
+    .course-archive-button:hover, .course-archive-button:focus { transform:translateY(-2px); box-shadow:0 0 24px rgba(0,255,204,.55); }
     [hidden] { display:none !important; }
 
   </style>
@@ -323,7 +325,8 @@
     </nav>
     <section class="course-empty" id="arteCourse2627">
       <h2>Plástica 2026-2027</h2>
-      <p>Espacio preparado para añadir los nuevos trabajos del curso.</p>
+      <p>Próximamente añadiremos las nuevas propuestas. Mientras tanto, puedes visitar las fichas que trabajamos el curso pasado.</p>
+      <button class="course-archive-button" type="button" onclick="showArteCourse('2526')">Ver fichas de 2025-2026</button>
     </section>
     <div class="intro" id="arteCourse2526Intro" hidden>
       <button class="close-btn" onclick="window.close()">Cerrar</button>
