@@ -344,6 +344,71 @@
       to { background-position: -220% 0; }
     }
 
+    /* Panel completo sin desplazamiento en pantallas de ordenador */
+    @media (min-width: 900px) and (min-height: 680px) {
+      body {
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+        padding: 10px 14px;
+      }
+      .app {
+        width: min(100%, 1380px);
+        height: calc(100dvh - 20px);
+        display: grid;
+        grid-template-columns: minmax(330px, .82fr) minmax(560px, 1.35fr);
+        grid-template-rows: minmax(0, 1fr) auto auto;
+        gap: 10px;
+      }
+      .hero {
+        grid-column: 1;
+        grid-row: 1;
+        margin: 0;
+        padding: clamp(18px, 2.2vh, 24px);
+        border-radius: 20px;
+      }
+      h1 { font-size: clamp(2.3rem, 5vh, 3.4rem); }
+      .subtitle { margin-top: 9px; line-height: 1.4; font-size: .9rem; }
+      .match-strip { margin-top: 14px; gap: 7px; }
+      .match-chip { padding: 9px 10px; }
+      .weather-section {
+        grid-column: 2;
+        grid-row: 1;
+        margin: 0;
+        padding: clamp(14px, 2vh, 18px);
+        border-radius: 20px;
+      }
+      .section-title { margin-bottom: 10px; }
+      .weather-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .weather-card { min-height: 86px; padding: 10px 12px; }
+      .weather-icon { margin-bottom: 4px; font-size: 1.1rem; }
+      .weather-value { margin-top: 3px; font-size: 1.08rem; }
+      .weather-value.small { font-size: .88rem; }
+      .source-line { margin-top: 8px; font-size: .69rem; }
+      .criterion-section {
+        grid-column: 1;
+        grid-row: 2;
+        margin: 0;
+        padding: 13px 16px;
+        border-radius: 18px;
+      }
+      .criterion-section .section-title { margin-bottom: 0; }
+      .verdict {
+        grid-column: 2;
+        grid-row: 2;
+        padding: 15px 18px;
+        border-radius: 18px;
+      }
+      .verdict-main { margin: 5px auto 7px; font-size: clamp(1.45rem, 3vh, 2.1rem); }
+      .verdict-reason { line-height: 1.35; font-size: .88rem; }
+      .footer {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        padding: 2px 8px 0;
+        font-size: .66rem;
+      }
+    }
+
     @media (max-width: 640px) {
       body { padding: 12px; }
       .hero { padding: 22px 18px; border-radius: 22px; }
@@ -386,7 +451,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section weather-section">
       <div class="section-title">
         <h2>Condiciones previstas</h2>
         <div class="time-badge">11:45</div>
@@ -447,7 +512,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section criterion-section">
       <div class="section-title criterion-toggle" id="criterionToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="criterionDetails">
         <h2>Criterio Maximilian</h2>
         <div class="criterion-plus" id="criterionPlus" aria-hidden="true">+</div>
