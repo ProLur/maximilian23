@@ -931,7 +931,11 @@
       verdictMascot.hidden = !showMascot;
       if (showMascot) {
         const canPlay = decision.level === "play";
-        verdictMascot.src = canPlay ? "maximilian-juega-v2.png" : "maximilian-no-juega-v2.png";
+        // Ruta absoluta y versión para evitar que el navegador conserve un 404
+        // temporal mientras GitHub Pages termina de publicar imágenes nuevas.
+        verdictMascot.src = canPlay
+          ? "/juez/maximilian-juega-v2.png?v=2"
+          : "/juez/maximilian-no-juega-v2.png?v=2";
         verdictMascot.alt = canPlay
           ? "Maximilian alegre con el pulgar hacia arriba"
           : "Maximilian triste con el pulgar hacia abajo";
