@@ -436,6 +436,87 @@
       }
     }
 
+    /* Vista de televisión: ocupa el lienzo y prioriza datos + veredicto. */
+    @media (min-width: 1200px) and (min-height: 700px) {
+      body {
+        padding: clamp(18px, 2.2vh, 28px) clamp(22px, 2.2vw, 42px);
+        overflow: hidden;
+      }
+      .app {
+        width: 100%;
+        height: calc(100dvh - clamp(36px, 4.4vh, 56px));
+        max-width: none;
+        grid-template-columns: minmax(380px, .62fr) minmax(760px, 1.38fr);
+        grid-template-rows: minmax(0, 1.72fr) minmax(240px, .82fr) auto;
+        gap: clamp(14px, 1.5vh, 20px);
+      }
+      .hero {
+        padding: clamp(26px, 3.4vh, 42px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .eyebrow { font-size: clamp(.8rem, 1vw, 1.05rem); }
+      h1 { font-size: clamp(3.1rem, 5vw, 5.4rem); }
+      .hero-title img { width: clamp(78px, 6vw, 118px); }
+      .subtitle { font-size: clamp(1rem, 1.1vw, 1.28rem); }
+      .match-strip { margin-top: clamp(22px, 3vh, 34px); gap: 12px; }
+      .match-chip { padding: clamp(14px, 1.8vh, 21px); }
+      .match-chip small { font-size: clamp(.72rem, .8vw, .92rem); }
+      .match-chip strong { font-size: clamp(1.05rem, 1.25vw, 1.42rem); }
+      .weather-section {
+        padding: clamp(24px, 2.8vh, 36px);
+        display: flex;
+        flex-direction: column;
+      }
+      .section-title h2 { font-size: clamp(1.25rem, 1.4vw, 1.65rem); }
+      .time-badge { font-size: 1rem; padding: 9px 14px; }
+      .weather-grid {
+        flex: 1;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        gap: clamp(12px, 1.2vw, 18px);
+      }
+      .weather-card {
+        min-height: 0;
+        padding: clamp(18px, 2.1vh, 28px);
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .weather-icon { font-size: clamp(1.7rem, 2vw, 2.35rem); margin-bottom: 10px; }
+      .weather-label { font-size: clamp(.86rem, 1vw, 1.12rem); }
+      .weather-value { margin-top: 8px; font-size: clamp(1.55rem, 1.9vw, 2.25rem); }
+      .weather-value.small { font-size: clamp(1.12rem, 1.35vw, 1.6rem); }
+      .source-line { margin-top: 12px; font-size: clamp(.72rem, .8vw, .9rem); }
+      .criterion-section { display: none; }
+      .verdict {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        padding: clamp(22px, 2.8vh, 36px) clamp(38px, 4vw, 76px);
+        gap: clamp(32px, 4vw, 76px);
+        border-radius: 24px;
+      }
+      .verdict-mascot {
+        width: clamp(190px, 15vw, 285px);
+        height: clamp(210px, 24vh, 310px);
+      }
+      .verdict-content { flex: 1; }
+      .verdict-kicker { font-size: clamp(.9rem, 1vw, 1.15rem); }
+      .verdict-main {
+        margin: 10px auto 14px;
+        max-width: none;
+        font-size: clamp(2.6rem, 4.2vw, 5rem);
+      }
+      .verdict-reason {
+        max-width: 1100px;
+        font-size: clamp(1.05rem, 1.25vw, 1.45rem);
+        line-height: 1.45;
+      }
+      .footer { font-size: clamp(.68rem, .75vw, .86rem); }
+    }
+
     @media (max-width: 640px) {
       body { padding: 12px; }
       .hero { padding: 22px 18px; border-radius: 22px; }
@@ -565,7 +646,7 @@
     </section>
 
     <section class="verdict loading" id="verdictBox" aria-live="polite">
-      <img class="verdict-mascot" id="verdictMascot" alt="" hidden>
+      <img class="verdict-mascot" id="verdictMascot" alt="" hidden decoding="async">
       <div class="verdict-content">
         <div class="verdict-kicker">Decisión de Maximilian 23</div>
         <div class="verdict-main" id="verdictMain">Consultando el cielo…</div>
@@ -931,16 +1012,22 @@
       verdictMascot.hidden = !showMascot;
       if (showMascot) {
         const canPlay = decision.level === "play";
-        // Ruta absoluta y versión para evitar que el navegador conserve un 404
-        // temporal mientras GitHub Pages termina de publicar imágenes nuevas.
-        verdictMascot.src = canPlay
-          ? "/juez/maximilian-juega-v2.png?v=2"
-          : "/juez/maximilian-no-juega-v2.png?v=2";
-        verdictMascot.alt = canPlay
-          ? "Maximilian alegre con el pulgar hacia arriba"
-          : "Maximilian triste con el pulgar hacia abajo";
+        const fileName = canPlay ? "maximilian-juega-v2.png" : "maximilian-no-juega-v2.png";
+        const localUrl = `/juez/${fileName}?v=4`;
+        const rawUrl = `https://raw.githubusercontent.com/ProLur/maximilian23/main/juez/${fileName}`;
+        verdictMascot.onerror = () => {
+          if (verdictMascot.src !== rawUrl) verdictMascot.src = rawUrl;
+        };
+        verdictMascot.src = localUrl;
+        verdictMascot.alt = "";
       }
     }
+
+    // Descarga ambos pulgares antes de que llegue el momento del veredicto.
+    ["maximilian-juega-v2.png", "maximilian-no-juega-v2.png"].forEach(fileName => {
+      const preload = new Image();
+      preload.src = `/juez/${fileName}?v=4`;
+    });
 
     function resolveAndRenderDecision(forecast) {
       /*
