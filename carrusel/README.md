@@ -4,8 +4,9 @@ Sube las imágenes a `carrusel/fotos/`. Se aceptan AVIF, GIF, JPG/JPEG, PNG y We
 El carrusel consulta la API pública de GitHub al abrirse y vuelve a comprobar la
 carpeta cada cinco minutos. No hace falta editar una lista de archivos.
 
-La página alterna bloques de hasta tres fotos (cinco segundos cada una) con la
-página del juez (quince segundos). Para verla en producción:
+La página alterna bloques de hasta tres fotos (diez segundos cada una) con la
+página del juez (quince segundos). Cada pantalla sale deslizándose hacia la
+derecha antes de mostrar la siguiente. Para verla en producción:
 
 https://www.maximilian23.com/carrusel/
 
