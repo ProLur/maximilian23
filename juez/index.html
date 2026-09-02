@@ -439,22 +439,23 @@
     /* Vista de televisión: ocupa el lienzo y prioriza datos + veredicto. */
     @media (min-width: 1200px) and (min-height: 700px) {
       body {
-        padding: clamp(18px, 2.2vh, 28px) clamp(22px, 2.2vw, 42px);
+        padding: 0;
         overflow: hidden;
       }
       .app {
         width: 100%;
-        height: calc(100dvh - clamp(36px, 4.4vh, 56px));
+        height: 100dvh;
         max-width: none;
         grid-template-columns: minmax(380px, .62fr) minmax(760px, 1.38fr);
-        grid-template-rows: minmax(0, 1.72fr) minmax(240px, .82fr) auto;
-        gap: clamp(14px, 1.5vh, 20px);
+        grid-template-rows: minmax(0, 1.72fr) minmax(240px, .82fr);
+        gap: 10px;
       }
       .hero {
         padding: clamp(26px, 3.4vh, 42px);
         display: flex;
         flex-direction: column;
         justify-content: center;
+        border-radius: 0;
       }
       .eyebrow { font-size: clamp(.8rem, 1vw, 1.05rem); }
       h1 { font-size: clamp(3.1rem, 5vw, 5.4rem); }
@@ -468,6 +469,7 @@
         padding: clamp(24px, 2.8vh, 36px);
         display: flex;
         flex-direction: column;
+        border-radius: 0;
       }
       .section-title h2 { font-size: clamp(1.25rem, 1.4vw, 1.65rem); }
       .time-badge { font-size: 1rem; padding: 9px 14px; }
@@ -496,7 +498,7 @@
         grid-row: 2;
         padding: clamp(22px, 2.8vh, 36px) clamp(38px, 4vw, 76px);
         gap: clamp(32px, 4vw, 76px);
-        border-radius: 24px;
+        border-radius: 0;
       }
       .verdict-mascot {
         width: clamp(190px, 15vw, 285px);
@@ -514,7 +516,7 @@
         font-size: clamp(1.05rem, 1.25vw, 1.45rem);
         line-height: 1.45;
       }
-      .footer { font-size: clamp(.68rem, .75vw, .86rem); }
+      .footer { display: none; }
     }
 
     @media (max-width: 640px) {
