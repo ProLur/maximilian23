@@ -106,6 +106,19 @@
       letter-spacing: -.055em;
     }
 
+    .hero-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-title img {
+      width: clamp(54px, 6vw, 76px);
+      height: auto;
+      flex: 0 0 auto;
+      filter: drop-shadow(0 0 12px rgba(49, 209, 124, .22));
+    }
+
     .subtitle {
       margin: 12px 0 0;
       color: var(--muted);
@@ -224,6 +237,16 @@
       background: rgba(16, 33, 42, .95);
       text-align: center;
     }
+
+    .verdict-mascot {
+      width: 105px;
+      height: 118px;
+      object-fit: contain;
+      flex: 0 0 auto;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.28));
+    }
+
+    .verdict-content { min-width: 0; }
 
     .verdict.waiting {
       border-color: rgba(101,201,255,.26);
@@ -398,6 +421,10 @@
         grid-row: 2;
         padding: 15px 18px;
         border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
       }
       .verdict-main { margin: 5px auto 7px; font-size: clamp(1.45rem, 3vh, 2.1rem); }
       .verdict-reason { line-height: 1.35; font-size: .88rem; }
@@ -417,6 +444,10 @@
       .weather-grid { grid-template-columns: repeat(2, 1fr); }
       .weather-card { min-height: 102px; }
       .section-title { align-items: flex-start; }
+      .hero-title { gap: 9px; }
+      .verdict { display: flex; align-items: center; gap: 10px; text-align: left; }
+      .verdict-mascot { width: 76px; height: 94px; }
+      .verdict-main { font-size: clamp(1.35rem, 7vw, 2rem); }
     }
 
     @media (max-width: 380px) {
@@ -429,7 +460,10 @@
   <main class="app">
     <section class="hero">
       <p class="eyebrow">Árbitro meteorológico oficial</p>
-      <h1>¿Se juega?</h1>
+      <div class="hero-title">
+        <img src="../Cabeza.png" alt="Cabeza de Maximilian 23">
+        <h1>¿Se juega?</h1>
+      </div>
       <p class="subtitle">
         Consulta la previsión de Zafra y muestra si las condiciones son adecuadas para celebrar el partido.
       </p>
@@ -531,12 +565,15 @@
     </section>
 
     <section class="verdict loading" id="verdictBox" aria-live="polite">
-      <div class="verdict-kicker">Decisión de Maximilian 23</div>
-      <div class="verdict-main" id="verdictMain">Consultando el cielo…</div>
-      <p class="verdict-reason" id="verdictReason">
-        Recuperando la previsión para las 11:45.
-      </p>
-      <div class="error-line" id="errorLine" hidden></div>
+      <img class="verdict-mascot" id="verdictMascot" alt="" hidden>
+      <div class="verdict-content">
+        <div class="verdict-kicker">Decisión de Maximilian 23</div>
+        <div class="verdict-main" id="verdictMain">Consultando el cielo…</div>
+        <p class="verdict-reason" id="verdictReason">
+          Recuperando la previsión para las 11:45.
+        </p>
+        <div class="error-line" id="errorLine" hidden></div>
+      </div>
     </section>
 
     <div class="footer">
@@ -603,6 +640,8 @@
       verdictReason: document.getElementById("verdictReason"),
       errorLine: document.getElementById("errorLine")
     };
+
+    const verdictMascot = document.getElementById("verdictMascot");
 
     const entryInstant = new Date();
 
@@ -888,6 +927,15 @@
       els.verdictBox.className = `verdict ${decision.level}`;
       els.verdictMain.textContent = decision.title;
       els.verdictReason.textContent = decision.reason;
+      const showMascot = decision.level === "play" || decision.level === "no-play";
+      verdictMascot.hidden = !showMascot;
+      if (showMascot) {
+        const canPlay = decision.level === "play";
+        verdictMascot.src = canPlay ? "maximilian-juega.png" : "maximilian-no-juega.png";
+        verdictMascot.alt = canPlay
+          ? "Maximilian alegre con el pulgar hacia arriba"
+          : "Maximilian triste con el pulgar hacia abajo";
+      }
     }
 
     function resolveAndRenderDecision(forecast) {
@@ -991,3 +1039,4 @@
   </script>
 </body>
 </html>
+
