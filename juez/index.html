@@ -431,8 +431,7 @@
       <p class="eyebrow">Árbitro meteorológico oficial</p>
       <h1>¿Se juega?</h1>
       <p class="subtitle">
-        Maximilian 23 vigila el cielo de Zafra y decide si las condiciones son
-        adecuadas para el partido. Sin botones, sin discusiones con el VAR meteorológico.
+        Consulta la previsión de Zafra y muestra si las condiciones son adecuadas para celebrar el partido.
       </p>
 
       <div class="match-strip">
@@ -519,20 +518,14 @@
       </div>
       <div id="criterionDetails" hidden>
         <p class="subtitle" style="margin:0; max-width:none;">
-          Maximilian 23 aplica un criterio preventivo para deporte infantil. Valora la franja completa
-          de 11:30 a 13:00 y tiene en cuenta temperatura, sensación térmica, humedad, lluvia, viento,
-          rachas y fenómenos adversos. Para el calor sigue el principio recomendado por la
-          <strong>American Academy of Pediatrics (AAP)</strong>: el riesgo durante el ejercicio depende
-          del estrés térmico ambiental —temperatura, humedad y radiación— y la actividad debe modificarse
-          o aplazarse cuando las condiciones sean excesivas. También toma como referencia las recomendaciones
-          de la <strong>Asociación Española de Pediatría (AEP)</strong> sobre hidratación y ejercicio infantil.
-          Los límites de Maximilian 23 son deliberadamente conservadores y no sustituyen la valoración
-          de los adultos responsables ni una alerta meteorológica oficial.
+          Para decidir, se revisa la previsión completa entre las 11:30 y las 13:00: temperatura,
+          sensación térmica, humedad, lluvia, viento, rachas y fenómenos adversos. Se aplica un criterio
+          preventivo para el deporte escolar, tomando como referencia las recomendaciones de la
+          <strong>Asociación Española de Pediatría</strong> sobre hidratación, ejercicio y exposición al calor.
+          Los límites son prudentes y no sustituyen la valoración de los adultos responsables ni las alertas meteorológicas oficiales.
         </p>
         <div class="source-line">
-          Fuentes de referencia: American Academy of Pediatrics (Pediatrics, “Climatic Heat Stress and
-          Exercising Children and Adolescents”, reafirmado en 2025) · HealthyChildren.org (AAP) ·
-          Asociación Española de Pediatría (AEP), “Hidratación y deporte”.
+          Referencia: Asociación Española de Pediatría, recomendaciones sobre hidratación y deporte infantil.
         </div>
       </div>
     </section>
@@ -796,8 +789,8 @@
       els.conditionIcon.textContent = icon;
 
       els.forecastMeta.textContent =
-        `Previsión automática para ${CONFIG.locationName} · ${CONFIG.matchTime} · ` +
-        `Datos de Open‑Meteo consultados al entrar. Maximilian 23 evalúa la franja 11:30–13:00.`;
+        `Previsión para ${CONFIG.locationName} a las ${CONFIG.matchTime}. ` +
+        `Datos de Open‑Meteo actualizados al abrir la página. Se revisa la franja de 11:30 a 13:00.`;
     }
 
     /*
@@ -872,7 +865,7 @@
         level: "play",
         title: "🟢 SE JUEGA",
         reason:
-          `Las condiciones previstas entre las 11:30 y las 13:00 se mantienen dentro de los límites establecidos para el partido. Maximilian 23 da el visto bueno.`
+          `Las condiciones previstas entre las 11:30 y las 13:00 están dentro de los límites establecidos. El partido puede celebrarse.`
       };
     }
     function joinReasons(items) {
@@ -886,8 +879,8 @@
         level: "waiting",
         title: "⏳ AÚN NO SE HA TOMADO UNA DECISIÓN",
         reason:
-          `Maximilian 23 ya está vigilando la previsión de las ${CONFIG.matchTime}, ` +
-          `pero el veredicto oficial no se publica hasta las ${CONFIG.decisionTime}.`
+          `La previsión de las ${CONFIG.matchTime} ya se está revisando. ` +
+          `La decisión se publicará a partir de las ${CONFIG.decisionTime}.`
       };
     }
 
