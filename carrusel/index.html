@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Carrusel Maximilian23</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; }
+    body { cursor: none; }
+    .slide {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+    }
+    #foto {
+      display: none;
+      object-fit: contain;
+      object-position: center;
+    }
+    #juez { display: none; }
+    #pantalla-completa {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      z-index: 10;
+      display: grid;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      place-items: center;
+      color: #fff;
+      background: rgb(0 0 0 / 45%);
+      border: 1px solid rgb(255 255 255 / 35%);
+      border-radius: 10px;
+      font: 24px/1 system-ui, sans-serif;
+      cursor: pointer;
+      opacity: .72;
+    }
+    #pantalla-completa:hover,
+    #pantalla-completa:focus-visible {
+      opacity: 1;
+      background: rgb(0 0 0 / 70%);
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+    #estado {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+      color: #aaa;
+      background: #000;
+      font: 500 clamp(18px, 2.5vw, 32px)/1.4 system-ui, sans-serif;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <img id="foto" class="slide" alt="">
+  <iframe
+    id="juez"
+    class="slide"
+    title="Tiempo y veredicto del partido"
+    src="about:blank"
+    allow="autoplay; fullscreen"
+    referrerpolicy="strict-origin-when-cross-origin">
+  </iframe>
+  <div id="estado">Cargando imágenes…</div>
+  <button
+    id="pantalla-completa"
+    type="button"
+    aria-label="Entrar en pantalla completa"
+    title="Entrar en pantalla completa">⛶</button>
+
+  <script>
+    'use strict';
+
+    // Se usan cuando la web está en un dominio propio (maximilian23.com).
+    // Si se copia este archivo a otro repositorio, solo hay que cambiar estos valores.
+    const GITHUB_OWNER = 'ProLur';
+    const GITHUB_REPO = 'maximilian23';
+    const FOTOS_PATH = 'carrusel/fotos';
+    const JUEZ_URL = 'https://www.maximilian23.com/juez';
+    const FOTO_MS = 5_000;
+    const JUEZ_MS = 15_000;
+    const ACTUALIZAR_LISTA_MS = 5 * 60_000;
+    const EXTENSIONES = /\.(?:avif|gif|jpe?g|png|webp)$/i;
+
+    const foto = document.querySelector('#foto');
+    const juez = document.querySelector('#juez');
+    const estado = document.querySelector('#estado');
+    const botonPantallaCompleta = document.querySelector('#pantalla-completa');
+    let imagenes = [];
+    let ultimaActualizacion = 0;
+
+    function actualizarBotonPantallaCompleta() {
+      const activa = Boolean(document.fullscreenElement);
+      botonPantallaCompleta.textContent = activa ? '✕' : '⛶';
+      botonPantallaCompleta.setAttribute(
+        'aria-label',
+        activa ? 'Salir de pantalla completa' : 'Entrar en pantalla completa'
+      );
+      botonPantallaCompleta.title = botonPantallaCompleta.getAttribute('aria-label');
+      botonPantallaCompleta.setAttribute('aria-pressed', String(activa));
+    }
+
+    async function alternarPantallaCompleta() {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen();
+      } catch (error) {
+        console.error('No se pudo cambiar el modo de pantalla completa:', error);
+      }
+    }
+
+    botonPantallaCompleta.addEventListener('click', alternarPantallaCompleta);
+    document.addEventListener('fullscreenchange', actualizarBotonPantallaCompleta);
+    actualizarBotonPantallaCompleta();
+
+    function repositorio() {
+      const host = location.hostname.toLowerCase();
+      if (host.endsWith('.github.io')) {
+        const owner = host.slice(0, -'.github.io'.length);
+        const repo = location.pathname.split('/').filter(Boolean)[0];
+        if (owner && repo && repo !== 'carrusel') return { owner, repo };
+      }
+      return { owner: GITHUB_OWNER, repo: GITHUB_REPO };
+    }
+
+    function pausa(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function obtenerImagenes() {
+      const { owner, repo } = repositorio();
+      const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${FOTOS_PATH}`;
+      const respuesta = await fetch(url, {
+        headers: { Accept: 'application/vnd.github+json' },
+        cache: 'no-store'
+      });
+      if (!respuesta.ok) throw new Error(`GitHub respondió ${respuesta.status}`);
+
+      const contenido = await respuesta.json();
+      if (!Array.isArray(contenido)) throw new Error('La ruta de fotos no es una carpeta');
+
+      return contenido
+        .filter(archivo => archivo.type === 'file' && EXTENSIONES.test(archivo.name) && archivo.download_url)
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+        .map(archivo => ({ nombre: archivo.name, url: archivo.download_url }));
+    }
+
+    async function actualizarImagenes() {
+      try {
+        const nuevas = await obtenerImagenes();
+        imagenes = nuevas;
+        ultimaActualizacion = Date.now();
+        estado.textContent = nuevas.length
+          ? ''
+          : 'No hay imágenes en carrusel/fotos. Mostrando el juez.';
+      } catch (error) {
+        console.error('No se pudo actualizar la lista de fotos:', error);
+        if (!imagenes.length) estado.textContent = 'No se pudo cargar la lista de imágenes. Reintentando…';
+      }
+    }
+
+    function mostrarFoto(imagen) {
+      return new Promise(resolve => {
+        let terminado = false;
+        const finalizar = () => {
+          if (terminado) return;
+          terminado = true;
+          foto.onload = null;
+          foto.onerror = null;
+          resolve();
+        };
+
+        juez.style.display = 'none';
+        estado.style.display = 'none';
+        foto.style.display = 'block';
+        foto.alt = imagen.nombre;
+        foto.onload = () => setTimeout(finalizar, FOTO_MS);
+        foto.onerror = finalizar;
+        foto.src = imagen.url;
+      });
+    }
+
+    async function mostrarJuez() {
+      foto.style.display = 'none';
+      estado.style.display = 'none';
+      juez.style.display = 'block';
+      // Recargar evita que una pantalla de resultados quede congelada entre bloques.
+      juez.src = `${JUEZ_URL}${JUEZ_URL.includes('?') ? '&' : '?'}carrusel=${Date.now()}`;
+      await pausa(JUEZ_MS);
+    }
+
+    async function iniciar() {
+      await actualizarImagenes();
+
+      while (true) {
+        if (Date.now() - ultimaActualizacion >= ACTUALIZAR_LISTA_MS) await actualizarImagenes();
+
+        if (!imagenes.length) {
+          await mostrarJuez();
+          continue;
+        }
+
+        // Una copia estable hace que las fotos añadidas a mitad de ciclo entren en el siguiente.
+        const ciclo = [...imagenes];
+        for (let i = 0; i < ciclo.length; i += 3) {
+          for (const imagen of ciclo.slice(i, i + 3)) await mostrarFoto(imagen);
+          await mostrarJuez();
+        }
+      }
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>
