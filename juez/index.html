@@ -43,7 +43,12 @@
 
     .live-clock { margin-bottom: 18px; text-align: left; }
     .live-clock small { display: block; color: var(--muted); font-weight: 800; letter-spacing: .12em; }
-    .live-clock time { display: block; color: #fff; font-size: clamp(2.8rem, 4.2vw, 6rem); font-weight: 900; line-height: 1.15; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    .live-clock time { display: block; width: 100%; max-width: 600px; margin-top: 9px; padding: 8px; border-radius: 8px; background: #071012; border: 1px solid #34413c; }
+    .digital-face { display: block; width: 100%; height: auto; }
+    .digital-segment { fill: #ffbd59; opacity: .07; }
+    .digital-segment.on, .digital-colon { fill: #ffbd59; opacity: 1; }
+    .digital-colon.off { opacity: .07; }
+    @media (prefers-reduced-motion: reduce) { .digital-colon.off { opacity: 1; } }
 
     .topbar {
       display: flex;
@@ -521,6 +526,15 @@
         line-height: 1.45;
       }
       .footer { display: none; }
+    }
+
+    @media (min-width: 1200px) and (min-height: 700px) and (max-height: 850px) {
+      .hero { padding: 18px 24px; }
+      .hero h1 { font-size: 3rem; }
+      .hero .subtitle { font-size: .9rem; margin-top: 8px; }
+      .live-clock { margin-bottom: 12px; }
+      .match-strip { margin-top: 14px; }
+      .match-chip { padding: 10px; }
     }
 
     @media (max-width: 640px) {
@@ -1128,13 +1142,39 @@
 
     async function init() {
       const clock = document.getElementById('liveClock');
+      // Dígitos de siete segmentos propios: no dependen de fuentes externas.
+      const shapes = [
+        '8,3 42,3 48,9 42,15 8,15 2,9',
+        '44,17 50,11 50,43 44,49 38,43 38,23',
+        '44,51 50,57 50,89 44,95 38,83 38,57',
+        '8,85 42,85 48,91 42,97 8,97 2,91',
+        '6,51 12,57 12,83 6,95 0,89 0,57',
+        '6,17 12,23 12,43 6,49 0,43 0,11',
+        '8,44 42,44 48,50 42,56 8,56 2,50'
+      ];
+      const numbers = ['abcdef', 'bc', 'abdeg', 'abcdg', 'bcfg', 'acdfg', 'acdefg', 'abc', 'abcdefg', 'abcdfg'];
+      clock.innerHTML = '<svg class="digital-face" viewBox="0 0 400 100" aria-hidden="true" focusable="false">'
+        + [0, 58, 146, 204, 292, 350].map(x => `<g class="digital-digit" transform="translate(${x} 0)">${shapes.map(points => `<polygon class="digital-segment" points="${points}"/>`).join('')}</g>`).join('')
+        + [121, 267].map(x => `<g class="digital-colon"><circle cx="${x}" cy="32" r="5"/><circle cx="${x}" cy="68" r="5"/></g>`).join('')
+        + '</svg>';
+      const digits = clock.querySelectorAll('.digital-digit');
+      const colons = clock.querySelectorAll('.digital-colon');
       const clockFormat = new Intl.DateTimeFormat('es-ES', {
         timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit',
         second: '2-digit', hourCycle: 'h23'
       });
       const updateClock = () => {
         const now = new Date();
-        clock.textContent = clockFormat.format(now);
+        const text = clockFormat.format(now);
+        const values = text.replace(/\D/g, '');
+        digits.forEach((digit, index) => {
+          const active = numbers[Number(values[index])];
+          digit.querySelectorAll('polygon').forEach((segment, i) => {
+            segment.classList.toggle('on', active.includes('abcdefg'[i]));
+          });
+        });
+        colons.forEach(colon => colon.classList.toggle('off', now.getSeconds() % 2 !== 0));
+        clock.setAttribute('aria-label', `Hora actual en Zafra: ${text}`);
         clock.dateTime = now.toISOString();
       };
       updateClock();
