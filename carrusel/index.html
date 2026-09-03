@@ -31,7 +31,8 @@
       object-fit: contain;
       object-position: center;
     }
-    #juez { display: none; }
+    .slide.saliendo-izquierda { transform: translateX(-105vw); opacity: 0; }
+    #juez { display: none; pointer-events: none; }
     #pantalla-completa {
       position: fixed;
       top: max(12px, env(safe-area-inset-top));
@@ -76,6 +77,7 @@
     id="juez"
     class="slide"
     title="Tiempo y veredicto del partido"
+    tabindex="-1"
     src="about:blank"
     allow="autoplay; fullscreen"
     referrerpolicy="strict-origin-when-cross-origin">
@@ -108,6 +110,16 @@
     const botonPantallaCompleta = document.querySelector('#pantalla-completa');
     let imagenes = [];
     let ultimaActualizacion = 0;
+    let avanzarDiapositiva = null;
+
+    document.addEventListener('keydown', event => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      if (!event.repeat && avanzarDiapositiva) {
+        avanzarDiapositiva(event.key === 'ArrowRight' ? 1 : -1);
+      }
+    });
 
     function actualizarBotonPantallaCompleta() {
       const activa = Boolean(document.fullscreenElement);
@@ -147,11 +159,12 @@
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function salirHaciaLaDerecha(elemento) {
-      elemento.classList.add('saliendo');
+    async function salirHaciaLaDerecha(elemento, direccion = 1) {
+      const clase = direccion === -1 ? 'saliendo-izquierda' : 'saliendo';
+      elemento.classList.add(clase);
       await pausa(TRANSICION_MS);
       elemento.style.display = 'none';
-      elemento.classList.remove('saliendo');
+      elemento.classList.remove(clase);
     }
 
     async function obtenerImagenes() {
@@ -173,6 +186,7 @@
     }
 
     async function actualizarImagenes() {
+      ultimaActualizacion = Date.now();
       try {
         const nuevas = await obtenerImagenes();
         imagenes = nuevas;
@@ -186,57 +200,63 @@
       }
     }
 
-    function mostrarFoto(imagen) {
+    function mostrarDiapositiva(imagen) {
       return new Promise(resolve => {
+        const elemento = imagen ? foto : juez;
         let terminado = false;
-        const finalizar = async (animar = true) => {
+        let temporizador;
+        const finalizar = async (direccion = 1, animar = true) => {
           if (terminado) return;
           terminado = true;
+          clearTimeout(temporizador);
+          avanzarDiapositiva = null;
           foto.onload = null;
           foto.onerror = null;
-          if (animar) await salirHaciaLaDerecha(foto);
-          else foto.style.display = 'none';
-          resolve();
+          if (animar) await salirHaciaLaDerecha(elemento, direccion);
+          else elemento.style.display = 'none';
+          resolve(direccion);
         };
-
+        avanzarDiapositiva = direccion => finalizar(direccion);
+        foto.style.display = 'none';
         juez.style.display = 'none';
         estado.style.display = 'none';
-        foto.classList.remove('saliendo');
-        foto.style.display = 'block';
-        foto.alt = imagen.nombre;
-        foto.onload = () => setTimeout(() => finalizar(true), FOTO_MS);
-        foto.onerror = () => finalizar(false);
-        foto.src = imagen.url;
+        elemento.classList.remove('saliendo', 'saliendo-izquierda');
+        elemento.style.display = 'block';
+        if (imagen) {
+          foto.alt = imagen.nombre;
+          // Un archivo que no responde tampoco debe bloquear el teclado o el ciclo.
+          temporizador = setTimeout(() => finalizar(1, false), 15_000);
+          foto.onload = () => {
+            clearTimeout(temporizador);
+            temporizador = setTimeout(() => finalizar(), FOTO_MS);
+          };
+          foto.onerror = () => finalizar(1, false);
+          foto.src = imagen.url;
+        } else {
+          juez.src = `${JUEZ_URL}${JUEZ_URL.includes('?') ? '&' : '?'}carrusel=${Date.now()}`;
+          temporizador = setTimeout(() => finalizar(), JUEZ_MS);
+        }
       });
     }
 
-    async function mostrarJuez() {
-      foto.style.display = 'none';
-      estado.style.display = 'none';
-      juez.classList.remove('saliendo');
-      juez.style.display = 'block';
-      // Recargar evita que una pantalla de resultados quede congelada entre bloques.
-      juez.src = `${JUEZ_URL}${JUEZ_URL.includes('?') ? '&' : '?'}carrusel=${Date.now()}`;
-      await pausa(JUEZ_MS);
-      await salirHaciaLaDerecha(juez);
+    function crearSecuencia() {
+      const secuencia = [];
+      for (let i = 0; i < imagenes.length; i += 3) {
+        secuencia.push(...imagenes.slice(i, i + 3), null);
+      }
+      return secuencia.length ? secuencia : [null];
     }
 
     async function iniciar() {
       await actualizarImagenes();
-
+      let secuencia = crearSecuencia();
+      let indice = 0;
       while (true) {
-        if (Date.now() - ultimaActualizacion >= ACTUALIZAR_LISTA_MS) await actualizarImagenes();
-
-        if (!imagenes.length) {
-          await mostrarJuez();
-          continue;
-        }
-
-        // Una copia estable hace que las fotos añadidas a mitad de ciclo entren en el siguiente.
-        const ciclo = [...imagenes];
-        for (let i = 0; i < ciclo.length; i += 3) {
-          for (const imagen of ciclo.slice(i, i + 3)) await mostrarFoto(imagen);
-          await mostrarJuez();
+        const direccion = await mostrarDiapositiva(secuencia[indice]);
+        indice = (indice + direccion + secuencia.length) % secuencia.length;
+        if (indice === 0 && Date.now() - ultimaActualizacion >= ACTUALIZAR_LISTA_MS) {
+          await actualizarImagenes();
+          secuencia = crearSecuencia();
         }
       }
     }
