@@ -540,6 +540,13 @@
     @media (max-width: 380px) {
       .weather-grid { grid-template-columns: 1fr; }
     }
+    .match-chip strong.locality-name {
+      font-size: clamp(1.4rem, 1.8vw, 2.2rem);
+      font-weight: 900;
+      letter-spacing: .025em;
+      color: #fff;
+      white-space: nowrap;
+    }
   </style>
 </head>
 
@@ -562,7 +569,7 @@
       <div class="match-strip">
         <div class="match-chip">
           <small>Localidad</small>
-          <strong>Zafra · Badajoz</strong>
+          <strong class="locality-name">ZAFRA</strong>
         </div>
         <div class="match-chip">
           <small>Recreo / partido</small>
