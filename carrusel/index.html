@@ -164,7 +164,23 @@
       elemento.classList.add(clase);
       await pausa(TRANSICION_MS);
       elemento.style.display = 'none';
+      elemento.style.transition = 'none';
       elemento.classList.remove(clase);
+      elemento.style.transform = 'translateX(0)';
+      elemento.style.opacity = '1';
+    }
+
+    function mostrarSinRebote(elemento) {
+      elemento.style.transition = 'none';
+      elemento.classList.remove('saliendo', 'saliendo-izquierda');
+      elemento.style.transform = 'translateX(0)';
+      elemento.style.opacity = '1';
+      elemento.style.display = 'block';
+      // Fija el estado inicial antes de volver a habilitar la animación de salida.
+      void elemento.offsetWidth;
+      elemento.style.transform = '';
+      elemento.style.opacity = '';
+      elemento.style.transition = '';
     }
 
     async function obtenerImagenes() {
@@ -204,6 +220,7 @@
       return new Promise(resolve => {
         const elemento = imagen ? foto : juez;
         let terminado = false;
+        let visible = false;
         let temporizador;
         const finalizar = async (direccion = 1, animar = true) => {
           if (terminado) return;
@@ -212,7 +229,9 @@
           avanzarDiapositiva = null;
           foto.onload = null;
           foto.onerror = null;
-          if (animar) await salirHaciaLaDerecha(elemento, direccion);
+          juez.onload = null;
+          juez.onerror = null;
+          if (animar && visible) await salirHaciaLaDerecha(elemento, direccion);
           else elemento.style.display = 'none';
           resolve(direccion);
         };
@@ -220,21 +239,24 @@
         foto.style.display = 'none';
         juez.style.display = 'none';
         estado.style.display = 'none';
-        elemento.classList.remove('saliendo', 'saliendo-izquierda');
-        elemento.style.display = 'block';
+        const listo = duracion => {
+          if (terminado || visible) return;
+          visible = true;
+          clearTimeout(temporizador);
+          mostrarSinRebote(elemento);
+          temporizador = setTimeout(() => finalizar(), duracion);
+        };
+        // Límite de carga; no deja el carrusel bloqueado por un recurso caído.
+        temporizador = setTimeout(() => finalizar(1, false), 15_000);
         if (imagen) {
           foto.alt = imagen.nombre;
-          // Un archivo que no responde tampoco debe bloquear el teclado o el ciclo.
-          temporizador = setTimeout(() => finalizar(1, false), 15_000);
-          foto.onload = () => {
-            clearTimeout(temporizador);
-            temporizador = setTimeout(() => finalizar(), FOTO_MS);
-          };
+          foto.onload = () => listo(FOTO_MS);
           foto.onerror = () => finalizar(1, false);
           foto.src = imagen.url;
         } else {
+          juez.onload = () => listo(JUEZ_MS);
+          juez.onerror = () => finalizar(1, false);
           juez.src = `${JUEZ_URL}${JUEZ_URL.includes('?') ? '&' : '?'}carrusel=${Date.now()}`;
-          temporizador = setTimeout(() => finalizar(), JUEZ_MS);
         }
       });
     }
@@ -252,6 +274,12 @@
       let secuencia = crearSecuencia();
       let indice = 0;
       while (true) {
+        // Adelanta la descarga de la próxima foto, también durante el juez.
+        const siguienteFoto = secuencia[(indice + 1) % secuencia.length];
+        if (siguienteFoto) {
+          const precarga = new Image();
+          precarga.src = siguienteFoto.url;
+        }
         const direccion = await mostrarDiapositiva(secuencia[indice]);
         indice = (indice + direccion + secuencia.length) % secuencia.length;
         if (indice === 0 && Date.now() - ultimaActualizacion >= ACTUALIZAR_LISTA_MS) {
