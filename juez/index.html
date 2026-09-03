@@ -41,6 +41,10 @@
       margin: 0 auto;
     }
 
+    .live-clock { margin-bottom: 18px; text-align: left; }
+    .live-clock small { display: block; color: var(--muted); font-weight: 800; letter-spacing: .12em; }
+    .live-clock time { display: block; color: #fff; font-size: clamp(2.8rem, 4.2vw, 6rem); font-weight: 900; line-height: 1.15; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+
     .topbar {
       display: flex;
       justify-content: space-between;
@@ -542,6 +546,10 @@
 <body>
   <main class="app">
     <section class="hero">
+      <div class="live-clock">
+        <small>HORA ACTUAL · ZAFRA</small>
+        <time id="liveClock" aria-label="Hora actual en Zafra">--:--:--</time>
+      </div>
       <p class="eyebrow">Árbitro meteorológico oficial</p>
       <div class="hero-title">
         <img src="../Cabeza.png" alt="Cabeza de Maximilian 23">
@@ -557,7 +565,7 @@
           <strong>Zafra · Badajoz</strong>
         </div>
         <div class="match-chip">
-          <small>Partido</small>
+          <small>Recreo / partido</small>
           <strong>11:45</strong>
         </div>
         <div class="match-chip">
@@ -569,8 +577,7 @@
 
     <section class="section weather-section">
       <div class="section-title">
-        <h2>Condiciones previstas</h2>
-        <div class="time-badge">11:45</div>
+        <h2>Previsión para el recreo · 11:45</h2>
       </div>
 
       <div class="weather-grid">
@@ -1113,6 +1120,18 @@
     });
 
     async function init() {
+      const clock = document.getElementById('liveClock');
+      const clockFormat = new Intl.DateTimeFormat('es-ES', {
+        timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit',
+        second: '2-digit', hourCycle: 'h23'
+      });
+      const updateClock = () => {
+        const now = new Date();
+        clock.textContent = clockFormat.format(now);
+        clock.dateTime = now.toISOString();
+      };
+      updateClock();
+      setInterval(updateClock, 1000);
       await refreshForecast();
 
       // Mantiene la previsión razonablemente fresca mientras la página
