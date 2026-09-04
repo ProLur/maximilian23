@@ -216,6 +216,100 @@
       margin-bottom: 9px;
     }
 
+    .admin-trigger {
+      display: block;
+      width: fit-content;
+      padding: 0;
+      border: 0;
+      color: inherit;
+      background: transparent;
+      font: inherit;
+      line-height: 1;
+      cursor: pointer;
+      transition: transform .18s ease, filter .18s ease;
+    }
+
+    .admin-trigger:hover,
+    .admin-trigger:focus-visible {
+      transform: scale(1.12);
+      filter: drop-shadow(0 0 8px rgba(101, 201, 255, .65));
+      outline: none;
+    }
+
+    .admin-modal[hidden] { display: none; }
+
+    .admin-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(2, 9, 13, .82);
+      backdrop-filter: blur(8px);
+    }
+
+    .admin-dialog {
+      position: relative;
+      width: min(100%, 520px);
+      padding: 30px;
+      border: 1px solid rgba(101, 201, 255, .35);
+      border-radius: 22px;
+      color: var(--text);
+      background: linear-gradient(145deg, #102a35, #0a1c25);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, .58);
+    }
+
+    .admin-dialog h2 { margin: 0 42px 8px 0; font-size: 1.55rem; }
+    .admin-dialog p { margin: 0 0 20px; color: var(--muted); line-height: 1.5; }
+    .admin-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--text);
+      background: rgba(255, 255, 255, .06);
+      font-size: 1.35rem;
+      cursor: pointer;
+    }
+
+    .admin-form { display: grid; gap: 12px; }
+    .admin-form label { color: #d9ebf0; font-weight: 800; }
+    .admin-form input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 11px;
+      color: var(--text);
+      background: rgba(0, 0, 0, .28);
+      font: inherit;
+    }
+
+    .admin-form input:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .admin-error { min-height: 1.3em; margin: 0; color: #ffb6ba; font-size: .88rem; }
+    .admin-button,
+    .decision-button {
+      min-height: 48px;
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 11px;
+      color: #061017;
+      font: inherit;
+      font-weight: 900;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+
+    .admin-button { background: var(--blue); }
+    .decision-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .decision-button.play { background: #53df94; }
+    .decision-button.no-play { color: #fff; background: #e9545b; }
+    .admin-button:hover,
+    .decision-button:hover { filter: brightness(1.08); }
+
     .weather-label {
       color: var(--muted);
       font-size: .76rem;
@@ -640,7 +734,7 @@
 
       <div class="weather-grid">
         <article class="weather-card">
-          <div class="weather-icon">🌡️</div>
+          <button class="weather-icon admin-trigger" id="adminTrigger" type="button" aria-label="Abrir control del veredicto" title="Control del veredicto">🌡️</button>
           <div class="weather-label">Temperatura</div>
           <div class="weather-value" id="temperature"><span class="skeleton"></span></div>
         </article>
@@ -734,6 +828,32 @@
     </div>
   </main>
 
+  <div class="admin-modal" id="adminModal" hidden>
+    <div class="admin-dialog" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+      <button class="admin-close" id="adminClose" type="button" aria-label="Cerrar">×</button>
+
+      <div id="passwordStep">
+        <h2 id="adminTitle">Control del veredicto</h2>
+        <p>Introduce la contraseña para cambiar la decisión de hoy.</p>
+        <form class="admin-form" id="passwordForm">
+          <label for="adminPassword">Contraseña</label>
+          <input id="adminPassword" type="password" autocomplete="off" required>
+          <div class="admin-error" id="adminError" aria-live="polite"></div>
+          <button class="admin-button" type="submit">Continuar</button>
+        </form>
+      </div>
+
+      <div id="decisionStep" hidden>
+        <h2>¿Se juega o no?</h2>
+        <p>La opción elegida sustituirá la recomendación automática durante el día de hoy.</p>
+        <div class="decision-buttons">
+          <button class="decision-button play" id="forcePlay" type="button">SÍ, SE JUEGA</button>
+          <button class="decision-button no-play" id="forceNoPlay" type="button">NO, NO SE JUEGA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     "use strict";
 
@@ -759,6 +879,9 @@
       matchTime: "11:45",
       decisionTime: "11:30"
     });
+
+    const ADMIN_PASSWORD = "PARTIDOHOY";
+    const MANUAL_DECISION_KEY = "maximilian23:juez:manual-decision";
 
     /*
       Umbrales editables.
@@ -792,6 +915,19 @@
       verdictMain: document.getElementById("verdictMain"),
       verdictReason: document.getElementById("verdictReason"),
       errorLine: document.getElementById("errorLine")
+    };
+
+    const admin = {
+      trigger: document.getElementById("adminTrigger"),
+      modal: document.getElementById("adminModal"),
+      close: document.getElementById("adminClose"),
+      passwordStep: document.getElementById("passwordStep"),
+      decisionStep: document.getElementById("decisionStep"),
+      form: document.getElementById("passwordForm"),
+      password: document.getElementById("adminPassword"),
+      error: document.getElementById("adminError"),
+      forcePlay: document.getElementById("forcePlay"),
+      forceNoPlay: document.getElementById("forceNoPlay")
     };
 
     const verdictMascot = document.getElementById("verdictMascot");
@@ -1095,6 +1231,38 @@
       }
     }
 
+    function readManualDecision() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(MANUAL_DECISION_KEY));
+        if (saved?.date === madridParts().dateISO && ["play", "no-play"].includes(saved.choice)) {
+          return saved.choice;
+        }
+        localStorage.removeItem(MANUAL_DECISION_KEY);
+      } catch {}
+      return null;
+    }
+
+    function saveManualDecision(choice) {
+      localStorage.setItem(MANUAL_DECISION_KEY, JSON.stringify({
+        date: madridParts().dateISO,
+        choice
+      }));
+    }
+
+    function getManualDecision(choice) {
+      return choice === "play"
+        ? {
+            level: "play",
+            title: "🟢 SE JUEGA",
+            reason: "Decisión indicada manualmente para hoy por la persona responsable."
+          }
+        : {
+            level: "no-play",
+            title: "🔴 NO SE JUEGA",
+            reason: "Decisión indicada manualmente para hoy por la persona responsable."
+          };
+    }
+
     // Descarga ambos pulgares antes de que llegue el momento del veredicto.
     ["maximilian-juega-v2.png", "maximilian-no-juega-v2.png"].forEach(fileName => {
       const preload = new Image();
@@ -1102,14 +1270,12 @@
     });
 
     function resolveAndRenderDecision(forecast) {
-      /*
-        PUNTO DE EXTENSIÓN FUTURO:
-        aquí podrá incorporarse un "modo administrador" que, si está
-        autenticado y existe una decisión manual válida, pueda sustituir
-        getAutomaticDecision(forecast).
+      const manualChoice = readManualDecision();
+      if (manualChoice) {
+        renderVerdict(getManualDecision(manualChoice));
+        return;
+      }
 
-        Actualmente NO hay puerta de atrás ni control manual.
-      */
       const canPublish =
         currentMadridMinutes() >= timeToMinutes(CONFIG.decisionTime);
 
@@ -1118,9 +1284,75 @@
       );
     }
 
+    function notifyCarousel(type, extra = {}) {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type, ...extra }, window.location.origin);
+      }
+    }
+
+    function openAdmin() {
+      admin.passwordStep.hidden = false;
+      admin.decisionStep.hidden = true;
+      admin.password.value = "";
+      admin.error.textContent = "";
+      admin.modal.hidden = false;
+      notifyCarousel("juez-admin-open");
+      requestAnimationFrame(() => admin.password.focus());
+    }
+
+    function closeAdmin() {
+      admin.modal.hidden = true;
+      notifyCarousel("juez-admin-close");
+      admin.trigger.focus();
+    }
+
+    function applyManualDecision(choice) {
+      saveManualDecision(choice);
+      renderVerdict(getManualDecision(choice));
+      closeAdmin();
+    }
+
+    admin.trigger.addEventListener("click", openAdmin);
+    admin.close.addEventListener("click", closeAdmin);
+    admin.modal.addEventListener("click", event => {
+      if (event.target === admin.modal) closeAdmin();
+    });
+    admin.form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (admin.password.value !== ADMIN_PASSWORD) {
+        admin.error.textContent = "Contraseña incorrecta.";
+        admin.password.select();
+        return;
+      }
+      admin.passwordStep.hidden = true;
+      admin.decisionStep.hidden = false;
+      admin.forcePlay.focus();
+    });
+    admin.forcePlay.addEventListener("click", () => applyManualDecision("play"));
+    admin.forceNoPlay.addEventListener("click", () => applyManualDecision("no-play"));
+    document.addEventListener("keydown", event => {
+      if (!admin.modal.hidden && event.key === "Escape") {
+        event.preventDefault();
+        closeAdmin();
+        return;
+      }
+      if (admin.modal.hidden && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+        notifyCarousel("carrusel-navigate", { direction: event.key === "ArrowLeft" ? -1 : 1 });
+      }
+    });
+
     let latestForecast = null;
 
     function renderError(error) {
+      const manualChoice = readManualDecision();
+      if (manualChoice) {
+        renderVerdict(getManualDecision(manualChoice));
+        els.errorLine.hidden = false;
+        els.errorLine.textContent = "No se ha podido actualizar la previsión meteorológica.";
+        els.forecastMeta.textContent = "No se ha podido actualizar la previsión.";
+        return;
+      }
+
       const beforeDecision =
         currentMadridMinutes() < timeToMinutes(CONFIG.decisionTime);
 

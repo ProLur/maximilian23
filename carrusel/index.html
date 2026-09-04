@@ -9,7 +9,7 @@
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; }
-    body { cursor: none; }
+    body { cursor: default; }
     .slide {
       position: fixed;
       inset: 0;
@@ -32,7 +32,7 @@
       object-position: center;
     }
     .slide.saliendo-izquierda { transform: translateX(-105vw); opacity: 0; }
-    #juez { display: none; pointer-events: none; }
+    #juez { display: none; pointer-events: auto; }
     #pantalla-completa {
       position: fixed;
       top: max(12px, env(safe-area-inset-top));
@@ -111,6 +111,8 @@
     let imagenes = [];
     let ultimaActualizacion = 0;
     let avanzarDiapositiva = null;
+    let pausarDiapositiva = null;
+    let reanudarDiapositiva = null;
 
     document.addEventListener('keydown', event => {
       if (event.altKey || event.ctrlKey || event.metaKey) return;
@@ -118,6 +120,15 @@
       event.preventDefault();
       if (!event.repeat && avanzarDiapositiva) {
         avanzarDiapositiva(event.key === 'ArrowRight' ? 1 : -1);
+      }
+    });
+
+    window.addEventListener('message', event => {
+      if (event.origin !== new URL(JUEZ_URL).origin || event.source !== juez.contentWindow) return;
+      if (event.data?.type === 'juez-admin-open') pausarDiapositiva?.();
+      if (event.data?.type === 'juez-admin-close') reanudarDiapositiva?.();
+      if (event.data?.type === 'carrusel-navigate' && avanzarDiapositiva) {
+        avanzarDiapositiva(event.data.direction === -1 ? -1 : 1);
       }
     });
 
@@ -222,11 +233,20 @@
         let terminado = false;
         let visible = false;
         let temporizador;
+        let tiempoRestante = 0;
+        let venceEn = 0;
+        const programarFin = duracion => {
+          tiempoRestante = duracion;
+          venceEn = Date.now() + duracion;
+          temporizador = setTimeout(() => finalizar(), duracion);
+        };
         const finalizar = async (direccion = 1, animar = true) => {
           if (terminado) return;
           terminado = true;
           clearTimeout(temporizador);
           avanzarDiapositiva = null;
+          pausarDiapositiva = null;
+          reanudarDiapositiva = null;
           foto.onload = null;
           foto.onerror = null;
           juez.onload = null;
@@ -236,6 +256,16 @@
           resolve(direccion);
         };
         avanzarDiapositiva = direccion => finalizar(direccion);
+        pausarDiapositiva = () => {
+          if (terminado || !visible || !temporizador) return;
+          tiempoRestante = Math.max(1000, venceEn - Date.now());
+          clearTimeout(temporizador);
+          temporizador = null;
+        };
+        reanudarDiapositiva = () => {
+          if (terminado || !visible || temporizador) return;
+          programarFin(tiempoRestante || JUEZ_MS);
+        };
         foto.style.display = 'none';
         juez.style.display = 'none';
         estado.style.display = 'none';
@@ -244,7 +274,7 @@
           visible = true;
           clearTimeout(temporizador);
           mostrarSinRebote(elemento);
-          temporizador = setTimeout(() => finalizar(), duracion);
+          programarFin(duracion);
         };
         // Límite de carga; no deja el carrusel bloqueado por un recurso caído.
         temporizador = setTimeout(() => finalizar(1, false), 15_000);
