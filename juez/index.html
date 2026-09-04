@@ -306,6 +306,27 @@
       font-size: .95rem;
     }
 
+    .aep-note {
+      max-width: 620px;
+      margin: 16px 0 0 auto;
+      color: #9fb8c1;
+      font-size: .68rem;
+      line-height: 1.4;
+      text-align: right;
+    }
+
+    .aep-note a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(159, 184, 193, .45);
+    }
+
+    .aep-note a:hover,
+    .aep-note a:focus-visible {
+      color: #d8edf2;
+      border-bottom-color: currentColor;
+    }
+
     .criterion-toggle {
       cursor: pointer;
       margin-bottom: 0;
@@ -428,7 +449,7 @@
       .verdict {
         grid-column: 2;
         grid-row: 2;
-        padding: 15px 18px;
+        padding: 15px 18px 42px;
         border-radius: 18px;
         display: flex;
         align-items: center;
@@ -437,6 +458,14 @@
       }
       .verdict-main { margin: 5px auto 7px; font-size: clamp(1.45rem, 3vh, 2.1rem); }
       .verdict-reason { line-height: 1.35; font-size: .88rem; }
+      .aep-note {
+        position: absolute;
+        right: 16px;
+        bottom: 9px;
+        max-width: 72%;
+        margin: 0;
+        font-size: .61rem;
+      }
       .footer {
         grid-column: 1 / -1;
         grid-row: 3;
@@ -505,7 +534,7 @@
       .verdict {
         grid-column: 1 / -1;
         grid-row: 2;
-        padding: clamp(22px, 2.8vh, 36px) clamp(38px, 4vw, 76px);
+        padding: clamp(22px, 2.8vh, 36px) clamp(38px, 4vw, 76px) clamp(54px, 6.2vh, 72px);
         gap: clamp(32px, 4vw, 76px);
         border-radius: 0;
       }
@@ -524,6 +553,14 @@
         max-width: 1100px;
         font-size: clamp(1.05rem, 1.25vw, 1.45rem);
         line-height: 1.45;
+      }
+      .aep-note {
+        position: absolute;
+        right: clamp(24px, 2.4vw, 46px);
+        bottom: clamp(13px, 1.7vh, 22px);
+        max-width: min(720px, 48vw);
+        margin: 0;
+        font-size: clamp(.66rem, .7vw, .82rem);
       }
       .footer { display: none; }
     }
@@ -685,6 +722,11 @@
         </p>
         <div class="error-line" id="errorLine" hidden></div>
       </div>
+      <p class="aep-note">
+        Criterio preventivo inspirado en recomendaciones de la
+        <a href="https://www.aeped.es/enfamilia/salud-en-familia/hidratacion-deporte" target="_blank" rel="noopener noreferrer">Asociación Española de Pediatría</a>
+        sobre ejercicio, calor e hidratación.
+      </p>
     </section>
 
     <div class="footer">
