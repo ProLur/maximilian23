@@ -403,14 +403,14 @@
     .aep-note {
       max-width: 620px;
       margin: 16px 0 0 auto;
-      color: #9fb8c1;
+      color: #e8cf8a;
       font-size: .68rem;
       line-height: 1.4;
       text-align: right;
     }
 
     .aep-note strong {
-      color: #d8edf2;
+      color: #ffe29a;
       font-weight: 900;
     }
 
@@ -643,11 +643,13 @@
       }
       .aep-note {
         position: absolute;
+        left: clamp(360px, 32vw, 620px);
         right: clamp(24px, 2.4vw, 46px);
         bottom: clamp(13px, 1.7vh, 22px);
-        max-width: min(720px, 48vw);
+        max-width: none;
         margin: 0;
         font-size: clamp(.66rem, .7vw, .82rem);
+        white-space: nowrap;
       }
       .footer { display: none; }
     }
@@ -810,7 +812,7 @@
         <div class="error-line" id="errorLine" hidden></div>
       </div>
       <p class="aep-note">
-        Criterio preventivo inspirado en recomendaciones de la
+        * Criterio preventivo inspirado en recomendaciones de la
         <strong>Asociación Española de Pediatría</strong>
         sobre ejercicio, calor e hidratación.
       </p>
