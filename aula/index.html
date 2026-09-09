@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071b25">
+  <title>Reservas · Aula del Futuro</title>
+  <style>
+    :root{--bg:#06151d;--panel:#0d2530;--panel2:#12323e;--line:#24505d;--cyan:#21ead2;--orange:#ffad3d;--ink:#f7fbfc;--muted:#acd0d8;--free:#123c36;--busy:#38242b;--shadow:0 22px 65px #0008}
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 85% 0,#104254 0,transparent 34%),var(--bg);color:var(--ink)}
+    button,input{font:inherit}button{cursor:pointer}.app{width:min(1500px,100%);margin:auto;padding:clamp(16px,3vw,42px)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:16px}.bot{width:68px;height:68px;object-fit:contain}.eyebrow{margin:0;color:var(--cyan);font-weight:900;letter-spacing:.16em;text-transform:uppercase;font-size:.78rem}.brand h1{margin:.15rem 0 0;font-size:clamp(1.8rem,3.4vw,3.6rem);line-height:1}.today{color:var(--muted);text-align:right;font-weight:700}
+    .toolbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;background:#091e28cc;border:1px solid var(--line);border-radius:20px;padding:14px 18px;box-shadow:var(--shadow);margin-bottom:18px}.nav{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:1.6rem}.nav:disabled{opacity:.25;cursor:not-allowed}.week{text-align:center}.week strong{display:block;font-size:clamp(1.15rem,2vw,1.65rem)}.week span{color:var(--muted)}
+    .legend{display:flex;gap:18px;align-items:center;justify-content:flex-end;margin:0 2px 14px;color:var(--muted);font-size:.9rem}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px}.dot.free{background:#36d6a2}.dot.busy{background:#ff7a78}
+    .schedule{display:grid;grid-template-columns:150px repeat(5,minmax(150px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px}.corner,.day,.time,.slot{border:1px solid var(--line);border-radius:16px;min-height:82px}.corner{background:transparent;border-color:transparent}.day{background:var(--panel);padding:15px;text-align:center;position:sticky;top:0}.day strong{display:block;font-size:1.08rem;text-transform:capitalize}.day span{color:var(--muted);font-size:.88rem}.time{background:#091e28;display:grid;place-content:center;text-align:center;font-weight:900;color:var(--orange);padding:12px}.time small{color:var(--muted);font-weight:600}.slot{background:var(--free);color:var(--ink);padding:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;transition:.18s}.slot:hover:not(:disabled){transform:translateY(-2px);border-color:var(--cyan);box-shadow:0 8px 24px #00d9c12b}.slot .status{font-weight:900}.slot .who{font-size:.86rem;color:#d8edef;margin-top:4px}.slot.busy{background:var(--busy);border-color:#69404b;cursor:default}.slot.past{opacity:.45;cursor:not-allowed}.slot.loading{opacity:.55}
+    .notice{text-align:center;color:var(--muted);margin:22px 0 0}.notice.error{color:#ff9b98}.notice.ok{color:#77efc7}
+    dialog{width:min(520px,calc(100% - 28px));border:1px solid var(--line);border-radius:22px;background:#0b222c;color:var(--ink);box-shadow:var(--shadow);padding:0}dialog::backdrop{background:#020a0dcc;backdrop-filter:blur(5px)}.modal{padding:26px}.modal h2{margin:0 0 6px;font-size:1.6rem}.modal p{margin:0 0 20px;color:var(--muted)}label{display:block;font-weight:800;margin:14px 0 6px}input{width:100%;border:1px solid var(--line);border-radius:12px;background:#06171f;color:var(--ink);padding:13px 14px;outline:none}input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #21ead222}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:900}.secondary{background:#173540;color:var(--ink)}.primary{background:var(--cyan);color:#04211e}.primary:disabled{opacity:.45}.error-box{display:none;color:#ffaaa7;margin-top:12px;font-weight:700}.error-box.show{display:block}
+    @media(max-width:850px){header{align-items:flex-start}.today{display:none}.schedule{grid-template-columns:115px repeat(5,150px)}.app{padding:14px}.bot{width:54px;height:54px}.toolbar{grid-template-columns:44px 1fr 44px}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header><div class="brand"><img class="bot" src="../max.png" alt="Maximilian 23"><div><p class="eyebrow">CEIP Juan XXIII · Zafra</p><h1>Aula del Futuro</h1></div></div><div class="today" id="today"></div></header>
+    <section class="toolbar"><button class="nav" id="prev" aria-label="Semana anterior">‹</button><div class="week"><strong id="weekTitle">Cargando semana…</strong><span id="weekRange"></span></div><button class="nav" id="next" aria-label="Semana siguiente">›</button></section>
+    <div class="legend"><span><i class="dot free"></i>Disponible</span><span><i class="dot busy"></i>Reservado</span></div>
+    <section class="schedule" id="schedule" aria-live="polite"></section>
+    <p class="notice" id="notice">Cargando reservas…</p>
+  </main>
+  <dialog id="booking"><form class="modal" id="form"><h2>Reservar el aula</h2><p id="selection"></p><label for="teacher">Nombre del maestro o maestra</label><input id="teacher" name="teacher" maxlength="60" required autocomplete="name"><label for="group">Curso o grupo</label><input id="group" name="group" maxlength="40" required placeholder="Ej.: 5.º A"><div class="error-box" id="formError"></div><div class="actions"><button class="btn secondary" type="button" id="cancel">Cancelar</button><button class="btn primary" id="save" type="submit">Confirmar reserva</button></div></form></dialog>
+  <script>
+    const API_URL = 'https://aula-del-futuro-reservas.mmartinezf001.workers.dev/';
+    const DAYS = ['lunes','martes','miércoles','jueves','viernes'];
+    const SLOTS = [{id:'T1',start:'09:00',end:'09:55'},{id:'T2',start:'09:55',end:'10:50'},{id:'T3',start:'10:50',end:'11:45'},{id:'T4',start:'12:15',end:'13:10'},{id:'T5',start:'13:10',end:'14:00'}];
+    const fmt = new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'long'}); const longFmt = new Intl.DateTimeFormat('es-ES',{weekday:'long',day:'numeric',month:'long'});
+    const startOfWeek=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}; const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const currentWeek=startOfWeek(new Date()); let offset=0,reservations={},selected=null;
+    const el=id=>document.getElementById(id); el('today').textContent=longFmt.format(new Date());
+    function dayAt(n){const d=new Date(currentWeek);d.setDate(d.getDate()+offset*7+n);return d}
+    function key(date,slot){return `${iso(date)}_${slot}`}
+    function render(){const monday=dayAt(0),friday=dayAt(4);el('weekTitle').textContent=offset===0?'Semana actual':'Semana siguiente';el('weekRange').textContent=`Del ${fmt.format(monday)} al ${fmt.format(friday)}`;el('prev').disabled=offset===0;el('next').disabled=offset===1;
+      let html='<div class="corner"></div>';DAYS.forEach((name,i)=>{const d=dayAt(i);html+=`<div class="day"><strong>${name}</strong><span>${fmt.format(d)}</span></div>`});
+      SLOTS.forEach(slot=>{html+=`<div class="time">${slot.start}<small>a ${slot.end}</small></div>`;DAYS.forEach((_,i)=>{const date=dayAt(i),k=key(date,slot.id),r=reservations[k],past=date<new Date(new Date().setHours(0,0,0,0));const cls=r?'busy':past?'past':'';html+=`<button class="slot ${cls}" ${r||past?'disabled':''} data-date="${iso(date)}" data-slot="${slot.id}"><span class="status">${r?'Reservado':past?'Finalizado':'Reservar'}</span>${r?`<span class="who">${escapeHtml(r.grupo||'')}</span>`:''}</button>`})});el('schedule').innerHTML=html;document.querySelectorAll('.slot:not(:disabled)').forEach(b=>b.addEventListener('click',()=>openBooking(b.dataset.date,b.dataset.slot)))}
+    const escapeHtml=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    async function load(){try{el('notice').className='notice';el('notice').textContent='Actualizando reservas…';const res=await fetch(API_URL,{cache:'no-store'});if(!res.ok)throw new Error();const data=await res.json();reservations=data.reservas||{};render();el('notice').textContent='Puedes reservar durante la semana actual y la siguiente.'}catch{render();el('notice').className='notice error';el('notice').textContent='No se han podido cargar las reservas. Inténtalo de nuevo en unos instantes.'}}
+    function openBooking(date,slotId){const slot=SLOTS.find(s=>s.id===slotId);selected={date,slotId};el('selection').textContent=`${longFmt.format(new Date(date+'T12:00:00'))}, de ${slot.start} a ${slot.end}`;el('form').reset();el('formError').className='error-box';el('booking').showModal();setTimeout(()=>el('teacher').focus(),50)}
+    el('cancel').onclick=()=>el('booking').close();el('prev').onclick=()=>{offset=0;render()};el('next').onclick=()=>{offset=1;render()};
+    el('form').addEventListener('submit',async e=>{e.preventDefault();const save=el('save');save.disabled=true;save.textContent='Reservando…';el('formError').className='error-box';try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fecha:selected.date,tramo:selected.slotId,nombre:el('teacher').value.trim(),grupo:el('group').value.trim()})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'No se pudo completar la reserva.');el('booking').close();el('notice').className='notice ok';el('notice').textContent='Reserva confirmada.';await load()}catch(err){el('formError').textContent=err.message;el('formError').className='error-box show'}finally{save.disabled=false;save.textContent='Confirmar reserva'}});load();setInterval(load,60000);
+  </script>
+</body>
+</html>
