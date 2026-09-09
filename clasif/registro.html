@@ -354,7 +354,10 @@
 
     async function loadData() {
       try {
-        const res = await fetch(STORAGE_URL, { cache: 'no-store' });
+        const res = await fetch(STORAGE_URL, {
+          cache: 'no-store',
+          headers: { 'X-Master-Key': MASTER_KEY }
+        });
         if (res.ok) {
           const data = await res.json();
           const loaded = data.record.scores;
