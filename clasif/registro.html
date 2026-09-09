@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro • Juego del Silencio (Privado)</title>
-  <link rel="icon" type="image/png" href="https://maximilian23.com/Cabeza.png">
+  <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20data-codex-favicon-badge%3D%22codex-favicon-badge%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cimage%20href%3D%22data%3Aimage%2Fbmp%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAIpUlEQVR4nKxXW2ycVxGeOef8t716dx07zs0xSWnTAIKmpelFpaWhQqJK1Qv0oS9QUV4Rb4AqSLgECbU8VOKlFbTipgoUeOhDqBCQpBCIkpI2zaVpUifYie3Ycby73n%2F3v50zzFnb2EmbpFVzpH93%2FZ%2Fjf76Z%2Beab%2BSV8sFXmS%2FCVwXVe4ip72P1UwR1fvbP3lSfu6PsjgD8E13lJuAaAWwfUSzseqt5714bK%2BteOT8uplt4Fc8AJrsNS1zoQprI2ORmCxk7STh02HAMsRg7nv2nJ9aEWXmOPArfnkVuXpzvqWq5965y4HaB%2BtGuIyCwe3Y7btgPs3r1b7Ibd%2FAPsnoGPCGDJKj%2BGg2t%2Bly%2Fjqtbhw5NLNhYicYkxIkK74ANE5ZopsCAJGn%2Fq9cxMeL75df77JVXtGww8dzkg9ki7j6YpUhqvFGB0enhslm3X4fpGAHzRs%2FygUM6AI2HU7%2Bu7qdTX7%2BVKBVBKQBYzLxr1VKXRqA7b%2B0aHh3f2z87uOgWQwDUicDUAtkI0XzdhdeUPvXJ5a3n1GtevlEBIwbEncEtlcvI5mwd0GIgThVBSYPqUSc8cOrx379793%2BN07MftnI5t7x%2BRKwGwqWHRkV%2FxVq%2F7ifTzg6VVK0Rx1QojlLTZJaENySwC8Hwg10MUlg6INFvHyrIabvl4DaaPHR9%2F7rlff59o2y%2Fuw21M0PcKmbyy58Hj%2FpqhZ6SfW6tcFyvrhkg6yjIMJDJwFCilQEcniFEbMI5QpqkxUUQhyOxihvjA5g2lT944dNv99%2F%2Bscfr3jx3a%2FodjC8S8IgAXYJuBwpsb3b7%2BF1SuuJZ0ljiBT4WB5VLoFAS7SsoBIxVq10fjBUhewFHw0UaCcnnBe%2BLsTGS04yYP3rauB4Xa9OjTO19j7Oe2b79UxJYCmNf63aTy5ef93v47dBS3LSgVeDJXrYLxc0iOS2AM%2B5iA6LQAkwiE%2FZ0m%2FDvmHGScmgSLnhDHz12UA9V850v33lI9cXpq%2FTeeHP0VbNokYXyc3p8DfmWNdOQDxs%2B%2FoFwvVspx2GFUvks9GzdAkPNBXjyP2KwDtVsESYSYpqB1RtiNDVeskoAcIRUEZPJFUespwFNbPxv990IU%2FPSZF7fOjI29Mm%2BXFsi2sGoqn3%2B2sHLlY0ystH56xGEA9j6lcYbp1HlTa0%2BKeOQMtFsRtcIYu6KsXCaMpSWH0DLD3hJcIfwjUESJ68DPjxx0Hnliazow0P%2BDman2CKT1N5dGYA6NV3zeq%2FQ91b95s958QwnOHnoD%2F3VoHPI9JUwyghthkhrTdRyNmfWarVUrhJxUmqkjuI6V5iV9wQLirzTiD4323Gf6nUwMDDpHLurhaOTE3Xxu3Npe4MAQ%2BKVfotYUagXfHDqLW2pT8PLbvn0UlqkNxWgGToZMOJOBGlwB65%2FbAb0PPQCzB99APX2B2cS1saC8gp1iwhbu%2Fxz4G2%2FG%2BN1RmOJiqWXTqbduQ28ZUllvzL5qeTen5dK%2FywnySgU5nYydw79NlvGwdzMUegKM4xR6VQL1lBNsj%2BsYinfeDsVbNkL51k9g9cEtBFyKFqkVbbAqkaQgVwzQ6u9%2BC4d2PE2FzZsoi1PklGDJhCSD%2FKNzFQdmDoDj38gyq43WIHWEfxkmenm8D5G9tYz3hYHI8NNxjryyUgQdttCEIbnLl2E3i91EYjf61ntn5QpUy6qkSnkofHoj38woZYYGWYvJWRrg0wOLJJQqsDTmNGrBGWs1m5hMNUlr082r77Dz9unzxcNggTod0LJrcDHntDgWiFwOsoszAK0WinKxi67DTrhcqu00sI6XFwGQCTlyxpDpuqJ0QrJxAXUUdb3yFKDPjMaoaw3SmQZgrUbcEzAem6Ru43OYiBwpzipaaplOG0SlhrJUoHR6xsaFbJkm7QgazVnbFxqLAOL4JAOw%2FrDPhPYQwSxljB6cArSMpMGChjMznAUuu3D%2FQajvex2sKNb%2F%2Bo%2B5%2BDcbuFRakpFRah17B7xaFdoHDnFsXOwNjD4bg4xmwzE%2BMrEIQIf7dRxr6XvStEMDmcY0bCNzgqRn4EyUgwfLBAcmMmiTC8nb79LId37M4TCgxyZIrFoF2A75Odx9UXG%2BWKrHJ3Bix7MgCjnovH4EPNelPj%2BFA5PMZEp2wtxsJxZ1wK%2FsUoXSF1GK2PELKktjTOrT6JcrEIkAvlA9b7xOE%2F982meiSFanjs0GYuBAfst94K4dJGqzcguJ8alhav%2Fz3xwGOw5k%2FMgi3fOx1Aq42jPqTkA8dRtvnO3S7%2F8xy6LD4OS%2B7C%2FrL5HREF%2BcMsL1hPR9YJ9oOMrj%2BkICn6oxsFRDSIoV0EHbPZIz56Az3YCoGUE0PILp0ZPsX8qF5kJf3sF7ViVU6e0xr56i8xS1HmdjRwCWJmwhCvwOICq9T1EUPcy1WpSul5hMe9J1MEky8HgQWVfRtEa1yMki1ogMOrGhmPeirFun3Y7muxILvqAg4FbCtTvpVuK3wlIw%2B86pJ3nOfhHmGp9ZCmDp4vqUm%2BWylb%2F1assC04nbJssERW2p%2FYLggUSUXe7YUkNOZkwtxi1sd0xtNXV1SAtFFk9kVNbIZNZUxXw4MbkP6iOfh7kxbV6yLwWwdMYHKFafVIWeb0vXv8FwLlEq7bpOxs6axLAV5oGUBu2bAlcjS4ywFUicaMoyzZkRMtHgUiey6T2auzD8NWbIAVgc9eYk6DLvLQi3CyLp%2FMe0whEefxyuhgKLT0Uba4ccjq5yUStWDsWTmWJKqDglFSd8pcZhQXVAZ1KmraYT1f9OjfEfJUR7Ljd%2BeQQuv28P2xmuCE7pYfD9u7nfbCTh9qBSBT4QML2dbgaszAjSHBabhzYZYhlNzsZhaw%2BEM7%2BZZ%2Fz8nPleQ3AVEAv%2FtDDBWE0dYmyrWfr6uAhKrG9%2Bt6VITMBkTZ5OWGDiYT53AhbfDexgkV7JyLWWgEXWfpj3v4UoXvU17X8AAAD%2F%2F7ZZFDkAAAAGSURBVAMAK6T%2BjQYWhUMAAAAASUVORK5CYII%3D%22%20width%3D%2232%22%20height%3D%2232%22%20opacity%3D%220.3%22%20%2F%3E%3Cpath%20d%3D%22M3.04536%204.45259C2.7582%203.60299%203.60299%202.7582%204.45259%203.04536L14.1828%206.33403C15.1637%206.66558%2015.0872%208.08006%2014.0715%208.39045L10.2994%209.54319C9.93919%209.65327%209.65327%209.93919%209.54319%2010.2994L8.39046%2014.0715C8.08007%2015.0872%206.66558%2015.1637%206.33404%2014.1828L3.04536%204.45259Z%22%20fill%3D%22black%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20paint-order%3D%22stroke%20fill%22%20transform%3D%22translate(-2%20-2)%20scale(2.1)%22%20%2F%3E%3C%2Fsvg%3E" data-codex-favicon-badge="true" data-codex-original-favicon-href="https://maximilian23.com/Cabeza.png">
   <style>
     body {
       font-family: "Courier New", Courier, monospace;
@@ -44,6 +43,10 @@
       margin: 2rem auto;
       padding: 0 1rem;
     }
+    .term-tabs { display:flex; justify-content:center; gap:.7rem; flex-wrap:wrap; margin:0 0 1.2rem; }
+    .term-tab { background:#161b22; color:#b9d0d7; border:2px solid #00ffcc66; border-radius:999px; padding:.7rem 1.15rem; font:700 1rem inherit; cursor:pointer; }
+    .term-tab.active { background:#00ffcc; color:#06201b; box-shadow:0 0 14px #00ffcc55; }
+    .term-hidden { display:none !important; }
     .classification {
       background: rgba(30,45,61,0.35);
       border: 2px solid #00ffcc55;
@@ -189,6 +192,7 @@
       display: table-cell;
     }
     @media (max-width: 600px) {
+      .term-tabs { display:none; }
       th, td { padding: 8px; font-size: 0.95rem; }
       .team-name { padding-left: 1.2rem; font-size: 1.15rem; }
       .total-cell { min-width: 84px; }
@@ -213,30 +217,53 @@
     <h1>Registro Privado • Juego del Silencio</h1>
   </header>
   <div class="container">
+    <nav class="term-tabs" aria-label="Trimestre">
+      <button class="term-tab active" type="button" data-term="0">1.º trimestre</button>
+      <button class="term-tab" type="button" data-term="1">2.º trimestre</button>
+      <button class="term-tab" type="button" data-term="2">3.º trimestre</button>
+    </nav>
     <div class="classification">
       <div class="table-wrapper">
       <table>
         <thead>
           <tr>
             <th class="sticky-left">Equipo</th>
-            <th class="week-header" data-week="1">S1</th>
-            <th class="week-header" data-week="2">S2</th>
-            <th class="week-header" data-week="3">S3</th>
-            <th class="week-header" data-week="4">S4</th>
-            <th class="week-header" data-week="5">S5</th>
-            <th class="week-header" data-week="6">S6</th>
-            <th class="week-header" data-week="7">S7</th>
-            <th class="week-header" data-week="8">S8</th>
-            <th class="week-header" data-week="9">S9</th>
-            <th class="week-header" data-week="10">S10</th>
-            <th class="week-header" data-week="11">S11</th>
-            <th class="week-header" data-week="12">S12</th>
-            <th class="week-header" data-week="13">S13</th>
-            <th class="week-header" data-week="14">S14</th>
-            <th class="week-header" data-week="15">S15</th>
-            <th class="week-header" data-week="16">S16</th>
-            <th class="week-header" data-week="17">S17</th>
-            <th class="week-header" data-week="18">S18</th>
+            <th class="week-header mobile-hidden-week" data-week="1">S1</th>
+            <th class="week-header mobile-hidden-week" data-week="2">S2</th>
+            <th class="week-header mobile-hidden-week" data-week="3">S3</th>
+            <th class="week-header mobile-hidden-week" data-week="4">S4</th>
+            <th class="week-header mobile-hidden-week" data-week="5">S5</th>
+            <th class="week-header mobile-hidden-week" data-week="6">S6</th>
+            <th class="week-header mobile-hidden-week" data-week="7">S7</th>
+            <th class="week-header mobile-hidden-week" data-week="8">S8</th>
+            <th class="week-header mobile-hidden-week" data-week="9">S9</th>
+            <th class="week-header mobile-hidden-week" data-week="10">S10</th>
+            <th class="week-header mobile-hidden-week" data-week="11">S11</th>
+            <th class="week-header mobile-hidden-week" data-week="12">S12</th>
+            <th class="week-header mobile-hidden-week" data-week="13">S13</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="14">S14</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="15">S15</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="16">S16</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="17">S17</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="18">S18</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="19">S19</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="20">S20</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="21">S21</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="22">S22</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="23">S23</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="24">S24</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="25">S25</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="26">S26</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="27">S27</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="28">S28</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="29">S29</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="30">S30</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="31">S31</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="32">S32</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="33">S33</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="34">S34</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="35">S35</th>
+            <th class="week-header mobile-hidden-week term-hidden" data-week="36">S36</th>
             <th class="sticky-right">TOTAL</th>
           </tr>
         </thead>
@@ -248,10 +275,10 @@
   </div>
 
   <script>
-    const STORAGE_URL = 'https://api.jsonbin.io/v3/b/699588baae596e708f33e153';
+    const STORAGE_URL = 'https://api.jsonbin.io/v3/b/6aa13d37ffd5d16053f13ac9';
     const MASTER_KEY = '$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy';
 
-    const TOTAL_WEEKS = 18;
+    const TOTAL_WEEKS = 36;
     const MAX_SCORE = 10;
     const teams = ["3º A", "3º B", "4º A", "4º B"];
     const TEAM_ALIASES = {
@@ -271,9 +298,11 @@
       "4º B": Array(TOTAL_WEEKS).fill(0)
     };
 
-    // Fecha de inicio (importante: mes 1 = febrero)
-    const FECHA_INICIO = new Date(2026, 1, 16); // 16 feb 2026
-    const QUARANTINE_WEEKS = [8, 9];
+    // Primera semana completa del curso 2026/27.
+    const FECHA_INICIO = new Date(2026, 8, 14);
+    const QUARANTINE_WEEKS = [];
+    const TERMS = [{from:1,to:13},{from:14,to:24},{from:25,to:36}];
+    let selectedTerm = 0;
 
     function normalizeScore(value) {
       const numericValue = Number(value);
@@ -350,6 +379,9 @@
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
       const semanaActual = calcularSemanaActual();
+      selectedTerm = TERMS.findIndex(t => semanaActual >= t.from && semanaActual <= t.to);
+      if (selectedTerm < 0) selectedTerm = 0;
+      document.querySelectorAll('.term-tab').forEach((button,index) => button.classList.toggle('active',index === selectedTerm));
 
       // Resaltar headers de semanas pasadas
       document.querySelectorAll('.week-header').forEach(th => {
@@ -357,6 +389,7 @@
         th.classList.toggle('semana-pasada', weekNum < semanaActual);
         th.classList.toggle('semana-cuarentena', QUARANTINE_WEEKS.includes(weekNum));
         th.classList.toggle('mobile-hidden-week', weekNum !== semanaActual);
+        th.classList.toggle('term-hidden', weekNum < TERMS[selectedTerm].from || weekNum > TERMS[selectedTerm].to);
       });
 
       teams.forEach(team => {
@@ -390,7 +423,8 @@
             </div>`;
           const cellClasses = [
             isQuarantine ? 'quarantine-cell' : '',
-            weekNum !== semanaActual ? 'mobile-hidden-week' : ''
+            weekNum !== semanaActual ? 'mobile-hidden-week' : '',
+            weekNum < TERMS[selectedTerm].from || weekNum > TERMS[selectedTerm].to ? 'term-hidden' : ''
           ].filter(Boolean).join(' ');
           html += `<td class="${cellClasses}">${selectHTML}</td>`;
         }
@@ -439,6 +473,20 @@
       });
     }
 
+    function showTerm(index) {
+      selectedTerm = index;
+      document.querySelectorAll('.term-tab').forEach((button,i) => button.classList.toggle('active',i === index));
+      document.querySelectorAll('.week-header').forEach(th => {
+        const week = Number(th.dataset.week);
+        th.classList.toggle('term-hidden',week < TERMS[index].from || week > TERMS[index].to);
+      });
+      document.querySelectorAll('#table-body tr').forEach(row => {
+        Array.from(row.children).slice(1,-1).forEach((cell,i) => cell.classList.toggle('term-hidden',i+1 < TERMS[index].from || i+1 > TERMS[index].to));
+      });
+    }
+
+    document.querySelectorAll('.term-tab').forEach((button,index) => button.addEventListener('click',() => showTerm(index)));
+
     async function guardarDatos() {
       document.querySelectorAll('.score-inputs').forEach(wrapper => {
         const integerSelect = wrapper.querySelector('select[data-part="integer"]');
@@ -478,9 +526,10 @@
       renderEditableTable();
     };
   </script>
-</body>
-</html>
 
 
 
 
+
+
+</body></html>
