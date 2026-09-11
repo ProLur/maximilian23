@@ -6,7 +6,6 @@ const ORIGINS=new Set(['https://maximilian23.com','https://www.maximilian23.com'
 const SLOTS=new Set(['T1','T2','T3','T4','T5']);
 const MASTER_CANCEL_HASH='46635b56d3c7f0b7bb26adae2a1692debbfd145d4a0986a9137fe91e73e70360';
 const TEACHERS=new Set(['Lali','Inma','Mari Ángeles','Fani','Mawi','Mamen','Isabel','Rosa','Cristina','Marian','Chiqui','Gema','Paula','May','María Jesús','Silverio','Carmina','Manuel','Berna','Luis','Vero','Chari','Arancha','Susi','Fran','Sarah','Manoli','Admin','Adriana','Lidia'].map(userId));
-const COURSES=new Set(['I3A','I3B','I4A','I4B','I5A','I5B','P1A','P1B','P2A','P2B','P3A','P3B','P4A','P4B','P5A','P5B','P6A','P6B']);
 const FIJAS=[{dia:5,tramo:'T2',grupo:'Religión'},{dia:2,tramo:'T3',grupo:'5º Bilingüe'},{dia:3,tramo:'T3',grupo:'6º Bilingüe'},{dia:4,tramo:'T4',grupo:'5º Bilingüe'}];
 
 export default{async fetch(request,env){
@@ -45,7 +44,7 @@ export default{async fetch(request,env){
 
     if(record.reservas[bookingKey])return out({error:'Ese hueco acaba de ser reservado. Elige otro.'},409,headers);
     const nombre=clean(body.nombre,60),grupo=clean(body.grupo,40),usuario=userId(nombre),hash=await passwordHash(body.password);
-    if(!TEACHERS.has(usuario)||!COURSES.has(courseId(grupo)))return out({error:'No puedes crear una reserva del aula del futuro'},403,headers);
+    if(!TEACHERS.has(usuario))return out({error:'No puedes crear una reserva del aula del futuro'},403,headers);
     if(usuario==='admin'&&hash!==MASTER_CANCEL_HASH)return out({error:'Contraseña de administrador incorrecta.'},401,headers);
     if(record.usuarios[usuario]&&record.usuarios[usuario].passwordHash!==hash)return out({error:'La contraseña no coincide con la registrada para ese nombre.'},401,headers);
     if(!record.usuarios[usuario])record.usuarios[usuario]={nombre,passwordHash:hash,creado:new Date().toISOString()};
@@ -102,6 +101,5 @@ function withFijas(reservas){const merged={...reservas};for(const fija of FIJAS)
 function esFija(fecha,tramo){const date=new Date(fecha+'T12:00:00');return FIJAS.some(f=>f.dia===date.getDay()&&f.tramo===tramo)}
 function clean(value,max){return String(value||'').trim().replace(/[<>]/g,'').slice(0,max)}
 function userId(nombre){return nombre.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es-ES').replace(/\s+/g,' ').trim()}
-function courseId(value){const text=String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase(),infantil=/INFANTIL|ANOS?/.test(text),compact=text.replace(/INFANTIL|ANOS?|CURSO|[.ºª\s-]/g,'');return (infantil?'I':'P')+compact}
 async function passwordHash(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('')}
 function validate(body){if(!body||!/^\d{4}-\d{2}-\d{2}$/.test(body.fecha)||!SLOTS.has(body.tramo)||String(body.password||'').length<4)return'La contraseña debe tener al menos 4 caracteres.';if(body.accion!=='cancelar'&&(!clean(body.nombre,60)||!clean(body.grupo,40)))return'Completa correctamente todos los datos.';const date=new Date(body.fecha+'T12:00:00');if(![1,2,3,4,5].includes(date.getDay()))return'Solo se puede reservar de lunes a viernes.';const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const end=new Date(monday);end.setDate(end.getDate()+11);if(date<monday||date>end)return'Solo están disponibles la semana actual y la siguiente.';return''}
