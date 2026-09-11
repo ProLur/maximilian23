@@ -79,7 +79,7 @@
             z-index: 999;
             backdrop-filter: blur(8px);
             box-sizing: border-box;
-            overflow: hidden;
+            overflow-y: auto;
             border-radius: 0 16px 16px 0;
         }
         #mobileMenu.open {
@@ -109,13 +109,39 @@
             overflow: hidden;
             position: relative;
         }
+        .menu-section-title {
+            width: 100%;
+            margin: 5px 0 10px;
+            color: #a9b8c4;
+            font: bold 12px/1.2 "Courier New", monospace;
+            letter-spacing: 1.7px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        #mobileMenu .menu-section-title {
+            margin-top: 14px;
+        }
+        #mobileMenu .menu-section-title:first-of-type {
+            margin-top: 0;
+        }
+        .menu-item.teacher-link {
+            border-color: #ffc857aa !important;
+            color: #ffe29a !important;
+            background: rgba(255,200,87,.08) !important;
+            text-shadow: 0 0 6px rgba(255,200,87,.65) !important;
+            box-shadow: 0 2px 8px rgba(255,200,87,.25) !important;
+        }
+        .menu-item.teacher-link:hover {
+            background: rgba(255,200,87,.18) !important;
+            box-shadow: 0 0 14px rgba(255,200,87,.55) !important;
+        }
         #mobileMenu .menu-item:hover {
             background: rgba(0,255,204,0.2);
             box-shadow: inset 0 0 15px rgba(0,255,204,0.3), 0 0 15px #00ffcc;
             transform: translateY(-2px);
         }
         #mobileMenu .menu-image {
-            margin-top: 40px;
+            margin-top: 24px;
             display: flex;
             justify-content: center;
             width: 100%;
@@ -160,7 +186,7 @@
             border-right: 2px solid #00ffcc;
             position: relative;
             flex-direction: column;
-            padding-top: 60px;           /* espacio para la barra de botones */
+            padding-top: 170px;
         }
         .button-bar {
             position: absolute;
@@ -174,7 +200,14 @@
             flex-wrap: wrap;
             z-index: 20;
         }
-        .button-bar div {
+        .button-group {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .button-bar .menu-item {
             background: rgba(0,255,204,0.07);
             color: #00ffcc;
             font-family: "Courier New", monospace;
@@ -189,7 +222,7 @@
             box-shadow: 0 2px 8px #00ffcc44;
             white-space: nowrap;
         }
-        .button-bar div:hover {
+        .button-bar .menu-item:hover {
             background: rgba(0,255,204,0.22);
             box-shadow: 0 0 14px #00ffcc88;
             transform: scale(1.06);
@@ -320,11 +353,16 @@
     </header>
     <div id="mobileMenu">
         <div id="closeMenu" style="position: absolute; top: 12px; right: 12px; font-size: 28px; color: #00ffcc; cursor: pointer; z-index: 1001;">X</div>
+        <div class="menu-section-title">Sección alumnos</div>
         <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
         <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
         <div class="menu-item" onclick="openArte()">Plástica</div>
         <div class="menu-item" onclick="openNuevo()">Meteoescuela</div>
         <div class="menu-item" onclick="openRadar()">Herramientas</div>
+        <div class="menu-section-title">Sección profesores</div>
+        <div class="menu-item teacher-link" onclick="openAula()">Reservas · Aula del Futuro</div>
+        <div class="menu-item teacher-link" onclick="openJuez()">¿Se juega?</div>
+        <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
         <div class="menu-image">
             <img id="mobileMaxImage" src="https://maximilian23.com/max.png" alt="Maximilian">
         </div>
@@ -333,11 +371,20 @@
     <div class="container">
         <div class="left-panel">
             <div class="button-bar">
-                <div onclick="openLab()">Laboratorio Musical</div>
-                <div onclick="openRadio()">Radio Maximilian 23</div>
-                <div onclick="openArte()">Plástica</div>
-                <div onclick="openNuevo()">Meteoescuela</div>
-                <div onclick="openRadar()">Herramientas</div>
+                <div class="menu-section-title">Sección alumnos</div>
+                <div class="button-group">
+                    <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
+                    <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
+                    <div class="menu-item" onclick="openArte()">Plástica</div>
+                    <div class="menu-item" onclick="openNuevo()">Meteoescuela</div>
+                    <div class="menu-item" onclick="openRadar()">Herramientas</div>
+                </div>
+                <div class="menu-section-title">Sección profesores</div>
+                <div class="button-group">
+                    <div class="menu-item teacher-link" onclick="openAula()">Reservas · Aula del Futuro</div>
+                    <div class="menu-item teacher-link" onclick="openJuez()">¿Se juega?</div>
+                    <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
+                </div>
             </div>
             <div class="image-container">
                 <img id="maxImage" src="max.png" alt="Maximilian grande">
@@ -378,6 +425,18 @@
         }
         function openRadar() {
             window.open('https://maximilian23.com/radar/', '_blank');
+            closeMobileMenu();
+        }
+        function openAula() {
+            window.open('https://maximilian23.com/aula/', '_blank');
+            closeMobileMenu();
+        }
+        function openJuez() {
+            window.open('https://maximilian23.com/juez/', '_blank');
+            closeMobileMenu();
+        }
+        function openCarrusel() {
+            window.open('https://maximilian23.com/carrusel/', '_blank');
             closeMobileMenu();
         }
         const menuIcon = document.getElementById('menuIcon');
