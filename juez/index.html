@@ -789,7 +789,7 @@
       </div>
       <div id="criterionDetails" hidden>
         <p class="subtitle" style="margin:0; max-width:none;">
-          Para decidir, se revisa la previsión completa entre las 11:30 y las 13:00: temperatura,
+          Para decidir, se revisa la previsión completa entre las 11:30 y las 14:00: temperatura,
           sensación térmica, humedad, lluvia, viento, rachas y fenómenos adversos. Se aplica un criterio
           preventivo para el deporte escolar, tomando como referencia las recomendaciones de la
           <strong>Asociación Española de Pediatría</strong> sobre hidratación, ejercicio y exposición al calor.
@@ -1038,7 +1038,7 @@
       }
 
       const window = [];
-      for (let minutes = timeToMinutes("11:30"); minutes <= timeToMinutes("13:00"); minutes += 15) {
+      for (let minutes = timeToMinutes("11:30"); minutes <= timeToMinutes("14:00"); minutes += 15) {
         const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
         const mm = String(minutes % 60).padStart(2, "0");
         const sample = sampleAt(`${hh}:${mm}`);
@@ -1046,7 +1046,7 @@
       }
 
       if (!window.length) {
-        throw new Error("No se encontraron datos para la franja 11:30–13:00.");
+        throw new Error("No se encontraron datos para la franja 11:30–14:00.");
       }
 
       return { ...display, window };
@@ -1113,7 +1113,7 @@
 
       els.forecastMeta.textContent =
         `Previsión para ${CONFIG.locationName} a las ${CONFIG.matchTime}. ` +
-        `Datos de Open‑Meteo actualizados al abrir la página. Se revisa la franja de 11:30 a 13:00.`;
+        `Datos de Open‑Meteo actualizados al abrir la página. Se revisa la franja de 11:30 a 14:00.`;
     }
 
     /*
@@ -1188,7 +1188,7 @@
         level: "play",
         title: "🟢 SE JUEGA",
         reason:
-          `Las condiciones previstas entre las 11:30 y las 13:00 están dentro de los límites establecidos. El partido puede celebrarse.`
+          `Las condiciones previstas entre las 11:30 y las 14:00 están dentro de los límites establecidos. El partido puede celebrarse.`
       };
     }
     function joinReasons(items) {
