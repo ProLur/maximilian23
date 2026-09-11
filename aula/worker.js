@@ -82,7 +82,7 @@ async function jsonbinUrl(url,key,options={}){
   let lastError;
   for(let attempt=0;attempt<3;attempt++){
     try{
-      const response=await fetch(url,{...options,headers:{...(options.headers||{}),'X-Access-Key':key}});
+      const response=await fetch(url,{...options,headers:{...(options.headers||{}),'X-Master-Key':key}});
       if(response.ok)return response;
       lastError=Error(`JSONBin ${response.status}`);
       if(response.status<500&&response.status!==429)throw lastError;
