@@ -7,6 +7,7 @@ const SLOTS=new Set(['T1','T2','T3','T4','T5']);
 const MASTER_CANCEL_HASH='46635b56d3c7f0b7bb26adae2a1692debbfd145d4a0986a9137fe91e73e70360';
 const TEACHERS=new Set(['Lali','Inma','Mari Ángeles','Fani','Mawi','Mamen','Isabel','Rosa','Cristina','Marian','Chiqui','Gema','Paula','May','María Jesús','Silverio','Carmina','Manuel','Berna','Luis','Vero','Chari','Arancha','Susi','Fran','Sarah','Manoli','Admin','Adriana','Lidia'].map(userId));
 const COURSES=new Set(['I3A','I3B','I4A','I4B','I5A','I5B','P1A','P1B','P2A','P2B','P3A','P3B','P4A','P4B','P5A','P5B','P6A','P6B']);
+const FIJAS=[{dia:5,tramo:'T2',grupo:'Religión'},{dia:2,tramo:'T3',grupo:'5º Bilingüe'},{dia:3,tramo:'T3',grupo:'6º Bilingüe'},{dia:4,tramo:'T4',grupo:'5º Bilingüe'}];
 
 export default{async fetch(request,env){
   const origin=request.headers.get('Origin')||'',headers=cors(origin);
@@ -17,13 +18,15 @@ export default{async fetch(request,env){
     if(path==='/clasif')return classification(request,env,headers);
     if(request.method==='GET'){
       const record=await read(env.JSONBIN_KEY);
-      return out({reservas:record.reservas||{}},200,headers);
+      return out({reservas:withFijas(record.reservas||{})},200,headers);
     }
     if(request.method!=='POST')return out({error:'Método no permitido.'},405,headers);
     const body=await request.json(),error=validate(body);
     if(error)return out({error},400,headers);
     const record=await read(env.JSONBIN_KEY),bookingKey=body.fecha+'_'+body.tramo;
     record.reservas||={};record.usuarios||={};
+
+    if(body.accion!=='cancelar'&&esFija(body.fecha,body.tramo))return out({error:'Ese horario está reservado de forma fija para todo el curso.'},409,headers);
 
     if(body.accion==='cancelar'){
       const booking=record.reservas[bookingKey];
@@ -93,6 +96,10 @@ async function jsonbinUrl(url,key,options={}){
 }
 async function read(key){const response=await jsonbin(key);const data=await response.json();if(!data?.record)throw Error('Respuesta de JSONBin inválida');return data.record}
 function save(key,record){return jsonbin(key,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)})}
+function mondayOf(offset){const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7)+offset*7);return monday}
+function isoDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function withFijas(reservas){const merged={...reservas};for(const fija of FIJAS)for(let offset=0;offset<=1;offset++){const d=mondayOf(offset);d.setDate(d.getDate()+(fija.dia-1));merged[isoDate(d)+'_'+fija.tramo]={nombre:fija.grupo,grupo:fija.grupo,usuario:'fija',fija:true}}return merged}
+function esFija(fecha,tramo){const date=new Date(fecha+'T12:00:00');return FIJAS.some(f=>f.dia===date.getDay()&&f.tramo===tramo)}
 function clean(value,max){return String(value||'').trim().replace(/[<>]/g,'').slice(0,max)}
 function userId(nombre){return nombre.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es-ES').replace(/\s+/g,' ').trim()}
 function courseId(value){const text=String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase(),infantil=/INFANTIL|ANOS?/.test(text),compact=text.replace(/INFANTIL|ANOS?|CURSO|[.ºª\s-]/g,'');return (infantil?'I':'P')+compact}
