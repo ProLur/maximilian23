@@ -833,19 +833,20 @@
         <form class="admin-form" id="passwordForm">
           <label for="adminPassword">Contraseña</label>
           <input id="adminPassword" type="password" autocomplete="off" required>
-          <div class="admin-error" id="adminError" aria-live="polite"></div>
           <button class="admin-button" type="submit">Continuar</button>
         </form>
       </div>
 
       <div id="decisionStep" hidden>
         <h2>¿Se juega o no?</h2>
-        <p>La opción elegida sustituirá la recomendación automática durante el día de hoy.</p>
+        <p>La opción elegida sustituirá la recomendación automática hasta las 12:00 de hoy, y se verá igual en cualquier ordenador.</p>
         <div class="decision-buttons">
           <button class="decision-button play" id="forcePlay" type="button">SÍ, SE JUEGA</button>
           <button class="decision-button no-play" id="forceNoPlay" type="button">NO, NO SE JUEGA</button>
         </div>
       </div>
+
+      <div class="admin-error" id="adminError" aria-live="polite"></div>
     </div>
   </div>
 
@@ -875,8 +876,15 @@
       decisionTime: "11:30"
     });
 
-    const ADMIN_PASSWORD = "PARTIDOHOY";
-    const MANUAL_DECISION_KEY = "maximilian23:juez:manual-decision";
+    const ADMIN_PASSWORD_HASH = "46635b56d3c7f0b7bb26adae2a1692debbfd145d4a0986a9137fe91e73e70360";
+    const JUEZ_API_URL = "https://aula-del-futuro-reservas.mmartinezf001.workers.dev/juez";
+    const RESET_HOUR = 12;
+
+    async function sha256Hex(value) {
+      const bytes = new TextEncoder().encode(String(value || ""));
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+    }
 
     /*
       Umbrales editables.
@@ -1226,22 +1234,21 @@
       }
     }
 
-    function readManualDecision() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(MANUAL_DECISION_KEY));
-        if (saved?.date === madridParts().dateISO && ["play", "no-play"].includes(saved.choice)) {
-          return saved.choice;
-        }
-        localStorage.removeItem(MANUAL_DECISION_KEY);
-      } catch {}
-      return null;
-    }
+    let manualDecisionCache = null;
 
-    function saveManualDecision(choice) {
-      localStorage.setItem(MANUAL_DECISION_KEY, JSON.stringify({
-        date: madridParts().dateISO,
-        choice
-      }));
+    async function fetchManualDecision() {
+      try {
+        const res = await fetch(JUEZ_API_URL, { cache: "no-store" });
+        const data = await res.json();
+        const p = madridParts();
+        const stillToday = data?.fecha === p.dateISO;
+        const beforeReset = (p.hour * 60 + p.minute) < RESET_HOUR * 60;
+        manualDecisionCache = (stillToday && beforeReset && ["play", "no-play"].includes(data.decision))
+          ? data.decision
+          : null;
+      } catch {
+        // Ante un fallo de red se mantiene el último valor conocido.
+      }
     }
 
     function getManualDecision(choice) {
@@ -1265,9 +1272,8 @@
     });
 
     function resolveAndRenderDecision(forecast) {
-      const manualChoice = readManualDecision();
-      if (manualChoice) {
-        renderVerdict(getManualDecision(manualChoice));
+      if (manualDecisionCache) {
+        renderVerdict(getManualDecision(manualDecisionCache));
         return;
       }
 
@@ -1301,10 +1307,27 @@
       admin.trigger.focus();
     }
 
-    function applyManualDecision(choice) {
-      saveManualDecision(choice);
-      renderVerdict(getManualDecision(choice));
-      closeAdmin();
+    async function applyManualDecision(choice) {
+      admin.error.textContent = "";
+      admin.forcePlay.disabled = true;
+      admin.forceNoPlay.disabled = true;
+      try {
+        const res = await fetch(JUEZ_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: admin.password.value, decision: choice })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "No se pudo guardar el veredicto.");
+        manualDecisionCache = choice;
+        renderVerdict(getManualDecision(choice));
+        closeAdmin();
+      } catch (err) {
+        admin.error.textContent = err.message;
+      } finally {
+        admin.forcePlay.disabled = false;
+        admin.forceNoPlay.disabled = false;
+      }
     }
 
     admin.trigger.addEventListener("click", openAdmin);
@@ -1312,13 +1335,15 @@
     admin.modal.addEventListener("click", event => {
       if (event.target === admin.modal) closeAdmin();
     });
-    admin.form.addEventListener("submit", event => {
+    admin.form.addEventListener("submit", async event => {
       event.preventDefault();
-      if (admin.password.value !== ADMIN_PASSWORD) {
+      const hash = await sha256Hex(admin.password.value);
+      if (hash !== ADMIN_PASSWORD_HASH) {
         admin.error.textContent = "Contraseña incorrecta.";
         admin.password.select();
         return;
       }
+      admin.error.textContent = "";
       admin.passwordStep.hidden = true;
       admin.decisionStep.hidden = false;
       admin.forcePlay.focus();
@@ -1339,9 +1364,8 @@
     let latestForecast = null;
 
     function renderError(error) {
-      const manualChoice = readManualDecision();
-      if (manualChoice) {
-        renderVerdict(getManualDecision(manualChoice));
+      if (manualDecisionCache) {
+        renderVerdict(getManualDecision(manualDecisionCache));
         els.errorLine.hidden = false;
         els.errorLine.textContent = "No se ha podido actualizar la previsión meteorológica.";
         els.forecastMeta.textContent = "No se ha podido actualizar la previsión.";
@@ -1448,15 +1472,19 @@
       };
       updateClock();
       setInterval(updateClock, 1000);
+      await fetchManualDecision();
       await refreshForecast();
 
       // Mantiene la previsión razonablemente fresca mientras la página
       // permanece abierta, sin necesidad de ningún botón.
       setInterval(refreshForecast, 5 * 60 * 1000);
 
-      // Reevalúa el bloqueo horario. Así, al llegar las 11:30,
-      // el veredicto aparece automáticamente sin recargar la página.
-      setInterval(() => {
+      // Reevalúa el veredicto manual (compartido entre ordenadores) y el
+      // bloqueo horario. Así, al llegar las 11:30, al forzar un veredicto
+      // desde otro ordenador, o al pasar las 12:00 y resetearse, el
+      // veredicto se actualiza solo sin recargar la página.
+      setInterval(async () => {
+        await fetchManualDecision();
         if (latestForecast) {
           resolveAndRenderDecision(latestForecast);
         }
