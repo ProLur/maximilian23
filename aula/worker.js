@@ -2,6 +2,8 @@ const BIN_ID='6aa116caac6210605ab70811';
 const JSONBIN_URL='https://api.jsonbin.io/v3/b/'+BIN_ID;
 const CLASSIF_BIN_ID='6aa13d37ffd5d16053f13ac9';
 const CLASSIF_URL='https://api.jsonbin.io/v3/b/'+CLASSIF_BIN_ID;
+const JUEZ_BIN_ID='6aa43dedac6210605ac19e35';
+const JUEZ_URL='https://api.jsonbin.io/v3/b/'+JUEZ_BIN_ID;
 const ORIGINS=new Set(['https://maximilian23.com','https://www.maximilian23.com']);
 const SLOTS=new Set(['T1','T2','T3','T4','T5']);
 const MASTER_CANCEL_HASH='46635b56d3c7f0b7bb26adae2a1692debbfd145d4a0986a9137fe91e73e70360';
@@ -15,6 +17,7 @@ export default{async fetch(request,env){
   try{
     const path=new URL(request.url).pathname.replace(/\/+$/,'')||'/';
     if(path==='/clasif')return classification(request,env,headers);
+    if(path==='/juez')return juez(request,env,headers);
     if(request.method==='GET'){
       const record=await read(env.JSONBIN_KEY);
       return out({reservas:withFijas(record.reservas||{})},200,headers);
@@ -74,6 +77,22 @@ async function classification(request,env,headers){
   return out({ok:true,lastUpdate:record.lastUpdate},200,headers);
 }
 
+async function juez(request,env,headers){
+  if(request.method==='GET'){
+    const response=await jsonbinUrl(JUEZ_URL,env.JSONBIN_KEY);
+    const data=await response.json();
+    return out(data.record||{fecha:null,decision:null},200,headers);
+  }
+  if(request.method!=='POST')return out({error:'Método no permitido.'},405,headers);
+  const body=await request.json();
+  if(!body||!['play','no-play'].includes(body.decision))return out({error:'Decisión no válida.'},400,headers);
+  const hash=await passwordHash(body.password);
+  if(hash!==MASTER_CANCEL_HASH)return out({error:'Contraseña incorrecta.'},401,headers);
+  const record={fecha:madridDate(),decision:body.decision,actualizado:new Date().toISOString()};
+  await jsonbinUrl(JUEZ_URL,env.JSONBIN_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)});
+  return out({ok:true},200,headers);
+}
+function madridDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function cors(origin){return{'Access-Control-Allow-Origin':ORIGINS.has(origin)?origin:'https://maximilian23.com','Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Cache-Control':'no-store'}}
 function out(data,status,headers){return new Response(JSON.stringify(data),{status,headers:{...headers,'Content-Type':'application/json; charset=utf-8'}})}
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -102,4 +121,4 @@ function esFija(fecha,tramo){const date=new Date(fecha+'T12:00:00');return FIJAS
 function clean(value,max){return String(value||'').trim().replace(/[<>]/g,'').slice(0,max)}
 function userId(nombre){return nombre.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es-ES').replace(/\s+/g,' ').trim()}
 async function passwordHash(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('')}
-function validate(body){if(!body||!/^\d{4}-\d{2}-\d{2}$/.test(body.fecha)||!SLOTS.has(body.tramo)||String(body.password||'').length<4)return'La contraseña debe tener al menos 4 caracteres.';if(body.accion!=='cancelar'&&(!clean(body.nombre,60)||!clean(body.grupo,40)))return'Completa correctamente todos los datos.';const date=new Date(body.fecha+'T12:00:00');if(![1,2,3,4,5].includes(date.getDay()))return'Solo se puede reservar de lunes a viernes.';const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const end=new Date(monday);end.setDate(end.getDate()+11);if(date<monday||date>end)return'Solo están disponibles la semana actual y la siguiente.';return''}
+function validate(body){if(!body||!/^\d{4}-\d{2}-\d{2}$/.test(body.fecha)||!SLOTS.has(body.tramo)||String(body.password||'').length<4)return'La contraseña debe tener al menos 4 caracteres.';if(body.accion!=='cancelar'&&(!clean(body.nombre,60)||!clean(body.grupo,40)))return'Completa correctamente todos los datos.';const date=new Date(body.fecha+'T12:00:00');if(![1,2,3,4,5].includes(date.getDay()))return'Solo se puede reservar de lunes a viernes.';const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const end=new Date(monday);end.setDate(end.getDate()+11);end.setHours(23,59,59,999);if(date<monday||date>end)return'Solo están disponibles la semana actual y la siguiente.';return''}
