@@ -1,7 +1,3 @@
-const CLASSIF_BIN_ID='6aa13d37ffd5d16053f13ac9';
-const CLASSIF_URL='https://api.jsonbin.io/v3/b/'+CLASSIF_BIN_ID;
-const JUEZ_BIN_ID='6aa43dedac6210605ac19e35';
-const JUEZ_URL='https://api.jsonbin.io/v3/b/'+JUEZ_BIN_ID;
 const ORIGINS=new Set(['https://maximilian23.com','https://www.maximilian23.com']);
 const SLOTS=new Set(['T1','T2','T3','T4','T5']);
 const MASTER_CANCEL_HASH='46635b56d3c7f0b7bb26adae2a1692debbfd145d4a0986a9137fe91e73e70360';
@@ -14,8 +10,8 @@ export default{async fetch(request,env){
   if(!ORIGINS.has(origin))return out({error:'Origen no permitido.'},403,headers);
   try{
     const path=new URL(request.url).pathname.replace(/\/+$/,'')||'/';
-    if(path==='/clasif')return classification(request,env,headers);
-    if(path==='/juez')return juez(request,env,headers);
+    if(path==='/clasif')return await classification(request,env,headers);
+    if(path==='/juez')return await juez(request,env,headers);
     if(request.method==='GET'){
       const record=await read(env);
       return out({reservas:withFijas(record.reservas||{})},200,headers);
@@ -63,9 +59,8 @@ export default{async fetch(request,env){
 
 async function classification(request,env,headers){
   if(request.method==='GET'){
-    const response=await jsonbinUrl(CLASSIF_URL,env.JSONBIN_KEY);
-    const data=await response.json();
-    return out(data.record||{},200,headers);
+    const record=await read(env,'futbol/clasificacion');
+    return out(record,200,headers);
   }
   if(request.method!=='POST')return out({error:'Método no permitido.'},405,headers);
   const body=await request.json(),teams=['3º A','3º B','4º A','4º B','5º A','5º B'];
@@ -73,7 +68,7 @@ async function classification(request,env,headers){
   const scores={};
   for(const team of teams)scores[team]=body.scores[team].map(value=>Math.max(0,Math.min(10,Math.round((Number(value)||0)*10)/10)));
   const record={scores,lastUpdate:new Date().toISOString()};
-  await jsonbinUrl(CLASSIF_URL,env.JSONBIN_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)});
+  if(!(await save(env,record,'futbol/clasificacion')).ok)throw Error();
   return out({ok:true,lastUpdate:record.lastUpdate},200,headers);
 }
 
@@ -95,9 +90,8 @@ async function resetPassword(body,env,headers){
 
 async function juez(request,env,headers){
   if(request.method==='GET'){
-    const response=await jsonbinUrl(JUEZ_URL,env.JSONBIN_KEY);
-    const data=await response.json();
-    return out(data.record||{fecha:null,decision:null},200,headers);
+    const record=await read(env,'futbol/juez');
+    return out(Object.keys(record).length?record:{fecha:null,decision:null},200,headers);
   }
   if(request.method!=='POST')return out({error:'Método no permitido.'},405,headers);
   const body=await request.json();
@@ -105,28 +99,14 @@ async function juez(request,env,headers){
   const hash=await passwordHash(body.password);
   if(hash!==MASTER_CANCEL_HASH)return out({error:'Contraseña incorrecta.'},401,headers);
   const record={fecha:madridDate(),decision:body.decision,actualizado:new Date().toISOString()};
-  await jsonbinUrl(JUEZ_URL,env.JSONBIN_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)});
+  if(!(await save(env,record,'futbol/juez')).ok)throw Error();
   return out({ok:true},200,headers);
 }
 function madridDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function cors(origin){return{'Access-Control-Allow-Origin':ORIGINS.has(origin)?origin:'https://maximilian23.com','Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Cache-Control':'no-store'}}
 function out(data,status,headers){return new Response(JSON.stringify(data),{status,headers:{...headers,'Content-Type':'application/json; charset=utf-8'}})}
-const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function jsonbinUrl(url,key,options={}){
-  let lastError;
-  for(let attempt=0;attempt<3;attempt++){
-    try{
-      const response=await fetch(url,{...options,headers:{...(options.headers||{}),'X-Master-Key':key}});
-      if(response.ok)return response;
-      lastError=Error(`JSONBin ${response.status}`);
-      if(response.status<500&&response.status!==429)throw lastError;
-    }catch(error){lastError=error}
-    if(attempt<2)await wait(300*(attempt+1));
-  }
-  throw lastError||Error('JSONBin no disponible');
-}
 
-// --- Firestore (reservas) ---
+// --- Firestore ---
 let cachedSA=null,cachedToken=null;
 function getSA(env){
   if(!cachedSA)cachedSA=JSON.parse(env.FIREBASE_SA_KEY);
@@ -163,8 +143,8 @@ async function getAccessToken(env){
   cachedToken={token:data.access_token,exp:now+data.expires_in};
   return cachedToken.token;
 }
-function firestoreDocUrl(env){
-  return `https://firestore.googleapis.com/v1/projects/${getSA(env).project_id}/databases/(default)/documents/aula/estado`;
+function firestoreDocUrl(env,docPath){
+  return `https://firestore.googleapis.com/v1/projects/${getSA(env).project_id}/databases/(default)/documents/${docPath}`;
 }
 function toFsValue(v){
   if(v===null||v===undefined)return{nullValue:null};
@@ -194,17 +174,17 @@ function fromFsFields(fields){
   for(const k in fields)obj[k]=fromFsValue(fields[k]);
   return obj;
 }
-async function read(env){
+async function read(env,docPath='aula/estado'){
   const token=await getAccessToken(env);
-  const response=await fetch(firestoreDocUrl(env),{headers:{Authorization:'Bearer '+token}});
-  if(response.status===404)return{config:{},reservas:{},usuarios:{}};
+  const response=await fetch(firestoreDocUrl(env,docPath),{headers:{Authorization:'Bearer '+token}});
+  if(response.status===404)return docPath==='aula/estado'?{config:{},reservas:{},usuarios:{}}:{};
   if(!response.ok)throw Error('Firestore '+response.status);
   const data=await response.json();
   return fromFsFields(data.fields||{});
 }
-async function save(env,record){
+async function save(env,record,docPath='aula/estado'){
   const token=await getAccessToken(env);
-  const response=await fetch(firestoreDocUrl(env),{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({fields:toFsFields(record)})});
+  const response=await fetch(firestoreDocUrl(env,docPath),{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({fields:toFsFields(record)})});
   return{ok:response.ok};
 }
 
