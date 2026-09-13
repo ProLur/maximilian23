@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071b25">
+  <title>Reset contraseña · Aula del Futuro</title>
+  <style>
+    :root{--bg:#06151d;--panel:#0d2530;--line:#24505d;--cyan:#21ead2;--ink:#f7fbfc;--muted:#acd0d8}
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0}
+    body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 22px 65px #0008}
+    h1{margin:0 0 6px;font-size:1.5rem}
+    p{margin:0 0 22px;color:var(--muted);font-size:.92rem}
+    label{display:block;font-weight:800;margin:14px 0 6px}
+    input{width:100%;border:1px solid var(--line);border-radius:12px;background:#06171f;color:var(--ink);padding:13px 14px;outline:none;font:inherit}
+    input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #21ead222}
+    button{width:100%;margin-top:22px;border:0;border-radius:12px;padding:13px 18px;font-weight:900;font:inherit;background:var(--cyan);color:#04211e;cursor:pointer}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .msg{margin-top:16px;font-weight:700;text-align:center}
+    .msg.error{color:#ff9b98}
+    .msg.ok{color:#77efc7}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Restablecer contraseña</h1>
+    <p>Elimina la contraseña guardada de un profesor, como si nunca la hubiera escrito. La próxima vez que reserve, podrá fijar una contraseña nueva.</p>
+    <form id="form">
+      <label for="nombre">Nombre del profesor</label>
+      <input id="nombre" required autocomplete="off">
+      <label for="admin">Contraseña de administrador</label>
+      <input id="admin" type="password" required autocomplete="off">
+      <button id="btn" type="submit">Eliminar contraseña</button>
+    </form>
+    <p class="msg" id="msg"></p>
+  </main>
+  <script>
+    const API_URL='https://aula-del-futuro-reservas.mmartinezf001.workers.dev/';
+    const el=id=>document.getElementById(id);
+    el('form').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const btn=el('btn'),msg=el('msg');
+      btn.disabled=true;btn.textContent='Eliminando…';msg.className='msg';msg.textContent='';
+      try{
+        const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'reset_password',nombre:el('nombre').value.trim(),adminPassword:el('admin').value})});
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok)throw new Error(data.error||'No se pudo completar la operación.');
+        msg.className='msg ok';msg.textContent='Contraseña eliminada. Ya puede reservar con una contraseña nueva.';
+        el('form').reset();
+      }catch(err){
+        msg.className='msg error';msg.textContent=err.message;
+      }finally{
+        btn.disabled=false;btn.textContent='Eliminar contraseña';
+      }
+    });
+  </script>
+</body></html>
