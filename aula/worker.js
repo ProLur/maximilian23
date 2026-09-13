@@ -1,5 +1,3 @@
-const BIN_ID='6aa116caac6210605ab70811';
-const JSONBIN_URL='https://api.jsonbin.io/v3/b/'+BIN_ID;
 const CLASSIF_BIN_ID='6aa13d37ffd5d16053f13ac9';
 const CLASSIF_URL='https://api.jsonbin.io/v3/b/'+CLASSIF_BIN_ID;
 const JUEZ_BIN_ID='6aa43dedac6210605ac19e35';
@@ -19,13 +17,15 @@ export default{async fetch(request,env){
     if(path==='/clasif')return classification(request,env,headers);
     if(path==='/juez')return juez(request,env,headers);
     if(request.method==='GET'){
-      const record=await read(env.JSONBIN_KEY);
+      const record=await read(env);
       return out({reservas:withFijas(record.reservas||{})},200,headers);
     }
     if(request.method!=='POST')return out({error:'Método no permitido.'},405,headers);
-    const body=await request.json(),error=validate(body);
+    const body=await request.json();
+    if(body.accion==='reset_password')return resetPassword(body,env,headers);
+    const error=validate(body);
     if(error)return out({error},400,headers);
-    const record=await read(env.JSONBIN_KEY),bookingKey=body.fecha+'_'+body.tramo;
+    const record=await read(env),bookingKey=body.fecha+'_'+body.tramo;
     record.reservas||={};record.usuarios||={};
 
     if(body.accion!=='cancelar'&&esFija(body.fecha,body.tramo))return out({error:'Ese horario está reservado de forma fija para todo el curso.'},409,headers);
@@ -41,7 +41,7 @@ export default{async fetch(request,env){
         if(stored&&entered!==stored)return out({error:'Contraseña incorrecta.'},401,headers);
       }
       delete record.reservas[bookingKey];record.ultimaActualizacion=new Date().toISOString();
-      if(!(await save(env.JSONBIN_KEY,record)).ok)throw Error();
+      if(!(await save(env,record)).ok)throw Error();
       return out({ok:true},200,headers);
     }
 
@@ -53,7 +53,7 @@ export default{async fetch(request,env){
     if(!record.usuarios[usuario])record.usuarios[usuario]={nombre,passwordHash:hash,creado:new Date().toISOString()};
     record.reservas[bookingKey]={nombre,grupo,usuario,passwordHash:hash,creada:new Date().toISOString()};
     record.ultimaActualizacion=new Date().toISOString();
-    if(!(await save(env.JSONBIN_KEY,record)).ok)throw Error();
+    if(!(await save(env,record)).ok)throw Error();
     return out({ok:true},201,headers);
   }catch(error){
     console.error('Aula reservas:',error?.message||error);
@@ -77,6 +77,22 @@ async function classification(request,env,headers){
   return out({ok:true,lastUpdate:record.lastUpdate},200,headers);
 }
 
+async function resetPassword(body,env,headers){
+  const nombre=clean(body.nombre,60),adminPassword=String(body.adminPassword||'');
+  if(!nombre)return out({error:'Indica el nombre del profesor.'},400,headers);
+  const adminHash=await passwordHash(adminPassword);
+  if(adminHash!==MASTER_CANCEL_HASH)return out({error:'Contraseña de administrador incorrecta.'},401,headers);
+  const usuario=userId(nombre);
+  if(usuario==='admin')return out({error:'La contraseña de Admin no se puede eliminar aquí.'},400,headers);
+  if(!TEACHERS.has(usuario))return out({error:'Ese nombre no está en la lista de profesores.'},404,headers);
+  const record=await read(env);
+  record.usuarios||={};
+  delete record.usuarios[usuario];
+  record.ultimaActualizacion=new Date().toISOString();
+  if(!(await save(env,record)).ok)throw Error();
+  return out({ok:true},200,headers);
+}
+
 async function juez(request,env,headers){
   if(request.method==='GET'){
     const response=await jsonbinUrl(JUEZ_URL,env.JSONBIN_KEY);
@@ -96,9 +112,6 @@ function madridDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/M
 function cors(origin){return{'Access-Control-Allow-Origin':ORIGINS.has(origin)?origin:'https://maximilian23.com','Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Cache-Control':'no-store'}}
 function out(data,status,headers){return new Response(JSON.stringify(data),{status,headers:{...headers,'Content-Type':'application/json; charset=utf-8'}})}
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function jsonbin(key,options={}){
-  return jsonbinUrl(JSONBIN_URL,key,options);
-}
 async function jsonbinUrl(url,key,options={}){
   let lastError;
   for(let attempt=0;attempt<3;attempt++){
@@ -112,13 +125,94 @@ async function jsonbinUrl(url,key,options={}){
   }
   throw lastError||Error('JSONBin no disponible');
 }
-async function read(key){const response=await jsonbin(key);const data=await response.json();if(!data?.record)throw Error('Respuesta de JSONBin inválida');return data.record}
-function save(key,record){return jsonbin(key,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)})}
+
+// --- Firestore (reservas) ---
+let cachedSA=null,cachedToken=null;
+function getSA(env){
+  if(!cachedSA)cachedSA=JSON.parse(env.FIREBASE_SA_KEY);
+  return cachedSA;
+}
+function b64urlFromBuffer(buf){
+  let binary='';
+  for(const b of new Uint8Array(buf))binary+=String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64url(str){return b64urlFromBuffer(new TextEncoder().encode(str))}
+async function importPrivateKey(pem){
+  const body=pem.replace(/-----BEGIN PRIVATE KEY-----/,'').replace(/-----END PRIVATE KEY-----/,'').replace(/\s+/g,'');
+  const der=Uint8Array.from(atob(body),c=>c.charCodeAt(0));
+  return crypto.subtle.importKey('pkcs8',der.buffer,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
+}
+async function signJwt(sa){
+  const now=Math.floor(Date.now()/1000);
+  const header=b64url(JSON.stringify({alg:'RS256',typ:'JWT'}));
+  const claims=b64url(JSON.stringify({iss:sa.client_email,scope:'https://www.googleapis.com/auth/datastore',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600}));
+  const unsigned=header+'.'+claims;
+  const key=await importPrivateKey(sa.private_key);
+  const sig=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned));
+  return unsigned+'.'+b64urlFromBuffer(sig);
+}
+async function getAccessToken(env){
+  const now=Math.floor(Date.now()/1000);
+  if(cachedToken&&cachedToken.exp>now+60)return cachedToken.token;
+  const sa=getSA(env);
+  const assertion=await signJwt(sa);
+  const response=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+encodeURIComponent(assertion)});
+  if(!response.ok)throw Error('Firebase auth '+response.status);
+  const data=await response.json();
+  cachedToken={token:data.access_token,exp:now+data.expires_in};
+  return cachedToken.token;
+}
+function firestoreDocUrl(env){
+  return `https://firestore.googleapis.com/v1/projects/${getSA(env).project_id}/databases/(default)/documents/aula/estado`;
+}
+function toFsValue(v){
+  if(v===null||v===undefined)return{nullValue:null};
+  if(typeof v==='boolean')return{booleanValue:v};
+  if(typeof v==='number')return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};
+  if(typeof v==='string')return{stringValue:v};
+  if(Array.isArray(v))return{arrayValue:{values:v.map(toFsValue)}};
+  return{mapValue:{fields:toFsFields(v)}};
+}
+function toFsFields(obj){
+  const fields={};
+  for(const k in obj)fields[k]=toFsValue(obj[k]);
+  return fields;
+}
+function fromFsValue(v){
+  if(!v||'nullValue' in v)return null;
+  if('booleanValue' in v)return v.booleanValue;
+  if('integerValue' in v)return Number(v.integerValue);
+  if('doubleValue' in v)return v.doubleValue;
+  if('stringValue' in v)return v.stringValue;
+  if('arrayValue' in v)return(v.arrayValue.values||[]).map(fromFsValue);
+  if('mapValue' in v)return fromFsFields(v.mapValue.fields||{});
+  return null;
+}
+function fromFsFields(fields){
+  const obj={};
+  for(const k in fields)obj[k]=fromFsValue(fields[k]);
+  return obj;
+}
+async function read(env){
+  const token=await getAccessToken(env);
+  const response=await fetch(firestoreDocUrl(env),{headers:{Authorization:'Bearer '+token}});
+  if(response.status===404)return{config:{},reservas:{},usuarios:{}};
+  if(!response.ok)throw Error('Firestore '+response.status);
+  const data=await response.json();
+  return fromFsFields(data.fields||{});
+}
+async function save(env,record){
+  const token=await getAccessToken(env);
+  const response=await fetch(firestoreDocUrl(env),{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({fields:toFsFields(record)})});
+  return{ok:response.ok};
+}
+
 function mondayOf(offset){const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7)+offset*7);return monday}
 function isoDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function withFijas(reservas){const merged={...reservas};for(const fija of FIJAS)for(let offset=0;offset<=1;offset++){const d=mondayOf(offset);d.setDate(d.getDate()+(fija.dia-1));merged[isoDate(d)+'_'+fija.tramo]={nombre:fija.grupo,grupo:fija.grupo,usuario:'fija',fija:true}}return merged}
 function esFija(fecha,tramo){const date=new Date(fecha+'T12:00:00');return FIJAS.some(f=>f.dia===date.getDay()&&f.tramo===tramo)}
 function clean(value,max){return String(value||'').trim().replace(/[<>]/g,'').slice(0,max)}
-function userId(nombre){return nombre.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es-ES').replace(/\s+/g,' ').trim()}
+function userId(nombre){return nombre.normalize('NFD').replace(/[̀-ͯ]/g,'').toLocaleLowerCase('es-ES').replace(/\s+/g,' ').trim()}
 async function passwordHash(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('')}
 function validate(body){if(!body||!/^\d{4}-\d{2}-\d{2}$/.test(body.fecha)||!SLOTS.has(body.tramo)||String(body.password||'').length<4)return'La contraseña debe tener al menos 4 caracteres.';if(body.accion!=='cancelar'&&(!clean(body.nombre,60)||!clean(body.grupo,40)))return'Completa correctamente todos los datos.';const date=new Date(body.fecha+'T12:00:00');if(![1,2,3,4,5].includes(date.getDay()))return'Solo se puede reservar de lunes a viernes.';const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const end=new Date(monday);end.setDate(end.getDate()+11);end.setHours(23,59,59,999);if(date<monday||date>end)return'Solo están disponibles la semana actual y la siguiente.';return''}
