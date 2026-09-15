@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redacción · Crónica Escolar</title>
+  <link rel="icon" href="../Cabeza.png">
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body class="editor-page">
+  <header class="editor-header">
+    <div><span class="eyebrow">REDACCIÓN</span><h1>Crónica Escolar</h1></div>
+    <a href="./" target="_blank" rel="noopener">Ver periódico ↗</a>
+  </header>
+
+  <main class="editor-shell">
+    <section id="loginPanel" class="login-card">
+      <h2>Acceso a la redacción</h2>
+      <p>Usa tu cuenta educativa autorizada para escribir y publicar noticias.</p>
+      <button id="googleLogin" class="primary google-login" type="button">Entrar con Google</button>
+      <p id="loginError" class="form-message error" role="alert"></p>
+    </section>
+
+    <section id="editorPanel" class="editor-workspace hidden">
+      <div class="editor-topline">
+        <div><span id="sessionUser"></span><button id="logoutBtn" class="text-button">Cerrar sesión</button></div>
+        <button id="newBtn" class="secondary">+ Nueva noticia</button>
+      </div>
+      <div class="editor-columns">
+        <aside class="drafts-panel"><h2>Noticias y borradores</h2><div id="draftList"></div></aside>
+        <form id="articleForm" class="article-form">
+          <input id="docId" type="hidden">
+          <div class="form-grid">
+            <label class="wide">Titular<input id="title" maxlength="120" required placeholder="Escribe un titular claro"></label>
+            <label>Sección<select id="category" required><option>Colegio</option><option>Aula</option><option>Cultura</option><option>Deportes</option><option>Tecnología</option><option>Medio ambiente</option><option>Opinión</option></select></label>
+            <label>Firma<input id="author" maxlength="60" required placeholder="Nombre o clase"></label>
+            <label class="wide">Entradilla<textarea id="summary" maxlength="260" rows="3" required placeholder="Resumen breve de la noticia"></textarea></label>
+            <label class="wide">Imagen principal<input id="image" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WebP. Se optimizará automáticamente antes de publicarla.</small></label>
+            <div id="imagePreview" class="image-preview hidden"></div>
+          </div>
+          <fieldset class="body-field">
+            <legend>Cuerpo de la noticia</legend>
+            <div class="toolbar" role="toolbar" aria-label="Formato de texto">
+              <button type="button" data-command="bold" title="Negrita"><b>N</b></button>
+              <button type="button" data-command="italic" title="Cursiva"><i>C</i></button>
+              <button type="button" data-command="formatBlock" data-value="h2" title="Subtítulo">Título</button>
+              <button type="button" data-command="formatBlock" data-value="p" title="Párrafo">Párrafo</button>
+              <button type="button" data-command="insertUnorderedList" title="Lista">• Lista</button>
+              <button type="button" id="linkBtn" title="Añadir enlace">Enlace</button>
+              <button type="button" data-command="removeFormat" title="Quitar formato">Limpiar</button>
+            </div>
+            <div id="bodyEditor" class="rich-editor" contenteditable="true" data-placeholder="Escribe aquí la noticia…"></div>
+          </fieldset>
+          <div class="publish-row">
+            <p id="saveMessage" class="form-message" role="status"></p>
+            <button id="draftBtn" class="secondary" type="button">Guardar borrador</button>
+            <button id="publishBtn" class="primary" type="submit">Publicar noticia</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="write.js?v=1"></script>
+</body>
+</html>

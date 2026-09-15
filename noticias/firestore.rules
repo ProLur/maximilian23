@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isEditor() {
+      return request.auth != null
+        && request.auth.token.email == 'mmartinezf001@educarex.es';
+    }
+
+    match /articles/{articleId} {
+      allow read: if resource.data.status == 'published' || isEditor();
+      allow create, delete: if isEditor();
+      allow update: if isEditor()
+        || (resource.data.status == 'published'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+          && request.resource.data.views == resource.data.views + 1);
+    }
+
+  }
+}
