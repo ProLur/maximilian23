@@ -2,7 +2,7 @@ const ORIGINS=new Set(['https://maximilian23.com','https://www.maximilian23.com'
 const SLOTS=new Set(['T1','T2','T3','T4','T5']);
 const MASTER_CANCEL_HASH='46635b56d3c7f0b7bb26adae2a1692debbfd145d4a0986a9137fe91e73e70360';
 const TEACHERS=new Set(['Lali','Inma','Mari Ángeles','Fani','Mawi','Mamen','Isabel','Rosa','Cristina','Marian','Chiqui','Gema','Paula','May','María Jesús','Silverio','Carmina','Manuel','Berna','Luis','Vero','Chari','Arancha','Susi','Fran','Sarah','Manoli','Admin','Adriana','Lidia'].map(userId));
-const FIJAS=[{dia:5,tramo:'T2',grupo:'Religión'},{dia:2,tramo:'T3',grupo:'5º Bilingüe'},{dia:3,tramo:'T3',grupo:'6º Bilingüe'},{dia:4,tramo:'T4',grupo:'5º Bilingüe'}];
+const FIJAS=[{dia:5,tramo:'T2',grupo:'Religión'},{dia:2,tramo:'T3',grupo:'5º Bilingüe'},{dia:3,tramo:'T3',grupo:'6º Bilingüe'},{dia:4,tramo:'T4',grupo:'5º Bilingüe'},{dia:2,tramo:'T4',grupo:'A.E.'},{dia:5,tramo:'T1',grupo:'A.E.'}];
 
 export default{async fetch(request,env){
   const origin=request.headers.get('Origin')||'',headers=cors(origin);
