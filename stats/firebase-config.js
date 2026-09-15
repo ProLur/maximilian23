@@ -1,0 +1,2 @@
+export const firebaseConfig={apiKey:'AIzaSyDo7ywdepy6xFNfqE85zpjJ-7bTXNv_m0g',authDomain:'maximilian23-estadisticas.firebaseapp.com',projectId:'maximilian23-estadisticas',storageBucket:'maximilian23-estadisticas.firebasestorage.app',messagingSenderId:'1086296137016',appId:'1:1086296137016:web:eee9161b3339d5df4c75cd'};
+export const isFirebaseConfigured=!Object.values(firebaseConfig).some(value=>value==='REEMPLAZAR');

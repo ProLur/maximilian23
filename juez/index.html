@@ -729,7 +729,7 @@
 
       <div class="weather-grid">
         <article class="weather-card">
-          <button class="weather-icon admin-trigger" id="adminTrigger" type="button" aria-label="Abrir control del veredicto" title="Control del veredicto">🌡️</button>
+          <button class="weather-icon admin-trigger" id="adminTrigger" type="button" aria-label="Abrir">🌡️</button>
           <div class="weather-label">Temperatura</div>
           <div class="weather-value" id="temperature"><span class="skeleton"></span></div>
         </article>
@@ -824,16 +824,13 @@
   </main>
 
   <div class="admin-modal" id="adminModal" hidden>
-    <div class="admin-dialog" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <div class="admin-dialog" role="dialog" aria-modal="true" aria-label="Acceso">
       <button class="admin-close" id="adminClose" type="button" aria-label="Cerrar">×</button>
 
       <div id="passwordStep">
-        <h2 id="adminTitle">Control del veredicto</h2>
-        <p>Introduce la contraseña para cambiar la decisión de hoy.</p>
         <form class="admin-form" id="passwordForm">
-          <label for="adminPassword">Contraseña</label>
-          <input id="adminPassword" type="password" autocomplete="off" required>
-          <button class="admin-button" type="submit">Continuar</button>
+          <input id="adminPassword" type="password" autocomplete="off" aria-label="Contraseña" required>
+          <button class="admin-button" type="submit" aria-label="Continuar">→</button>
         </form>
       </div>
 
@@ -1493,6 +1490,7 @@
 
     init();
   </script>
+  <script type="module" src="https://maximilian23.com/stats/tracker.js?v=1"></script>
 </body>
 </html>
 

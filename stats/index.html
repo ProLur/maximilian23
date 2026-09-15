@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estadísticas · Maximilian 23</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="../Cabeza.png">
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <header>
+    <a class="brand" href="../"><img src="../Cabeza.png" alt=""><span>Maximilian 23</span></a>
+    <div><span class="overline">PANEL DE ACTIVIDAD</span><h1>Estadísticas</h1></div>
+    <button id="refreshBtn" type="button">Actualizar</button>
+  </header>
+  <main>
+    <p class="privacy-note">Datos globales y anónimos. No se guardan nombres, direcciones IP ni ubicaciones personales.</p>
+    <section class="summary-grid" aria-label="Resumen">
+      <article><span>Visitas totales</span><strong id="totalViews">—</strong></article>
+      <article><span>Visitas hoy</span><strong id="todayViews">—</strong></article>
+      <article><span>Páginas con actividad</span><strong id="activePages">—</strong></article>
+      <article><span>Última visita</span><strong id="lastVisit">—</strong></article>
+    </section>
+    <section class="dashboard-grid">
+      <article class="panel ranking-panel">
+        <div class="panel-heading"><div><span class="overline">DE MAYOR A MENOR</span><h2>Páginas más visitadas</h2></div><span id="rangeLabel">Histórico</span></div>
+        <div id="loading" class="message">Cargando estadísticas…</div>
+        <div id="empty" class="message hidden">Todavía no hay visitas registradas.</div>
+        <div id="ranking" class="ranking"></div>
+      </article>
+      <aside>
+        <article class="panel">
+          <span class="overline">DISPOSITIVOS</span><h2>Cómo nos visitan</h2>
+          <div id="devices" class="device-list"></div>
+        </article>
+        <article class="panel">
+          <span class="overline">ÚLTIMOS 7 DÍAS</span><h2>Actividad reciente</h2>
+          <div id="weekChart" class="week-chart" aria-label="Visitas de la última semana"></div>
+        </article>
+      </aside>
+    </section>
+  </main>
+  <footer>Estadísticas privadas de funcionamiento · Maximilian 23</footer>
+  <script type="module" src="app.js?v=1"></script>
+</body>
+</html>
