@@ -84,6 +84,14 @@
       top: 0;
       z-index: 3;
     }
+    .week-range {
+      display: block;
+      margin-top: 4px;
+      color: #a8bcc7;
+      font-size: 0.62rem;
+      font-weight: normal;
+      text-transform: lowercase;
+    }
     th.semana-pasada {
       color: #ff5555 !important;
       background: linear-gradient(#ff444422, transparent) !important;
@@ -358,6 +366,15 @@
       return Math.max(1, Math.min(semanasCompletas + 1, TOTAL_WEEKS));
     }
 
+    function rangoSemana(weekNum) {
+      const inicio = new Date(FECHA_INICIO);
+      inicio.setDate(inicio.getDate() + (weekNum - 1) * 7);
+      const fin = new Date(inicio);
+      fin.setDate(fin.getDate() + 6);
+      const formato = date => date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+      return `${formato(inicio)}–${formato(fin)}`;
+    }
+
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     async function fetchWithRetry(url, options = {}, retries = 2) {
       let lastError;
@@ -411,6 +428,9 @@
       // Resaltar headers de semanas pasadas
       document.querySelectorAll('.week-header').forEach(th => {
         const weekNum = parseInt(th.dataset.week);
+        const rango = rangoSemana(weekNum);
+        th.innerHTML = `S${weekNum}<small class="week-range">${rango}</small>`;
+        th.title = `Semana ${weekNum}: ${rango}, de lunes a domingo`;
         th.classList.toggle('semana-pasada', weekNum < semanaActual);
         th.classList.toggle('semana-cuarentena', QUARANTINE_WEEKS.includes(weekNum));
         th.classList.toggle('mobile-hidden-week', weekNum !== semanaActual);
