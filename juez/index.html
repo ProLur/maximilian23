@@ -789,7 +789,7 @@
       </div>
       <div id="criterionDetails" hidden>
         <p class="subtitle" style="margin:0; max-width:none;">
-          Para decidir, se revisa la previsión completa entre las 11:30 y las 14:00: temperatura,
+          Para decidir, se revisa la previsión completa entre las 11:45 y las 12:15: temperatura,
           sensación térmica, humedad, lluvia, viento, rachas y fenómenos adversos. Se aplica un criterio
           preventivo para el deporte escolar, tomando como referencia las recomendaciones de la
           <strong>Asociación Española de Pediatría</strong> sobre hidratación, ejercicio y exposición al calor.
@@ -870,7 +870,9 @@
       longitude: -6.4173,
       timezone: "Europe/Madrid",
       matchTime: "11:45",
-      decisionTime: "11:30"
+      decisionTime: "11:30",
+      evaluationStart: "11:45",
+      evaluationEnd: "12:15"
     });
 
     const ADMIN_PASSWORD_HASH = "46635b56d3c7f0b7bb26adae2a1692debbfd145d4a0986a9137fe91e73e70360";
@@ -1043,7 +1045,7 @@
       }
 
       const window = [];
-      for (let minutes = timeToMinutes("11:30"); minutes <= timeToMinutes("14:00"); minutes += 15) {
+      for (let minutes = timeToMinutes(CONFIG.evaluationStart); minutes <= timeToMinutes(CONFIG.evaluationEnd); minutes += 15) {
         const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
         const mm = String(minutes % 60).padStart(2, "0");
         const sample = sampleAt(`${hh}:${mm}`);
@@ -1051,7 +1053,7 @@
       }
 
       if (!window.length) {
-        throw new Error("No se encontraron datos para la franja 11:30–14:00.");
+        throw new Error(`No se encontraron datos para la franja ${CONFIG.evaluationStart}–${CONFIG.evaluationEnd}.`);
       }
 
       return { ...display, window };
@@ -1118,7 +1120,7 @@
 
       els.forecastMeta.textContent =
         `Previsión para ${CONFIG.locationName} a las ${CONFIG.matchTime}. ` +
-        `Datos de Open‑Meteo actualizados al abrir la página. Se revisa la franja de 11:30 a 14:00.`;
+        `Datos de Open‑Meteo actualizados al abrir la página. Se revisa la franja de ${CONFIG.evaluationStart} a ${CONFIG.evaluationEnd}.`;
     }
 
     /*
@@ -1193,7 +1195,7 @@
         level: "play",
         title: "🟢 SE JUEGA",
         reason:
-          `Las condiciones previstas entre las 11:30 y las 14:00 están dentro de los límites establecidos. El partido puede celebrarse.`
+          `Las condiciones previstas entre las ${CONFIG.evaluationStart} y las ${CONFIG.evaluationEnd} están dentro de los límites establecidos. El partido puede celebrarse.`
       };
     }
     function joinReasons(items) {
