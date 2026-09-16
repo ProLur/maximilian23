@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Habla con Maximilian 23</title>
+  <style>
+    :root{color-scheme:dark;--cyan:#20ead4;--ink:#071219;--panel:#0c202a;--line:#1f5360}
+    *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--ink);color:#eefcff;overflow:hidden}
+    .app{height:100%;display:grid;grid-template-rows:auto 1fr auto;background:linear-gradient(155deg,#102b35,#071219 55%)}
+    header{display:flex;align-items:center;gap:11px;padding:13px 15px;background:#08171e;border-bottom:1px solid var(--line)}
+    header img{width:45px;height:45px;object-fit:contain;filter:drop-shadow(0 0 7px #20ead477)}
+    .title{min-width:0}.title strong{display:block;color:var(--cyan);font-size:16px}.title span{display:flex;align-items:center;gap:6px;font-size:12px;color:#b9d6dc}.dot{width:8px;height:8px;border-radius:50%;background:#53e38c;box-shadow:0 0 7px #53e38c}
+    #chat{overflow:auto;padding:16px 13px 20px;scroll-behavior:smooth}
+    .bot,.user{max-width:88%;margin:0 0 11px;padding:10px 12px;border-radius:16px;line-height:1.42;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;animation:in .2s ease}
+    .bot{background:#17313c;border:1px solid #285363;border-bottom-left-radius:5px}.user{margin-left:auto;background:#00bca9;color:#041412;border-bottom-right-radius:5px}
+    .bot a{color:#73f5e7}.bot strong{color:#fff}.typing{display:flex;gap:4px;padding:4px}.typing i{width:6px;height:6px;background:#9bd5da;border-radius:50%;animation:b 1s infinite alternate}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+    footer{padding:10px;background:#08171e;border-top:1px solid var(--line)}
+    form{display:flex;gap:8px}input{min-width:0;flex:1;border:1px solid #2c6170;border-radius:12px;background:#102832;color:#fff;padding:11px 12px;font-size:16px;outline:none}input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #20ead422}
+    button{border:0;border-radius:12px;background:var(--cyan);color:#02100f;font-weight:800;padding:0 14px;cursor:pointer}button:disabled,input:disabled{opacity:.6}
+    .legal{display:block;margin-top:7px;text-align:center;color:#7fa8b0;font-size:10px}.legal a{color:#9bcbd1}
+    @keyframes in{from{opacity:0;transform:translateY(5px)}}@keyframes b{to{opacity:.25;transform:translateY(-3px)}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header><img src="../Cabeza.png" alt=""><div class="title"><strong>Maximilian 23</strong><span><i class="dot"></i> Agente del colegio</span></div></header>
+    <section id="chat" aria-live="polite"></section>
+    <footer>
+      <form id="form"><input id="message" autocomplete="off" placeholder="Escribe tu mensaje…" aria-label="Mensaje"><button id="send" type="submit">Enviar</button></form>
+      <small class="legal">Al conversar aceptas las <a href="../politica.html" target="_blank" rel="noopener">políticas de uso</a>.</small>
+    </footer>
+  </main>
+  <script>
+    const API_URL='https://max23.onrender.com/chat',chat=document.querySelector('#chat'),input=document.querySelector('#message'),send=document.querySelector('#send');
+    const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function render(text){return esc(text).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')}
+    function bubble(kind,content,html=false){const el=document.createElement('div');el.className=kind;if(html)el.innerHTML=content;else el.textContent=content;chat.append(el);chat.scrollTop=chat.scrollHeight;return el}
+    bubble('bot','Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. ¿Qué quieres saber?');
+    document.querySelector('#form').addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message)return;bubble('user',message);input.value='';input.disabled=send.disabled=true;const wait=bubble('bot','<span class="typing"><i></i><i></i><i></i></span>',true);try{const response=await fetch(API_URL,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});if(!response.ok)throw new Error();const data=await response.json();wait.innerHTML=render(data.reply||'No he podido responder.');}catch{wait.textContent='No he podido conectar. Inténtalo de nuevo en unos segundos.'}finally{input.disabled=send.disabled=false;input.focus();chat.scrollTop=chat.scrollHeight}});
+  </script>
+</body>
+</html>
