@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071019">
+  <title>Radar de mercados · Maximilian 23</title>
+  <meta name="description" content="Panel de seguimiento de bolsa con valores de España y Estados Unidos.">
+  <link rel="preconnect" href="https://s3.tradingview.com">
+  <style>
+    :root{--bg:#071019;--panel:#0d1a26;--panel2:#112332;--line:#20384a;--text:#f2f7fa;--muted:#8fa7b7;--cyan:#33e0cf;--lime:#c8f04b;--orange:#ff9d57;--red:#ff6b73;--shadow:0 24px 70px rgba(0,0,0,.32)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 85% 0,#113341 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+    button,input{font:inherit}.shell{width:min(1480px,calc(100% - 36px));margin:auto}.topbar{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.04em}.brand-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid #2a5a68;border-radius:14px;background:linear-gradient(145deg,#163d49,#08131d);font-size:22px;box-shadow:0 0 30px rgba(51,224,207,.13)}
+    .brand small{display:block;color:var(--cyan);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:2px}.top-status{color:var(--muted);font-size:.82rem}.top-status i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);margin-right:8px}
+    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center;padding:70px 0 50px}.eyebrow{color:var(--lime);font-size:.78rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase}.hero h1{font-size:clamp(3rem,7vw,7.2rem);line-height:.86;letter-spacing:-.065em;margin:16px 0 24px;max-width:900px}.hero h1 span{color:transparent;-webkit-text-stroke:1px var(--cyan)}.hero p{color:#b9c9d3;font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.7;max-width:690px}
+    .searchbox{background:linear-gradient(145deg,rgba(18,38,52,.96),rgba(10,23,33,.96));border:1px solid #25475a;border-radius:26px;padding:26px;box-shadow:var(--shadow)}.searchbox label{display:block;font-weight:850;font-size:1.05rem;margin-bottom:12px}.searchrow{display:flex;gap:10px}.searchrow input{width:100%;min-width:0;color:white;background:#07131d;border:1px solid #315267;border-radius:14px;padding:15px 16px;outline:none}.searchrow input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(51,224,207,.1)}.searchrow button{border:0;border-radius:14px;padding:0 20px;background:var(--cyan);font-weight:900;color:#04201e;cursor:pointer}.suggestions{position:relative}.suggestion-list{position:absolute;left:0;right:0;top:8px;z-index:5;background:#0b1822;border:1px solid #294658;border-radius:14px;box-shadow:var(--shadow);overflow:hidden;display:none}.suggestion-list.open{display:block}.suggestion-list button{display:flex;justify-content:space-between;width:100%;padding:12px 14px;border:0;border-bottom:1px solid #1d3342;background:none;color:white;cursor:pointer;text-align:left}.suggestion-list button:hover{background:#132b3a}.suggestion-list span{color:var(--muted);font-size:.8rem}.hint{color:var(--muted);font-size:.78rem;margin:10px 0 0}
+    .section{padding:34px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:20px}.section-head h2{font-size:clamp(1.8rem,3vw,3rem);letter-spacing:-.04em;margin:0}.section-head p{max-width:680px;color:var(--muted);line-height:1.55;margin:0}.rank-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.market-card{background:linear-gradient(155deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:22px;padding:21px;min-width:0}.market-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.market-title h3{margin:0;font-size:1.05rem}.market-title span{font-size:.68rem;font-weight:900;letter-spacing:.12em;color:var(--lime);border:1px solid rgba(200,240,75,.28);padding:6px 8px;border-radius:999px}.picks{list-style:none;padding:0;margin:0}.pick{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:10px;padding:12px 0;border-top:1px solid rgba(255,255,255,.07)}.pick:first-child{border-top:0}.rank{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#172e3d;color:var(--cyan);font-weight:900}.pick b{display:block;font-size:.9rem}.pick small{color:var(--muted)}.pick button{border:1px solid #315064;background:transparent;color:#d9e6ed;border-radius:9px;padding:7px 8px;cursor:pointer}.pick button:hover{border-color:var(--cyan);color:var(--cyan)}
+    .tv-shell{height:465px;background:#08131c;border:1px solid var(--line);border-radius:22px;overflow:hidden}.tv-shell.large{height:520px}.tradingview-widget-container,.tradingview-widget-container__widget{height:100%;width:100%}.private-note{display:flex;align-items:center;gap:14px;margin-top:14px;padding:15px 18px;border:1px solid rgba(255,157,87,.25);border-radius:14px;background:rgba(255,157,87,.07);color:#ffd1ad}.private-note strong{color:var(--orange)}
+    .search-result{display:none;margin-top:20px}.search-result.show{display:block}.result-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.result-head h3{margin:0}.result-head button{background:none;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer}
+    .method{display:grid;grid-template-columns:1fr 1fr;gap:18px}.note{background:#0b1822;border:1px solid var(--line);border-radius:18px;padding:22px;color:#aec0ca;line-height:1.6}.note strong{color:white}.footer{display:flex;justify-content:space-between;gap:24px;padding:30px 0 42px;margin-top:30px;border-top:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:.78rem}.footer a{color:var(--cyan)}
+    @media(max-width:950px){.hero{grid-template-columns:1fr;padding-top:48px}.rank-grid{grid-template-columns:1fr}.method{grid-template-columns:1fr}.tv-shell{height:560px}}
+    @media(max-width:600px){.shell{width:min(100% - 22px,1480px)}.top-status{display:none}.hero{padding:38px 0 22px}.hero h1{font-size:3.25rem}.searchrow{display:grid}.searchrow button{padding:13px}.section{padding:24px 0}.section-head{display:block}.section-head p{margin-top:10px}.tv-shell,.tv-shell.large{height:620px}.footer{display:block}.footer span{display:block;margin-top:10px}}
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <div class="brand"><span class="brand-mark">↗</span><span><small>Maximilian 23</small>RADAR DE MERCADOS</span></div>
+    <div class="top-status"><i></i>Datos de mercado servidos por TradingView</div>
+  </header>
+
+  <main>
+    <section class="shell hero">
+      <div>
+        <div class="eyebrow">España · Estados Unidos</div>
+        <h1>El mercado,<br><span>de un vistazo.</span></h1>
+        <p>Un panel directo para vigilar tus valores, descubrir compañías con buen comportamiento técnico y consultar cualquier acción sin salir de la página.</p>
+      </div>
+      <div class="searchbox">
+        <label for="stock-search">Busca una empresa</label>
+        <div class="suggestions">
+          <div class="searchrow"><input id="stock-search" autocomplete="off" placeholder="Ej.: Iberdrola, Nvidia, Coca-Cola…"><button id="search-button">Consultar</button></div>
+          <div class="suggestion-list" id="suggestion-list"></div>
+        </div>
+        <p class="hint">Escribe el nombre o el símbolo. El resultado aparecerá aquí mismo.</p>
+      </div>
+    </section>
+
+    <section class="shell search-result" id="search-result">
+      <div class="result-head"><h3 id="result-title">Resultado</h3><button id="close-result">Cerrar</button></div>
+      <div class="tv-shell large" id="result-widget"></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><h2>Los 5 destacados</h2><p>Selección orientativa por tendencia, liquidez y comportamiento reciente. Pulsa cualquier valor para abrir su ficha completa.</p></div>
+      <div class="rank-grid" id="rankings"></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><h2>Siempre en el radar</h2><p>Precio, variación y evolución de los valores que quieres seguir permanentemente.</p></div>
+      <div class="tv-shell" id="watchlist-widget"></div>
+      <div class="private-note"><span>◉</span><div><strong>SpaceX no cotiza en bolsa.</strong> Es una empresa privada y, por tanto, no existe todavía un precio público oficial de sus acciones.</div></div>
+    </section>
+
+    <section class="shell section method">
+      <div class="note"><strong>¿Qué significa “atractivo”?</strong><br>Es una lectura cuantitativa de fortaleza técnica, actividad y tendencia; no una predicción ni una recomendación de compra.</div>
+      <div class="note"><strong>Sobre los precios</strong><br>La disponibilidad en tiempo real o con retraso depende de cada mercado y de la fuente de datos. Comprueba siempre el precio con tu intermediario antes de operar.</div>
+    </section>
+  </main>
+
+  <footer class="shell footer"><span>© 2026 Maximilian 23 · Panel informativo</span><span>Datos y gráficos: <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a></span></footer>
+
+  <script>
+    const groups = [
+      {title:'Mercado continuo',tag:'ESPAÑA',items:[['Inditex','BME:ITX'],['Iberdrola','BME:IBE'],['Ferrovial','BME:FER'],['Aena','BME:AENA'],['Amadeus','BME:AMS']]},
+      {title:'IBEX 35',tag:'GRANDES VALORES',items:[['Banco Santander','BME:SAN'],['BBVA','BME:BBVA'],['Indra','BME:IDR'],['Repsol','BME:REP'],['Cellnex','BME:CLNX']]},
+      {title:'Estados Unidos',tag:'USA',items:[['Nvidia','NASDAQ:NVDA'],['Microsoft','NASDAQ:MSFT'],['Apple','NASDAQ:AAPL'],['Amazon','NASDAQ:AMZN'],['Tesla','NASDAQ:TSLA']]}
+    ];
+    const catalog = [
+      ['Santander','BME:SAN'],['ENCE','BME:ENC'],['Tesla','NASDAQ:TSLA'],['Apple','NASDAQ:AAPL'],['Disney','NYSE:DIS'],['Amazon','NASDAQ:AMZN'],['PRISA','BME:PRS'],['DIA','BME:DIA'],
+      ['Inditex','BME:ITX'],['Iberdrola','BME:IBE'],['Ferrovial','BME:FER'],['Aena','BME:AENA'],['Amadeus','BME:AMS'],['BBVA','BME:BBVA'],['Indra','BME:IDR'],['Repsol','BME:REP'],['Cellnex','BME:CLNX'],
+      ['Nvidia','NASDAQ:NVDA'],['Microsoft','NASDAQ:MSFT'],['Meta','NASDAQ:META'],['Alphabet / Google','NASDAQ:GOOGL'],['Netflix','NASDAQ:NFLX'],['Coca-Cola','NYSE:KO'],['McDonald’s','NYSE:MCD'],['Nike','NYSE:NKE'],['Intel','NASDAQ:INTC'],['AMD','NASDAQ:AMD'],
+      ['CaixaBank','BME:CABK'],['Banco Sabadell','BME:SAB'],['Bankinter','BME:BKT'],['Telefónica','BME:TEF'],['Naturgy','BME:NTGY'],['Endesa','BME:ELE'],['Acciona','BME:ANA'],['Mapfre','BME:MAP'],['Grifols','BME:GRF'],['Solaria','BME:SLR']
+    ];
+    const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    const rankings=document.getElementById('rankings');
+    groups.forEach(g=>{const card=document.createElement('article');card.className='market-card';card.innerHTML=`<div class="market-title"><h3>${g.title}</h3><span>${g.tag}</span></div><ol class="picks">${g.items.map((x,i)=>`<li class="pick"><span class="rank">${i+1}</span><span><b>${x[0]}</b><small>${x[1]}</small></span><button data-symbol="${x[1]}" data-name="${x[0]}" aria-label="Ver ${x[0]}">Ver</button></li>`).join('')}</ol>`;rankings.appendChild(card)});
+    function widgetScript(target,src,config){target.innerHTML='';const wrap=document.createElement('div');wrap.className='tradingview-widget-container';const inner=document.createElement('div');inner.className='tradingview-widget-container__widget';wrap.appendChild(inner);const script=document.createElement('script');script.type='text/javascript';script.src=src;script.async=true;script.textContent=JSON.stringify(config);wrap.appendChild(script);target.appendChild(wrap)}
+    function showSymbol(name,symbol){document.getElementById('result-title').textContent=`${name} · ${symbol}`;const box=document.getElementById('search-result');box.classList.add('show');widgetScript(document.getElementById('result-widget'),'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js',{symbols:[[name+'|1D',symbol+'|1D']],chartOnly:false,width:'100%',height:'100%',locale:'es',colorTheme:'dark',autosize:true,showVolume:true,showMA:true,hideDateRanges:false,hideMarketStatus:false,hideSymbolLogo:false,scalePosition:'right',scaleMode:'Normal',fontFamily:'Trebuchet MS, sans-serif',fontSize:'12',noTimeScale:false,valuesTracking:'1',changeMode:'price-and-percent',chartType:'area',lineWidth:2,lineType:0,dateRanges:['1d|1','1m|30','3m|60','12m|1D','60m|1W','all|1M']});box.scrollIntoView({behavior:'smooth',block:'start'})}
+    document.addEventListener('click',e=>{const b=e.target.closest('[data-symbol]');if(b)showSymbol(b.dataset.name,b.dataset.symbol)});
+    const input=document.getElementById('stock-search'),list=document.getElementById('suggestion-list');
+    function matches(){const q=norm(input.value);return q?catalog.filter(x=>norm(x[0]+' '+x[1]).includes(q)).slice(0,7):[]}
+    function draw(){const found=matches();list.innerHTML=found.map((x,i)=>`<button data-index="${i}"><b>${x[0]}</b><span>${x[1]}</span></button>`).join('');list.classList.toggle('open',!!found.length);list.querySelectorAll('button').forEach((b,i)=>b.onclick=()=>{const x=found[i];input.value=x[0];list.classList.remove('open');showSymbol(x[0],x[1])})}
+    input.addEventListener('input',draw);input.addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+    function search(){const q=norm(input.value);const x=catalog.find(x=>norm(x[0])===q||norm(x[1])===q)||matches()[0];list.classList.remove('open');if(x)showSymbol(x[0],x[1]);else{list.innerHTML='<button><b>No encontrado</b><span>Prueba con el nombre o ticker</span></button>';list.classList.add('open')}}
+    document.getElementById('search-button').onclick=search;document.getElementById('close-result').onclick=()=>document.getElementById('search-result').classList.remove('show');document.addEventListener('click',e=>{if(!e.target.closest('.suggestions'))list.classList.remove('open')});
+    widgetScript(document.getElementById('watchlist-widget'),'https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js',{colorTheme:'dark',dateRange:'12M',showChart:true,locale:'es',width:'100%',height:'100%',largeChartUrl:'',isTransparent:true,showSymbolLogo:true,showFloatingTooltip:false,plotLineColorGrowing:'rgba(51, 224, 207, 1)',plotLineColorFalling:'rgba(255, 107, 115, 1)',gridLineColor:'rgba(42, 66, 81, .35)',scaleFontColor:'rgba(143, 167, 183, 1)',belowLineFillColorGrowing:'rgba(51, 224, 207, .10)',belowLineFillColorFalling:'rgba(255, 107, 115, .10)',belowLineFillColorGrowingBottom:'rgba(51, 224, 207, 0)',belowLineFillColorFallingBottom:'rgba(255, 107, 115, 0)',symbolActiveColor:'rgba(51, 224, 207, .10)',tabs:[{title:'Mi selección',symbols:[{s:'BME:SAN',d:'Santander'},{s:'BME:ENC',d:'ENCE'},{s:'NASDAQ:TSLA',d:'Tesla'},{s:'NASDAQ:AAPL',d:'Apple'},{s:'NYSE:DIS',d:'Disney'},{s:'NASDAQ:AMZN',d:'Amazon'},{s:'BME:PRS',d:'PRISA'},{s:'BME:DIA',d:'DIA'}]}]});
+  </script>
+</body>
+</html>
