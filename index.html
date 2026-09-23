@@ -324,7 +324,14 @@
             transition: all .3s ease; backdrop-filter: blur(4px); z-index: 900; cursor: pointer;
         }
         #policyButton:hover { background: rgba(0,255,204,.2); border-color: #00ffcc; box-shadow: 0 0 6px #00ffcc88; }
-        @media (max-width: 767px) { #policyButton { display: none; } }
+        @media (max-width: 767px) { #policyButton { display: none; } }<div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div><div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
+        <div class="menu-item teacher-link" onclick="openBlog()">Blog de CITE</div><div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
+        <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
+                    <div class="menu-item teacher-link" onclick="openBlog()">Blog de CITE</div>const menuIcon = document.getElementById('menuIcon');function openBlog() {
+            window.open('https://maximilian23.com/blog/', '_blank');
+            closeMobileMenu();
+        }
+        const menuIcon = document.getElementById('menuIcon');
         #policyBanner {
             position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(13,17,23,0.97); color: #00ffcc;
             text-align: center; padding: 18px 10px; border-top: 2px solid #00ffcc; font-family: "Courier New", monospace; font-size: 14px;
