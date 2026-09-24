@@ -372,6 +372,7 @@
         <div class="menu-item teacher-link" onclick="openAula()">Reservas · Aula del Futuro</div>
         <div class="menu-item teacher-link" onclick="openJuez()">¿Se juega?</div>
         <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
+        <div class="menu-item teacher-link" onclick="openBlog()">Blog de CITE</div>
         <div class="menu-image">
             <img id="mobileMaxImage" src="https://maximilian23.com/max.png" alt="Maximilian">
         </div>
@@ -393,6 +394,7 @@
                     <div class="menu-item teacher-link" onclick="openAula()">Reservas · Aula del Futuro</div>
                     <div class="menu-item teacher-link" onclick="openJuez()">¿Se juega?</div>
                     <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
+                    <div class="menu-item teacher-link" onclick="openBlog()">Blog de CITE</div>
                 </div>
             </div>
             <div class="image-container">
@@ -450,6 +452,10 @@
         }
         function openCarrusel() {
             window.open('https://maximilian23.com/carrusel/', '_blank');
+            closeMobileMenu();
+        }
+        function openBlog() {
+            window.open('https://maximilian23.com/blog/', '_blank');
             closeMobileMenu();
         }
         const menuIcon = document.getElementById('menuIcon');
