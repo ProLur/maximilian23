@@ -186,19 +186,20 @@
             border-right: 2px solid #00ffcc;
             position: relative;
             flex-direction: column;
-            padding-top: 170px;
+            padding: 14px 20px 18px;
+            gap: 10px;
+            overflow: hidden;
         }
         .button-bar {
-            position: absolute;
-            top: 12px;
-            left: 0;
-            right: 0;
+            position: static;
             display: flex;
             justify-content: center;
             gap: 12px;
-            padding: 0 20px;
+            padding: 0;
             flex-wrap: wrap;
             z-index: 20;
+            flex: 0 0 auto;
+            width: 100%;
         }
         .button-group {
             width: 100%;
@@ -230,16 +231,19 @@
             box-shadow: 0 0 14px #00ffcc88;
             transform: scale(1.06);
         }
-        .image-container { 
-            margin-top: 20px; 
+        .image-container {
+            margin-top: 8px;
             text-align: center; 
             flex: 1; 
             display: flex; 
             align-items: center; 
-            justify-content: center; 
+            justify-content: center;
+            min-height: 0;
         }
         .left-panel img {
-            max-width: 220px; 
+            max-width: 220px;
+            max-height: min(43vh, 330px);
+            object-fit: contain;
             height: auto; 
             border-radius: 10px; 
             border: 2px solid #00ffcc;
@@ -324,20 +328,15 @@
             transition: all .3s ease; backdrop-filter: blur(4px); z-index: 900; cursor: pointer;
         }
         #policyButton:hover { background: rgba(0,255,204,.2); border-color: #00ffcc; box-shadow: 0 0 6px #00ffcc88; }
-        @media (max-width: 767px) { #policyButton { display: none; } }<div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div><div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
-        <div class="menu-item teacher-link" onclick="openBlog()">Blog de CITE</div><div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
-        <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
-                    <div class="menu-item teacher-link" onclick="openBlog()">Blog de CITE</div>const menuIcon = document.getElementById('menuIcon');function openBlog() {
-            window.open('https://maximilian23.com/blog/', '_blank');
-            closeMobileMenu();
-        }
-        const menuIcon = document.getElementById('menuIcon');
+        @media (max-width: 767px) { #policyButton { display: none; } }
         #policyBanner {
             position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(13,17,23,0.97); color: #00ffcc;
             text-align: center; padding: 18px 10px; border-top: 2px solid #00ffcc; font-family: "Courier New", monospace; font-size: 14px;
-            transform: translateY(100%); transition: transform 0.6s ease; z-index: 999;
+            transform: translateY(calc(100% + 4px)); visibility: hidden; pointer-events: none;
+            transition: transform 0.6s ease, visibility 0s linear 0.6s; z-index: 1100;
+            box-sizing: border-box;
         }
-        #policyBanner.show { transform: translateY(0); }
+        #policyBanner.show { transform: translateY(0); visibility: visible; pointer-events: auto; transition-delay: 0s; }
         #policyBanner a { color: #00ffcc; text-decoration: underline; font-weight: bold; }
         #policyBanner a:hover { color: #33ffe6; }
         #acceptPolicies { background: #00ffcc; color: #000; border: none; padding: 6px 12px; margin-left: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
@@ -627,9 +626,8 @@
             typeWriterEffect(b, "Hola, soy Maximilian 23. Estoy aquí para ayudarte con la información del colegio. Recuerda escribir correctamente para que pueda entenderte bien. ¿Qué quieres saber?");
             scrollBottom();
             const accepted = localStorage.getItem("policiesAccepted");
-            if (!accepted) {
-                document.getElementById("policyBanner").classList.add("show");
-            }
+            const policyBanner = document.getElementById("policyBanner");
+            policyBanner.classList.toggle("show", !accepted);
         });
         const opens = [document.getElementById("policyButton"), document.getElementById("policyIcon")];
         opens.forEach(o => {
@@ -651,7 +649,11 @@
         }
         document.getElementById("acceptPolicies").addEventListener("click", () => {
             localStorage.setItem("policiesAccepted", "true");
-            document.getElementById("policyBanner").classList.remove("show");
+            const policyBanner = document.getElementById("policyBanner");
+            policyBanner.classList.remove("show");
+            policyBanner.addEventListener("transitionend", () => {
+                if (!policyBanner.classList.contains("show")) policyBanner.hidden = true;
+            }, { once: true });
         });
     </script>
     <script type="module" src="https://maximilian23.com/stats/tracker.js?v=1"></script>
