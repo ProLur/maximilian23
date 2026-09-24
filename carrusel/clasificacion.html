@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071219">
+  <title>Clasificación · Juego del Silencio</title>
+  <style>
+    :root{color-scheme:dark;--ink:#f4ffff;--muted:#9eb8c0;--cyan:#20ead4;--gold:#ffbd59;--panel:#112630}
+    *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden}body{display:grid;place-items:center;background:radial-gradient(circle at 14% 18%,#0d766844,transparent 35%),radial-gradient(circle at 90% 85%,#ff9f1c20,transparent 34%),#071219;color:var(--ink);font-family:Inter,Segoe UI,system-ui,sans-serif}
+    main{width:min(94vw,1500px);height:min(92vh,850px);display:grid;grid-template-rows:auto 1fr auto;gap:clamp(12px,2vh,24px);padding:clamp(18px,3vw,46px)}
+    header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #20ead466;padding-bottom:clamp(12px,2vh,22px)}
+    .brand{display:flex;align-items:center;gap:clamp(12px,1.6vw,24px)}.brand img{width:clamp(56px,6vw,92px);height:clamp(56px,6vw,92px);object-fit:contain;filter:drop-shadow(0 0 18px #20ead455)}
+    .eyebrow{margin:0 0 5px;color:var(--gold);font-size:clamp(12px,1.15vw,18px);font-weight:900;letter-spacing:.2em;text-transform:uppercase}h1{margin:0;font:900 clamp(30px,4vw,68px)/.98 Georgia,serif;letter-spacing:-.035em}.course{color:var(--cyan);font-size:clamp(15px,1.5vw,23px);font-weight:800;text-align:right}
+    #ranking{display:grid;align-content:center;gap:clamp(8px,1.25vh,16px)}.row{display:grid;grid-template-columns:clamp(46px,5vw,76px) 1fr auto;align-items:center;gap:clamp(12px,2vw,30px);min-height:clamp(54px,8.2vh,82px);padding:0 clamp(18px,2.4vw,36px);border:1px solid #20ead42f;border-radius:18px;background:linear-gradient(90deg,#132d38ee,#0d2029dd);box-shadow:0 10px 30px #0004}.row:first-child{border-color:#ffbd5988;background:linear-gradient(90deg,#493615aa,#172c32 45%,#10252e);box-shadow:0 12px 34px #0006,0 0 22px #ffbd5917}.pos{color:var(--muted);font:900 clamp(19px,2.1vw,31px)/1 Georgia,serif}.row:first-child .pos{color:var(--gold)}.team{font:900 clamp(22px,2.65vw,42px)/1.1 Georgia,serif}.points{display:flex;align-items:baseline;gap:.45em;color:var(--cyan);font-size:clamp(28px,3.2vw,50px);font-weight:950;font-variant-numeric:tabular-nums}.points small{color:var(--muted);font-size:.34em;letter-spacing:.12em;text-transform:uppercase}
+    footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:clamp(11px,1.05vw,16px)}.live{display:flex;align-items:center;gap:9px}.dot{width:10px;height:10px;border-radius:50%;background:#46eb88;box-shadow:0 0 12px #46eb88}
+    .error{align-self:center;text-align:center;color:#ffd1d1;font-size:clamp(18px,2vw,30px)}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand"><img src="../Cabeza.png" alt=""><div><p class="eyebrow">Juego del Silencio</p><h1>Clasificación</h1></div></div>
+      <div class="course">Curso 2026/27</div>
+    </header>
+    <section id="ranking" aria-live="polite"><p class="error">Cargando clasificación…</p></section>
+    <footer><span class="live"><i class="dot"></i> Datos actualizados automáticamente</span><span id="updated"></span></footer>
+  </main>
+  <script>
+    const URL='https://aula-del-futuro-reservas.mmartinezf001.workers.dev/clasif';
+    const TEAMS=['3º A','3º B','4º A','4º B','5º A','5º B'];
+    const ranking=document.querySelector('#ranking'),updated=document.querySelector('#updated');
+    const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const total=values=>(Array.isArray(values)?values:[]).reduce((sum,value)=>sum+(Number(value)||0),0);
+    const format=value=>Number(value).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
+    async function load(){
+      try{
+        const response=await fetch(`${URL}?t=${Date.now()}`,{cache:'no-store'});
+        if(!response.ok)throw new Error();
+        const data=await response.json(),scores=data.scores||{};
+        const rows=TEAMS.map(team=>({team,points:total(scores[team])})).sort((a,b)=>b.points-a.points||a.team.localeCompare(b.team,'es'));
+        ranking.innerHTML=rows.map((row,index)=>`<article class="row"><span class="pos">${index+1}.º</span><span class="team">${esc(row.team)}</span><strong class="points">${format(row.points)} <small>puntos</small></strong></article>`).join('');
+        updated.textContent=data.lastUpdate?`Actualizado ${new Date(data.lastUpdate).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:'Clasificación en directo';
+      }catch(error){ranking.innerHTML='<p class="error">No se ha podido cargar la clasificación.</p>';updated.textContent='Reintentando…'}
+    }
+    load();setInterval(load,60_000);
+  </script>
+</body>
+</html>

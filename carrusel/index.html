@@ -32,7 +32,7 @@
       object-position: center;
     }
     .slide.saliendo-izquierda { transform: translateX(-105vw); opacity: 0; }
-    #juez { display: none; pointer-events: auto; }
+    #juez, #clasificacion { display: none; pointer-events: auto; }
     #pantalla-completa {
       position: fixed;
       top: max(12px, env(safe-area-inset-top));
@@ -82,6 +82,14 @@
     allow="autoplay; fullscreen"
     referrerpolicy="strict-origin-when-cross-origin">
   </iframe>
+  <iframe
+    id="clasificacion"
+    class="slide"
+    title="Clasificación del Juego del Silencio"
+    tabindex="-1"
+    src="about:blank"
+    referrerpolicy="strict-origin-when-cross-origin">
+  </iframe>
   <div id="estado">Cargando imágenes…</div>
   <button
     id="pantalla-completa"
@@ -98,14 +106,17 @@
     const GITHUB_REPO = 'maximilian23';
     const FOTOS_PATH = 'carrusel/fotos';
     const JUEZ_URL = 'https://www.maximilian23.com/juez';
+    const CLASIFICACION_URL = 'https://www.maximilian23.com/carrusel/clasificacion.html';
     const FOTO_MS = 10_000;
     const JUEZ_MS = 15_000;
+    const CLASIFICACION_MS = 15_000;
     const TRANSICION_MS = 800;
     const ACTUALIZAR_LISTA_MS = 5 * 60_000;
     const EXTENSIONES = /\.(?:avif|gif|jpe?g|png|webp)$/i;
 
     const foto = document.querySelector('#foto');
     const juez = document.querySelector('#juez');
+    const clasificacion = document.querySelector('#clasificacion');
     const estado = document.querySelector('#estado');
     const botonPantallaCompleta = document.querySelector('#pantalla-completa');
     let imagenes = [];
@@ -227,9 +238,11 @@
       }
     }
 
-    function mostrarDiapositiva(imagen) {
+    function mostrarDiapositiva(item) {
       return new Promise(resolve => {
-        const elemento = imagen ? foto : juez;
+        const esClasificacion = item === 'clasificacion';
+        const imagen = item && !esClasificacion ? item : null;
+        const elemento = esClasificacion ? clasificacion : (imagen ? foto : juez);
         let terminado = false;
         let visible = false;
         let temporizador;
@@ -251,6 +264,8 @@
           foto.onerror = null;
           juez.onload = null;
           juez.onerror = null;
+          clasificacion.onload = null;
+          clasificacion.onerror = null;
           if (animar && visible) await salirHaciaLaDerecha(elemento, direccion);
           else elemento.style.display = 'none';
           resolve(direccion);
@@ -268,6 +283,7 @@
         };
         foto.style.display = 'none';
         juez.style.display = 'none';
+        clasificacion.style.display = 'none';
         estado.style.display = 'none';
         const listo = duracion => {
           if (terminado || visible) return;
@@ -278,7 +294,11 @@
         };
         // Límite de carga; no deja el carrusel bloqueado por un recurso caído.
         temporizador = setTimeout(() => finalizar(1, false), 15_000);
-        if (imagen) {
+        if (esClasificacion) {
+          clasificacion.onload = () => listo(CLASIFICACION_MS);
+          clasificacion.onerror = () => finalizar(1, false);
+          clasificacion.src = `${CLASIFICACION_URL}?carrusel=${Date.now()}`;
+        } else if (imagen) {
           foto.alt = imagen.nombre;
           foto.onload = () => listo(FOTO_MS);
           foto.onerror = () => finalizar(1, false);
@@ -294,9 +314,9 @@
     function crearSecuencia() {
       const secuencia = [];
       for (let i = 0; i < imagenes.length; i += 3) {
-        secuencia.push(...imagenes.slice(i, i + 3), null);
+        secuencia.push(...imagenes.slice(i, i + 3), null, 'clasificacion');
       }
-      return secuencia.length ? secuencia : [null];
+      return secuencia.length ? secuencia : [null, 'clasificacion'];
     }
 
     async function iniciar() {
@@ -306,7 +326,7 @@
       while (true) {
         // Adelanta la descarga de la próxima foto, también durante el juez.
         const siguienteFoto = secuencia[(indice + 1) % secuencia.length];
-        if (siguienteFoto) {
+        if (siguienteFoto && siguienteFoto !== 'clasificacion') {
           const precarga = new Image();
           precarga.src = siguienteFoto.url;
         }
