@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function hasEmail(email) {
+      return request.auth != null && request.auth.token.email == email;
+    }
+    function isMainEditor() {
+      return hasEmail('mmartinezf001@educarex.es');
+    }
+    function isAulaEditor() {
+      return hasEmail('fmhernandez02@educarex.es');
+    }
+
+    match /articles/{articleId} {
+      allow read: if resource.data.status == 'published' || isMainEditor();
+      allow create, delete: if isMainEditor();
+      allow update: if isMainEditor()
+        || (resource.data.status == 'published'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+          && request.resource.data.views == resource.data.views + 1);
+    }
+
+    match /citePosts/{postId} {
+      allow read: if resource.data.status == 'published' || isMainEditor();
+      allow create, update, delete: if isMainEditor();
+    }
+
+    match /aulaBlogPosts/{postId} {
+      allow read: if resource.data.status == 'published' || isAulaEditor();
+      allow create, update, delete: if isAulaEditor();
+    }
+  }
+}
