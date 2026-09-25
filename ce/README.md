@@ -2,6 +2,8 @@
 
 Periódico digital de Maximilian 23.
 
+La aplicación pública está alojada directamente en `https://maximilian23.com/ce/`.
+
 ## Servicios de Firebase
 
 - Cloud Firestore: colección `articles`, incluyendo las imágenes optimizadas.

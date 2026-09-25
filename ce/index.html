@@ -2,11 +2,55 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Crónica Escolar · Maximilian 23</title>
-  <link rel="canonical" href="https://maximilian23.com/noticias/">
-  <meta http-equiv="refresh" content="0;url=https://maximilian23.com/noticias/">
-  <script>location.replace('https://maximilian23.com/noticias/'+location.search+location.hash)</script>
+  <meta name="description" content="Crónica Escolar, el periódico de nuestra comunidad educativa.">
+  <link rel="icon" type="image/png" href="favicon-cronica.png?v=2">
+  <link rel="stylesheet" href="styles.css?v=2">
 </head>
-<body><p>Abriendo <a href="https://maximilian23.com/noticias/">Crónica Escolar</a>…</p></body>
+<body>
+  <header class="masthead">
+    <a class="brand-link" href="./" aria-label="Portada de Crónica Escolar">
+      <span class="eyebrow">MAXIMILIAN 23 PRESENTA</span>
+      <span class="masthead-title-row"><img class="newspaper-logo" src="logo-cronica-web.png" alt="Maximilian 23, reportero de Crónica Escolar"><span class="brand">Crónica Escolar</span></span>
+      <span class="tagline">El periódico de nuestra comunidad educativa</span>
+    </a>
+    <div class="date-line"><span id="today"></span><span>Edición digital</span></div>
+    <nav class="sections" aria-label="Secciones">
+      <button class="section active" data-category="Todas">Portada</button>
+      <button class="section" data-category="Colegio">Colegio</button>
+      <button class="section" data-category="Aula">Aula</button>
+      <button class="section" data-category="Cultura">Cultura</button>
+      <button class="section" data-category="Deportes">Deportes</button>
+      <button class="section" data-category="Tecnología">Tecnología</button>
+      <button class="section" data-category="Medio ambiente">Medio ambiente</button>
+      <button class="section" data-category="Opinión">Opinión</button>
+    </nav>
+  </header>
+
+  <main class="newspaper">
+    <div id="loading" class="status">Abriendo la edición de hoy…</div>
+    <div id="empty" class="empty hidden">
+      <span class="empty-kicker">PRÓXIMAMENTE</span>
+      <h1>Estamos preparando la primera edición</h1>
+      <p>Muy pronto encontrarás aquí las historias, actividades y noticias de nuestro colegio.</p>
+    </div>
+    <div id="paper" class="paper-layout hidden">
+      <section id="lead" class="lead-story"></section>
+      <aside class="most-read">
+        <h2>Más leídas</h2>
+        <ol id="mostRead"></ol>
+      </aside>
+      <section id="latest" class="latest-grid" aria-label="Últimas noticias"></section>
+    </div>
+  </main>
+
+  <footer>
+    <span>Crónica Escolar · Maximilian 23</span>
+    <a href="../">Volver a Maximilian 23</a>
+  </footer>
+
+  <script type="module" src="app.js?v=1"></script>
+  <script type="module" src="https://maximilian23.com/stats/tracker.js?v=1"></script>
+</body>
 </html>
