@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Buscador | Maximilian 23</title>
+
+  <meta name="description" content="Buscador web de Maximilian 23. Búsquedas realizadas mediante Google.">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background:
+        radial-gradient(circle at top, #ffffff 0%, #f7f6f2 45%, #efeee9 100%);
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      color: #17212b;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+
+    .buscador {
+      width: 92%;
+      max-width: 780px;
+      text-align: center;
+      padding: 35px 10px;
+    }
+
+    /* MAXIMILIAN */
+
+    .maximilian {
+      width: 165px;
+      max-width: 42vw;
+      height: auto;
+      display: block;
+      margin: 0 auto 18px;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,.12));
+    }
+
+    /* TÍTULOS */
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .marca {
+      margin-top: 5px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #0088a9;
+    }
+
+    .subtitulo {
+      margin: 0 auto 30px;
+      color: #69727c;
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    /* BUSCADOR */
+
+    .formulario {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 62px;
+      background: #fff;
+      border: 1px solid #d9dde1;
+      border-radius: 35px;
+      padding: 6px;
+      box-shadow:
+        0 5px 18px rgba(0,0,0,.08),
+        0 1px 3px rgba(0,0,0,.05);
+      transition: box-shadow .2s, border-color .2s;
+    }
+
+    .formulario:focus-within {
+      border-color: #9ebfc7;
+      box-shadow:
+        0 8px 25px rgba(0,0,0,.12),
+        0 0 0 3px rgba(0,136,169,.08);
+    }
+
+    .icono-busqueda {
+      width: 24px;
+      height: 24px;
+      margin-left: 15px;
+      margin-right: 3px;
+      opacity: .55;
+      flex-shrink: 0;
+    }
+
+    .formulario input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      padding: 13px 15px;
+      font-family: inherit;
+      font-size: 18px;
+      color: #17212b;
+    }
+
+    .formulario input::placeholder {
+      color: #9ba1a6;
+    }
+
+    .formulario button {
+      min-height: 48px;
+      border: 0;
+      border-radius: 27px;
+      padding: 0 27px;
+      background: #17212b;
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 650;
+      cursor: pointer;
+      transition:
+        transform .15s,
+        opacity .15s,
+        box-shadow .15s;
+    }
+
+    .formulario button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    }
+
+    .formulario button:active {
+      transform: translateY(0);
+    }
+
+    /* GOOGLE */
+
+    .google-info {
+      margin-top: 18px;
+      color: #7b8288;
+      font-size: 14px;
+    }
+
+    .google {
+      display: inline-flex;
+      margin-left: 4px;
+      font-weight: 600;
+      letter-spacing: -.3px;
+    }
+
+    .g1 { color: #4285F4; }
+    .g2 { color: #EA4335; }
+    .g3 { color: #FBBC05; }
+    .g4 { color: #4285F4; }
+    .g5 { color: #34A853; }
+    .g6 { color: #EA4335; }
+
+    /* ACCESOS DIRECTOS */
+
+    .titulo-accesos {
+      margin-top: 42px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #969ca1;
+    }
+
+    .accesos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .accesos a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 9px 17px;
+      background: rgba(255,255,255,.85);
+      border: 1px solid #dfe1e3;
+      border-radius: 22px;
+      color: #27323b;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0,0,0,.03);
+      transition:
+        transform .18s,
+        box-shadow .18s,
+        background .18s;
+    }
+
+    .accesos a:hover {
+      transform: translateY(-2px);
+      background: #fff;
+      box-shadow: 0 5px 13px rgba(0,0,0,.09);
+    }
+
+    /* VOLVER A MAXIMILIAN */
+
+    .volver {
+      margin-top: 35px;
+    }
+
+    .volver a {
+      color: #0088a9;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .volver a:hover {
+      text-decoration: underline;
+    }
+
+    /* PIE */
+
+    footer {
+      position: absolute;
+      bottom: 18px;
+      width: 100%;
+      padding: 0 20px;
+      text-align: center;
+      color: #a0a4a8;
+      font-size: 12px;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 600px) {
+
+      body {
+        justify-content: flex-start;
+      }
+
+      .buscador {
+        padding-top: 55px;
+        padding-bottom: 90px;
+      }
+
+      .maximilian {
+        width: 135px;
+      }
+
+      .subtitulo {
+        font-size: 15px;
+        margin-bottom: 24px;
+      }
+
+      .formulario {
+        min-height: 57px;
+      }
+
+      .formulario input {
+        font-size: 16px;
+        padding-left: 9px;
+      }
+
+      .icono-busqueda {
+        width: 21px;
+        height: 21px;
+        margin-left: 12px;
+      }
+
+      .formulario button {
+        min-height: 45px;
+        padding: 0 18px;
+        font-size: 15px;
+      }
+
+      footer {
+        position: relative;
+        bottom: auto;
+        margin-top: -55px;
+        padding-bottom: 20px;
+      }
+    }
+
+    @media (max-width: 420px) {
+
+      .formulario {
+        padding: 5px;
+      }
+
+      .icono-busqueda {
+        display: none;
+      }
+
+      .formulario input {
+        padding-left: 14px;
+      }
+
+      .formulario button {
+        padding: 0 15px;
+      }
+
+      .accesos {
+        gap: 8px;
+      }
+
+      .accesos a {
+        padding: 8px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="buscador">
+
+    <!--
+      Coloca maximilian-buscador.png en la misma carpeta
+      que este index.html.
+    -->
+    <img
+      src="maximilian-buscador.png"
+      alt="Maximilian 23"
+      class="maximilian"
+    >
+
+    <div class="marca">Maximilian 23</div>
+
+    <h1>¿Qué quieres buscar?</h1>
+
+    <p class="subtitulo">
+      Busca en Internet desde Maximilian 23.
+    </p>
+
+    <!--
+      La búsqueda se envía directamente a Google.
+      Maximilian 23 no almacena ni procesa la consulta.
+    -->
+    <form
+      class="formulario"
+      action="https://www.google.com/search"
+      method="get"
+      target="_blank"
+      rel="noopener"
+    >
+
+      <!-- Lupa -->
+      <svg
+        class="icono-busqueda"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          fill="currentColor"
+          d="M9.5 3a6.5 6.5 0 1 0 3.98 11.64L19.85 21 21 19.85l-6.36-6.37A6.5 6.5 0 0 0 9.5 3zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9z"
+        />
+      </svg>
+
+      <input
+        type="search"
+        name="q"
+        placeholder="Escribe aquí tu búsqueda..."
+        aria-label="Buscar en Google"
+        autocomplete="off"
+        autofocus
+        required
+      >
+
+      <button type="submit">
+        Buscar
+      </button>
+
+    </form>
+
+    <!-- Dejamos claro quién realiza la búsqueda -->
+    <div class="google-info">
+      Búsqueda realizada mediante
+
+      <span class="google" aria-label="Google">
+        <span class="g1">G</span>
+        <span class="g2">o</span>
+        <span class="g3">o</span>
+        <span class="g4">g</span>
+        <span class="g5">l</span>
+        <span class="g6">e</span>
+      </span>
+    </div>
+
+    <!-- ACCESOS DIRECTOS -->
+
+    <div class="titulo-accesos">
+      Accesos rápidos
+    </div>
+
+    <nav class="accesos" aria-label="Accesos rápidos">
+
+      <a
+        href="https://www.educarex.es/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Educarex
+      </a>
+
+      <a
+        href="https://rayuela.educarex.es/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Rayuela
+      </a>
+
+      <a
+        href="https://dle.rae.es/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Diccionario RAE
+      </a>
+
+      <a
+        href="https://es.wikipedia.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Wikipedia
+      </a>
+
+    </nav>
+
+    <div class="volver">
+      <a href="https://maximilian23.com/">
+        ← Volver a Maximilian 23
+      </a>
+    </div>
+
+  </main>
+
+  <footer>
+    Maximilian 23 · CEIP Juan XXIII · Zafra
+  </footer>
+
+</body>
+</html>
