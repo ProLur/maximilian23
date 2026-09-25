@@ -8,7 +8,8 @@ service cloud.firestore {
       return hasEmail('mmartinezf001@educarex.es');
     }
     function isAulaEditor() {
-      return hasEmail('fmhernandez02@educarex.es');
+      return hasEmail('fmhernandez02@educarex.es')
+        || hasEmail('mmartinezf001@educarex.es');
     }
 
     match /articles/{articleId} {
