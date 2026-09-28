@@ -135,6 +135,9 @@
             background: rgba(255,200,87,.18) !important;
             box-shadow: 0 0 14px rgba(255,200,87,.55) !important;
         }
+        #mobileMenu .teacher-start {
+            margin-top: 26px;
+        }
         #mobileMenu .menu-item:hover {
             background: rgba(0,255,204,0.2);
             box-shadow: inset 0 0 15px rgba(0,255,204,0.3), 0 0 15px #00ffcc;
@@ -179,7 +182,8 @@
         .container { flex: 1; display: flex; overflow: hidden; }
         .left-panel {
             display: none;
-            flex: 1;
+            flex: 0 1 35%;
+            min-width: 340px;
             align-items: center;
             justify-content: center;
             background: rgba(13,17,23,0.9);
@@ -194,7 +198,7 @@
             position: static;
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: clamp(22px, 3vh, 32px);
             padding: 0;
             flex-wrap: wrap;
             z-index: 20;
@@ -205,8 +209,12 @@
             width: 100%;
             display: flex;
             justify-content: center;
-            gap: 10px;
+            column-gap: clamp(9px, .7vw, 13px);
+            row-gap: 12px;
             flex-wrap: wrap;
+        }
+        .teacher-group {
+            padding-top: 4px;
         }
         .button-group + .menu-section-title {
             margin-top: 18px;
@@ -215,10 +223,10 @@
             background: rgba(0,255,204,0.07);
             color: #00ffcc;
             font-family: "Courier New", monospace;
-            font-size: 13px;
+            font-size: clamp(11px, .72vw, 13px);
             border: 1px solid #00ffcc88;
             border-radius: 12px;
-            padding: 6px 14px;
+            padding: 7px clamp(10px, .75vw, 14px);
             cursor: pointer;
             transition: all 0.3s ease;
             text-shadow: 0 0 6px #00ffcc;
@@ -252,9 +260,45 @@
             transition: transform 0.2s;
         }
         .left-panel img:hover { transform: scale(1.05); }
-        .chat-panel { flex: 2; display: flex; flex-direction: column; background: rgba(13,17,23,0.9); height: 100%; }
+        .chat-panel { flex: 1 1 65%; min-width: 0; display: flex; flex-direction: column; background: rgba(13,17,23,0.9); height: 100%; }
         @media (min-width:768px) { 
             .left-panel { display: flex; } 
+        }
+        @media (min-width: 768px) and (max-width: 1100px) {
+            .left-panel {
+                flex-basis: 39%;
+                min-width: 320px;
+                padding-inline: 14px;
+            }
+            .button-bar {
+                gap: 20px;
+            }
+            .button-group {
+                column-gap: 8px;
+                row-gap: 10px;
+            }
+            .button-bar .menu-item {
+                font-size: 11px;
+                padding-inline: 10px;
+            }
+        }
+        @media (min-width: 768px) and (max-height: 720px) {
+            .left-panel {
+                padding-top: 10px;
+                padding-bottom: 12px;
+            }
+            .button-bar {
+                gap: 16px;
+            }
+            .button-group {
+                row-gap: 8px;
+            }
+            .image-container {
+                margin-top: 2px;
+            }
+            .left-panel img {
+                max-height: min(39vh, 270px);
+            }
         }
         #chat { flex: 1; overflow-y: auto; padding: 15px; scroll-behavior: smooth; }
         .user, .bot {
@@ -367,7 +411,7 @@
         <div class="menu-item" onclick="openArte()">Plástica</div>
         <div class="menu-item" onclick="openNuevo()">Meteoescuela</div>
         <div class="menu-item" onclick="openRadar()">Herramientas</div>
-        <div class="menu-item teacher-link" onclick="openAula()">Reservas · Aula del Futuro</div>
+        <div class="menu-item teacher-link teacher-start" onclick="openAula()">Reservas · Aula del Futuro</div>
         <div class="menu-item teacher-link" onclick="openJuez()">¿Se juega?</div>
         <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
         <div class="menu-item teacher-link" onclick="openBlog()">Blogs de proyectos</div>
@@ -380,14 +424,14 @@
     <div class="container">
         <div class="left-panel">
             <div class="button-bar">
-                <div class="button-group">
+                <div class="button-group student-group">
                     <div class="menu-item" onclick="openLab()">Laboratorio Musical</div>
                     <div class="menu-item" onclick="openRadio()">Radio Maximilian 23</div>
                     <div class="menu-item" onclick="openArte()">Plástica</div>
                     <div class="menu-item" onclick="openNuevo()">Meteoescuela</div>
                     <div class="menu-item" onclick="openRadar()">Herramientas</div>
                 </div>
-                <div class="button-group">
+                <div class="button-group teacher-group">
                     <div class="menu-item teacher-link" onclick="openAula()">Reservas · Aula del Futuro</div>
                     <div class="menu-item teacher-link" onclick="openJuez()">¿Se juega?</div>
                     <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
