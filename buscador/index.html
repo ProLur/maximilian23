@@ -622,6 +622,34 @@
   </footer>
 
   <script src="https://maximilian23.com/widget/embed.js" defer></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      let attempts = 0;
+
+      const adjustMaximilianWidget = () => {
+        const host = document.querySelector("#maximilian23-widget-host");
+
+        if (!host?.shadowRoot) {
+          if (attempts++ < 180) requestAnimationFrame(adjustMaximilianWidget);
+          return;
+        }
+
+        const style = document.createElement("style");
+        style.textContent = `
+          .b { right: 38px !important; bottom: 38px !important; }
+          .p { right: 38px !important; bottom: 120px !important; }
+
+          @media (max-width: 520px) {
+            .b { right: 24px !important; bottom: 24px !important; }
+            .p { inset: 12px 12px 98px !important; }
+          }
+        `;
+        host.shadowRoot.append(style);
+      };
+
+      adjustMaximilianWidget();
+    });
+  </script>
 
 </body>
 </html>
