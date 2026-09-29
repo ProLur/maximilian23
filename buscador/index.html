@@ -483,6 +483,8 @@
       class="formulario"
       action="https://www.google.com/search"
       method="get"
+      data-stat-action="buscar"
+      data-stat-label="Búsquedas en Google"
     >
 
 
@@ -554,6 +556,8 @@
         href="https://rayuela.educarex.es/"
         target="_blank"
         rel="noopener noreferrer"
+        data-stat-action="rayuela"
+        data-stat-label="Acceso a Rayuela"
       >
         Rayuela
       </a>
@@ -563,6 +567,8 @@
         href="https://workspace.google.com/intl/es/products/drive/"
         target="_blank"
         rel="noopener noreferrer"
+        data-stat-action="drive"
+        data-stat-label="Acceso a Drive"
       >
         Drive
       </a>
@@ -572,6 +578,8 @@
         href="https://accounts.google.com/v3/signin/identifier?continue=https://mail.google.com/mail/?service%3Dmail%26flowName%3DGlifWebSignIn%26flowEntry%3DAccountChooser%26ec%3Dasw-gmail-globalnav-signin&uj=gafb-drive_6806282-hero_5050_hero-es&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S1496055745:1790352127184602"
         target="_blank"
         rel="noopener noreferrer"
+        data-stat-action="gmail"
+        data-stat-label="Acceso a Gmail"
       >
         Gmail
       </a>
@@ -580,6 +588,8 @@
         href="https://maximilian23.com/blog/"
         target="_blank"
         rel="noopener noreferrer"
+        data-stat-action="proyectos"
+        data-stat-label="Proyectos del centro"
       >
         Proyectos del centro
       </a>
@@ -588,6 +598,8 @@
         href="https://cpjuanxxiiizafra.educarex.es/"
         target="_blank"
         rel="noopener noreferrer"
+        data-stat-action="web-colegio"
+        data-stat-label="Web del colegio"
       >
         Web del colegio
       </a>
@@ -602,7 +614,7 @@
 
     <div class="volver">
 
-      <a href="https://maximilian23.com/">
+      <a href="https://maximilian23.com/" data-stat-action="maximilian" data-stat-label="Volver a Maximilian 23">
         Ir a Maximilian 23
       </a>
 
@@ -622,6 +634,7 @@
   </footer>
 
   <script src="https://maximilian23.com/widget/embed.js" defer></script>
+  <script type="module" src="https://maximilian23.com/stats/tracker.js?v=3"></script>
   <script>
     window.addEventListener("DOMContentLoaded", () => {
       let attempts = 0;
