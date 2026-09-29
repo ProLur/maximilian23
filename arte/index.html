@@ -320,13 +320,27 @@
   </header>
   <div class="container">
     <nav class="course-tabs" aria-label="Seleccionar curso">
-      <button class="course-tab" id="arteTab2526" type="button" onclick="showArteCourse('2526')">2025-2026</button>
       <button class="course-tab active" id="arteTab2627" type="button" onclick="showArteCourse('2627')">2026-2027</button>
+      <button class="course-tab" id="arteTab2526" type="button" onclick="showArteCourse('2526')">2025-2026</button>
     </nav>
-    <section class="course-empty" id="arteCourse2627">
-      <h2>Plástica 2026-2027</h2>
-      <p>Próximamente añadiremos las nuevas propuestas. Mientras tanto, puedes visitar las fichas que trabajamos el curso pasado.</p>
-      <button class="course-archive-button" type="button" onclick="showArteCourse('2526')">Ver fichas de 2025-2026</button>
+    <section id="arteCourse2627">
+      <div class="intro">
+        <h2>Plástica 2026-2027</h2>
+        <p>Nuevas propuestas y dibujos trabajados durante este curso.</p>
+      </div>
+      <div class="gallery">
+        <div class="card" onclick="openModal('sombreros.png', 'Sombreros')">
+          <div class="image-container">
+            <img src="sombreros.png" alt="Seis modelos de sombreros coloreados" loading="lazy">
+          </div>
+          <div class="card-info">
+            <h3>Sombreros</h3>
+            <p>Observamos distintos tipos de sombreros y practicamos el color, las formas y los detalles.<br>
+              <a class="download-link" href="sombreros-blanco-y-negro.png" download onclick="event.stopPropagation()">Descargar en blanco y negro</a>
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
     <div class="intro" id="arteCourse2526Intro" hidden>
       <button class="close-btn" onclick="window.close()">Cerrar</button>
