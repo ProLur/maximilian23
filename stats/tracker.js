@@ -2,7 +2,8 @@ import{initializeApp,getApps}from'https://www.gstatic.com/firebasejs/12.19.0/fir
 import{getFirestore,doc,setDoc,increment,serverTimestamp}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import{firebaseConfig,isFirebaseConfigured}from'./firebase-config.js?v=1';
 let statsDb;
-if(isFirebaseConfigured&&!location.pathname.startsWith('/stats')){
+const ownerKey='m23-stats-owner';
+if(isFirebaseConfigured&&!location.pathname.startsWith('/stats')&&localStorage.getItem(ownerKey)!=='1'){
   track().catch(()=>{});
   installActionTracking();
 }

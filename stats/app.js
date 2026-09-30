@@ -1,6 +1,7 @@
 import{initializeApp}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import{getFirestore,collection,getDocs}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import{firebaseConfig,isFirebaseConfigured}from'./firebase-config.js?v=1';
+localStorage.setItem('m23-stats-owner','1');
 const $=selector=>document.querySelector(selector),format=new Intl.NumberFormat('es-ES');
 const ranges={day:{label:'Último día',days:1},week:{label:'Última semana',days:7},month:{label:'Último mes',days:30},all:{label:'Todo el histórico',days:null}};
 let sourcePages=[],activeRange='week';
