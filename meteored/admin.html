@@ -312,11 +312,11 @@ Panel de<br>administración
 
 <script>
 
-const BIN_ID="69aaa6b0d0ea881f40f4bc92";
-const KEY="$2a$10$Z4/lj4bJs4gRcw67snP9zewPYv9rbqaXFeGKdX07gqvA0ucBoTgVy";
-
 const PASSWORD="SextoSexto";
 const STORAGE_KEY="meteo_admin_access";
+let resolveMeteoStore;
+const meteoStoreReady=new Promise(resolve=>{resolveMeteoStore=resolve;});
+window.addEventListener('meteo-store-ready',()=>resolveMeteoStore(window.meteoStore),{once:true});
 
 let currentDate=new Date();
 let currentFecha="";
@@ -479,17 +479,15 @@ cal.appendChild(div);
 const hoy=new Date();
 const hoyStr=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;
 
-fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?t=${Date.now()}`,{
-headers:{"X-Master-Key":KEY}
-})
-.then(r=>r.json())
-.then(data=>{
+meteoStoreReady
+.then(store=>store.list())
+.then(meteo=>{
 
 if(renderId!==calendarRenderId) return;
 
 cal.innerHTML="";
 
-const meteo=(data?.record?.meteo || []).filter(d=>d && d.fecha);
+meteo=(meteo || []).filter(d=>d && d.fecha);
 const conDatos=new Set(meteo.filter(hasMeaningfulData).map(d=>d.fecha));
 
 const primerDia=new Date(year,month,1).getDay()||7;
@@ -579,30 +577,8 @@ rain:num("rain")
 
 try{
 
-const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,{
-headers:{"X-Master-Key":KEY}
-});
-
-const data=await res.json();
-let meteo=data.record.meteo || [];
-
-const idx=meteo.findIndex(d=>d.fecha===currentFecha);
-
-if(idx!==-1){
-const {hum_indoor,pressure,wind_gust,wind_chill,...resto}=meteo[idx];
-meteo[idx]={...resto,...nuevo};
-}else{
-meteo.push(nuevo);
-}
-
-await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`,{
-method:"PUT",
-headers:{
-"Content-Type":"application/json",
-"X-Master-Key":KEY
-},
-body:JSON.stringify({meteo})
-});
+const store=await meteoStoreReady;
+await store.save(nuevo);
 
 msg.textContent="¡Guardado!";
 
@@ -619,6 +595,7 @@ msg.textContent="Error saving";
 
 </script>
 
-<script type="module" src="https://maximilian23.com/stats/tracker.js?v=1"></script>
+<script type="module" src="meteo-store.js?v=1"></script>
+<script type="module" src="https://maximilian23.com/stats/tracker.js?v=5"></script>
 </body>
 </html>

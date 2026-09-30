@@ -177,13 +177,10 @@ to{transform:rotate(360deg);}
 <button class="course-tab active" id="meteoTab2627" type="button" onclick="showMeteoCourse('2627')">2026-2027</button>
 <button class="course-tab" id="meteoTab2526" type="button" onclick="showMeteoCourse('2526')">2025-2026</button>
 </nav>
-<section class="course-empty" id="meteoCourse2627">
-<h2>Meteoescuela 2026-2027</h2>
-<p>Próximamente registraremos los nuevos datos. Mientras tanto, puedes visitar las mediciones y gráficas del curso pasado.</p>
-<button class="course-archive-button" type="button" onclick="showMeteoCourse('2526')">Ver datos de 2025-2026</button>
-</section>
-<div class="main-container" id="meteoCourse2526" hidden>
+<div class="main-container" id="meteoDashboard">
 <div class="content-wrapper">
+
+<h2 id="courseTitle" style="text-align:center;color:#125a9c;margin:0 0 20px;">Meteoescuela 2026-2027</h2>
 
 <div class="charts-grid">
 
@@ -246,12 +243,15 @@ to{transform:rotate(360deg);}
 
 <script>
 
-const DATA_URL="data-2025-2026.json";
-const CACHE_KEY="meteored_2025_2026_cache_v1";
+const ARCHIVE_URL="data-2025-2026.json";
+let resolveMeteoStore;
+const meteoStoreReady=new Promise(resolve=>{resolveMeteoStore=resolve;});
+window.addEventListener('meteo-store-ready',()=>resolveMeteoStore(window.meteoStore),{once:true});
 
 let allData=[];
 let smallCharts={};
 let modalChart=null;
+let activeCourse='2627';
 const calendarLoading=document.getElementById("calendarLoading");
 
 // 👉 Parseo robusto (clave)
@@ -316,25 +316,6 @@ function normalizeData(data){
 return (data || [])
 .filter(d=>d && d.fecha)
 .sort((a,b)=>(a.fecha||"").localeCompare(b.fecha||""));
-}
-
-function serializeData(data){
-return JSON.stringify(normalizeData(data));
-}
-
-function saveCache(data){
-localStorage.setItem(CACHE_KEY,serializeData(data));
-}
-
-function readCache(){
-try{
-const raw=localStorage.getItem(CACHE_KEY);
-if(!raw) return null;
-const parsed=JSON.parse(raw);
-return Array.isArray(parsed) ? normalizeData(parsed) : null;
-}catch{
-return null;
-}
 }
 
 function destroySmallCharts(){
@@ -440,10 +421,9 @@ if(!canvas) return;
 const ctx=canvas.getContext("2d");
 const cfg=chartConfigs[type];
 
-const data=allData.map(d=>parseValue(d[type])).filter(v=>v!==null);
-const labels=allData.map(d=>formatShortDateEs(d.fecha||""));
-
-if(data.length===0) return;
+const points=allData.filter(d=>parseValue(d[type])!==null);
+const data=points.map(d=>parseValue(d[type]));
+const labels=points.map(d=>formatShortDateEs(d.fecha||""));
 
 return new Chart(ctx,{
 type:"line",
@@ -477,8 +457,9 @@ if(modalChart) modalChart.destroy();
 
 const ctx=document.getElementById("modalChartCanvas").getContext("2d");
 
-const data=allData.map(d=>parseValue(d[type])).filter(v=>v!==null);
-const labels=allData.map(d=>formatDateEs(d.fecha));
+const points=allData.filter(d=>parseValue(d[type])!==null);
+const data=points.map(d=>parseValue(d[type]));
+const labels=points.map(d=>formatDateEs(d.fecha));
 
 modalChart=new Chart(ctx,{
 type:"line",
@@ -509,79 +490,34 @@ document.getElementById("calendar").classList.toggle("loading",isLoading);
 calendarLoading.classList.toggle("visible",isLoading);
 }
 
-async function cargarConCache(){
-const cachedData=readCache();
-
-if(cachedData && cachedData.length){
-allData=cachedData;
-renderAll();
-setLoading(false);
+async function loadCourse(course){
+activeCourse=course;
+document.getElementById('meteoTab2526').classList.toggle('active',course==='2526');
+document.getElementById('meteoTab2627').classList.toggle('active',course==='2627');
+document.getElementById('courseTitle').textContent=course==='2526'?'Meteoescuela 2025-2026':'Meteoescuela 2026-2027';
+setLoading(true);
+try{
+if(course==='2526'){
+ const res=await fetch(`${ARCHIVE_URL}?t=${Date.now()}`,{cache:'no-store'});
+ if(!res.ok) throw new Error(`Archivo histórico: ${res.status}`);
+ const json=await res.json();
+ allData=normalizeData(json?.meteo||[]);
 }else{
-setLoading(true);
+ const store=await meteoStoreReady;
+ allData=normalizeData(await store.list());
 }
-
-try{
-const url=`${DATA_URL}?t=${Date.now()}`;
-
-const res=await fetch(url,{cache:"no-store"});
-
-const json=await res.json();
-const freshData=normalizeData(json?.meteo || []);
-const freshSerialized=serializeData(freshData);
-const currentSerialized=serializeData(allData);
-
-if(freshSerialized!==currentSerialized){
-allData=freshData;
 renderAll();
-saveCache(freshData);
-}else if(!cachedData){
-allData=freshData;
-renderAll();
-saveCache(freshData);
-}
 
 }catch(e){
 console.error(e);
-if(!cachedData){
-document.querySelector(".main-container").innerHTML+=
-"<p style='text-align:center;padding:3rem;color:#ff6666;font-size:1.3rem;'>Error al cargar datos meteorolÃ³gicos</p>";
-}
+allData=[];
+renderAll();
 }finally{
 setLoading(false);
 }
 }
 
-async function cargar(){
-setLoading(true);
-try{
-const url=`${DATA_URL}?t=${Date.now()}`;
-
-const res=await fetch(url,{cache:"no-store"});
-
-const json=await res.json();
-
-allData=(json?.meteo || [])
-.filter(d=>d && d.fecha)
-.sort((a,b)=>(a.fecha||"").localeCompare(b.fecha||""));
-
-updateMonthTitle();
-crearCalendario(allData);
-
-Object.keys(chartConfigs).forEach(type=>{
-const canvasId=`chart-${type.replace(/_/g,'-')}`;
-smallCharts[type]=createSmallChart(canvasId,type);
-});
-
-}catch(e){
-console.error(e);
-document.querySelector(".main-container").innerHTML+=
-"<p style='text-align:center;padding:3rem;color:#ff6666;font-size:1.3rem;'>Error al cargar datos meteorológicos</p>";
-}finally{
-setLoading(false);
-}
-}
-
-cargarConCache();
+loadCourse('2627');
 
 window.onclick=function(event){
 if(event.target.classList.contains('modal')){
@@ -591,14 +527,12 @@ event.target.style.display="none";
 
 
 function showMeteoCourse(course){
- const oldCourse=course==='2526';
- document.getElementById('meteoCourse2526').hidden=!oldCourse;
- document.getElementById('meteoCourse2627').hidden=oldCourse;
- document.getElementById('meteoTab2526').classList.toggle('active',oldCourse);
- document.getElementById('meteoTab2627').classList.toggle('active',!oldCourse);
+ if(course===activeCourse) return;
+ loadCourse(course);
 }
 </script>
 
-<script type="module" src="https://maximilian23.com/stats/tracker.js?v=1"></script>
+<script type="module" src="meteo-store.js?v=1"></script>
+<script type="module" src="https://maximilian23.com/stats/tracker.js?v=5"></script>
 </body>
 </html>
