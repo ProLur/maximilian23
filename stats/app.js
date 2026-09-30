@@ -4,9 +4,10 @@ import{firebaseConfig,isFirebaseConfigured}from'./firebase-config.js?v=1';
 localStorage.setItem('m23-stats-owner','1');
 const $=selector=>document.querySelector(selector),format=new Intl.NumberFormat('es-ES');
 const ranges={day:{label:'Último día',days:1},week:{label:'Última semana',days:7},month:{label:'Último mes',days:30},all:{label:'Todo el histórico',days:null}};
-let sourcePages=[],activeRange='week';
+const rangeKey='m23-stats-range',savedRange=localStorage.getItem(rangeKey);
+let sourcePages=[],activeRange=ranges[savedRange]?savedRange:'day';
 $('#refreshBtn').addEventListener('click',load);
-document.querySelectorAll('.range-tab').forEach(button=>button.addEventListener('click',()=>{activeRange=button.dataset.range;document.querySelectorAll('.range-tab').forEach(item=>item.classList.toggle('active',item===button));render(sourcePages);}));
+document.querySelectorAll('.range-tab').forEach(button=>{button.classList.toggle('active',button.dataset.range===activeRange);button.addEventListener('click',()=>{activeRange=button.dataset.range;localStorage.setItem(rangeKey,activeRange);document.querySelectorAll('.range-tab').forEach(item=>item.classList.toggle('active',item===button));render(sourcePages);});});
 async function load(){
   $('#loading').classList.remove('hidden');$('#empty').classList.add('hidden');$('#ranking').innerHTML='';
   if(!isFirebaseConfigured){$('#loading').textContent='El panel está en preparación.';return;}
