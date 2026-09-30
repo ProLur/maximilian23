@@ -6,7 +6,7 @@
   <title>Estadísticas · Maximilian 23</title>
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="../Cabeza.png">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <header>
@@ -42,8 +42,11 @@
         </article>
         <article class="panel search-panel">
           <span class="overline">BUSCADOR</span><h2>Uso del buscador</h2>
-          <strong id="searchTotal" class="search-total">—</strong>
-          <span id="searchPeriod" class="search-period">Interacciones en el periodo</span>
+          <div class="search-network-grid">
+            <div><span>Buscador EDU</span><strong id="searchEdu">—</strong></div>
+            <div><span>Buscador NOR</span><strong id="searchNor">—</strong></div>
+          </div>
+          <span id="searchPeriod" class="search-period">Usos en el periodo</span>
           <div id="searchActions" class="search-actions"></div>
         </article>
         <article class="panel">
@@ -54,6 +57,6 @@
     </section>
   </main>
   <footer>Estadísticas privadas de funcionamiento · Maximilian 23</footer>
-  <script type="module" src="app.js?v=3"></script>
+  <script type="module" src="app.js?v=4"></script>
 </body>
 </html>

@@ -17,7 +17,25 @@ async function track(){
 async function trackAction(action,label){
   const db=getStatsDb(),day=localDay(new Date()),device=innerWidth<600?'mobile':innerWidth<1024?'tablet':'desktop';
   const safeAction=String(action||'accion').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,50)||'accion';
-  await setDoc(doc(db,'pageStats',`buscador-accion-${safeAction}`),{path:`evento:buscador/${safeAction}`,title:String(label||action||'Acción del buscador').slice(0,100),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)}},{merge:true});
+  const network=await getNetworkType();
+  const category=network?`-${network.toLowerCase()}`:'';
+  const eventPath=network?`evento:buscador-${network.toLowerCase()}/${safeAction}`:`evento:buscador/${safeAction}`;
+  await setDoc(doc(db,'pageStats',`buscador${category}-accion-${safeAction}`),{path:eventPath,title:String(label||action||'Acción del buscador').slice(0,100),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)}},{merge:true});
+}
+async function getNetworkType(){
+  const cacheKey='m23-search-network',now=Date.now();
+  try{
+    const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
+    if(cached?.type&&now-cached.savedAt<43200000)return cached.type;
+    const response=await fetch('https://ipwho.is/',{headers:{Accept:'application/json'}});
+    if(!response.ok)return'';
+    const data=await response.json();
+    if(!data?.success)return'';
+    const networkText=[data.connection?.org,data.connection?.isp,data.connection?.domain].filter(Boolean).join(' ');
+    const type=/(educarex|junta\s+(de\s+)?extremadura|juntaex|educaci[oó]n.{0,40}extremadura|extremadura.{0,40}educaci[oó]n)/i.test(networkText)?'EDU':'NOR';
+    localStorage.setItem(cacheKey,JSON.stringify({type,savedAt:now}));
+    return type;
+  }catch{return'';}
 }
 function installActionTracking(){
   document.addEventListener('submit',event=>{
