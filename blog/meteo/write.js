@@ -2,7 +2,7 @@ import{initializeApp}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-ap
 import{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signOut}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import{getFirestore,collection,doc,getDoc,getDocs,setDoc,deleteDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import{firebaseConfig}from'./firebase-config.js?v=1';
-const $=s=>document.querySelector(s),EDITORS=['fmhernandez02@educarex.es','mmartinezf001@educarex.es'],app=initializeApp(firebaseConfig,'meteo-editor'),auth=getAuth(app),db=getFirestore(app),editId=new URLSearchParams(location.search).get('id');let images=[];
+const $=s=>document.querySelector(s),EDITORS=['mmartinezf001@educarex.es','fjboraitab01@educarex.es'],app=initializeApp(firebaseConfig,'meteo-editor'),auth=getAuth(app),db=getFirestore(app),editId=new URLSearchParams(location.search).get('id');let images=[];
 onAuthStateChanged(auth,async u=>{if(EDITORS.includes(u?.email?.toLowerCase())){$('#loginPanel').classList.add('hidden');$('#editorPanel').classList.remove('hidden');$('#sessionUser').textContent='Sesión de redacción';await list();if(editId)await open(editId)}else{if(u)await signOut(auth);$('#editorPanel').classList.add('hidden');$('#loginPanel').classList.remove('hidden')}});
 $('#googleLogin').onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider)}catch(e){if(e.code!=='auth/popup-closed-by-user')$('#loginError').textContent='No se ha podido acceder.'}};$('#logoutBtn').onclick=()=>signOut(auth);$('#newBtn').onclick=clear;
 document.querySelectorAll('[data-command]').forEach(b=>b.onclick=()=>document.execCommand(b.dataset.command,false,b.dataset.value||null));

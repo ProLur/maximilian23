@@ -11,6 +11,10 @@ service cloud.firestore {
       return hasEmail('fmhernandez02@educarex.es')
         || hasEmail('mmartinezf001@educarex.es');
     }
+    function isMeteoEditor() {
+      return hasEmail('mmartinezf001@educarex.es')
+        || hasEmail('fjboraitab01@educarex.es');
+    }
 
     match /articles/{articleId} {
       allow read: if resource.data.status == 'published' || isMainEditor();
@@ -32,8 +36,8 @@ service cloud.firestore {
     }
 
     match /meteoBlogPosts/{postId} {
-      allow read: if resource.data.status == 'published' || isMainEditor();
-      allow create, update, delete: if isMainEditor();
+      allow read: if resource.data.status == 'published' || isMeteoEditor();
+      allow create, update, delete: if isMeteoEditor();
     }
   }
 }
