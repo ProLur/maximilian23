@@ -22,7 +22,7 @@ main{width:min(1180px,calc(100% - 48px));margin:auto;padding:40px 0}
 .cite{background:linear-gradient(110deg,#285a4c,#23443d)}
 .aula{--accent:#bedce3;background:linear-gradient(110deg,#2c485b,#273b4c)}
 .meteo{--accent:#e3d5b4;background:linear-gradient(110deg,#52615b,#3b4d49)}
-.meteo img{opacity:.88}
+.meteo img{opacity:1}
 .actions{grid-column:3;grid-row:1;display:grid;gap:10px;position:relative;font-size:.79rem;font-weight:700}
 .actions a,.actions span{display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 18px;border:1px solid #ffffff3b;border-radius:6px;text-align:center;line-height:1.35;text-decoration:none;transition:background .2s,border-color .2s,transform .2s}
 .actions a:first-child{color:#1c3430;background:var(--accent);border-color:var(--accent)}

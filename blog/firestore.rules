@@ -30,5 +30,10 @@ service cloud.firestore {
       allow read: if resource.data.status == 'published' || isAulaEditor();
       allow create, update, delete: if isAulaEditor();
     }
+
+    match /meteoBlogPosts/{postId} {
+      allow read: if resource.data.status == 'published' || isMainEditor();
+      allow create, update, delete: if isMainEditor();
+    }
   }
 }
