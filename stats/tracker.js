@@ -8,20 +8,20 @@ if(isFirebaseConfigured&&!location.pathname.startsWith('/stats')&&localStorage.g
   installActionTracking();
 }
 async function track(){
-  const path=normalizePath(location.pathname),day=localDay(new Date()),sessionKey=`m23-view:${day}:${path}`;
+  const now=new Date(),path=normalizePath(location.pathname),day=localDay(now),hour=localHour(now),sessionKey=`m23-view:${day}:${path}`;
   if(sessionStorage.getItem(sessionKey))return;sessionStorage.setItem(sessionKey,'1');
   const db=getStatsDb();
   const device=innerWidth<600?'mobile':innerWidth<1024?'tablet':'desktop';
   const id=path==='/'?'inicio':path.replace(/^\//,'').replace(/\/$/,'').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
-  await setDoc(doc(db,'pageStats',id),{path,title:cleanTitle(document.title),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)}},{merge:true});
+  await setDoc(doc(db,'pageStats',id),{path,title:cleanTitle(document.title),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)},hours:{[hour]:increment(1)}},{merge:true});
 }
 async function trackAction(action,label){
-  const db=getStatsDb(),day=localDay(new Date()),device=innerWidth<600?'mobile':innerWidth<1024?'tablet':'desktop';
+  const now=new Date(),db=getStatsDb(),day=localDay(now),hour=localHour(now),device=innerWidth<600?'mobile':innerWidth<1024?'tablet':'desktop';
   const safeAction=String(action||'accion').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,50)||'accion';
   const network=await getNetworkType();
   const category=network?`-${network.toLowerCase()}`:'';
   const eventPath=network?`evento:buscador-${network.toLowerCase()}/${safeAction}`:`evento:buscador/${safeAction}`;
-  await setDoc(doc(db,'pageStats',`buscador${category}-accion-${safeAction}`),{path:eventPath,title:String(label||action||'Acción del buscador').slice(0,100),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)}},{merge:true});
+  await setDoc(doc(db,'pageStats',`buscador${category}-accion-${safeAction}`),{path:eventPath,title:String(label||action||'Acción del buscador').slice(0,100),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)},hours:{[hour]:increment(1)}},{merge:true});
 }
 async function getNetworkType(){
   const cacheKey='m23-search-network',now=Date.now();
@@ -59,4 +59,5 @@ function getStatsDb(){
 }
 function normalizePath(value){let path=value.replace(/\/index\.html$/i,'/');if(!path.endsWith('/')&&!/\.[a-z0-9]+$/i.test(path))path+='/';return path||'/';}
 function localDay(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+function localHour(date){return `${localDay(date)}T${String(date.getHours()).padStart(2,'0')}`;}
 function cleanTitle(value){return String(value||'Página sin título').replace(/\s*[·|–-]\s*Maximilian\s*23.*$/i,'').slice(0,100);}
