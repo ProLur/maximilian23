@@ -17,7 +17,7 @@ async function load(){
 function render(pages){
   $('#loading').classList.add('hidden');if(!pages.length){$('#empty').classList.remove('hidden');return;}
   const range=ranges[activeRange],dayRange=range.days?dayKeys(range.days):null,hourRange=range.hours?hourKeys(range.hours):null;
-  const rangedPages=pages.map(page=>({...page,rangeTotal:hourRange?hourRange.reduce((sum,key)=>sum+(page.hours?.[key]||0),0):dayRange?dayRange.reduce((sum,key)=>sum+(page.days?.[key]||0),0):(page.total||0)}));
+  const rangedPages=pages.map(page=>({...page,rangeTotal:hourRange?hourRange.reduce((sum,key)=>sum+(page.hours?.[key]||page.days?.[key]||0),0):dayRange?dayRange.reduce((sum,key)=>sum+(page.days?.[key]||0),0):(page.total||0)}));
   const searchEvents=rangedPages.filter(page=>/^evento:buscador(?:-(?:edu|nor))?\//.test(String(page.path||''))).sort((a,b)=>b.rangeTotal-a.rangeTotal);
   const contentPages=rangedPages.filter(page=>!String(page.path||'').startsWith('evento:'));
   const viewPages=contentPages.filter(page=>page.rangeTotal>0).sort((a,b)=>b.rangeTotal-a.rangeTotal);
@@ -32,7 +32,7 @@ function render(pages){
 function dayKeys(length){return Array.from({length},(_,offset)=>{const date=new Date();date.setHours(12,0,0,0);date.setDate(date.getDate()-offset);return localDay(date);});}
 function hourKeys(length){const end=new Date();end.setMinutes(0,0,0);return Array.from({length},(_,offset)=>{const date=new Date(end);date.setHours(date.getHours()-offset);return `${localDay(date)}T${String(date.getHours()).padStart(2,'0')}`;});}
 function makeDays(pages,length){return Array.from({length},(_,offset)=>{const date=new Date();date.setHours(12,0,0,0);date.setDate(date.getDate()-(length-1-offset));const key=localDay(date);return{key,date,value:pages.reduce((sum,p)=>sum+(p.days?.[key]||0),0)}});}
-function makeHours(pages,length){const end=new Date();end.setMinutes(0,0,0);return Array.from({length},(_,offset)=>{const date=new Date(end);date.setHours(date.getHours()-(length-1-offset));const key=`${localDay(date)}T${String(date.getHours()).padStart(2,'0')}`;return{key,date,value:pages.reduce((sum,p)=>sum+(p.hours?.[key]||0),0)}});}
+function makeHours(pages,length){const end=new Date();end.setMinutes(0,0,0);return Array.from({length},(_,offset)=>{const date=new Date(end);date.setHours(date.getHours()-(length-1-offset));const key=`${localDay(date)}T${String(date.getHours()).padStart(2,'0')}`;return{key,date,value:pages.reduce((sum,p)=>sum+(p.hours?.[key]||p.days?.[key]||0),0)}});}
 function longDate(date){return new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'long'}).format(date);}
 function longDateTime(date){return new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(date);}
 function localDay(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}

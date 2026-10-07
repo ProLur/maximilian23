@@ -13,7 +13,7 @@ async function track(){
   const db=getStatsDb();
   const device=innerWidth<600?'mobile':innerWidth<1024?'tablet':'desktop';
   const id=path==='/'?'inicio':path.replace(/^\//,'').replace(/\/$/,'').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
-  await setDoc(doc(db,'pageStats',id),{path,title:cleanTitle(document.title),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)},hours:{[hour]:increment(1)}},{merge:true});
+  await setDoc(doc(db,'pageStats',id),{path,title:cleanTitle(document.title),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1),[hour]:increment(1)}},{merge:true});
 }
 async function trackAction(action,label){
   const now=new Date(),db=getStatsDb(),day=localDay(now),hour=localHour(now),device=innerWidth<600?'mobile':innerWidth<1024?'tablet':'desktop';
@@ -21,7 +21,7 @@ async function trackAction(action,label){
   const network=await getNetworkType();
   const category=network?`-${network.toLowerCase()}`:'';
   const eventPath=network?`evento:buscador-${network.toLowerCase()}/${safeAction}`:`evento:buscador/${safeAction}`;
-  await setDoc(doc(db,'pageStats',`buscador${category}-accion-${safeAction}`),{path:eventPath,title:String(label||action||'Acción del buscador').slice(0,100),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1)},hours:{[hour]:increment(1)}},{merge:true});
+  await setDoc(doc(db,'pageStats',`buscador${category}-accion-${safeAction}`),{path:eventPath,title:String(label||action||'Acción del buscador').slice(0,100),total:increment(1),lastVisit:serverTimestamp(),devices:{[device]:increment(1)},days:{[day]:increment(1),[hour]:increment(1)}},{merge:true});
 }
 async function getNetworkType(){
   const cacheKey='m23-search-network',now=Date.now();
