@@ -14,7 +14,7 @@ async function load(){
     const item=snap.data();document.title=`${item.title} · Crónica Escolar`;
     const safeBody=window.DOMPurify.sanitize(item.bodyHtml||'',{USE_PROFILES:{html:true}});
     const imageSource=item.imageDataUrl||item.imageUrl||'';
-    root.innerHTML=`<header><span class="category">${escapeHtml(item.category)}</span><h1>${escapeHtml(item.title)}</h1><p class="article-summary">${escapeHtml(item.summary)}</p><span class="byline">Por ${escapeHtml(item.author)} · ${dateText(item.publishedAt)}</span></header>${imageSource?`<img class="article-hero" src="${escapeHtml(imageSource)}" alt="${escapeHtml(item.imageAlt||item.title)}">`:''}<div class="article-content">${safeBody}</div>`;
+    root.innerHTML=`<header><span class="category">${escapeHtml(item.category)}</span><h1>${escapeHtml(item.title)}</h1><p class="article-summary">${escapeHtml(item.summary)}</p><span class="byline">Por ${escapeHtml(item.author)} · ${dateText(item.publishedAt)}</span></header><div class="article-body-layout${imageSource?'':' no-image'}">${imageSource?`<img class="article-hero" src="${escapeHtml(imageSource)}" alt="${escapeHtml(item.imageAlt||item.title)}">`:''}<div class="article-content">${safeBody}</div></div>`;
     updateDoc(ref,{views:increment(1)}).catch(()=>{});
   }catch(error){root.innerHTML='<div class="status">Esta noticia no está disponible.</div>';}
 }

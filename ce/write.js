@@ -42,13 +42,17 @@ async function optimizeImage(file){
 async function save(status){
   const title=$('#title').value.trim(),summary=$('#summary').value.trim(),author=$('#author').value.trim(),bodyHtml=$('#bodyEditor').innerHTML.trim();
   if(!title||!summary||!author||!bodyHtml||bodyHtml==='<br>'){showMessage('Completa el titular, la entradilla, la firma y el texto.',true);return;}
+  const isNew=!$('#docId').value;
   const id=$('#docId').value||`${slugify(title)}-${Date.now().toString(36)}`;showMessage(status==='published'?'Publicando…':'Guardando borrador…');
   try{
     const file=$('#image').files[0];if(file)currentImageData=await optimizeImage(file);
     const refDoc=doc(db,'articles',id),previous=await getDoc(refDoc),old=previous.data()||{};
     const record={title,slug:slugify(title),summary,author,category:$('#category').value,bodyHtml,imageDataUrl:currentImageData,imageAlt:title,status,updatedAt:serverTimestamp(),createdAt:old.createdAt||serverTimestamp(),views:old.views||0};
     if(status==='published')record.publishedAt=old.publishedAt||serverTimestamp();
-    await setDoc(refDoc,record,{merge:true});$('#docId').value=id;$('#deleteBtn').classList.remove('hidden');$('#unpublishBtn').classList.toggle('hidden',status!=='published');showMessage(status==='published'?'Noticia publicada correctamente.':'Borrador guardado.',false,true);await loadDrafts();
+    await setDoc(refDoc,record,{merge:true});
+    await loadDrafts();
+    if(status==='published'&&isNew){clearForm();showMessage('Noticia publicada. El formulario ya está listo para crear otra.',false,true);}
+    else{$('#docId').value=id;$('#deleteBtn').classList.remove('hidden');$('#unpublishBtn').classList.toggle('hidden',status!=='published');showMessage(status==='published'?'Cambios publicados.':'Borrador guardado.',false,true);}
   }catch(error){console.error(error);showMessage('No se ha podido guardar. Comprueba la conexión e inténtalo de nuevo.',true);}
 }
 function showMessage(text,error=false,success=false){saveMessage.textContent=text;saveMessage.className=`form-message${error?' error':''}${success?' success':''}`;}
@@ -68,8 +72,8 @@ async function unpublishCurrent(){
   catch(error){console.error(error);showMessage('No se ha podido despublicar la noticia.',true);}
 }
 async function deleteArticle(id){
-  if(!id||!confirm('¿Seguro que quieres eliminar esta noticia? Esta acción no se puede deshacer.'))return;
-  try{await deleteDoc(doc(db,'articles',id));if($('#docId').value===id)clearForm();showMessage('Noticia eliminada.',false,true);await loadDrafts();}
+  if(!id||!confirm('¿Eliminar esta noticia y su imagen? Esta acción no se puede deshacer.'))return;
+  try{await deleteDoc(doc(db,'articles',id));if($('#docId').value===id)clearForm();showMessage('Noticia e imagen eliminadas.',false,true);await loadDrafts();}
   catch(error){console.error(error);showMessage('No se ha podido eliminar la noticia.',true);}
 }
 function clearForm(){$('#articleForm').reset();$('#docId').value='';$('#bodyEditor').innerHTML='';$('#imagePreview').classList.add('hidden');$('#deleteBtn').classList.add('hidden');$('#unpublishBtn').classList.add('hidden');currentImageData='';showMessage('');}
