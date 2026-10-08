@@ -3,8 +3,8 @@ import{getFirestore,doc,setDoc,increment,serverTimestamp}from'https://www.gstati
 import{firebaseConfig,isFirebaseConfigured}from'./firebase-config.js?v=1';
 let statsDb;
 const ownerKey='m23-stats-owner';
-if(isFirebaseConfigured&&!location.pathname.startsWith('/stats')&&localStorage.getItem(ownerKey)!=='1'){
-  track().catch(()=>{});
+if(isFirebaseConfigured&&!location.pathname.startsWith('/stats')){
+  if(localStorage.getItem(ownerKey)!=='1')track().catch(()=>{});
   installActionTracking();
 }
 async function track(){
@@ -29,27 +29,28 @@ async function getNetworkType(){
     const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
     if(cached?.type&&now-cached.savedAt<43200000)return cached.type;
     const response=await fetch('https://ipwho.is/',{headers:{Accept:'application/json'}});
-    if(!response.ok)return'';
+    if(!response.ok)return'NOR';
     const data=await response.json();
-    if(!data?.success)return'';
+    if(!data?.success)return'NOR';
     const networkText=[data.connection?.org,data.connection?.isp,data.connection?.domain].filter(Boolean).join(' ');
     const type=/(educarex|junta\s+(de\s+)?extremadura|juntaex|educaci[oó]n.{0,40}extremadura|extremadura.{0,40}educaci[oó]n)/i.test(networkText)?'EDU':'NOR';
     localStorage.setItem(cacheKey,JSON.stringify({type,savedAt:now}));
     return type;
-  }catch{return'';}
+  }catch{return'NOR';}
 }
 function installActionTracking(){
+  getNetworkType().catch(()=>{});
   document.addEventListener('submit',event=>{
     const form=event.target.closest?.('form[data-stat-action]');if(!form||form.dataset.statSent==='1')return;
     event.preventDefault();form.dataset.statSent='1';
-    Promise.race([trackAction(form.dataset.statAction,form.dataset.statLabel),new Promise(resolve=>setTimeout(resolve,1200))]).finally(()=>form.submit());
+    Promise.race([trackAction(form.dataset.statAction,form.dataset.statLabel),new Promise(resolve=>setTimeout(resolve,2500))]).finally(()=>form.submit());
   });
   document.addEventListener('click',event=>{
     const link=event.target.closest?.('a[data-stat-action]');if(!link)return;
     const sameTab=!link.target||link.target==='_self';
     if(!sameTab){trackAction(link.dataset.statAction,link.dataset.statLabel).catch(()=>{});return;}
     event.preventDefault();
-    Promise.race([trackAction(link.dataset.statAction,link.dataset.statLabel),new Promise(resolve=>setTimeout(resolve,1200))]).finally(()=>location.href=link.href);
+    Promise.race([trackAction(link.dataset.statAction,link.dataset.statLabel),new Promise(resolve=>setTimeout(resolve,2500))]).finally(()=>location.href=link.href);
   });
 }
 function getStatsDb(){
