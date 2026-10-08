@@ -18,3 +18,9 @@
 .article-tools{display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);margin-bottom:22px}.article-tools .post-tags{margin:15px 0}.edit-post{flex:0 0 auto;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--ink);color:#fff;text-decoration:none;font-size:1.25rem;transition:.2s}.edit-post:hover{background:var(--orange);color:var(--ink);transform:rotate(-8deg)}
 .post-card h3 a{text-decoration:none}.post-card h3 a:hover{color:var(--green)}
 .tag-cloud{display:grid;gap:8px;margin:12px 0}.tag-cloud a{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;border-radius:8px;padding:8px 10px}.tag-cloud a span{min-width:0;overflow-wrap:anywhere}.tag-cloud a.active{outline:2px solid var(--green);outline-offset:1px}
+
+/* Jerarquía tipográfica común: título protagonista, autor discreto y lectura cómoda. */
+.article-meta{font-size:.78rem;line-height:1.5;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--green)}
+.article-summary{font-size:clamp(1.08rem,1.6vw,1.22rem);line-height:1.65}
+.article-body{font-size:clamp(1rem,1.15vw,1.08rem);line-height:1.8}
+@media(max-width:700px){.post-card h3{font-size:clamp(1.45rem,7vw,1.72rem)}.post-copy{padding:20px}.article-meta{font-size:.74rem}.article-summary{font-size:1.05rem}}
