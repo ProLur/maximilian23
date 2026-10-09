@@ -1097,12 +1097,25 @@ body.modo-preguntas {
 
 /* Vistas independientes usadas por radar.html y pizarras.html. */
 html[data-view="radar"] .main {
-    grid-template-columns: minmax(240px, 300px) minmax(390px, 470px);
+    grid-template-columns: minmax(240px, 300px) minmax(560px, 680px);
     gap: clamp(14px, 2.5vw, 30px);
 }
 html[data-view="radar"] .right { display: none; }
-html[data-view="radar"] .center { width: min(100%, 470px); }
-html[data-view="radar"] .center-controls { display: flex !important; }
+html[data-view="radar"] .center { width: min(100%, 680px); }
+html[data-view="radar"] .center-middle {
+    flex-direction: row;
+    gap: clamp(16px, 3vw, 34px);
+}
+html[data-view="radar"] .center-controls {
+    display: flex !important;
+    flex: 0 0 min(31%, 190px);
+    flex-direction: column;
+    gap: 10px;
+}
+html[data-view="radar"] #btn {
+    width: min(100%, 330px);
+    align-self: center;
+}
 
 html[data-view="pizarras"] body {
     background:
@@ -1159,6 +1172,11 @@ html[data-view="pizarras"] .right-controls { display: none; }
     html[data-view="radar"] .main { grid-template-columns: 1fr; overflow: auto; }
     html[data-view="radar"] .left,
     html[data-view="radar"] .center { max-width: min(100%, 560px); }
+    html[data-view="radar"] .center-middle { flex-direction: column; }
+    html[data-view="radar"] .center-controls {
+        flex: none;
+        width: 100%;
+    }
     html[data-view="pizarras"] .right-top { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
 }
 @media (max-width: 560px) {
@@ -1210,17 +1228,8 @@ html[data-view="pizarras"] .right-controls { display: none; }
 
         <div class="center-middle">
             <canvas id="radar" width="320" height="320"></canvas>
-        </div>
-
-        <div class="center-bottom">
-            <div class="barra"><div class="barra-inner" id="barra"></div></div>
-
-            <div class="estado" id="estado">Pulsa iniciar</div>
-            <div class="nota"   id="nota"></div>
-            <button id="btn" onclick="toggle()">INICIAR</button>
-
             <div class="center-controls">
-                <button class="btn-calibrar" onclick="calibrarAula()">âŠ™ CALIBRAR</button>
+                <button class="btn-calibrar" onclick="calibrarAula()">◎ CALIBRAR</button>
                 <div class="sens-wrap">
                     <span class="sens-label">Sensibilidad</span>
                     <span class="sens-val" id="sensValor">1.0</span>
@@ -1229,6 +1238,14 @@ html[data-view="pizarras"] .right-controls { display: none; }
                         oninput="actualizarSens(this.value)">
                 </div>
             </div>
+        </div>
+
+        <div class="center-bottom">
+            <div class="barra"><div class="barra-inner" id="barra"></div></div>
+
+            <div class="estado" id="estado">Pulsa iniciar</div>
+            <div class="nota"   id="nota"></div>
+            <button id="btn" onclick="toggle()">INICIAR</button>
         </div>
     </div>
 
