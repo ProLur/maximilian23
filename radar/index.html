@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Radar de Silencio • Maximilian 23</title>
+<script>document.documentElement.dataset.view = new URLSearchParams(location.search).get('view') || 'all';</script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1092,6 +1093,78 @@ body.modo-preguntas {
         max-width: none;
         width: 100%;
     }
+}
+
+/* Vistas independientes usadas por radar.html y pizarras.html. */
+html[data-view="radar"] .main {
+    grid-template-columns: minmax(240px, 300px) minmax(390px, 470px);
+    gap: clamp(14px, 2.5vw, 30px);
+}
+html[data-view="radar"] .right { display: none; }
+html[data-view="radar"] .center { width: min(100%, 470px); }
+html[data-view="radar"] .center-controls { display: flex !important; }
+
+html[data-view="pizarras"] body {
+    background:
+        radial-gradient(circle at 50% 0%, rgba(0,255,204,.15), transparent 42%),
+        #0d1117;
+    overflow: auto;
+}
+html[data-view="pizarras"] .main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    height: auto;
+    padding: clamp(24px, 6vw, 72px);
+}
+html[data-view="pizarras"] .left,
+html[data-view="pizarras"] .center { display: none; }
+html[data-view="pizarras"] .right {
+    width: min(100%, 980px);
+    max-width: none;
+    height: auto;
+}
+html[data-view="pizarras"] .right-top {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: clamp(14px, 2vw, 22px);
+}
+html[data-view="pizarras"] .right-top::before {
+    content: "PIZARRAS DE AULA";
+    grid-column: 1 / -1;
+    color: #fff;
+    font-size: clamp(1.65rem, 4vw, 3rem);
+    font-weight: 900;
+    letter-spacing: -.04em;
+    text-align: center;
+    margin-bottom: 8px;
+}
+html[data-view="pizarras"] .pizarra-btn {
+    min-height: 150px;
+    max-height: none;
+    padding: 24px;
+    font-size: clamp(1rem, 1.8vw, 1.28rem);
+    background: linear-gradient(145deg, #18212b, #11171e);
+    border-color: rgba(0,255,204,.42);
+    box-shadow: 0 18px 38px rgba(0,0,0,.28);
+}
+html[data-view="pizarras"] .pizarra-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 46px rgba(0,255,204,.12);
+}
+html[data-view="pizarras"] .right-controls { display: none; }
+
+@media (max-width: 900px) {
+    html[data-view="radar"] .main { grid-template-columns: 1fr; overflow: auto; }
+    html[data-view="radar"] .left,
+    html[data-view="radar"] .center { max-width: min(100%, 560px); }
+    html[data-view="pizarras"] .right-top { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+}
+@media (max-width: 560px) {
+    html[data-view="pizarras"] .main { padding: 20px 14px; }
+    html[data-view="pizarras"] .right-top { grid-template-columns: 1fr; }
+    html[data-view="pizarras"] .pizarra-btn { min-height: 92px; }
 }
 </style>
 </head>
