@@ -15,6 +15,9 @@ service cloud.firestore {
       return hasEmail('mmartinezf001@educarex.es')
         || hasEmail('fjboraitab01@educarex.es');
     }
+    function isHuertoEditor() {
+      return hasEmail('mmartinezf001@educarex.es');
+    }
 
     match /articles/{articleId} {
       allow read: if resource.data.status == 'published' || isMainEditor();
@@ -38,6 +41,11 @@ service cloud.firestore {
     match /meteoBlogPosts/{postId} {
       allow read: if resource.data.status == 'published' || isMeteoEditor();
       allow create, update, delete: if isMeteoEditor();
+    }
+
+    match /huertoBlogPosts/{postId} {
+      allow read: if resource.data.status == 'published' || isHuertoEditor();
+      allow create, update, delete: if isHuertoEditor();
     }
   }
 }
