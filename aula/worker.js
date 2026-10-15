@@ -12,6 +12,7 @@ export default{async fetch(request,env){
     const path=new URL(request.url).pathname.replace(/\/+$/,'')||'/';
     if(path==='/clasif')return await classification(request,env,headers);
     if(path==='/juez')return await juez(request,env,headers);
+    if(path==='/blog-images')return await blogImages(request,env,headers);
     if(request.method==='GET'){
       const record=await read(env);
       return out({reservas:withFijas(record.reservas||{})},200,headers);
@@ -103,8 +104,71 @@ async function juez(request,env,headers){
   return out({ok:true},200,headers);
 }
 function madridDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
-function cors(origin){return{'Access-Control-Allow-Origin':ORIGINS.has(origin)?origin:'https://maximilian23.com','Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Cache-Control':'no-store'}}
+function cors(origin){return{'Access-Control-Allow-Origin':ORIGINS.has(origin)?origin:'https://maximilian23.com','Vary':'Origin','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Cache-Control':'no-store'}}
 function out(data,status,headers){return new Response(JSON.stringify(data),{status,headers:{...headers,'Content-Type':'application/json; charset=utf-8'}})}
+
+// --- Imágenes de los blogs en GitHub ---
+const BLOG_EDITORS={
+  cite:new Set(['mmartinezf001@educarex.es']),
+  aula:new Set(['fmhernandezr02@educarex.es','mmartinezf001@educarex.es']),
+  meteo:new Set(['mmartinezf001@educarex.es','fjboraitab01@educarex.es']),
+  huerto:new Set(['mmartinezf001@educarex.es','silverio68@educarex.es'])
+};
+async function blogImages(request,env,headers){
+  if(request.method!=='POST')return out({error:'Método no permitido.'},405,headers);
+  const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+  const identity=await firebaseIdentity(token,env);
+  if(!identity)return out({error:'La sesión ha caducado. Cierra sesión y vuelve a entrar.'},401,headers);
+  const body=await request.json(),blog=String(body.blog||'').toLowerCase();
+  if(!BLOG_EDITORS[blog]?.has(identity.email))return out({error:'Esta cuenta no está autorizada para editar este blog.'},403,headers);
+  if(body.action==='upload'){
+    const postId=safePart(body.postId,100),images=Array.isArray(body.images)?body.images:[];
+    if(!postId||!images.length||images.length>4)return out({error:'Envío de imágenes no válido.'},400,headers);
+    const urls=[],paths=[];
+    for(let index=0;index<images.length;index++){
+      const match=String(images[index]).match(/^data:image\/webp;base64,([A-Za-z0-9+/=]+)$/);
+      if(!match||match[1].length>1000000)return out({error:'Una imagen no tiene un formato o tamaño válido.'},400,headers);
+      const path=`blog/${blog}/images/${postId}/${String(index+1).padStart(2,'0')}-${crypto.randomUUID()}.webp`;
+      await githubPut(env,path,match[1],`Añadir imagen de ${blog}: ${postId}`);
+      paths.push(path);urls.push(`https://raw.githubusercontent.com/ProLur/maximilian23/main/${path}`);
+    }
+    return out({urls,paths},201,headers);
+  }
+  if(body.action==='delete'){
+    const paths=Array.isArray(body.paths)?body.paths:[];
+    if(paths.length>20)return out({error:'Demasiadas imágenes para eliminar.'},400,headers);
+    for(const path of paths){
+      const value=String(path||'');
+      if(!value.startsWith(`blog/${blog}/images/`)||value.includes('..'))return out({error:'Ruta de imagen no válida.'},400,headers);
+      await githubDelete(env,value,`Eliminar imagen de ${blog}`);
+    }
+    return out({ok:true},200,headers);
+  }
+  return out({error:'Acción no válida.'},400,headers);
+}
+async function firebaseIdentity(token,env){
+  if(!token)return null;
+  const response=await fetch('https://oauth2.googleapis.com/tokeninfo?id_token='+encodeURIComponent(token));
+  if(!response.ok)return null;
+  const data=await response.json(),project=env.FIREBASE_PROJECT_ID||'cronica-escolar-maximilian23';
+  if(data.aud!==project||data.email_verified!=='true')return null;
+  return{email:String(data.email||'').trim().toLowerCase()};
+}
+function safePart(value,max){return String(value||'').toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/(^-|-$)/g,'').slice(0,max)}
+function githubHeaders(env){return{'Authorization':'Bearer '+env.GITHUB_TOKEN,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json','User-Agent':'maximilian23-blog-images'}}
+async function githubPut(env,path,content,message){
+  const response=await fetch('https://api.github.com/repos/ProLur/maximilian23/contents/'+path,{method:'PUT',headers:githubHeaders(env),body:JSON.stringify({message,content,branch:'main'})});
+  if(!response.ok)throw Error('GitHub upload '+response.status);
+}
+async function githubDelete(env,path,message){
+  const url='https://api.github.com/repos/ProLur/maximilian23/contents/'+path;
+  const current=await fetch(url,{headers:githubHeaders(env)});
+  if(current.status===404)return;
+  if(!current.ok)throw Error('GitHub read '+current.status);
+  const {sha}=await current.json();
+  const response=await fetch(url,{method:'DELETE',headers:githubHeaders(env),body:JSON.stringify({message,sha,branch:'main'})});
+  if(!response.ok&&response.status!==404)throw Error('GitHub delete '+response.status);
+}
 
 // --- Firestore ---
 let cachedSA=null,cachedToken=null;
@@ -196,3 +260,4 @@ function clean(value,max){return String(value||'').trim().replace(/[<>]/g,'').sl
 function userId(nombre){return nombre.normalize('NFD').replace(/[̀-ͯ]/g,'').toLocaleLowerCase('es-ES').replace(/\s+/g,' ').trim()}
 async function passwordHash(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('')}
 function validate(body){if(!body||!/^\d{4}-\d{2}-\d{2}$/.test(body.fecha)||!SLOTS.has(body.tramo)||String(body.password||'').length<4)return'La contraseña debe tener al menos 4 caracteres.';if(body.accion!=='cancelar'&&(!clean(body.nombre,60)||!clean(body.grupo,40)))return'Completa correctamente todos los datos.';const date=new Date(body.fecha+'T12:00:00');if(![1,2,3,4,5].includes(date.getDay()))return'Solo se puede reservar de lunes a viernes.';const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const end=new Date(monday);end.setDate(end.getDate()+11);end.setHours(23,59,59,999);if(date<monday||date>end)return'Solo están disponibles la semana actual y la siguiente.';return''}
+
