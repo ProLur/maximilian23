@@ -16,7 +16,8 @@ service cloud.firestore {
         || hasEmail('fjboraitab01@educarex.es');
     }
     function isHuertoEditor() {
-      return hasEmail('mmartinezf001@educarex.es');
+      return hasEmail('mmartinezf001@educarex.es')
+        || hasEmail('silverio68@educarex.es');
     }
 
     match /articles/{articleId} {
@@ -49,3 +50,4 @@ service cloud.firestore {
     }
   }
 }
+
