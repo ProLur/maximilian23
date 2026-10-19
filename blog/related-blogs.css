@@ -1,0 +1,38 @@
+/* Shared sidebar navigation; each blog keeps its own palette and widget styles. */
+.related-blogs-list {
+  display: grid;
+  gap: 0;
+}
+.related-blog-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  text-decoration: none;
+  font-size: .94rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.related-blog-link img {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  object-fit: contain;
+}
+.related-blog-link .related-blog-name {
+  flex: 1;
+  min-width: 0;
+}
+.related-blog-link .related-blog-arrow {
+  color: var(--green);
+}
+.related-blog-link:hover .related-blog-name {
+  color: var(--green);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.related-blog-link:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 4px;
+}
