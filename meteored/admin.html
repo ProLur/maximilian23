@@ -312,8 +312,6 @@ Panel de<br>administración
 
 <script>
 
-const PASSWORD="SextoSexto";
-const STORAGE_KEY="meteo_admin_access";
 let resolveMeteoStore;
 const meteoStoreReady=new Promise(resolve=>{resolveMeteoStore=resolve;});
 window.addEventListener('meteo-store-ready',()=>resolveMeteoStore(window.meteoStore),{once:true});
@@ -384,23 +382,28 @@ modalLoading.classList.toggle("visible",isLoading);
 const passwordScreen=document.getElementById("password-screen");
 const mainContent=document.getElementById("main-content");
 
-if(localStorage.getItem(STORAGE_KEY)==="true"){
+let initialized=false;
+function enterAdmin(){
 passwordScreen.style.display="none";
 mainContent.style.display="block";
-initAdmin();
-}else{
-document.getElementById("password-form").onsubmit=e=>{
+if(!initialized){initialized=true;initAdmin();}else crearCalendario();
+}
+meteoStoreReady.then(store=>{if(store.hasSession())enterAdmin();});
+document.getElementById("password-form").onsubmit=async e=>{
 e.preventDefault();
 const input=document.getElementById("password-input").value;
-if(input===PASSWORD){
-localStorage.setItem(STORAGE_KEY,"true");
-passwordScreen.style.display="none";
-mainContent.style.display="block";
-initAdmin();
-}else{
-document.getElementById("password-error").textContent="Wrong password";
-}
-}
+const button=document.getElementById('password-btn');
+button.disabled=true;
+document.getElementById('password-error').textContent='Comprobando acceso…';
+try{
+const store=await meteoStoreReady;
+await store.login(input);
+document.getElementById('password-input').value='';
+document.getElementById('password-error').textContent='';
+enterAdmin();
+}catch(error){
+document.getElementById('password-error').textContent=error.message||'No se pudo iniciar sesión.';
+}finally{button.disabled=false;}
 }
 
 function initAdmin(){
@@ -518,9 +521,10 @@ cal.appendChild(d);
 setCalendarLoading(false);
 
 })
-.catch(()=>{
+.catch(error=>{
 if(renderId!==calendarRenderId) return;
 setCalendarLoading(false);
+cal.textContent=error.message||'No se pudieron cargar las mediciones. Recarga para reintentar.';
 });
 
 }
@@ -556,6 +560,8 @@ document.getElementById("form").onsubmit=async e=>{
 e.preventDefault();
 
 const msg=document.getElementById("message");
+const saveButton=formElement.querySelector('button[type="submit"]');
+saveButton.disabled=true;
 msg.textContent="Guardando...";
 
 const nuevo={
@@ -588,14 +594,17 @@ crearCalendario();
 },900);
 
 }catch(err){
-msg.textContent="Error saving";
+msg.textContent=err.message||'No se pudo guardar. Los valores siguen en el formulario para reintentar.';
+}finally{
+saveButton.disabled=false;
 }
 
 };
 
 </script>
 
-<script type="module" src="meteo-store.js?v=1"></script>
+<script type="module" src="meteo-store.js?v=2"></script>
 <script type="module" src="https://maximilian23.com/stats/tracker.js?v=6"></script>
 </body>
 </html>
+
