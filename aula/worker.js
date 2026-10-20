@@ -13,6 +13,7 @@ export default{async fetch(request,env){
     if(path==='/clasif')return await classification(request,env,headers);
     if(path==='/juez')return await juez(request,env,headers);
     if(path==='/blog-images')return await blogImages(request,env,headers);
+    if(path==='/meteo')return await meteo(request,env,headers);
     if(request.method==='GET'){
       const record=await read(env);
       return out({reservas:withFijas(record.reservas||{})},200,headers);
@@ -57,6 +58,47 @@ export default{async fetch(request,env){
     return out({error:'No se ha podido conectar con las reservas. Espera unos segundos y vuelve a intentarlo.'},503,headers)
   }
 }};
+
+// Measurements are stored separately from visits, one document per date.
+const METEO_PASSWORD_HASH='d5012077b8f1480d6f97bb97c91905dc0cb27e91be9e9f22f2199d8622ae9b30';
+function validateMeteo(value){
+  if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value.fecha||''))throw Error('Indica una fecha válida.');
+  const date=new Date(value.fecha+'T12:00:00Z');
+  if(!Number.isFinite(date.getTime())||date.toISOString().slice(0,10)!==value.fecha||value.fecha<'2026-09-01'||value.fecha>'2100-08-31')throw Error('La fecha no es válida para este curso.');
+  const entry={fecha:value.fecha};
+  for(const [key,min,max] of [['temp_indoor',-80,80],['temp_outdoor',-80,80],['hum_outdoor',0,100],['wind_speed',0,150],['rain',0,3000]]){
+    const raw=value[key];
+    if(raw===null||raw===undefined||String(raw).trim()===''){entry[key]=null;continue;}
+    const number=Number(String(raw).replace(',','.'));
+    if(!Number.isFinite(number)||number<min||number>max)throw Error('Revisa el valor de '+key+'.');
+    entry[key]=number;
+  }
+  entry.wind_direction=clean(value.wind_direction,40)||null;
+  if(Object.entries(entry).filter(([key])=>key!=='fecha').every(([,v])=>v===null))throw Error('Introduce al menos una medición.');
+  return entry;
+}
+async function meteo(request,env,headers){
+  if(request.method==='GET'){
+    const token=await getAccessToken(env),url=firestoreDocUrl(env,'meteoObservations');
+    const rows=[];let pageToken='';
+    do{
+      const response=await fetch(url+'?pageSize=1000'+(pageToken?'&pageToken='+encodeURIComponent(pageToken):''),{headers:{Authorization:'Bearer '+token}});
+      if(!response.ok)throw Error('Firestore meteo '+response.status);
+      const data=await response.json();
+      rows.push(...(data.documents||[]).map(d=>fromFsFields(d.fields||{})));
+      pageToken=data.nextPageToken||'';
+    }while(pageToken);
+    return out({meteo:rows.sort((a,b)=>a.fecha.localeCompare(b.fecha))},200,headers);
+  }
+  if(request.method!=='POST')return out({error:'Método no permitido.'},405,headers);
+  const body=await request.json();
+  if(await passwordHash(body.password)!==(env.METEO_PASSWORD_HASH||METEO_PASSWORD_HASH))return out({error:'Contraseña incorrecta. Vuelve a iniciar sesión.'},401,headers);
+  if(body.action==='login')return out({ok:true},200,headers);
+  if(body.action!=='save')return out({error:'Acción no válida.'},400,headers);
+  let entry;try{entry=validateMeteo(body.entry);}catch(error){return out({error:error.message},400,headers);}
+  if(!(await save(env,entry,'meteoObservations/'+entry.fecha)).ok)throw Error('No se pudo guardar la medición.');
+  return out({ok:true,fecha:entry.fecha},200,headers);
+}
 
 async function classification(request,env,headers){
   if(request.method==='GET'){
