@@ -181,6 +181,7 @@ to{transform:rotate(360deg);}
 <div class="content-wrapper">
 
 <h2 id="courseTitle" style="text-align:center;color:#125a9c;margin:0 0 20px;">Meteoescuela 2026-2027</h2>
+<p id="loadError" role="status" style="text-align:center;color:#a12727" hidden></p>
 
 <div class="charts-grid">
 
@@ -496,6 +497,7 @@ document.getElementById('meteoTab2526').classList.toggle('active',course==='2526
 document.getElementById('meteoTab2627').classList.toggle('active',course==='2627');
 document.getElementById('courseTitle').textContent=course==='2526'?'Meteoescuela 2025-2026':'Meteoescuela 2026-2027';
 setLoading(true);
+document.getElementById('loadError').hidden=true;
 try{
 if(course==='2526'){
  const res=await fetch(`${ARCHIVE_URL}?t=${Date.now()}`,{cache:'no-store'});
@@ -510,6 +512,8 @@ renderAll();
 
 }catch(e){
 console.error(e);
+document.getElementById('loadError').textContent=e.message||'No se pudieron cargar las mediciones. Recarga para reintentar.';
+document.getElementById('loadError').hidden=false;
 allData=[];
 renderAll();
 }finally{
@@ -532,7 +536,8 @@ function showMeteoCourse(course){
 }
 </script>
 
-<script type="module" src="meteo-store.js?v=1"></script>
+<script type="module" src="meteo-store.js?v=2"></script>
 <script type="module" src="https://maximilian23.com/stats/tracker.js?v=6"></script>
 </body>
 </html>
+
