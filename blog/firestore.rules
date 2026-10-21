@@ -20,6 +20,14 @@ service cloud.firestore {
         || hasEmail('silverio68@educarex.es');
     }
 
+    // Public visitors may only increment the view counter of a published post.
+    function isPostView() {
+      return resource.data.status == 'published'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+        && request.resource.data.views is int
+        && request.resource.data.views == resource.data.get('views', 0) + 1;
+    }
+
     match /articles/{articleId} {
       allow read: if resource.data.status == 'published' || isMainEditor();
       allow create, delete: if isMainEditor();
@@ -31,22 +39,26 @@ service cloud.firestore {
 
     match /citePosts/{postId} {
       allow read: if resource.data.status == 'published' || isMainEditor();
-      allow create, update, delete: if isMainEditor();
+      allow create, delete: if isMainEditor();
+      allow update: if isMainEditor() || isPostView();
     }
 
     match /aulaBlogPosts/{postId} {
       allow read: if resource.data.status == 'published' || isAulaEditor();
-      allow create, update, delete: if isAulaEditor();
+      allow create, delete: if isAulaEditor();
+      allow update: if isAulaEditor() || isPostView();
     }
 
     match /meteoBlogPosts/{postId} {
       allow read: if resource.data.status == 'published' || isMeteoEditor();
-      allow create, update, delete: if isMeteoEditor();
+      allow create, delete: if isMeteoEditor();
+      allow update: if isMeteoEditor() || isPostView();
     }
 
     match /huertoBlogPosts/{postId} {
       allow read: if resource.data.status == 'published' || isHuertoEditor();
-      allow create, update, delete: if isHuertoEditor();
+      allow create, delete: if isHuertoEditor();
+      allow update: if isHuertoEditor() || isPostView();
     }
   }
 }
