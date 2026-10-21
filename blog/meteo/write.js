@@ -2,7 +2,7 @@ import{initializeApp}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-ap
 import{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signOut}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import{getFirestore,collection,doc,getDoc,getDocs,setDoc,deleteDoc,deleteField,serverTimestamp}from'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import{firebaseConfig}from'./firebase-config.js?v=1';
-import{uploadImages,deleteImages}from'../image-store.js?v=1';
+import{uploadImages,deleteImages}from'../image-store.js?v=2';
 const $=s=>document.querySelector(s),EDITORS=['mmartinezf001@educarex.es','fjboraitab01@educarex.es'],BLOG='meteo',app=initializeApp(firebaseConfig,'meteo-editor'),auth=getAuth(app),db=getFirestore(app),editId=new URLSearchParams(location.search).get('id');let images=[],imagePaths=[],editorLoaded=false;
 const permitted=u=>EDITORS.includes(u?.email?.trim().toLowerCase());
 function showLogin(u,text){$('#editorPanel').classList.add('hidden');$('#loginPanel').classList.remove('hidden');$('#authStatus').textContent=text;$('#loginLogoutBtn').classList.toggle('hidden',!u);$('#loginError').textContent=''}

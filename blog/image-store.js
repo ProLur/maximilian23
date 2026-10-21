@@ -1,11 +1,17 @@
 const IMAGE_API='https://aula-del-futuro-reservas.mmartinezf001.workers.dev/blog-images';
 
 async function request(user,payload){
-  const token=await user.getIdToken();
-  const response=await fetch(IMAGE_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(payload)});
-  const data=await response.json().catch(()=>({}));
-  if(!response.ok)throw Error(data.error||'No se pudieron guardar las imágenes.');
-  return data;
+  if(!user)throw Error('No hay una sesión iniciada. Conserva el texto antes de volver a entrar.');
+  for(let attempt=0;attempt<2;attempt++){
+    let token;
+    try{token=await user.getIdToken(true);}
+    catch{throw Error('No se pudo renovar la sesión. Conserva el texto y vuelve a intentarlo.');}
+    const response=await fetch(IMAGE_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(payload)});
+    const data=await response.json().catch(()=>({}));
+    if(response.status===401&&attempt===0)continue;
+    if(!response.ok)throw Error(data.error||'No se pudieron guardar las imágenes. El texto permanece en el formulario.');
+    return data;
+  }
 }
 
 export async function prepareImage(file){

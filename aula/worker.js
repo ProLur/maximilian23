@@ -12,7 +12,14 @@ export default{async fetch(request,env){
     const path=new URL(request.url).pathname.replace(/\/+$/,'')||'/';
     if(path==='/clasif')return await classification(request,env,headers);
     if(path==='/juez')return await juez(request,env,headers);
-    if(path==='/blog-images')return await blogImages(request,env,headers);
+    if(path==='/blog-images'){
+      headers['X-Blog-Images-Version']='firebase-rs256-v2';
+      try{return await blogImages(request,env,headers);}
+      catch(error){
+        console.error('Blog images:',error?.message||'request failed');
+        return out({error:'No se pudieron guardar las imágenes en el servidor. Conserva el texto e inténtalo de nuevo. Si se repite, comprueba la conexión con GitHub.'},503,headers);
+      }
+    }
     if(path==='/meteo')return await meteo(request,env,headers);
     if(request.method==='GET'){
       const record=await read(env);
@@ -188,13 +195,51 @@ async function blogImages(request,env,headers){
   }
   return out({error:'Acción no válida.'},400,headers);
 }
+const FIREBASE_JWKS_URL='https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
+let firebaseSigningKeys={keys:[],expires:0,fetched:0};
+function decodeJwtPart(value){
+  if(!/^[A-Za-z0-9_-]+$/.test(value))throw Error('Invalid token encoding');
+  const padded=value.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-value.length%4)%4);
+  return Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
+}
+async function firebaseSigningKey(kid){
+  const now=Date.now();
+  const known=firebaseSigningKeys.keys.find(key=>key.kid===kid);
+  if(firebaseSigningKeys.expires<=now||(!known&&now-firebaseSigningKeys.fetched>60000)){
+    const response=await fetch(FIREBASE_JWKS_URL,{signal:AbortSignal.timeout(10000)});
+    if(!response.ok)throw Error('No se pudo comprobar la sesión con Firebase. Conserva el texto e inténtalo de nuevo.');
+    const data=await response.json();
+    if(!Array.isArray(data.keys)||!data.keys.length)throw Error('Firebase no devolvió sus claves de verificación.');
+    const seconds=Number((response.headers.get('Cache-Control')||'').match(/max-age=(\d+)/)?.[1]||3600);
+    firebaseSigningKeys={keys:data.keys,expires:now+Math.min(seconds,86400)*1000,fetched:now};
+  }
+  return firebaseSigningKeys.keys.find(key=>key.kid===kid&&key.kty==='RSA'&&key.alg==='RS256');
+}
 async function firebaseIdentity(token,env){
-  if(!token)return null;
-  const response=await fetch('https://oauth2.googleapis.com/tokeninfo?id_token='+encodeURIComponent(token));
-  if(!response.ok)return null;
-  const data=await response.json(),project=env.FIREBASE_PROJECT_ID||'cronica-escolar-maximilian23';
-  if(data.aud!==project||data.email_verified!=='true')return null;
-  return{email:String(data.email||'').trim().toLowerCase()};
+  if(typeof token!=='string'||!token||token.length>20000)return null;
+  let header,claims,signature,parts;
+  try{
+    parts=token.split('.');
+    if(parts.length!==3)return null;
+    header=JSON.parse(new TextDecoder().decode(decodeJwtPart(parts[0])));
+    claims=JSON.parse(new TextDecoder().decode(decodeJwtPart(parts[1])));
+    signature=decodeJwtPart(parts[2]);
+  }catch{return null;}
+  const project=env.FIREBASE_PROJECT_ID||'cronica-escolar-maximilian23',now=Math.floor(Date.now()/1000);
+  if(header.alg!=='RS256'||typeof header.kid!=='string'||!header.kid)return null;
+  if(claims.aud!==project||claims.iss!=='https://securetoken.google.com/'+project)return null;
+  if(!Number.isInteger(claims.exp)||claims.exp<=now||!Number.isInteger(claims.iat)||claims.iat>now||claims.exp<=claims.iat)return null;
+  if(!Number.isInteger(claims.auth_time)||claims.auth_time>now)return null;
+  if(typeof claims.sub!=='string'||!claims.sub||claims.sub.length>128)return null;
+  if(claims.email_verified!==true||typeof claims.email!=='string'||!claims.email.trim())return null;
+  const jwk=await firebaseSigningKey(header.kid);
+  if(!jwk)return null;
+  let verified=false;
+  try{
+    const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
+    verified=await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,signature,new TextEncoder().encode(parts[0]+'.'+parts[1]));
+  }catch{return null;}
+  return verified?{email:claims.email.trim().toLowerCase(),uid:claims.sub}:null;
 }
 function safePart(value,max){return String(value||'').toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/(^-|-$)/g,'').slice(0,max)}
 function githubHeaders(env){return{'Authorization':'Bearer '+env.GITHUB_TOKEN,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json','User-Agent':'maximilian23-blog-images'}}
