@@ -1,0 +1,211 @@
+[
+  {
+    "group": "colegio",
+    "id": "colegio-transparente",
+    "title": "Logo del colegio · sin fondo",
+    "path": "/logo/logoc.png",
+    "format": "PNG",
+    "width": 1021,
+    "height": 836,
+    "bytes": 669371,
+    "transparent": true
+  },
+  {
+    "group": "colegio",
+    "id": "colegio-blanco",
+    "title": "Logo del colegio · fondo blanco",
+    "path": "/logo/logos.png",
+    "format": "PNG",
+    "width": 1021,
+    "height": 836,
+    "bytes": 625097,
+    "transparent": false
+  },
+  {
+    "group": "maximilian",
+    "id": "cabeza",
+    "title": "Cabeza de Maximilian",
+    "path": "/Cabeza.png",
+    "format": "PNG",
+    "width": 400,
+    "height": 351,
+    "bytes": 118995,
+    "transparent": true
+  },
+  {
+    "group": "maximilian",
+    "id": "personaje",
+    "title": "Maximilian · personaje completo",
+    "path": "/max.png",
+    "format": "PNG",
+    "width": 853,
+    "height": 1280,
+    "bytes": 1209752,
+    "transparent": false
+  },
+  {
+    "group": "maximilian",
+    "id": "presentacion",
+    "title": "Maximilian se presenta",
+    "path": "/maxcon.png",
+    "format": "PNG",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2185681,
+    "transparent": false
+  },
+  {
+    "group": "proyectos",
+    "id": "cite",
+    "title": "CITE · emblema",
+    "path": "/assets/programas/cite.png",
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1598153,
+    "transparent": false
+  },
+  {
+    "group": "proyectos",
+    "id": "aula-emblema",
+    "title": "Aula del Futuro · emblema",
+    "path": "/assets/programas/aula.png",
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1556069,
+    "transparent": false
+  },
+  {
+    "group": "proyectos",
+    "id": "meteo-emblema",
+    "title": "Meteoescuela · emblema",
+    "path": "/assets/programas/meteo.png",
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1598362,
+    "transparent": false
+  },
+  {
+    "group": "proyectos",
+    "id": "aula-personaje",
+    "title": "Maximilian · Aula del Futuro",
+    "path": "/blog/aula/maximilian-aula.png",
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1182882,
+    "transparent": true
+  },
+  {
+    "group": "proyectos",
+    "id": "meteo-personaje",
+    "title": "Maximilian · Meteoescuela",
+    "path": "/blog/meteo/maximilian-meteo.png",
+    "format": "PNG",
+    "width": 1387,
+    "height": 1134,
+    "bytes": 1139118,
+    "transparent": true
+  },
+  {
+    "group": "proyectos",
+    "id": "huerto-personaje",
+    "title": "Maximilian · Huerto escolar",
+    "path": "/blog/huerto/maximilian-huerto.png",
+    "format": "PNG",
+    "width": 1312,
+    "height": 1199,
+    "bytes": 1470035,
+    "transparent": true
+  },
+  {
+    "group": "proyectos",
+    "id": "cronica",
+    "title": "Maximilian · Crónica Escolar",
+    "path": "/ce/logo-cronica-web.png",
+    "format": "PNG",
+    "width": 512,
+    "height": 384,
+    "bytes": 313161,
+    "transparent": true
+  },
+  {
+    "group": "expresiones",
+    "id": "juega",
+    "title": "¡Se juega!",
+    "path": "/juez/maximilian-juega-v2.png",
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1377743,
+    "transparent": true
+  },
+  {
+    "group": "expresiones",
+    "id": "no-juega",
+    "title": "Hoy no se juega",
+    "path": "/juez/maximilian-no-juega-v2.png",
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1529856,
+    "transparent": true
+  },
+  {
+    "group": "materiales",
+    "id": "marcapaginas-1",
+    "title": "Marcapáginas · colección 1",
+    "path": "/arte/marcamax.png",
+    "format": "PNG",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 2055554,
+    "transparent": false
+  },
+  {
+    "group": "materiales",
+    "id": "marcapaginas-2",
+    "title": "Marcapáginas · colección 2",
+    "path": "/arte/marcamax2.png",
+    "format": "PNG",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 1993698,
+    "transparent": false
+  },
+  {
+    "group": "materiales",
+    "id": "cartel-aula",
+    "title": "Cartel · reserva del Aula",
+    "path": "/aula/aula.png",
+    "format": "PNG",
+    "width": 1175,
+    "height": 1684,
+    "bytes": 1213580,
+    "transparent": false
+  },
+  {
+    "group": "animaciones",
+    "id": "animacion-1",
+    "title": "Maximilian · animación 1",
+    "path": "/2.gif",
+    "format": "GIF",
+    "width": 400,
+    "height": 593,
+    "bytes": 5617186,
+    "transparent": false
+  },
+  {
+    "group": "animaciones",
+    "id": "espera",
+    "title": "Maximilian · esperando",
+    "path": "/waiting.gif",
+    "format": "GIF",
+    "width": 400,
+    "height": 593,
+    "bytes": 4355032,
+    "transparent": false
+  }
+]

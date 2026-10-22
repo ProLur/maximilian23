@@ -435,6 +435,7 @@
         <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
         <div class="menu-item teacher-link" onclick="openBlog()">Blogs de proyectos</div>
         <div class="menu-item teacher-link" onclick="openBuscador()">Buscador</div>
+        <div class="menu-item teacher-link" onclick="openRecursos()">Recursos gráficos</div>
         <div class="menu-image">
             <img id="mobileMaxImage" src="https://maximilian23.com/max.png" alt="Maximilian">
         </div>
@@ -457,6 +458,7 @@
                     <div class="menu-item teacher-link" onclick="openCarrusel()">Carrusel</div>
                     <div class="menu-item teacher-link" onclick="openBlog()">Blogs de proyectos</div>
                     <div class="menu-item teacher-link" onclick="openBuscador()">Buscador</div>
+        <div class="menu-item teacher-link" onclick="openRecursos()">Recursos gráficos</div>
                 </div>
             </div>
             <div class="image-container">
@@ -522,6 +524,10 @@
         }
         function openBlog() {
             window.open('https://maximilian23.com/blog/', '_blank');
+            closeMobileMenu();
+        }
+        function openRecursos() {
+            window.open('https://maximilian23.com/recursos/', '_blank');
             closeMobileMenu();
         }
         function openBuscador() {
