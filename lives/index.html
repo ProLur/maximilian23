@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Maximilian 23</title>
+  <meta name="description" content="Maximilian 23, la mascota virtual del CEIP Juan XXIII de Zafra.">
+  <meta name="theme-color" content="#0b161c">
+  <link rel="stylesheet" href="css/maximilian.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="escena" aria-label="Maximilian 23, cabeza robótica animada"></canvas>
+  <div class="vineta" aria-hidden="true"></div>
+
+  <div id="carga" role="status">Despertando a Maximilian…</div>
+
+  <button id="pantalla-completa" class="boton-pantalla" type="button"
+          title="Pantalla completa (F)" aria-label="Pantalla completa" aria-pressed="false">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <button id="activar" class="boton-activar" type="button" hidden>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+      <path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    Toca para activar la voz
+  </button>
+
+  <p id="subtitulo" class="subtitulo" aria-live="polite"></p>
+
+  <nav id="prueba" class="barra-prueba" hidden aria-label="Pruebas de expresiones"></nav>
+
+  <form id="prueba-voz" class="panel-voz" hidden aria-label="Prueba de voz">
+    <textarea name="texto" rows="3">¡Buenos días, chicos y chicas del Juan XXIII! Hoy vamos a aprender muchas cosas nuevas.</textarea>
+    <label>Voz <select name="voz"></select></label>
+    <label>Emoción <select name="emocion"></select></label>
+    <label>Velocidad <input name="velocidad" type="range" min="0.5" max="2" step="0.05" value="1"><output>1</output></label>
+    <label>Tono <input name="tono" type="range" min="0" max="2" step="0.05" value="1.1"><output>1.1</output></label>
+    <div class="acciones">
+      <button type="submit">Decir</button>
+      <button type="button" name="detener">Detener</button>
+    </div>
+  </form>
+
+  <script>
+    // Si main.js no llega a arrancar, explicar el motivo en vez de quedarse en "Despertando…"
+    (function () {
+      var errores = [];
+      window.addEventListener('error', function (e) {
+        errores.push((e.message || 'error') + (e.filename ? ' — ' + e.filename : ''));
+      }, true);
+      window.__maxFallo = function (motivo) {
+        if (window.__maxArrancado) return;
+        var el = document.getElementById('carga');
+        var msg;
+        if (location.protocol === 'file:') {
+          msg = 'Esta página no funciona abierta con doble clic. Ábrela desde su dirección web (https://…).';
+        } else {
+          msg = 'No se ha podido cargar el motor 3D (' + motivo + '). ' +
+                'Puede que la red bloquee cdn.jsdelivr.net o que el servidor modifique los scripts.';
+        }
+        el.textContent = msg;
+        el.classList.add('error');
+        if (errores.length) {
+          var d = document.createElement('small');
+          d.className = 'detalle';
+          d.textContent = errores.slice(-3).join(' · ');
+          el.appendChild(d);
+        }
+      };
+      setTimeout(function () { window.__maxFallo('tiempo agotado'); }, 15000);
+    })();
+  </script>
+  <script type="module" src="js/main.js" onerror="__maxFallo('main.js')"></script>
+</body>
+</html>
