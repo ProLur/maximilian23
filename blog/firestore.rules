@@ -20,13 +20,7 @@ service cloud.firestore {
         || hasEmail('silverio68@educarex.es');
     }
 
-    // Public visitors may only increment the view counter of a published post.
-    function isPostView() {
-      return resource.data.status == 'published'
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
-        && request.resource.data.views is int
-        && request.resource.data.views == resource.data.get('views', 0) + 1;
-    }
+    // Blog counters are written only by the server; public clients cannot edit posts.
 
     match /articles/{articleId} {
       allow read: if resource.data.status == 'published' || isMainEditor();
@@ -39,26 +33,22 @@ service cloud.firestore {
 
     match /citePosts/{postId} {
       allow read: if resource.data.status == 'published' || isMainEditor();
-      allow create, delete: if isMainEditor();
-      allow update: if isMainEditor() || isPostView();
+      allow create, update, delete: if isMainEditor();
     }
 
     match /aulaBlogPosts/{postId} {
       allow read: if resource.data.status == 'published' || isAulaEditor();
-      allow create, delete: if isAulaEditor();
-      allow update: if isAulaEditor() || isPostView();
+      allow create, update, delete: if isAulaEditor();
     }
 
     match /meteoBlogPosts/{postId} {
       allow read: if resource.data.status == 'published' || isMeteoEditor();
-      allow create, delete: if isMeteoEditor();
-      allow update: if isMeteoEditor() || isPostView();
+      allow create, update, delete: if isMeteoEditor();
     }
 
     match /huertoBlogPosts/{postId} {
       allow read: if resource.data.status == 'published' || isHuertoEditor();
-      allow create, delete: if isHuertoEditor();
-      allow update: if isHuertoEditor() || isPostView();
+      allow create, update, delete: if isHuertoEditor();
     }
   }
 }
