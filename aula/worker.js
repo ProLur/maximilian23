@@ -10,6 +10,7 @@ export default{async fetch(request,env){
   if(!ORIGINS.has(origin))return out({error:'Origen no permitido.'},403,headers);
   try{
     const path=new URL(request.url).pathname.replace(/\/+$/,'')||'/';
+    if(path==='/blog-views')return await blogViews(request,env,headers);
     if(path==='/clasif')return await classification(request,env,headers);
     if(path==='/juez')return await juez(request,env,headers);
     if(path==='/blog-images'){
@@ -348,3 +349,80 @@ function userId(nombre){return nombre.normalize('NFD').replace(/[̀-ͯ]/g,'').to
 async function passwordHash(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('')}
 function validate(body){if(!body||!/^\d{4}-\d{2}-\d{2}$/.test(body.fecha)||!SLOTS.has(body.tramo)||String(body.password||'').length<4)return'La contraseña debe tener al menos 4 caracteres.';if(body.accion!=='cancelar'&&(!clean(body.nombre,60)||!clean(body.grupo,40)))return'Completa correctamente todos los datos.';const date=new Date(body.fecha+'T12:00:00');if(![1,2,3,4,5].includes(date.getDay()))return'Solo se puede reservar de lunes a viernes.';const today=new Date();today.setHours(0,0,0,0);const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const end=new Date(monday);end.setDate(end.getDate()+11);end.setHours(23,59,59,999);if(date<monday||date>end)return'Solo están disponibles la semana actual y la siguiente.';return''}
 
+
+// Included in worker.js: only these four collections can be counted.
+const BLOG_COLLECTIONS = { cite: 'citePosts', aula: 'aulaBlogPosts', meteo: 'meteoBlogPosts', huerto: 'huertoBlogPosts' };
+const BLOG_PROJECT = 'cronica-escolar-maximilian23';
+const VIEW_WINDOW_MS = 30 * 60 * 1000;
+let viewHmacKey;
+
+async function blogViews(request, env, headers) {
+  headers['X-Blog-Views-Version'] = 'server-v1';
+  if (request.method !== 'POST') return out({ error: 'Método no permitido.' }, 405, headers);
+  if (!request.headers.get('Content-Type')?.startsWith('application/json')) return out({ error: 'Se requiere JSON.' }, 415, headers);
+  if (Number(request.headers.get('Content-Length') || 0) > 1024) return out({ error: 'Solicitud demasiado grande.' }, 413, headers);
+  // Bound streaming bodies as well as requests carrying Content-Length.
+  const reader = request.body?.getReader();
+  if (!reader) return out({ error: 'Faltan datos.' }, 400, headers);
+  let size = 0, chunks = [];
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > 1024) { await reader.cancel(); return out({ error: 'Solicitud demasiado grande.' }, 413, headers); }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(size); let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
+  let body;
+  try { body = JSON.parse(new TextDecoder().decode(bytes)); } catch { return out({ error: 'JSON no válido.' }, 400, headers); }
+  if (!body || Array.isArray(body) || Object.keys(body).some(k => !['blog', 'id', 'visitorId'].includes(k))
+    || !Object.hasOwn(BLOG_COLLECTIONS, body.blog)
+    || typeof body.id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,199}$/.test(body.id)
+    || typeof body.visitorId !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(body.visitorId)) {
+    return out({ error: 'Datos de visita no válidos.' }, 400, headers);
+  }
+  // Reuse the existing server credential; never send it to the browser.
+  // A distinct domain-separated HMAC input prevents recovering visitor UUIDs.
+  viewHmacKey ||= await crypto.subtle.importKey('raw', new TextEncoder().encode(getSA(env).private_key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const digest = await crypto.subtle.sign('HMAC', viewHmacKey, new TextEncoder().encode(`blog-views-v1:${body.blog}:${body.id}:${body.visitorId.toLowerCase()}`));
+  const receiptId = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+  const database = `projects/${BLOG_PROJECT}/databases/(default)`;
+  const base = `https://firestore.googleapis.com/v1/${database}/documents`;
+  const postName = `${database}/documents/${BLOG_COLLECTIONS[body.blog]}/${body.id}`;
+  const receiptName = `${database}/documents/_blogViewReceipts/${receiptId}`;
+  const token = await getAccessToken(env);
+  const auth = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+  const fsFetch = (url, options = {}) => fetch(url, { ...options, headers: auth, signal: AbortSignal.timeout(10000) });
+  // Optimistic preconditions + one atomic commit handle simultaneous tabs and retries.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const postResponse = await fsFetch(`https://firestore.googleapis.com/v1/${postName}?mask.fieldPaths=status&mask.fieldPaths=views`);
+    if (postResponse.status === 404) return out({ error: 'Entrada no disponible.' }, 404, headers);
+    if (!postResponse.ok) throw Error('Blog views read ' + postResponse.status);
+    const post = await postResponse.json();
+    if (post.fields?.status?.stringValue !== 'published') return out({ error: 'Entrada no disponible.' }, 404, headers);
+    const raw = post.fields?.views;
+    const views = raw ? Number(raw.integerValue) : 0;
+    if (!Number.isSafeInteger(views) || views < 0) throw Error('Invalid blog view counter');
+    const receiptResponse = await fsFetch(`https://firestore.googleapis.com/v1/${receiptName}`);
+    if (!receiptResponse.ok && receiptResponse.status !== 404) throw Error('Blog receipt read ' + receiptResponse.status);
+    const receipt = receiptResponse.ok ? await receiptResponse.json() : null;
+    const now = Date.now(), last = Date.parse(receipt?.fields?.countedAt?.timestampValue || '');
+    if (Number.isFinite(last) && now - last < VIEW_WINDOW_MS) {
+      return out({ ok: true, counted: false, views, retryAfterMs: Math.min(VIEW_WINDOW_MS, VIEW_WINDOW_MS - (now - last)) }, 200, headers);
+    }
+    const commit = await fsFetch(base + ':commit', { method: 'POST', body: JSON.stringify({ writes: [
+      { transform: { document: postName, fieldTransforms: [{ fieldPath: 'views', increment: { integerValue: '1' } }] }, currentDocument: { updateTime: post.updateTime } },
+      { update: { name: receiptName, fields: { countedAt: { timestampValue: new Date(now).toISOString() }, expireAt: { timestampValue: new Date(now + 86400000).toISOString() } } }, currentDocument: receipt ? { updateTime: receipt.updateTime } : { exists: false } }
+    ] }) });
+    if ([409, 412].includes(commit.status)) continue;
+    // FAILED_PRECONDITION may also be surfaced as HTTP 400 by Firestore.
+    if (!commit.ok) {
+      const failure = await commit.json().catch(() => ({}));
+      if (['ABORTED', 'ALREADY_EXISTS', 'FAILED_PRECONDITION'].includes(failure.error?.status)) continue;
+      throw Error('Blog views commit ' + commit.status);
+    }
+    return out({ ok: true, counted: true, views: views + 1, retryAfterMs: VIEW_WINDOW_MS }, 200, headers);
+  }
+  return out({ error: 'Visita pendiente. Vuelve a intentarlo.' }, 503, headers);
+}
