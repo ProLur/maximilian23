@@ -14,8 +14,10 @@ import { conectarRemoto } from './remoto.js';
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
 const params = new URLSearchParams(location.search);
-const USE_BLOOM = params.get('brillo') !== '0';
-const FILL = 0.9;                        // fraccion de pantalla que ocupa el modelo (medio cuerpo)
+// Calidad: ?calidad=alta|baja la fija; si no, se mide la fluidez y se baja sola si hace falta.
+const CALIDAD = params.get('calidad');
+const USE_BLOOM = params.get('brillo') !== '0' && CALIDAD !== 'baja';
+const FILL = 0.9;                        // fraccion de pantalla que ocupa el modelo (cuerpo entero)
 const BG = new THREE.Color('#0b161c');
 
 const canvas = document.getElementById('escena');
@@ -34,7 +36,7 @@ try {
   fail('Este navegador no puede mostrar gráficos 3D (WebGL).', err);
   throw err;
 }
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(CALIDAD === 'baja' ? 1 : Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.NeutralToneMapping;   // respeta los tonos originales
 renderer.toneMappingExposure = 1.0;
 
@@ -54,8 +56,12 @@ rim.position.set(1.5, 3.5, -4.5);
 scene.add(key, fill, rim, new THREE.HemisphereLight(0x9fd8e0, 0x0b161c, 0.35));
 
 const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
-let target = new THREE.Vector3();
-let modelSize = new THREE.Vector3(2.4, 2.2, 2);
+
+// Encuadres: 0 = cabeza, 1 = cabeza y busto (al cargar), 2 = cuerpo entero.
+// La rueda del raton, el pellizco o las teclas + / - pasan de uno a otro con suavidad.
+const ZOOM_INICIAL = 1;
+let framings = [{ center: new THREE.Vector3(), size: new THREE.Vector3(2.4, 2.2, 2) }];
+const zoom = { actual: ZOOM_INICIAL, objetivo: ZOOM_INICIAL };
 
 let composer = null;
 if (USE_BLOOM) {
@@ -65,21 +71,88 @@ if (USE_BLOOM) {
   composer.addPass(new OutputPass());
 }
 
+/** Encuadre interpolado para un zoom continuo entre 0 y framings.length - 1. */
+function framingAt(z) {
+  const i = Math.min(Math.floor(z), framings.length - 2);
+  if (i < 0) return framings[0];
+  const t = z - i;
+  const a = framings[i], b = framings[i + 1];
+  return { center: a.center.clone().lerp(b.center, t), size: a.size.clone().lerp(b.size, t) };
+}
+
+function placeCamera() {
+  const { center, size } = framingAt(zoom.actual);
+  // distancia para que el encuadre ocupe FILL de la dimension mas restrictiva
+  const vfov = camera.fov * THREE.MathUtils.DEG2RAD;
+  const fitH = (size.y / FILL) / (2 * Math.tan(vfov / 2));
+  const fitW = (size.x / FILL) / (2 * Math.tan(vfov / 2) * camera.aspect);
+  const dist = Math.max(fitH, fitW) + size.z / 2;
+  camera.position.set(center.x, center.y + dist * 0.06, center.z + dist);
+  camera.lookAt(center);
+  camera.updateProjectionMatrix();
+}
+
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
   renderer.setSize(w, h, false);
   composer?.setSize(w, h);
   camera.aspect = w / h;
-  // distancia para que el modelo ocupe FILL de la dimension mas restrictiva
-  const vfov = camera.fov * THREE.MathUtils.DEG2RAD;
-  const fitH = (modelSize.y / FILL) / (2 * Math.tan(vfov / 2));
-  const fitW = (modelSize.x / FILL) / (2 * Math.tan(vfov / 2) * camera.aspect);
-  const dist = Math.max(fitH, fitW) + modelSize.z / 2;
-  camera.position.set(target.x, target.y + dist * 0.06, target.z + dist);
-  camera.lookAt(target);
-  camera.updateProjectionMatrix();
+  placeCamera();
 }
 window.addEventListener('resize', resize);
+
+function zoomBy(delta) {
+  zoom.objetivo = THREE.MathUtils.clamp(zoom.objetivo + delta, 0, framings.length - 1);
+}
+
+// rueda del raton (y pellizco del panel tactil, que llega como rueda con Ctrl)
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const pasos = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+  zoomBy(pasos * (e.ctrlKey ? 0.01 : 0.002));
+}, { passive: false });
+
+// pellizco con dos dedos en pantallas tactiles
+const dedos = new Map();
+let distanciaDedos = 0;
+canvas.addEventListener('pointerdown', (e) => dedos.set(e.pointerId, e));
+canvas.addEventListener('pointermove', (e) => {
+  if (!dedos.has(e.pointerId)) return;
+  dedos.set(e.pointerId, e);
+  if (dedos.size !== 2) return;
+  const [a, b] = [...dedos.values()];
+  const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  if (distanciaDedos) zoomBy(-Math.log(d / distanciaDedos) * 1.5);
+  distanciaDedos = d;
+});
+for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) {
+  canvas.addEventListener(ev, (e) => {
+    dedos.delete(e.pointerId);
+    distanciaDedos = 0;
+  });
+}
+
+/** Sombra suave bajo los pies: un degradado radial (mas barato que sombras en tiempo real). */
+function groundShadow(box) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
+  grad.addColorStop(0.6, 'rgba(0, 0, 0, 0.25)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(size.x * 1.1, size.z * 1.6),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }),
+  );
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set((box.min.x + box.max.x) / 2, box.min.y + 0.005, (box.min.z + box.max.z) / 2);
+  return mesh;
+}
 
 // ------------------------------------------------------------------ carga
 let max = null;
@@ -95,8 +168,19 @@ async function load() {
   scene.add(gltf.scene);
 
   const box = new THREE.Box3().setFromObject(root);
-  box.getSize(modelSize);
-  box.getCenter(target);
+  const encuadre = (b) => ({ center: b.getCenter(new THREE.Vector3()), size: b.getSize(new THREE.Vector3()) });
+  const cabeza = root.getObjectByName('Cabeza');
+  const tronco = root.getObjectByName('Pivote_Cuerpo');
+  if (cabeza && tronco) {
+    // busto: de la cintura hacia arriba; cuerpo entero: todo el modelo
+    const cintura = tronco.getWorldPosition(new THREE.Vector3()).y - 0.15;
+    const busto = new THREE.Box3(new THREE.Vector3(box.min.x, cintura, box.min.z), box.max);
+    framings = [encuadre(new THREE.Box3().setFromObject(cabeza)), encuadre(busto), encuadre(box)];
+  } else {
+    framings = [encuadre(box)];
+    zoom.actual = zoom.objetivo = 0;
+  }
+  if (root.getObjectByName('Cadera_L')) scene.add(groundShadow(box));
   resize();
 
   max = new Maximilian(root, expresiones);
@@ -214,9 +298,37 @@ const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const dt = clock.getDelta();
   max?.update(dt);
+  if (Math.abs(zoom.actual - zoom.objetivo) > 1e-4) {
+    zoom.actual += (zoom.objetivo - zoom.actual) * (1 - Math.exp(-6 * Math.min(dt, 0.05)));
+    placeCamera();
+  }
   if (composer) composer.render(dt);
   else renderer.render(scene, camera);
+  if (max && !CALIDAD) vigilarFluidez(dt);
 });
+
+// En ordenadores lentos (pizarras, equipos antiguos) se quita el brillo y se reduce
+// la resolucion por pasos, midiendo la media de fotogramas cada 3 segundos.
+const fluidez = { tiempo: 0, frames: 0, nivel: 0 };
+function vigilarFluidez(dt) {
+  // los primeros segundos no cuentan: compilar sombreadores provoca tirones puntuales
+  if (document.hidden || fluidez.nivel >= 2 || max.time < 2) return;
+  fluidez.tiempo += dt;
+  fluidez.frames += 1;
+  if (fluidez.tiempo < 3) return;
+  const fps = fluidez.frames / fluidez.tiempo;
+  fluidez.tiempo = fluidez.frames = 0;
+  if (fps >= 40) return;
+  fluidez.nivel += 1;
+  if (fluidez.nivel === 1 && composer) {
+    composer = null;
+  } else {
+    fluidez.nivel = 2;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1) * (fps < 20 ? 0.75 : 1));
+  }
+  resize();
+  console.info(`Fluidez ${fps.toFixed(0)} fps: calidad reducida (nivel ${fluidez.nivel})`);
+}
 resize();
 
 // ------------------------------------------------------------------ mirada
@@ -277,6 +389,8 @@ window.addEventListener('keydown', (e) => {
   if (e.target.closest?.('input, textarea')) return;
   const k = e.key.toLowerCase();
   if (k === 'f') toggleFullscreen();
+  else if (k === '+' || k === '=') zoomBy(-0.5);
+  else if (k === '-') zoomBy(0.5);
   else if (max && KEYS[k]) ACTIONS[KEYS[k]][1]();
 });
 

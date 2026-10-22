@@ -6,12 +6,18 @@
   <title>Maximilian 23</title>
   <meta name="description" content="Maximilian 23, la mascota virtual del CEIP Juan XXIII de Zafra.">
   <meta name="theme-color" content="#0b161c">
+  <meta property="og:title" content="Maximilian 23">
+  <meta property="og:description" content="La mascota virtual del CEIP Juan XXIII de Zafra.">
+  <meta property="og:image" content="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preload" href="models/maximilian23.glb" as="fetch" crossorigin>
   <link rel="stylesheet" href="css/maximilian.css">
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        "three": "./vendor/three/build/three.module.js",
+        "three/addons/": "./vendor/three/examples/jsm/"
       }
     }
   </script>
@@ -70,7 +76,8 @@
           msg = 'Esta página no funciona abierta con doble clic. Ábrela desde su dirección web (https://…).';
         } else {
           msg = 'No se ha podido cargar el motor 3D (' + motivo + '). ' +
-                'Puede que la red bloquee cdn.jsdelivr.net o que el servidor modifique los scripts.';
+                'Comprueba que se subió la carpeta vendor/ y que el servidor no modifica los scripts ' +
+                '(en Cloudflare, desactiva Rocket Loader).';
         }
         el.textContent = msg;
         el.classList.add('error');

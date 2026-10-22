@@ -29,10 +29,7 @@ html, body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  /* el borde inferior se funde con el fondo: el medio cuerpo no parece cortado */
-  background:
-    linear-gradient(to bottom, transparent 82%, var(--fondo) 100%),
-    radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(2, 7, 9, 0.8) 100%);
+  background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(2, 7, 9, 0.8) 100%);
 }
 
 #carga {

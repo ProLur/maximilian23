@@ -72,6 +72,9 @@ export class Maximilian {
 
     // Cuerpo (opcional: el modelo puede ser solo la cabeza)
     this.bodyPivot = root.getObjectByName('Pivote_Cuerpo');
+    // Con piernas, Maximilian esta de pie: la flotacion pasa a ser un leve vaiven de la cabeza
+    this.standing = Boolean(root.getObjectByName('Cadera_L'));
+    this.pivotBase = this.pivot.position.clone();
     this.bodyBase = this.bodyPivot?.position.clone();
     this.bodyYaw = 0;
     this.headYaw = 0;
@@ -323,7 +326,8 @@ export class Maximilian {
     // Blender -> glTF: asentir = X, inclinar = -Z, girar = Y
     this.pivot.rotation.set(pitch * DEG, yaw * DEG, -roll * DEG);
     this.headYaw = yaw;
-    this.root.position.y = this.baseY + lift;
+    if (this.standing) this.pivot.position.y = this.pivotBase.y + 0.35 * lift;
+    else this.root.position.y = this.baseY + lift;
     this.updateAntenna(pitch, roll, dt);
   }
 
