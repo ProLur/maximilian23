@@ -10,6 +10,16 @@ const TAU = Math.PI * 2;
 const EYES = ['Ojo_L', 'Ojo_R'];
 const GROUPS = { ojos: EYES, ojo_l: ['Ojo_L'], ojo_r: ['Ojo_R'], boca: ['Boca'] };
 
+// Brazos: angulos en grados (ver _info en expresiones.json). Reposo: algo separados del pecho.
+const ARM_REST = { adelante: 0, fuera: 10, codo: 8, codo_lateral: 0, giro: 0 };
+const WAVE_POSE = { adelante: 10, fuera: 72, codo: 0, codo_lateral: 105, giro: 90 };
+const WAVE_TIME = 2.6;
+
+// Ejes de Blender expresados en el espacio de glTF/Three (Z arriba -> Y arriba)
+const AXIS_X = new THREE.Vector3(1, 0, 0);
+const AXIS_Y = new THREE.Vector3(0, 0, -1);
+const AXIS_Z = new THREE.Vector3(0, 1, 0);
+
 const clamp = (x, a, b) => Math.min(Math.max(x, a), b);
 const smoothstep = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
 const damp = (cur, target, k, dt) => cur + (target - cur) * (1 - Math.exp(-k * dt));
@@ -44,6 +54,7 @@ export class Maximilian {
     this.gaze = { x: 0, y: 0 };         // ojos: rapidos
     this.headGaze = { x: 0, y: 0 };     // cabeza: sigue a los ojos con retraso
     this.lastPointer = -Infinity;
+    this.gazeLocked = false;
     this.nextWander = 1;
 
     this.blinks = [];
@@ -58,6 +69,26 @@ export class Maximilian {
     this.syllablesLeft = 0;
 
     this.antennaSpring = { ax: 0, ay: 0, vx: 0, vy: 0, prev: null };
+
+    // Cuerpo (opcional: el modelo puede ser solo la cabeza)
+    this.bodyPivot = root.getObjectByName('Pivote_Cuerpo');
+    this.bodyBase = this.bodyPivot?.position.clone();
+    this.bodyYaw = 0;
+    this.headYaw = 0;
+    this.waveAt = -Infinity;
+    this.arms = {};
+    for (const [s, side] of [['L', 1], ['R', -1]]) {
+      const hombro = root.getObjectByName(`Hombro_${s}`);
+      if (!hombro) continue;
+      this.arms[s] = {
+        side,
+        hombro,
+        codo: root.getObjectByName(`Codo_${s}`),
+        muneca: root.getObjectByName(`Muneca_${s}`),
+        pose: { ...ARM_REST },
+        phase: side > 0 ? 0 : 1.9,      // desfase para que los brazos no se muevan a la vez
+      };
+    }
   }
 
   // ---------------------------------------------------------------- API publica
@@ -84,8 +115,19 @@ export class Maximilian {
 
   /** x, y en [-1, 1]: +x derecha del espectador, +y arriba. */
   lookAt(x, y) {
+    if (this.gazeLocked) return;
     this.gazeTarget.x = clamp(x, -1, 1);
     this.gazeTarget.y = clamp(y, -1, 1);
+    this.lastPointer = this.time;
+  }
+
+  /** true: mira al frente y deja de seguir el cursor y de mirar a su alrededor. */
+  mirarAlFrente(activo) {
+    this.gazeLocked = activo;
+    if (activo) {
+      this.gazeTarget.x = 0;
+      this.gazeTarget.y = 0;
+    }
     this.lastPointer = this.time;
   }
 
@@ -96,6 +138,13 @@ export class Maximilian {
     this.gazeTarget.y = 0.1;
     this.lastPointer = this.time;
     this.blink();
+  }
+
+  /** Saluda con la mano izquierda del robot (la derecha del espectador), como en el poster. */
+  wave() {
+    if (!this.arms.L) return;
+    this.waveAt = this.time;
+    this.setExpression('alegria', { duracion: WAVE_TIME });
   }
 
   startTalking() {
@@ -136,6 +185,7 @@ export class Maximilian {
     this.talkLevel = damp(this.talkLevel, this.talking ? 1 : 0, this.talking ? 10 : 6, dt);
     this.applyFace(dt);
     this.applyHead(dt);
+    this.applyBody(dt);
   }
 
   // ---------------------------------------------------------------- partes
@@ -153,7 +203,7 @@ export class Maximilian {
   updateGaze(dt) {
     const t = this.time;
     // sin raton/dedo durante un rato: mira a su alrededor, casi siempre hacia el publico
-    if (t - this.lastPointer > 4 && t > this.nextWander) {
+    if (!this.gazeLocked && t - this.lastPointer > 4 && t > this.nextWander) {
       const center = Math.random() < 0.55;
       this.gazeTarget.x = center ? rand(-0.15, 0.15) : rand(-0.9, 0.9);
       this.gazeTarget.y = center ? rand(-0.1, 0.15) : rand(-0.5, 0.6);
@@ -272,8 +322,63 @@ export class Maximilian {
 
     // Blender -> glTF: asentir = X, inclinar = -Z, girar = Y
     this.pivot.rotation.set(pitch * DEG, yaw * DEG, -roll * DEG);
+    this.headYaw = yaw;
     this.root.position.y = this.baseY + lift;
     this.updateAntenna(pitch, roll, dt);
+  }
+
+  armTarget(s) {
+    const state = this.expresiones[this.expression];
+    return { ...ARM_REST, ...state.brazos, ...state[`brazo_${s.toLowerCase()}`] };
+  }
+
+  applyBody(dt) {
+    if (!this.bodyPivot) return;
+    const t = this.time;
+    const breath = Math.sin(TAU * t / 4.2);
+
+    // respiracion y un leve giro que acompana, con retraso, a la cabeza
+    this.bodyYaw = damp(this.bodyYaw, this.headYaw * 0.2, 1.5, dt);
+    const k = this.talkLevel;
+    const sway = k * 1.5 * Math.sin(TAU * t / 2.7 + 0.8);
+    this.bodyPivot.rotation.set((0.6 * breath) * DEG, (this.bodyYaw + sway) * DEG, 0);
+    this.bodyPivot.position.copy(this.bodyBase);
+    this.bodyPivot.position.y += 0.008 * breath;
+
+    const a = t - this.attentionAt;
+    const attention = a >= 0 && a < 1.5 ? smoothstep(a / 0.12) * (1 - smoothstep((a - 0.3) / 0.8)) : 0;
+    const w = t - this.waveAt;
+    const wave = w >= 0 && w < WAVE_TIME + 0.6
+      ? smoothstep(w / 0.4) * (1 - smoothstep((w - WAVE_TIME + 0.4) / 0.6)) : 0;
+
+    for (const [s, arm] of Object.entries(this.arms)) {
+      const target = this.armTarget(s);
+      // gestos suaves al hablar: los antebrazos acompanan, cada brazo a su ritmo
+      target.codo += k * (14 + 10 * Math.sin(TAU * t / 1.7 + arm.phase));
+      target.adelante += k * (6 + 5 * Math.sin(TAU * t / 2.3 + arm.phase));
+      target.fuera += 6 * attention;
+      for (const key of Object.keys(ARM_REST)) arm.pose[key] = damp(arm.pose[key], target[key], 5, dt);
+
+      // respiracion: los brazos se abren y cierran apenas
+      const p = { ...arm.pose };
+      p.fuera += 1.2 * breath;
+      p.codo += 2 * Math.sin(TAU * t / 4.2 + 0.5);
+      if (s === 'L' && wave > 0) {
+        for (const key of Object.keys(ARM_REST)) p[key] += (WAVE_POSE[key] - p[key]) * wave;
+        p.codo_lateral += 18 * wave * Math.sin(TAU * 2.2 * w);
+      }
+      this.poseArm(arm, p);
+    }
+  }
+
+  poseArm(arm, p) {
+    const sd = arm.side;
+    // hombro: primero hacia delante y luego hacia fuera (rotaciones de Blender en ejes de glTF)
+    arm.hombro.quaternion.setFromAxisAngle(AXIS_Y, -sd * p.fuera * DEG)
+      .multiply(_q.setFromAxisAngle(AXIS_X, -p.adelante * DEG));
+    arm.codo.quaternion.setFromAxisAngle(AXIS_Y, -sd * p.codo_lateral * DEG)
+      .multiply(_q.setFromAxisAngle(AXIS_X, -p.codo * DEG));
+    arm.muneca.quaternion.setFromAxisAngle(AXIS_Z, sd * p.giro * DEG);
   }
 
   updateAntenna(pitch, roll, dt) {

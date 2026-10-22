@@ -44,20 +44,27 @@ function duracionEstimada(frase, velocidad) {
   return (0.38 * palabras + 0.3) / velocidad;
 }
 
+/** En silencio el texto se lee en subtitulos: se deja algo mas de tiempo. */
+function duracionLectura(frase, velocidad) {
+  return Math.max(duracionEstimada(frase, velocidad), (0.06 * frase.length + 0.6) / velocidad);
+}
+
 export class Voz {
   /**
    * @param {import('./maximilian.js').Maximilian} max
    * @param {{onTexto?: (t: string|null) => void, onEstado?: (e: string) => void}} cb
    */
-  constructor(max, { onTexto = () => {}, onEstado = () => {} } = {}) {
+  constructor(max, { onTexto = () => {}, onEstado = () => {}, silencio = false } = {}) {
     this.max = max;
     this.onTexto = onTexto;
     this.onEstado = onEstado;
     this.config = { velocidad: 1, tono: 1.1, volumen: 1, voz: null };
-    this.sintesis = 'speechSynthesis' in window ? window.speechSynthesis : null;
+    // En silencio no se usa la sintesis: boca y subtitulos solamente (no hace falta activar)
+    this.silencio = silencio;
+    this.sintesis = !silencio && 'speechSynthesis' in window ? window.speechSynthesis : null;
     this.voces = [];
     this.voz = null;
-    this.activa = false;
+    this.activa = silencio;
     this.cola = [];
     this.ocupado = false;
     this.generacion = 0;           // cambia al detener: invalida lo que estuviera en curso
@@ -70,7 +77,7 @@ export class Voz {
 
   async init() {
     if (!this.sintesis) {
-      this.onEstado('sin-voz');
+      this.onEstado(this.silencio ? 'silencio' : 'sin-voz');
       return;
     }
     this.voces = this.sintesis.getVoices();
@@ -114,6 +121,7 @@ export class Voz {
 
   /** Debe llamarse desde un clic o toque: desbloquea el audio del navegador. */
   activar(saludo = '¡Hola! Soy Maximilian 23. ¿En qué puedo ayudarte?') {
+    if (this.silencio) return;
     this.activa = true;
     this.onEstado('activa');
     if (this.sintesis) {
@@ -191,7 +199,18 @@ export class Voz {
     // Sin sintesis: Maximilian mueve la boca en silencio el tiempo estimado (con subtitulos)
     if (!this.sintesis) {
       this.max.startTalking();
-      return wait(estimada).then(() => this.max.stopTalking());
+      const fin = this.silencio ? duracionLectura(frase, velocidad) : estimada;
+      return new Promise((resolve) => {
+        const paso = () => {
+          // comprueba cada poco si se ha pulsado Detener
+          if (gen !== this.generacion || performance.now() >= limite) {
+            this.max.stopTalking();
+            resolve();
+          } else setTimeout(paso, 100);
+        };
+        const limite = performance.now() + fin * 1000;
+        paso();
+      });
     }
 
     return new Promise((resolve) => {

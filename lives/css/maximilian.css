@@ -29,7 +29,10 @@ html, body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(2, 7, 9, 0.8) 100%);
+  /* el borde inferior se funde con el fondo: el medio cuerpo no parece cortado */
+  background:
+    linear-gradient(to bottom, transparent 82%, var(--fondo) 100%),
+    radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(2, 7, 9, 0.8) 100%);
 }
 
 #carga {
@@ -112,7 +115,6 @@ body.inactivo .boton-pantalla { opacity: 0; pointer-events: none; }
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 .subtitulo.visible { opacity: 1; transform: translate(-50%, 0); }
-body:has(.barra-prueba:not([hidden])) .subtitulo { bottom: 120px; }
 
 .panel-voz {
   position: fixed;
@@ -155,30 +157,49 @@ body:has(.barra-prueba:not([hidden])) .subtitulo { bottom: 120px; }
   .panel-voz { top: auto; bottom: 130px; }
 }
 
-.barra-prueba {
+/* cuadro de gestos a la derecha, centrado en vertical */
+.panel-gestos {
   position: fixed;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
-  max-width: calc(100% - 96px);
+  right: max(16px, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
   gap: 6px;
-  padding: 8px;
-  border-radius: 12px;
+  padding: 10px;
+  border-radius: 14px;
   border: 1px solid var(--borde);
   background: var(--panel);
+  transition: opacity 0.4s ease;
 }
-.barra-prueba[hidden] { display: none; }
-.barra-prueba button {
+.panel-gestos[hidden] { display: none; }
+.panel-gestos button {
   font: inherit;
-  font-size: 0.85rem;
-  padding: 6px 10px;
+  font-size: 0.9rem;
+  min-width: 110px;
+  padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--borde);
   background: transparent;
   color: var(--texto);
+  text-align: left;
   cursor: pointer;
 }
-.barra-prueba button:hover { background: rgba(63, 224, 208, 0.15); }
+.panel-gestos button:hover, .panel-gestos button:focus-visible { background: rgba(63, 224, 208, 0.15); }
+.panel-gestos button:focus-visible { outline: 2px solid var(--turquesa); outline-offset: 1px; }
+body.inactivo .panel-gestos:not(:hover) { opacity: 0; pointer-events: none; }
+
+/* en el movil el cuadro pasa a una fila abajo para no tapar la cabeza */
+@media (max-width: 640px) {
+  .panel-gestos {
+    top: auto;
+    bottom: max(76px, env(safe-area-inset-bottom));
+    left: 16px;
+    right: 16px;
+    transform: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .panel-gestos button { min-width: 0; text-align: center; }
+}

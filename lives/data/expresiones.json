@@ -1,9 +1,15 @@
 {
-  "_info": "Expresiones de Maximilian 23. 'ojos' se aplica a los dos ojos; 'ojo_l' / 'ojo_r' a uno solo (L = izquierdo del robot = derecha del espectador). Los valores son pesos de shape keys (0-1). 'cabeza' en grados: asentir (+ mira abajo), inclinar (+ hacia la derecha del espectador), girar (+ hacia la derecha del espectador).",
-  "reposo":   { "ojos": {},                 "boca": {},                "cabeza": { "asentir": 0,  "inclinar": 0,  "girar": 0 } },
-  "alegria":  { "ojos": { "Alegre": 1 },    "boca": { "Sonrisa": 1 },  "cabeza": { "asentir": -3, "inclinar": 5,  "girar": 0 } },
-  "sorpresa": { "ojos": { "Sorpresa": 1 },  "boca": { "Sorpresa": 1 }, "cabeza": { "asentir": -5, "inclinar": 0,  "girar": 0 } },
-  "tristeza": { "ojos": { "Triste": 1 },    "boca": { "Triste": 1 },   "cabeza": { "asentir": 7,  "inclinar": -4, "girar": 0 } },
-  "serio":    { "ojos": {},                 "boca": { "Neutra": 1 },   "cabeza": { "asentir": 0,  "inclinar": 0,  "girar": 0 } },
-  "guino":    { "ojo_l": { "Parpadeo": 1 }, "boca": { "Sonrisa": 0.7 }, "cabeza": { "asentir": 0, "inclinar": 6,  "girar": 3 } }
+  "_info": "Expresiones de Maximilian 23. 'ojos' se aplica a los dos ojos; 'ojo_l' / 'ojo_r' a uno solo (L = izquierdo del robot = derecha del espectador). Los valores son pesos de shape keys (0-1). 'cabeza' en grados: asentir (+ mira abajo), inclinar (+ hacia la derecha del espectador), girar (+ hacia la derecha del espectador). 'brazos' (o 'brazo_l' / 'brazo_r') en grados: adelante (levanta el brazo hacia delante), fuera (lo separa del cuerpo), codo (dobla el antebrazo hacia delante), codo_lateral (lo dobla hacia arriba por el costado), giro (gira la mano). Lo que no se indique toma el valor de reposo.",
+  "reposo":   { "ojos": {},                 "boca": {},                "cabeza": { "asentir": 0,  "inclinar": 0,  "girar": 0 },
+                "brazos": {} },
+  "alegria":  { "ojos": { "Alegre": 1 },    "boca": { "Sonrisa": 1 },  "cabeza": { "asentir": -3, "inclinar": 5,  "girar": 0 },
+                "brazos": { "adelante": 14, "fuera": 28, "codo": 25, "codo_lateral": 38 } },
+  "sorpresa": { "ojos": { "Sorpresa": 1 },  "boca": { "Sorpresa": 1 }, "cabeza": { "asentir": -5, "inclinar": 0,  "girar": 0 },
+                "brazos": { "adelante": 35, "fuera": 22, "codo": 50 } },
+  "tristeza": { "ojos": { "Triste": 1 },    "boca": { "Triste": 1 },   "cabeza": { "asentir": 7,  "inclinar": -4, "girar": 0 },
+                "brazos": { "adelante": -4, "fuera": 3, "codo": 2 } },
+  "serio":    { "ojos": {},                 "boca": { "Neutra": 1 },   "cabeza": { "asentir": 0,  "inclinar": 0,  "girar": 0 },
+                "brazos": { "fuera": 8, "codo": 14 } },
+  "guino":    { "ojo_l": { "Parpadeo": 1 }, "boca": { "Sonrisa": 0.7 }, "cabeza": { "asentir": 0, "inclinar": 6,  "girar": 3 },
+                "brazo_l": { "adelante": 30, "fuera": 18, "codo": 75, "giro": 40 } }
 }

@@ -9,12 +9,13 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { Maximilian } from './maximilian.js';
 import { Voz } from './voz.js';
+import { conectarRemoto } from './remoto.js';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
 const params = new URLSearchParams(location.search);
 const USE_BLOOM = params.get('brillo') !== '0';
-const FILL = 0.72;                       // fraccion de pantalla que ocupa la cabeza
+const FILL = 0.9;                        // fraccion de pantalla que ocupa el modelo (medio cuerpo)
 const BG = new THREE.Color('#0b161c');
 
 const canvas = document.getElementById('escena');
@@ -69,7 +70,7 @@ function resize() {
   renderer.setSize(w, h, false);
   composer?.setSize(w, h);
   camera.aspect = w / h;
-  // distancia para que la cabeza ocupe FILL de la dimension mas restrictiva
+  // distancia para que el modelo ocupe FILL de la dimension mas restrictiva
   const vfov = camera.fov * THREE.MathUtils.DEG2RAD;
   const fitH = (modelSize.y / FILL) / (2 * Math.tan(vfov / 2));
   const fitW = (modelSize.x / FILL) / (2 * Math.tan(vfov / 2) * camera.aspect);
@@ -102,19 +103,51 @@ async function load() {
   window.maximilian = max;               // para probar desde la consola
   loading.classList.add('oculto');
   await setupVoz(max);
+  conectarRemoto({
+    onMensaje: ejecutarMensaje,
+    onEstado: (e) => {
+      console.info(`Control remoto: ${e}`);
+      document.body.dataset.remoto = e;
+    },
+  });
   document.dispatchEvent(new CustomEvent('maximilian:listo', { detail: max }));
 }
+
+// ------------------------------------------------------------------ mensajes remotos
+const GESTOS = {
+  atencion: () => max.attention(),
+  guino: () => max.wink(),
+  saludar: () => max.wave(),
+  parpadeo: () => max.blink(),
+  reposo: () => max.setExpression('reposo'),
+};
+
+/** Ejecuta un mensaje del panel: { tipo: 'decir' | 'gesto' | 'detener', ... } */
+function ejecutarMensaje(m) {
+  if (m.tipo === 'decir') {
+    voz.decir(m.texto, { emocion: m.emocion || undefined, velocidad: m.velocidad, tono: m.tono });
+  } else if (m.tipo === 'gesto') {
+    if (GESTOS[m.gesto]) GESTOS[m.gesto]();
+    else if (max.expresiones[m.gesto]) max.setExpression(m.gesto, { duracion: 4 });
+  } else if (m.tipo === 'detener') {
+    voz.detener();
+  }
+}
+window.maxMensaje = ejecutarMensaje;     // para probar sin Firebase desde la consola
 
 // ------------------------------------------------------------------ voz
 // Los navegadores no dejan sonar audio hasta que alguien toca la pagina: el primer
 // toque, clic o tecla activa la voz (y Maximilian saluda). Lo que llegue antes espera en cola.
-const SUBTITULOS = params.get('subtitulos') !== '0';
+// La voz sintetizada esta desactivada por ahora: ?voz=1 la vuelve a encender.
+const CON_VOZ = params.get('voz') === '1';
+const SUBTITULOS = !CON_VOZ || params.get('subtitulos') !== '0';
 const activarBtn = document.getElementById('activar');
 const subtitulo = document.getElementById('subtitulo');
 let voz = null;
 
 async function setupVoz(max) {
   voz = new Voz(max, {
+    silencio: !CON_VOZ,
     onTexto: (t) => {
       if (!SUBTITULOS) return;
       if (t) subtitulo.textContent = t;
@@ -190,6 +223,10 @@ resize();
 // Sigue al raton o al dedo; sin ellos, Maximilian mira a su alrededor por su cuenta.
 window.addEventListener('pointermove', (e) => {
   if (!max) return;
+  if (e.target.closest?.('#gestos')) {   // sobre el cuadro de gestos: mira al frente
+    if (!max.gazeLocked) max.mirarAlFrente(true);
+    return;
+  }
   const x = (e.clientX / window.innerWidth) * 2 - 1;
   const y = -((e.clientY / window.innerHeight) * 2 - 1);
   max.lookAt(x * 1.3, y * 1.3);
@@ -217,37 +254,43 @@ function wake() {
 ['pointermove', 'pointerdown', 'keydown'].forEach((ev) => window.addEventListener(ev, wake));
 wake();
 
-// ------------------------------------------------------------------ pruebas
-// Teclas: 1-5 expresiones, G guino, B parpadeo, A atencion, H hablar, F pantalla completa.
-// Con ?prueba=1 aparece ademas una barra de botones.
+// ------------------------------------------------------------------ gestos
+// Cuadro de botones a la derecha (?botones=0 lo oculta). Con el raton encima,
+// Maximilian mira al frente para que los gestos se vean de cara.
+// Teclas: 1-5 expresiones, G guino, S saludar, B parpadeo, A atencion, H hablar, F pantalla completa.
 const ACTIONS = {
-  reposo: () => max.setExpression('reposo'),
-  alegria: () => max.setExpression('alegria'),
-  sorpresa: () => max.setExpression('sorpresa'),
-  tristeza: () => max.setExpression('tristeza'),
-  serio: () => max.setExpression('serio'),
-  guino: () => max.wink(),
-  parpadeo: () => max.blink(),
-  atencion: () => max.attention(),
-  hablar: () => (max.talking ? max.stopTalking() : max.startTalking()),
+  reposo: ['Reposo', () => max.setExpression('reposo')],
+  alegria: ['Alegría', () => max.setExpression('alegria')],
+  sorpresa: ['Sorpresa', () => max.setExpression('sorpresa')],
+  tristeza: ['Tristeza', () => max.setExpression('tristeza')],
+  serio: ['Serio', () => max.setExpression('serio')],
+  guino: ['Guiño', () => max.wink()],
+  saludar: ['Saludar', () => max.wave()],
+  parpadeo: ['Parpadeo', () => max.blink()],
+  atencion: ['Atención', () => max.attention()],
+  hablar: ['Hablar', () => (max.talking ? max.stopTalking() : max.startTalking())],
 };
 const KEYS = { 1: 'reposo', 2: 'alegria', 3: 'sorpresa', 4: 'tristeza', 5: 'serio',
-  g: 'guino', b: 'parpadeo', a: 'atencion', h: 'hablar' };
+  g: 'guino', s: 'saludar', b: 'parpadeo', a: 'atencion', h: 'hablar' };
 
 window.addEventListener('keydown', (e) => {
   if (e.target.closest?.('input, textarea')) return;
   const k = e.key.toLowerCase();
   if (k === 'f') toggleFullscreen();
-  else if (max && KEYS[k]) ACTIONS[KEYS[k]]();
+  else if (max && KEYS[k]) ACTIONS[KEYS[k]][1]();
 });
 
-if (params.has('prueba')) {
-  const bar = document.getElementById('prueba');
-  bar.hidden = false;
-  for (const name of Object.keys(ACTIONS)) {
+if (params.get('botones') !== '0') {
+  const panel = document.getElementById('gestos');
+  panel.hidden = false;
+  for (const [name, [label, accion]] of Object.entries(ACTIONS)) {
     const b = document.createElement('button');
-    b.textContent = name;
-    b.addEventListener('click', () => max && ACTIONS[name]());
-    bar.appendChild(b);
+    b.type = 'button';
+    b.textContent = label;
+    b.dataset.accion = name;
+    b.addEventListener('click', () => max && accion());
+    panel.appendChild(b);
   }
+  panel.addEventListener('pointerenter', () => max?.mirarAlFrente(true));
+  panel.addEventListener('pointerleave', () => max?.mirarAlFrente(false));
 }

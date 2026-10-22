@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel de Maximilian</title>
+  <meta name="theme-color" content="#0b161c">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <header class="cabecera">
+    <h1>Maximilian 23 <span>· panel</span></h1>
+    <p id="pantallas" class="pantallas" hidden><span class="punto"></span><span class="texto"></span></p>
+    <button id="salir" class="secundario" type="button" hidden>Salir</button>
+  </header>
+
+  <main>
+    <p id="aviso" class="aviso" role="status">Cargando…</p>
+
+    <!-- Inicio de sesion -->
+    <form id="login" class="tarjeta" hidden>
+      <h2>Iniciar sesión</h2>
+      <label>Correo <input name="email" type="email" autocomplete="username" required></label>
+      <label>Contraseña <input name="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit">Entrar</button>
+      <button type="button" name="olvido" class="enlace">He olvidado la contraseña</button>
+      <p class="error" role="alert"></p>
+    </form>
+
+    <!-- Panel -->
+    <section id="panel" hidden>
+      <form id="mensaje" class="tarjeta">
+        <h2>Mensaje</h2>
+        <label class="bloque">
+          <span>Texto que dirá Maximilian</span>
+          <textarea name="texto" rows="4" maxlength="1000" required
+                    placeholder="¡Buenos días! Hoy es un día estupendo para aprender."></textarea>
+          <small class="contador">0 / 1000</small>
+        </label>
+        <div class="fila">
+          <label>Emoción <select name="emocion"></select></label>
+        </div>
+        <details class="ajustes-voz">
+          <summary>Ajustes de voz <small>(la voz está desactivada; se usarán cuando se active)</small></summary>
+          <label>Velocidad <input name="velocidad" type="range" min="0.5" max="2" step="0.05" value="1"><output>1</output></label>
+          <label>Tono <input name="tono" type="range" min="0" max="2" step="0.05" value="1.1"><output>1.1</output></label>
+        </details>
+        <div class="acciones">
+          <button type="submit">Enviar <small>(Ctrl+Intro)</small></button>
+          <button type="button" name="detener" class="peligro">Detener</button>
+        </div>
+        <p class="error" role="alert"></p>
+      </form>
+
+      <div class="tarjeta">
+        <h2>Gestos</h2>
+        <div id="gestos" class="gestos"></div>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Últimos mensajes</h2>
+        <ol id="historial" class="historial"></ol>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
