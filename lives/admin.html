@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css?v=20261023-acciones">
 </head>
 <body>
   <header class="cabecera">
@@ -33,6 +33,16 @@
 
     <!-- Panel -->
     <section id="panel" hidden>
+      <div id="acciones-directas" class="tarjeta">
+        <h2>Gestos</h2>
+        <p class="ayuda">Pulsa un botón sin escribir texto. Saludar y guiñar vuelven automáticamente a reposo.</p>
+        <div id="gestos" class="gestos"></div>
+        <h2>Emociones sin texto</h2>
+        <p class="ayuda">Se muestran durante 4 segundos y después vuelven a reposo.</p>
+        <div id="emociones" class="gestos"></div>
+        <p id="estado-accion" class="estado-accion" role="status" aria-live="polite"></p>
+        <p class="error" role="alert"></p>
+      </div>
       <form id="mensaje" class="tarjeta">
         <h2>Mensaje</h2>
         <label class="bloque">
@@ -42,7 +52,7 @@
           <small class="contador">0 / 1000</small>
         </label>
         <div class="fila">
-          <label>Emoción <select name="emocion"></select></label>
+          <label>Emoción al hablar <select name="emocion"></select></label>
         </div>
         <details class="ajustes-voz">
           <summary>Ajustes de voz <small>(la voz está desactivada; se usarán cuando se active)</small></summary>
@@ -57,17 +67,12 @@
       </form>
 
       <div class="tarjeta">
-        <h2>Gestos</h2>
-        <div id="gestos" class="gestos"></div>
-      </div>
-
-      <div class="tarjeta">
         <h2>Últimos mensajes</h2>
         <ol id="historial" class="historial"></ol>
       </div>
     </section>
   </main>
 
-  <script type="module" src="js/admin.js"></script>
+  <script type="module" src="js/admin.js?v=20261023-acciones"></script>
 </body>
 </html>

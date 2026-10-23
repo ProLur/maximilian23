@@ -12,9 +12,11 @@ const form = $('#mensaje');
 const salir = $('#salir');
 const pantallas = $('#pantallas');
 
-const GESTOS = [
+const EMOCIONES = [
   ['alegria', 'Alegría'], ['sorpresa', 'Sorpresa'], ['tristeza', 'Tristeza'], ['serio', 'Serio'],
-  ['guino', 'Guiño'], ['saludar', 'Saludar'], ['atencion', 'Atención'], ['parpadeo', 'Parpadeo'], ['reposo', 'Reposo'],
+];
+const GESTOS = [
+  ['saludar', 'Saludar'], ['guino', 'Guiñar el ojo'], ['atencion', 'Atención'], ['parpadeo', 'Parpadeo'], ['reposo', 'Reposo'],
 ];
 
 const ERRORES_AUTH = {
@@ -133,8 +135,8 @@ async function main() {
   });
 
   // ---------------------------------------------------------------- envio
-  async function enviar(datos) {
-    error(form, '');
+  async function enviar(datos, destino = form) {
+    error(destino, '');
     try {
       if (!usuario) throw new Error('Inicia sesión');
       const id = D.push(D.ref(db, `${RUTA}/mensajes`)).key;
@@ -149,7 +151,7 @@ async function main() {
       return true;
     } catch (err) {
       console.error(err);
-      error(form, err.code === 'PERMISSION_DENIED'
+      error(destino, err.code === 'PERMISSION_DENIED'
         ? 'Permiso denegado: revisa las reglas y que tu cuenta esté en maximilian/admins.'
         : `No se ha podido enviar (${err.message}).`);
       return false;
@@ -177,13 +179,23 @@ async function main() {
   });
   form.elements.detener.addEventListener('click', () => enviar({ tipo: 'detener' }));
 
-  for (const [id, nombre] of GESTOS) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'secundario';
-    b.textContent = nombre;
-    b.addEventListener('click', () => enviar({ tipo: 'gesto', gesto: id }));
-    $('#gestos').appendChild(b);
+  for (const [selector, acciones] of [['#gestos', GESTOS], ['#emociones', EMOCIONES]]) {
+    for (const [id, nombre] of acciones) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'secundario';
+      b.textContent = nombre;
+      b.dataset.gesto = id;
+      b.addEventListener('click', async () => {
+        const estado = $('#estado-accion');
+        b.disabled = true;
+        estado.textContent = 'Enviando…';
+        const enviado = await enviar({ tipo: 'gesto', gesto: id }, $('#acciones-directas'));
+        estado.textContent = enviado ? `${nombre}: enviado a las pantallas conectadas.` : '';
+        b.disabled = false;
+      });
+      $(selector).appendChild(b);
+    }
   }
 
   // ---------------------------------------------------------------- estado

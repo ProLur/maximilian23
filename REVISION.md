@@ -58,3 +58,7 @@ Referencias: [reglas Firebase](https://firebase.google.com/docs/database/securit
 ## Sincronización con GitHub
 
 Se integró esta versión en ProLur/maximilian23, actualizando lives/ y añadiendo el proyecto Blender, reglas, pruebas y documentación. El resto del sitio conserva su contenido. Se autorizó maximilian23.com para el inicio de sesión de Google. No se incluyeron credenciales, cachés ni herramientas temporales.
+
+## Gestos y emociones independientes
+
+El panel muestra primero Saludar, Guiñar el ojo, Atención, Parpadeo y Reposo, seguidos de Alegría, Sorpresa, Tristeza y Serio sin necesidad de texto. Los envíos directos muestran confirmación o error. Saludar vuelve a reposo tras su animación de 2,6 segundos y el guiño tras 0,8 segundos, con transición suave; las emociones remotas duran 4 segundos. Se ha probado este retorno con el GLB real en tests/gestos.mjs. Se versionaron los recursos del panel para evitar conservar la interfaz anterior en caché.
