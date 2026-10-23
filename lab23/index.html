@@ -645,20 +645,28 @@ function draw(){
     }
   });
 
-  // Ligaduras
+  // Ligaduras (si cruzan un salto de línea se dibujan en dos mitades)
+  const lineOf = {};
+  lines.forEach((line,li)=>line.forEach(({i})=>{ lineOf[i]=li; }));
   measures.forEach((m,mi)=>{
     m.notes.forEach((n,ni)=>{
       if(!n.tie||n.type!=="nota") return;
       const {fromMi,fromNi} = n.tie;
       const srcNote = measures[fromMi]?.notes[fromNi];
       if(!srcNote||srcNote.type!=="nota") return;
-      try{
-        new VF.StaveTie({
-          first_note:srcNote.vn, last_note:n.vn,
-          first_indices:[0], last_indices:[0],
-          direction:getTieDirection(srcNote, n)
-        }).setContext(ctx).draw();
-      }catch(e){}
+      const direction = getTieDirection(srcNote, n);
+      const pairs = lineOf[fromMi]===lineOf[mi]
+        ? [[srcNote.vn, n.vn]]
+        : [[srcNote.vn, null], [null, n.vn]];
+      pairs.forEach(([first_note, last_note])=>{
+        try{
+          new VF.StaveTie({
+            first_note, last_note,
+            first_indices:[0], last_indices:[0],
+            direction
+          }).setContext(ctx).draw();
+        }catch(e){}
+      });
     });
   });
 
