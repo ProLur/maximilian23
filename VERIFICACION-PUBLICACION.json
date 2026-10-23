@@ -1,0 +1,50 @@
+{
+  "sitio": "https://maximilian23-visor.web.app",
+  "panel": "https://maximilian23-visor.web.app/admin",
+  "verificaciones": [
+    {
+      "ruta": "/",
+      "estado": 200
+    },
+    {
+      "ruta": "/admin",
+      "estado": 200
+    },
+    {
+      "ruta": "/admin.html",
+      "estado": 200
+    },
+    {
+      "ruta": "/js/firebase-config.js",
+      "estado": 200
+    },
+    {
+      "ruta": "/js/remoto.js",
+      "estado": 200
+    },
+    {
+      "ruta": "/js/protocolo.js",
+      "estado": 200
+    },
+    {
+      "ruta": "/data/expresiones.json",
+      "estado": 200
+    },
+    {
+      "ruta": "firebaseapp.com/__/auth/iframe",
+      "estado": 200,
+      "frameOptions": null
+    },
+    {
+      "ruta": "firebaseapp.com/__/auth/handler",
+      "estado": 200,
+      "frameOptions": null
+    }
+  ],
+  "modelo": {
+    "bytes": 749936,
+    "sha256": "59d6e70d378e6436c0a098c9dd64d27ba9d75e76494992bd6144e59f9ea08e7a",
+    "coincideConLocal": true
+  },
+  "fecha": "2026-10-23T07:15:22.594Z"
+}

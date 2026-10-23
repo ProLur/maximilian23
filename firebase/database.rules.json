@@ -1,0 +1,104 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "maximilian": {
+      "admins": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": false
+        }
+      },
+      "comando": {
+        ".read": true,
+        ".write": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && newData.exists()",
+        ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren(['texto','velocidad','tono']) && !newData.child('gesto').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren(['gesto']) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('gesto').exists() && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()))",
+        "id": {
+          ".validate": "newData.isString() && newData.val().length === 20"
+        },
+        "tipo": {
+          ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener'"
+        },
+        "texto": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
+        },
+        "emocion": {
+          ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino'"
+        },
+        "gesto": {
+          ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino' || newData.val() === 'saludar' || newData.val() === 'atencion' || newData.val() === 'parpadeo' || newData.val() === 'reposo'"
+        },
+        "velocidad": {
+          ".validate": "newData.isNumber() && newData.val() >= 0.5 && newData.val() <= 2"
+        },
+        "tono": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+        },
+        "creado": {
+          ".validate": "newData.isNumber() && newData.val() === now"
+        },
+        "expira": {
+          ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 30000"
+        },
+        "autor": {
+          ".validate": "newData.val() === auth.uid"
+        },
+        "$otro": {
+          ".validate": false
+        }
+      },
+      "mensajes": {
+        ".read": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true",
+        ".indexOn": [
+          "creado"
+        ],
+        "$id": {
+          ".write": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && !data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren(['texto','velocidad','tono']) && !newData.child('gesto').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren(['gesto']) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('gesto').exists() && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()))",
+          "id": {
+            ".validate": "newData.isString() && newData.val().length === 20"
+          },
+          "tipo": {
+            ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener'"
+          },
+          "texto": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
+          },
+          "emocion": {
+            ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino'"
+          },
+          "gesto": {
+            ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino' || newData.val() === 'saludar' || newData.val() === 'atencion' || newData.val() === 'parpadeo' || newData.val() === 'reposo'"
+          },
+          "velocidad": {
+            ".validate": "newData.isNumber() && newData.val() >= 0.5 && newData.val() <= 2"
+          },
+          "tono": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+          },
+          "creado": {
+            ".validate": "newData.isNumber() && newData.val() === now"
+          },
+          "expira": {
+            ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 30000"
+          },
+          "autor": {
+            ".validate": "newData.val() === auth.uid"
+          },
+          "$otro": {
+            ".validate": false
+          }
+        }
+      },
+      "presencia": {
+        ".read": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true",
+        "$uid": {
+          "$conexion": {
+            ".write": "auth != null && auth.uid === $uid && $conexion.length === 20",
+            ".validate": "newData.isNumber() && newData.val() === now"
+          }
+        }
+      }
+    }
+  }
+}

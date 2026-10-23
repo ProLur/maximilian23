@@ -1,0 +1,16 @@
+{
+  "name": "maximilian23-visor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Visor 3D y control remoto de Maximilian 23",
+  "scripts": {
+    "test": "node tests/receptor.mjs",
+    "test:rules": "npx -y firebase-tools@latest emulators:exec --project demo-maximilian-seguridad --config firebase.json --only database \"node tests/reglas.mjs\"",
+    "deploy:firebase": "npx -y firebase-tools@latest deploy --only hosting,database,auth --project maximilian23-visor --config firebase.json"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.1.0"
+  },
+  "engines": { "node": ">=24" }
+}

@@ -51,6 +51,21 @@ async function main() {
     return;
   }
   const { auth, A, db, D } = fb;
+  await A.setPersistence(auth, A.browserSessionPersistence);
+  $('#google').addEventListener('click', async () => {
+    error(login, '');
+    const boton = $('#google');
+    boton.disabled = true;
+    try {
+      const proveedor = new A.GoogleAuthProvider();
+      proveedor.setCustomParameters({ prompt: 'select_account' });
+      await A.signInWithPopup(auth, proveedor);
+    } catch (err) {
+      error(login, err.code === 'auth/popup-blocked'
+        ? 'Permite la ventana de acceso de Google y vuelve a intentarlo.'
+        : ERRORES_AUTH[err.code] ?? 'No se ha completado el acceso con Google. Vuelve a intentarlo.');
+    } finally { boton.disabled = false; }
+  });
   const desfase = await desfaseServidor(db, D);
   let usuario = null;
   let parar = [];                        // suscripciones activas del panel
@@ -90,7 +105,7 @@ async function main() {
   A.onAuthStateChanged(auth, async (user) => {
     parar.forEach((fn) => fn());
     parar = [];
-    usuario = user;
+    usuario = null;
     pantallas.hidden = true;
     if (!user) {
       mostrar('login');
@@ -107,6 +122,11 @@ async function main() {
       mostrar('sin-permiso', `La cuenta ${user.email} no tiene permiso para controlar a Maximilian.`);
       return;
     }
+    if (auth.currentUser?.uid !== user.uid) return;
+    usuario = user;
+    parar.push(D.onValue(D.ref(db, `${RUTA}/admins/${user.uid}`), snap => {
+      if (snap.val() !== true) { usuario = null; parar.forEach(fn => fn()); parar = []; mostrar('sin-permiso', 'Permiso de administrador revocado.'); }
+    }));
     mostrar('panel');
     escucharPantallas();
     escucharHistorial();
@@ -116,11 +136,16 @@ async function main() {
   async function enviar(datos) {
     error(form, '');
     try {
-      await D.push(D.ref(db, `${RUTA}/mensajes`), {
+      if (!usuario) throw new Error('Inicia sesión');
+      const id = D.push(D.ref(db, `${RUTA}/mensajes`)).key;
+      const comando = {
+        id,
+        expira: Date.now() + desfase + 30000,
         ...datos,
         creado: D.serverTimestamp(),
         autor: usuario.uid,
-      });
+      };
+      await D.update(D.ref(db), { [`${RUTA}/mensajes/${id}`]: comando, [`${RUTA}/comando`]: comando });
       return true;
     } catch (err) {
       console.error(err);
@@ -166,7 +191,7 @@ async function main() {
     let datos = {};
     const pintar = () => {
       const ahora = Date.now() + desfase;
-      const n = Object.values(datos).filter((t) => ahora - t < 90_000).length;
+      const n = Object.values(datos).flatMap(v => Object.values(v)).filter((t) => ahora - t < 90_000).length;
       pantallas.hidden = false;
       pantallas.classList.toggle('activa', n > 0);
       pantallas.querySelector('.texto').textContent =

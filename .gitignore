@@ -1,0 +1,13 @@
+node_modules/
+.firebase/
+work/
+.claude/
+*-debug.log
+*.blend1
+*.blend2
+.env
+.env.*
+!.env.example
+*service-account*.json
+*credentials*.json
+*admin-import*.json

@@ -1,17 +1,8 @@
-// Configuracion del proyecto Firebase de Maximilian 23.
-// Copia aqui los valores de: Consola de Firebase > Configuracion del proyecto > Tus apps > SDK.
-// (Guia paso a paso: firebase/GUIA-FIREBASE.md)
-//
-// Estos datos NO son secretos: identifican el proyecto y Google los muestra en cualquier
-// web que use Firebase. La seguridad la ponen el inicio de sesion y las reglas de la base
-// de datos (firebase/database.rules.json). Aqui no hay que poner nunca contrasenas.
-//
-// Mientras apiKey o databaseURL esten vacios, la pagina funciona sin control remoto.
-
+// Configuracion publica del proyecto dedicado. Nunca incluir contrasenas ni claves privadas.
 export const FIREBASE_CONFIG = {
-  apiKey: '',
-  authDomain: '',
-  databaseURL: '',
-  projectId: '',
-  appId: '',
+  "apiKey": "AIzaSyAFU4lqUYiv2bJbVacTj0BR6O1CXmND6gs",
+  "authDomain": "maximilian23-visor.firebaseapp.com",
+  "databaseURL": "https://maximilian23-visor-default-rtdb.europe-west1.firebasedatabase.app",
+  "projectId": "maximilian23-visor",
+  "appId": "1:657014385303:web:e79e33f3bd5f0146e197d2"
 };
