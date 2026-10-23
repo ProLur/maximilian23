@@ -1,10 +1,10 @@
 {
-  "title": "Lección 7 - Vals de Maximilian (3/4)",
+  "title": "Lección 7 - Canto del monje (medieval)",
   "author": "Maximilian 23",
   "clef": "treble",
-  "timeSig": "3/4",
-  "bpm": 100,
-  "tempoLabel": "Moderato (100)",
+  "timeSig": "4/4",
+  "bpm": 66,
+  "tempoLabel": "Adagio (66)",
   "keySigAccidentals": [],
   "measures": [
     {
@@ -12,7 +12,7 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "c/4",
+          "note": "d/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -20,7 +20,53 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "e/4",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -34,7 +80,7 @@
           "acc": false
         }
       ],
-      "beats": 3,
+      "beats": 4,
       "closed": true
     },
     {
@@ -42,13 +88,21 @@
         {
           "type": "nota",
           "dur": "h",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "h",
           "note": "c/5",
-          "dot": true,
+          "dot": false,
           "tie": false,
           "acc": false
         }
       ],
-      "beats": 3,
+      "beats": 4,
       "closed": true
     },
     {
@@ -71,6 +125,44 @@
         },
         {
           "type": "nota",
+          "dur": "h",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
           "dur": "q",
           "note": "g/4",
           "dot": false,
@@ -78,21 +170,7 @@
           "acc": false
         }
       ],
-      "beats": 3,
-      "closed": true
-    },
-    {
-      "notes": [
-        {
-          "type": "nota",
-          "dur": "h",
-          "note": "g/4",
-          "dot": true,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 3,
+      "beats": 4,
       "closed": true
     },
     {
@@ -100,7 +178,37 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "a/4",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -116,58 +224,6 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "a/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 3,
-      "closed": true
-    },
-    {
-      "notes": [
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "g/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "c/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 3,
-      "closed": true
-    },
-    {
-      "notes": [
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "d/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
           "note": "e/4",
           "dot": false,
           "tie": false,
@@ -182,21 +238,21 @@
           "acc": false
         }
       ],
-      "beats": 3,
+      "beats": 4,
       "closed": true
     },
     {
       "notes": [
         {
           "type": "nota",
-          "dur": "h",
-          "note": "c/4",
-          "dot": true,
+          "dur": "w",
+          "note": "d/4",
+          "dot": false,
           "tie": false,
           "acc": false
         }
       ],
-      "beats": 3,
+      "beats": 4,
       "closed": true
     }
   ]

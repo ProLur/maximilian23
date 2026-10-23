@@ -1,10 +1,10 @@
 {
-  "title": "Lección 10 - Rema, rema (compás 6/8)",
+  "title": "Lección 10 - Vals de Maximilian (3/4)",
   "author": "Maximilian 23",
   "clef": "treble",
-  "timeSig": "6/8",
-  "bpm": 112,
-  "tempoLabel": "Allegretto (112)",
+  "timeSig": "3/4",
+  "bpm": 100,
+  "tempoLabel": "Moderato (100)",
   "keySigAccidentals": [],
   "measures": [
     {
@@ -13,14 +13,36 @@
           "type": "nota",
           "dur": "q",
           "note": "c/4",
-          "dot": true,
+          "dot": false,
           "tie": false,
           "acc": false
         },
         {
           "type": "nota",
           "dur": "q",
-          "note": "c/4",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "c/5",
           "dot": true,
           "tie": false,
           "acc": false
@@ -34,15 +56,7 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "c/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "d/4",
+          "note": "b/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -50,29 +64,7 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "e/4",
-          "dot": true,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 3,
-      "closed": true
-    },
-    {
-      "notes": [
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "d/4",
+          "note": "a/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -80,15 +72,7 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "f/4",
+          "note": "g/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -115,123 +99,15 @@
       "notes": [
         {
           "type": "nota",
-          "dur": "8",
-          "note": "c/5",
+          "dur": "q",
+          "note": "a/4",
           "dot": false,
           "tie": false,
           "acc": false
         },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "c/5",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "c/5",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "g/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "g/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "g/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 3,
-      "closed": true
-    },
-    {
-      "notes": [
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "c/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "c/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
-          "note": "c/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 3,
-      "closed": true
-    },
-    {
-      "notes": [
         {
           "type": "nota",
           "dur": "q",
-          "note": "g/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "8",
           "note": "f/4",
           "dot": false,
           "tie": false,
@@ -240,6 +116,28 @@
         {
           "type": "nota",
           "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
           "note": "e/4",
           "dot": false,
           "tie": false,
@@ -247,7 +145,37 @@
         },
         {
           "type": "nota",
-          "dur": "8",
+          "dur": "q",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
           "note": "d/4",
           "dot": false,
           "tie": false,
