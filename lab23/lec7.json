@@ -1,0 +1,203 @@
+{
+  "title": "Lección 7 - Vals de Maximilian (3/4)",
+  "author": "Maximilian 23",
+  "clef": "treble",
+  "timeSig": "3/4",
+  "bpm": 100,
+  "tempoLabel": "Moderato (100)",
+  "keySigAccidentals": [],
+  "measures": [
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "c/5",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "b/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "g/4",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "c/4",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    }
+  ]
+}

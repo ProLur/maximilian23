@@ -1,0 +1,287 @@
+{
+  "title": "Lección 6 - Los pollitos dicen (corcheas)",
+  "author": "Maximilian 23",
+  "clef": "treble",
+  "timeSig": "2/4",
+  "bpm": 88,
+  "tempoLabel": "Andantino (88)",
+  "keySigAccidentals": [],
+  "measures": [
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "a/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 2,
+      "closed": true
+    }
+  ]
+}

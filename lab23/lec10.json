@@ -1,0 +1,275 @@
+{
+  "title": "Lección 10 - Rema, rema (compás 6/8)",
+  "author": "Maximilian 23",
+  "clef": "treble",
+  "timeSig": "6/8",
+  "bpm": 112,
+  "tempoLabel": "Allegretto (112)",
+  "keySigAccidentals": [],
+  "measures": [
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "c/4",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "c/4",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "g/4",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "c/5",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "c/5",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "c/5",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "c/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "f/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "8",
+          "note": "d/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "h",
+          "note": "c/4",
+          "dot": true,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 3,
+      "closed": true
+    }
+  ]
+}

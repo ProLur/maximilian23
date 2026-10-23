@@ -1,5 +1,5 @@
 {
-  "title": "Lección 1 - Mis primeras notas",
+  "title": "Lección 1 - Sol y Mi",
   "author": "Maximilian 23",
   "clef": "treble",
   "timeSig": "4/4",
@@ -34,9 +34,9 @@
           "acc": false
         },
         {
-          "type": "silencio",
+          "type": "nota",
           "dur": "q",
-          "note": null,
+          "note": "e/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -50,7 +50,15 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "e/4",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -59,14 +67,6 @@
           "type": "nota",
           "dur": "q",
           "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "c/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -126,90 +126,6 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "a/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "silencio",
-          "dur": "q",
-          "note": null,
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "a/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "silencio",
-          "dur": "q",
-          "note": null,
-          "dot": false,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 4,
-      "closed": true
-    },
-    {
-      "notes": [
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "e/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "f/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
-          "note": "d/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "silencio",
-          "dur": "q",
-          "note": null,
-          "dot": false,
-          "tie": false,
-          "acc": false
-        }
-      ],
-      "beats": 4,
-      "closed": true
-    },
-    {
-      "notes": [
-        {
-          "type": "nota",
-          "dur": "h",
-          "note": "c/4",
-          "dot": false,
-          "tie": false,
-          "acc": false
-        },
-        {
-          "type": "nota",
-          "dur": "q",
           "note": "e/4",
           "dot": false,
           "tie": false,
@@ -219,6 +135,22 @@
           "type": "nota",
           "dur": "q",
           "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "silencio",
+          "dur": "q",
+          "note": null,
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "silencio",
+          "dur": "q",
+          "note": null,
           "dot": false,
           "tie": false,
           "acc": false
@@ -248,7 +180,45 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "f/4",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -270,7 +240,7 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "d/4",
+          "note": "g/4",
           "dot": false,
           "tie": false,
           "acc": false
@@ -278,15 +248,61 @@
         {
           "type": "nota",
           "dur": "q",
-          "note": "d/4",
+          "note": "e/4",
           "dot": false,
           "tie": false,
           "acc": false
         },
         {
           "type": "nota",
-          "dur": "h",
-          "note": "c/4",
+          "dur": "q",
+          "note": "g/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        }
+      ],
+      "beats": 4,
+      "closed": true
+    },
+    {
+      "notes": [
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "silencio",
+          "dur": "q",
+          "note": null,
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "nota",
+          "dur": "q",
+          "note": "e/4",
+          "dot": false,
+          "tie": false,
+          "acc": false
+        },
+        {
+          "type": "silencio",
+          "dur": "q",
+          "note": null,
           "dot": false,
           "tie": false,
           "acc": false
