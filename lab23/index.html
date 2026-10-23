@@ -39,15 +39,27 @@
     .lecciones-dropdown{position:relative;z-index:10020;justify-self:center;}
     #lecciones-btn{padding:.45rem 1rem;background:rgba(0,255,204,.18);border:1px solid #00ffcc88;border-radius:8px;color:#00ffcc;cursor:pointer;font-weight:bold;display:flex;align-items:center;gap:.4rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;white-space:nowrap;}
     #lecciones-btn:hover{background:rgba(0,255,204,.28);box-shadow:0 0 10px rgba(0,255,204,.4);}
-    #lecciones-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;background:rgba(13,17,23,.99);border:2px solid #00ffcc88;border-radius:8px;min-width:210px;z-index:10021;box-shadow:0 10px 28px rgba(0,255,204,.5);backdrop-filter:blur(8px);}
+    #lecciones-menu{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(94vw,860px);max-height:90vh;overflow-y:auto;padding:.8rem 1rem 1rem;background:rgba(13,17,23,.99);border:2px solid #00ffcc88;border-radius:12px;z-index:10021;box-shadow:0 10px 40px rgba(0,255,204,.5);backdrop-filter:blur(8px);}
     #lecciones-menu.show{display:block;}
-    #lecciones-menu button{width:100%;text-align:left;padding:.7rem 1.2rem;background:none;border:none;color:#e6edf3;cursor:pointer;display:flex;align-items:center;gap:.7rem;font-family:"Courier New",Courier,monospace;font-size:.88rem;}
-    #lecciones-menu button:hover{background:rgba(0,255,204,.22);}
+    .lec-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:.7rem;color:#00ffcc;font-family:"Courier New",Courier,monospace;font-weight:bold;font-size:1rem;}
+    .lec-leyenda{color:#e3b341;font-size:.8rem;font-weight:normal;margin-left:auto;}
+    .lec-cerrar{width:2.6rem;height:2.6rem;flex:none;background:none;border:1px solid #00ffcc88;border-radius:8px;color:#00ffcc;font-size:1.2rem;cursor:pointer;}
+    .lec-cerrar:hover{background:rgba(0,255,204,.22);}
+    .lec-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem;}
+    .lec-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;min-height:86px;padding:.55rem .4rem;background:rgba(0,255,204,.08);border:1px solid #00ffcc55;border-radius:10px;color:#e6edf3;cursor:pointer;font-family:"Courier New",Courier,monospace;text-align:center;}
+    .lec-tile:hover,.lec-tile:focus-visible{background:rgba(0,255,204,.24);box-shadow:0 0 10px rgba(0,255,204,.35);}
+    .lec-num{font-size:1.7rem;font-weight:bold;line-height:1;color:#00ffcc;}
+    .lec-name{font-size:.78rem;line-height:1.2;}
+    .lec-tile.medieval{background:rgba(227,179,65,.08);border-color:#e3b34188;}
+    .lec-tile.medieval:hover,.lec-tile.medieval:focus-visible{background:rgba(227,179,65,.22);box-shadow:0 0 10px rgba(227,179,65,.35);}
+    .lec-tile.medieval .lec-num{color:#e3b341;}
+    .lec-tile.medieval::after{content:"🏰";position:absolute;top:4px;right:6px;font-size:.8rem;}
+    @media (max-width: 720px){ .lec-grid{grid-template-columns:repeat(3,1fr);} }
+    @media (max-width: 420px){ .lec-grid{grid-template-columns:repeat(2,1fr);} .lec-tile{min-height:72px;} }
     @media (max-width: 980px){
       #barra-opciones{grid-template-columns:1fr;justify-items:center;}
       .acciones-dropdown,.lecciones-dropdown{justify-self:center;}
       .opciones-centro{justify-content:center;}
-      #lecciones-menu{right:auto;left:0;}
     }
     .main-layout{width:100%;max-width:1200px;display:flex;justify-content:center;gap:1.2rem;padding:0 1.5rem 2rem;align-items:flex-start;}
     .sidebar-left{width:136px;flex-shrink:0;position:sticky;top:110px;align-self:flex-start;padding:.9rem .6rem;background:rgba(30,45,61,.3);border-radius:12px;border:1px solid #00ffcc33;backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:1rem;}
@@ -167,27 +179,30 @@
   </div>
   <div class="lecciones-dropdown">
     <button id="lecciones-btn"><i class="fas fa-folder"></i> Lecciones</button>
-    <div id="lecciones-menu">
-      <button type="button" data-lesson-file="lec1.json"><i class="fas fa-book-open"></i> Lección 1 · Sol y Mi</button>
-      <button type="button" data-lesson-file="lec2.json"><i class="fas fa-book-open"></i> Lección 2 · Do, Re, Mi</button>
-      <button type="button" data-lesson-file="lec3.json"><i class="fas fa-book-open"></i> Lección 3 · Mis primeras notas</button>
-      <button type="button" data-lesson-file="lec4.json"><i class="fas fa-book-open"></i> Lección 4 · Estrellita</button>
-      <button type="button" data-lesson-file="lec5.json"><i class="fas fa-book-open"></i> Lección 5 · La escala de Do y la redonda</button>
-      <button type="button" data-lesson-file="lec6.json"><i class="fas fa-book-open"></i> Lección 6 · Campanas del monasterio (medieval)</button>
-      <button type="button" data-lesson-file="lec7.json"><i class="fas fa-book-open"></i> Lección 7 · Canto del monje (medieval)</button>
-      <button type="button" data-lesson-file="lec8.json"><i class="fas fa-book-open"></i> Lección 8 · Los pollitos dicen (corcheas)</button>
-      <button type="button" data-lesson-file="lec9.json"><i class="fas fa-book-open"></i> Lección 9 · Danza del castillo (medieval)</button>
-      <button type="button" data-lesson-file="lec10.json"><i class="fas fa-book-open"></i> Lección 10 · Vals de Maximilian (3/4)</button>
-      <button type="button" data-lesson-file="lec11.json"><i class="fas fa-book-open"></i> Lección 11 · Canción del trovador (medieval)</button>
-      <button type="button" data-lesson-file="lec12.json"><i class="fas fa-book-open"></i> Lección 12 · Himno de la alegría (puntillo)</button>
-      <button type="button" data-lesson-file="lec13.json"><i class="fas fa-book-open"></i> Lección 13 · Marcha de los caballeros (medieval)</button>
-      <button type="button" data-lesson-file="lec14.json"><i class="fas fa-book-open"></i> Lección 14 · Tambor del juglar (semicorcheas, medieval)</button>
-      <button type="button" data-lesson-file="lec15.json"><i class="fas fa-book-open"></i> Lección 15 · Cantiga de la reina (ligaduras, medieval)</button>
-      <button type="button" data-lesson-file="lec16.json"><i class="fas fa-book-open"></i> Lección 16 · Sol mayor y el Fa sostenido</button>
-      <button type="button" data-lesson-file="lec17.json"><i class="fas fa-book-open"></i> Lección 17 · Cantiga del peregrino (medieval)</button>
-      <button type="button" data-lesson-file="lec18.json"><i class="fas fa-book-open"></i> Lección 18 · Danza del rey (medieval)</button>
-      <button type="button" data-lesson-file="lec19.json"><i class="fas fa-book-open"></i> Lección 19 · Rondó de la corte (Re mayor, medieval)</button>
-      <button type="button" data-lesson-file="lec20.json"><i class="fas fa-book-open"></i> Lección 20 · Saltarello del bufón (6/8, medieval)</button>
+    <div id="lecciones-menu" role="dialog" aria-label="Lecciones">
+      <div class="lec-head"><span><i class="fas fa-folder-open"></i> Elige una lección</span><span class="lec-leyenda">🏰 estilo medieval</span><button type="button" class="lec-cerrar" aria-label="Cerrar">✕</button></div>
+      <div class="lec-grid">
+        <button type="button" class="lec-tile" data-lesson-file="lec1.json" title="Lección 1 · Sol y Mi"><span class="lec-num">1</span><span class="lec-name">Sol y Mi</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec2.json" title="Lección 2 · Do, Re, Mi"><span class="lec-num">2</span><span class="lec-name">Do, Re, Mi</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec3.json" title="Lección 3 · Mis primeras notas"><span class="lec-num">3</span><span class="lec-name">Mis primeras notas</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec4.json" title="Lección 4 · Estrellita"><span class="lec-num">4</span><span class="lec-name">Estrellita</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec5.json" title="Lección 5 · La escala de Do y la redonda"><span class="lec-num">5</span><span class="lec-name">La escala de Do y la redonda</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec6.json" title="Lección 6 · Campanas del monasterio (medieval)"><span class="lec-num">6</span><span class="lec-name">Campanas del monasterio</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec7.json" title="Lección 7 · Canto del monje (medieval)"><span class="lec-num">7</span><span class="lec-name">Canto del monje</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec8.json" title="Lección 8 · Los pollitos dicen (corcheas)"><span class="lec-num">8</span><span class="lec-name">Los pollitos dicen (corcheas)</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec9.json" title="Lección 9 · Danza del castillo (medieval)"><span class="lec-num">9</span><span class="lec-name">Danza del castillo</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec10.json" title="Lección 10 · Vals de Maximilian (3/4)"><span class="lec-num">10</span><span class="lec-name">Vals de Maximilian (3/4)</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec11.json" title="Lección 11 · Canción del trovador (medieval)"><span class="lec-num">11</span><span class="lec-name">Canción del trovador</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec12.json" title="Lección 12 · Himno de la alegría (puntillo)"><span class="lec-num">12</span><span class="lec-name">Himno de la alegría (puntillo)</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec13.json" title="Lección 13 · Marcha de los caballeros (medieval)"><span class="lec-num">13</span><span class="lec-name">Marcha de los caballeros</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec14.json" title="Lección 14 · Tambor del juglar (semicorcheas, medieval)"><span class="lec-num">14</span><span class="lec-name">Tambor del juglar (semicorcheas)</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec15.json" title="Lección 15 · Cantiga de la reina (ligaduras, medieval)"><span class="lec-num">15</span><span class="lec-name">Cantiga de la reina (ligaduras)</span></button>
+        <button type="button" class="lec-tile" data-lesson-file="lec16.json" title="Lección 16 · Sol mayor y el Fa sostenido"><span class="lec-num">16</span><span class="lec-name">Sol mayor y el Fa sostenido</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec17.json" title="Lección 17 · Cantiga del peregrino (medieval)"><span class="lec-num">17</span><span class="lec-name">Cantiga del peregrino</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec18.json" title="Lección 18 · Danza del rey (medieval)"><span class="lec-num">18</span><span class="lec-name">Danza del rey</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec19.json" title="Lección 19 · Rondó de la corte (Re mayor, medieval)"><span class="lec-num">19</span><span class="lec-name">Rondó de la corte (Re mayor)</span></button>
+        <button type="button" class="lec-tile medieval" data-lesson-file="lec20.json" title="Lección 20 · Saltarello del bufón (6/8, medieval)"><span class="lec-num">20</span><span class="lec-name">Saltarello del bufón (6/8)</span></button>
+      </div>
     </div>
   </div>
 </div>
@@ -1669,6 +1684,7 @@ function init(){
       loadLessonFromFile(btn.dataset.lessonFile);
     });
   });
+  lm.querySelector(".lec-cerrar").addEventListener("click",()=>lm.classList.remove("show"));
 
   document.addEventListener("click",e=>{
     if(!ab.contains(e.target) && !am.contains(e.target)) am.classList.remove("show");
