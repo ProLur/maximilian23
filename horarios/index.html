@@ -245,6 +245,8 @@ table.grid.av th.clk:hover{background:var(--brand-soft)}
 <div id="toast"></div>
 
 <script>
+// Google solo permite iniciar sesión desde https: si se abre por http en la web, se pasa a https
+if (location.protocol === 'http:' && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) location.replace('https://' + location.host + location.pathname + location.search + location.hash);
 /* =====================================================================
    MAXHORARIO — generador y editor de horarios para centros educativos
    ===================================================================== */
