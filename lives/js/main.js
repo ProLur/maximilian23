@@ -109,6 +109,7 @@ function zoomBy(delta) {
 
 // rueda del raton (y pellizco del panel tactil, que llega como rueda con Ctrl)
 window.addEventListener('wheel', (e) => {
+  if(e.target.closest?.('#subtitulo, #vincular, #cuento')) return;
   e.preventDefault();
   const pasos = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
   zoomBy(pasos * (e.ctrlKey ? 0.01 : 0.002));
@@ -240,6 +241,9 @@ async function setupVoz(max) {
       if (!SUBTITULOS) return;
       if (t) subtitulo.textContent = t;
       subtitulo.classList.toggle('visible', Boolean(t));
+      document.body.classList.toggle('modo-mensaje', Boolean(t));
+      if(t) subtitulo.scrollTop=0;
+      resize();
     },
     onEstado: (e) => {
       if (e === 'activa') activarBtn.hidden = true;

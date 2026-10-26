@@ -80,3 +80,8 @@ Datos: maximilian/sesiones/{codigo}/meta y canales/{nonce}/{comando,mensajes,mie
 La caducidad bloquea el acceso automáticamente mediante reglas, pero no borra físicamente los datos históricos. No se ha añadido un servicio de limpieza con facturación.
 
 Pruebas: cinco receptores simulados sin cruce de órdenes; emulador real de Realtime Database con cinco sesiones, permisos, colisiones, caducidad, cierre, reutilización con nueva generación, revocación y rechazo de comandos inválidos; modelo GLB y cuentos.
+
+## Panel plegable · 26 de octubre de 2026
+Todas las tarjetas del panel son acordeones con botones +/−, aria-expanded y control de teclado. Sesión empieza abierta y se pliega una sola vez al detectar el primer visor conectado; se puede volver a abrir manualmente. Nueva sesión vuelve a abrirla. El resto recuerda su estado en localStorage, por UID de usuario y navegador; las preferencias no se escriben en Firebase ni se comparten entre cuentas. Si el almacenamiento está bloqueado, los acordeones siguen funcionando sin persistencia.
+
+Los mensajes del panel aparecen a la derecha con letra grande, contraste alto y área de lectura desplazable para mensajes largos. El visor reserva la izquierda al personaje mientras se muestra el texto. Los cuentos conservan su presentación a la izquierda.

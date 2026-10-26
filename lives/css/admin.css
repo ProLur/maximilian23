@@ -138,3 +138,14 @@ button.enlace { background: none; color: var(--suave); padding: 4px; font-weight
 #estado-cuento { margin: 0; color: var(--turquesa); font-size: .9rem; }
 
 #codigo-sesion {display:block;font-size:clamp(2.8rem,8vw,4.5rem);font-weight:800;letter-spacing:.18em;color:#3fe0d0;font-variant-numeric:tabular-nums;margin:16px 0;}
+
+/* Cabeceras plegables accesibles; el botón completo funciona también con teclado. */
+.tarjeta.acordeon { display:block;padding:0;overflow:hidden; }
+.tarjeta .acordeon-cabecera { margin:0; }
+.acordeon-boton { display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:18px 16px;border:0;border-radius:0;background:transparent;color:var(--texto);text-align:left;font-size:1rem;font-weight:650; }
+.acordeon-boton:hover { background:#3fe0d00a; }
+.acordeon-boton:focus-visible { outline-offset:-4px;border-radius:12px; }
+.acordeon-signo { display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;border:1px solid var(--borde);border-radius:9px;color:var(--turquesa);font-size:1.4rem;line-height:1; }
+.acordeon-boton[aria-expanded=true] { border-bottom:1px solid var(--borde); }
+.acordeon-contenido { display:grid;gap:12px;padding:16px; }
+.acordeon-contenido[hidden] { display:none; }

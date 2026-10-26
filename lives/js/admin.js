@@ -1,3 +1,4 @@
+import { prepararAcordeones } from './acordeones.js?v=acordeones1';
 // Maximilian 23 - panel de control remoto.
 // Inicia sesion con Firebase Auth y escribe mensajes en la Realtime Database.
 // Las reglas (firebase/database.rules.json) solo dejan escribir a las cuentas de maximilian/admins.
@@ -13,6 +14,8 @@ const panel = $('#panel');
 const form = $('#mensaje');
 const salir = $('#salir');
 const pantallas = $('#pantallas');
+const acordeones = prepararAcordeones(panel);
+let sesionPlegada = false;
 
 const EMOCIONES = [
   ['alegria', 'Alegría'], ['sorpresa', 'Sorpresa'], ['tristeza', 'Tristeza'], ['serio', 'Serio'],
@@ -120,6 +123,7 @@ async function main() {
       await cerrarSesion();
       parar.forEach(fn=>fn()); parar=[];
       sesion=await crearSesion(fb,usuario.uid,desfase);
+      sesionPlegada=false;acordeones.abrirSesion();
       base=rutaSesion(sesion.codigo)+'/canales/'+sesion.nonce;
       $('#codigo-sesion').textContent=sesion.codigo;
       $('#caducidad-sesion').textContent='Válido hasta las '+new Date(sesion.expira).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
@@ -138,6 +142,7 @@ async function main() {
     parar.forEach((fn) => fn());
     parar = [];
     usuario = null;
+    acordeones.usuario(null);
     pantallas.hidden = true;
     if (!user) {
       mostrar('login');
@@ -156,6 +161,7 @@ async function main() {
     }
     if (auth.currentUser?.uid !== user.uid) return;
     usuario = user;
+    acordeones.usuario(user.uid);
     await nuevaSesion();
   });
 
@@ -254,6 +260,7 @@ async function main() {
     const pintar = () => {
       const ahora = Date.now() + desfase;
       const n = Object.values(datos).flatMap(v => Object.values(v)).filter((t) => ahora - t < 90_000).length;
+      if(n > 0 && !sesionPlegada){sesionPlegada=true;acordeones.plegarSesion();}
       pantallas.hidden = false;
       pantallas.classList.toggle('activa', n > 0);
       pantallas.querySelector('.texto').textContent =
