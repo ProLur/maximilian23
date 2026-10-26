@@ -44,6 +44,13 @@ try {
   const gesto={id,tipo:'gesto',gesto:'saludar',creado:serverTimestamp(),expira:Date.now()+20000,autor:'docente'};
   await assertSucceeds(set(ref(admin,'maximilian/comando'),gesto));
   await assertSucceeds(set(ref(admin,'maximilian/comando'),{id,tipo:'detener',creado:serverTimestamp(),expira:Date.now()+20000,autor:'docente'}));
+  for(const cuento of ['estrella','tortuga','nube','zorro','semilla']) {
+    const command={id,tipo:'cuento',cuento,creado:serverTimestamp(),expira:Date.now()+20000,autor:'docente'};
+    await assertSucceeds(set(ref(admin,'maximilian/comando'),command));
+    await assertFails(set(ref(usuario,'maximilian/comando'),{...command,autor:'otro'}));
+    await assertFails(set(ref(admin,'maximilian/comando'),{...command,texto:'Campo no permitido'}));
+  }
+  await assertFails(set(ref(admin,'maximilian/comando'),{id,tipo:'cuento',cuento:'inventado',creado:serverTimestamp(),expira:Date.now()+20000,autor:'docente'}));
   await env.withSecurityRulesDisabled(async c=>remove(ref(c.database(),'maximilian/admins/docente')));
   await assertFails(create(admin).send());
   console.log('Reglas: casos de permiso, validacion, presencia y revocacion superados.');

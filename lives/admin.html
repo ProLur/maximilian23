@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css?v=20261023-acciones">
+  <link rel="stylesheet" href="css/admin.css?v=cuentos1">
 </head>
 <body>
   <header class="cabecera">
@@ -43,6 +43,15 @@
         <p id="estado-accion" class="estado-accion" role="status" aria-live="polite"></p>
         <p class="error" role="alert"></p>
       </div>
+      <div id="biblioteca" class="tarjeta biblioteca">
+        <span class="biblioteca-etiqueta">LA HORA DEL CUENTO</span>
+        <h2>Cuéntanos un cuento, Maximilian</h2>
+        <p class="ayuda">Cinco historias cortas con gestos y texto grande. De momento se muestran para leer juntos: la voz definitiva está pendiente de elegir tras escuchar muestras.</p>
+        <div id="cuentos" class="cuentos-grid"></div>
+        <p id="estado-cuento" role="status" aria-live="polite"></p>
+        <button id="detener-cuento" class="peligro" type="button">Detener cuento</button>
+        <p class="error" role="alert"></p>
+      </div>
       <form id="mensaje" class="tarjeta">
         <h2>Mensaje</h2>
         <label class="bloque">
@@ -73,6 +82,6 @@
     </section>
   </main>
 
-  <script type="module" src="js/admin.js?v=20261023-acciones"></script>
+  <script type="module" src="js/admin.js?v=cuentos1"></script>
 </body>
 </html>

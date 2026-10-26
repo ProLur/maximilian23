@@ -12,7 +12,8 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preload" href="models/maximilian23.glb" as="fetch" crossorigin>
-  <link rel="stylesheet" href="css/maximilian.css">
+  <link rel="stylesheet" href="css/maximilian.css?v=cuentos1">
+  <link rel="stylesheet" href="css/cuentos.css?v=cuentos1">
   <script type="importmap">
     {
       "imports": {
@@ -42,10 +43,18 @@
       <path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Toca para activar la voz
+    Activar voz y cuentos
   </button>
 
   <p id="subtitulo" class="subtitulo" aria-live="polite"></p>
+  <section id="cuento" class="libro-cuento" hidden aria-labelledby="cuento-titulo">
+    <div class="cuento-cabecera"><span class="cuento-etiqueta">LA HORA DEL CUENTO</span><span id="cuento-icono" aria-hidden="true"></span></div>
+    <h1 id="cuento-titulo"></h1>
+    <p id="cuento-texto" aria-live="polite"></p>
+    <div class="cuento-pie"><span id="cuento-pagina"></span><button id="cerrar-cuento" type="button">Terminar cuento</button></div>
+    <div class="cuento-raíl" aria-hidden="true"><div id="cuento-progreso"></div></div>
+    <p id="cuento-aviso" role="status"></p>
+  </section>
 
   <nav id="gestos" class="panel-gestos" hidden aria-label="Gestos de Maximilian"></nav>
 
@@ -91,6 +100,6 @@
       setTimeout(function () { window.__maxFallo('tiempo agotado'); }, 15000);
     })();
   </script>
-  <script type="module" src="js/main.js" onerror="__maxFallo('main.js')"></script>
+  <script type="module" src="js/main.js?v=cuentos1" onerror="__maxFallo('main.js')"></script>
 </body>
 </html>

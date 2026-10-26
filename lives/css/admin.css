@@ -125,3 +125,14 @@ button.enlace { background: none; color: var(--suave); padding: 4px; font-weight
 .historial .vacio { color: var(--suave); display: block; }
 
 #login { max-width: 420px; justify-self: center; width: 100%; }
+.biblioteca { background: linear-gradient(135deg, #192d32, #18232e); border-color: #d7b97755; }
+.biblioteca h2 { color: #fff0c9; font-family: Georgia, serif; font-size: 1.6rem; }
+.biblioteca-etiqueta { font-size: .7rem; letter-spacing: .2em; color: #e6c68f; font-weight: 700; }
+.cuentos-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(185px,1fr)); gap: 12px; }
+.tarjeta-cuento { display: grid; gap: 9px; text-align: left; background: #ffffff06; color: var(--texto); border: 1px solid #ffffff16; border-top: 3px solid var(--cuento-color); border-radius: 16px; padding: 18px; }
+.tarjeta-cuento:hover { background: #ffffff0d; border-color: var(--cuento-color); }
+.cuento-mini-icono { font-size: 2rem; }
+.tarjeta-cuento strong { font-family: Georgia, serif; font-size: 1.1rem; line-height: 1.25; }
+.tarjeta-cuento small { font-size: .75rem; font-weight: 400; color: var(--suave); }
+.cuento-accion { font-size: .75rem; color: var(--cuento-color); margin-top: 4px; }
+#estado-cuento { margin: 0; color: var(--turquesa); font-size: .9rem; }

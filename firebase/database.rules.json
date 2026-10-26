@@ -12,12 +12,12 @@
       "comando": {
         ".read": true,
         ".write": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && newData.exists()",
-        ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren(['texto','velocidad','tono']) && !newData.child('gesto').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren(['gesto']) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('gesto').exists() && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()))",
+        ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren([\"texto\",\"velocidad\",\"tono\"]) && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren([\"gesto\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'cuento' && newData.hasChildren([\"cuento\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists()))",
         "id": {
           ".validate": "newData.isString() && newData.val().length === 20"
         },
         "tipo": {
-          ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener'"
+          ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener' || newData.val() === 'cuento'"
         },
         "texto": {
           ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
@@ -45,6 +45,9 @@
         },
         "$otro": {
           ".validate": false
+        },
+        "cuento": {
+          ".validate": "newData.val() === 'estrella' || newData.val() === 'tortuga' || newData.val() === 'nube' || newData.val() === 'zorro' || newData.val() === 'semilla'"
         }
       },
       "mensajes": {
@@ -54,12 +57,12 @@
         ],
         "$id": {
           ".write": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && !data.exists() && newData.exists()",
-          ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren(['texto','velocidad','tono']) && !newData.child('gesto').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren(['gesto']) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('gesto').exists() && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists()))",
+          ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren([\"texto\",\"velocidad\",\"tono\"]) && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren([\"gesto\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'cuento' && newData.hasChildren([\"cuento\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists()))",
           "id": {
             ".validate": "newData.isString() && newData.val().length === 20"
           },
           "tipo": {
-            ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener'"
+            ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener' || newData.val() === 'cuento'"
           },
           "texto": {
             ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
@@ -87,6 +90,9 @@
           },
           "$otro": {
             ".validate": false
+          },
+          "cuento": {
+            ".validate": "newData.val() === 'estrella' || newData.val() === 'tortuga' || newData.val() === 'nube' || newData.val() === 'zorro' || newData.val() === 'semilla'"
           }
         }
       },

@@ -151,6 +151,7 @@ export class Voz {
   /** Calla de inmediato y vacia la cola. */
   detener() {
     this.generacion += 1;
+    this.cancelarFrase?.();
     for (const m of this.cola) m.resolver();
     this.cola = [];
     this.sintesis?.cancel();
@@ -173,6 +174,8 @@ export class Voz {
         await wait(ESPERA_ATENCION);
       }
       if (emocion && gen === this.generacion) this.max.setExpression(emocion);
+      if (gen !== this.generacion) return;
+      msg.opciones.onInicio?.();
       this.onTexto(msg.texto);
       for (const frase of trocear(msg.texto)) {
         if (gen !== this.generacion) break;
@@ -222,6 +225,7 @@ export class Voz {
       u.volume = this.config.volumen;
 
       let hecho = false;
+      let sinInicio, vigilante;
       let arrancado = false;
       const fin = () => {
         if (hecho) return;
@@ -229,6 +233,7 @@ export class Voz {
         clearTimeout(vigilante);
         clearTimeout(sinInicio);
         this.vivas.delete(u);
+        if (this.cancelarFrase === fin) this.cancelarFrase = null;
         this.max.stopTalking();
         resolve();
       };
@@ -253,9 +258,11 @@ export class Voz {
       };
 
       this.vivas.add(u);
+      this.cancelarFrase = fin;
       this.sintesis.speak(u);
+      if (hecho) return;
       // Si el motor no arranca (sin voces, servicio caido), la boca se mueve igualmente
-      const sinInicio = setTimeout(() => {
+      sinInicio = setTimeout(() => {
         if (!arrancado && !hecho && gen === this.generacion) {
           this.onEstado('sin-audio');
           this.max.startTalking();
@@ -263,7 +270,7 @@ export class Voz {
         }
       }, 1500);
       // Chrome a veces no emite 'end': se continua igualmente
-      const vigilante = setTimeout(fin, (estimada * 2 + 4) * 1000);
+      vigilante = setTimeout(fin, (estimada * 2 + 4) * 1000);
     });
   }
 }

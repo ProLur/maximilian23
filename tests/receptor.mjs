@@ -19,7 +19,7 @@ globalThis.__fb = {
 };
 let source=fs.readFileSync(path.join(root,'lives/js/remoto.js'),'utf8')
  .replace("import { cargarFirebase, desfaseServidor, RUTA } from './firebase.js';", "const cargarFirebase = async () => globalThis.__fb; const desfaseServidor = async () => 0; const RUTA='maximilian';")
- .replace("'./protocolo.js'", JSON.stringify(dataURL(protocol)));
+ .replace(/'\.\/protocolo\.js(?:\?[^']*)?'/, JSON.stringify(dataURL(protocol)));
 const {conectarRemoto}=await import(dataURL(source));
 const received=[];const states=[];
 const connection=await conectarRemoto({onMensaje:m=>received.push(m),onEstado:s=>states.push(s)});

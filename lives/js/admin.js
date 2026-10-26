@@ -3,6 +3,7 @@
 // Las reglas (firebase/database.rules.json) solo dejan escribir a las cuentas de maximilian/admins.
 
 import { cargarFirebase, configurado, desfaseServidor, RUTA } from './firebase.js';
+import { CUENTOS } from './cuentos.js?v=cuentos1';
 
 const $ = (sel) => document.querySelector(sel);
 const aviso = $('#aviso');
@@ -199,6 +200,30 @@ async function main() {
   }
 
   // ---------------------------------------------------------------- estado
+  for (const cuento of CUENTOS) {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'tarjeta-cuento';
+    boton.style.setProperty('--cuento-color', cuento.color);
+    const icono = document.createElement('span');
+    icono.className = 'cuento-mini-icono'; icono.textContent = cuento.icono;
+    const titulo = document.createElement('strong'); titulo.textContent = cuento.titulo;
+    const tema = document.createElement('small'); tema.textContent = `${cuento.tema} · 1 minuto aprox.`;
+    const accion = document.createElement('span'); accion.className = 'cuento-accion'; accion.textContent = '▶ Contar este cuento';
+    boton.append(icono,titulo,tema,accion);
+    boton.addEventListener('click', async () => {
+      boton.disabled = true;
+      $('#estado-cuento').textContent = 'Enviando cuento…';
+      const ok = await enviar({tipo:'cuento',cuento:cuento.id},$('#biblioteca'));
+      $('#estado-cuento').textContent = ok ? `Enviado: ${cuento.titulo}. La narración comienza en el visor.` : '';
+      boton.disabled = false;
+    });
+    $('#cuentos').appendChild(boton);
+  }
+  $('#detener-cuento').addEventListener('click', async () => {
+    if (await enviar({tipo:'detener'},$('#biblioteca'))) $('#estado-cuento').textContent = 'Se ha enviado la orden de detener el cuento.';
+  });
+
   function escucharPantallas() {
     let datos = {};
     const pintar = () => {

@@ -116,6 +116,12 @@ export class Maximilian {
     this.setExpression('guino', { duracion: 0.8 });
   }
 
+  reposo() {
+    this.waveAt = -Infinity;
+    this.attentionAt = -Infinity;
+    this.setExpression('reposo');
+  }
+
   /** x, y en [-1, 1]: +x derecha del espectador, +y arriba. */
   lookAt(x, y) {
     if (this.gazeLocked) return;

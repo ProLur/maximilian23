@@ -1,6 +1,6 @@
 // Solo el ultimo comando es publico. No enviar datos personales.
 import { cargarFirebase, desfaseServidor, RUTA } from './firebase.js';
-import { valido } from './protocolo.js';
+import { valido } from './protocolo.js?v=cuentos1';
 export async function conectarRemoto({ onMensaje, onEstado = () => {} }) {
   try {
     const fb = await cargarFirebase({ conAuth: true, visor: true });

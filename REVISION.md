@@ -62,3 +62,7 @@ Se integró esta versión en ProLur/maximilian23, actualizando lives/ y añadien
 ## Gestos y emociones independientes
 
 El panel muestra primero Saludar, Guiñar el ojo, Atención, Parpadeo y Reposo, seguidos de Alegría, Sorpresa, Tristeza y Serio sin necesidad de texto. Los envíos directos muestran confirmación o error. Saludar vuelve a reposo tras su animación de 2,6 segundos y el guiño tras 0,8 segundos, con transición suave; las emociones remotas duran 4 segundos. Se ha probado este retorno con el GLB real en tests/gestos.mjs. Se versionaron los recursos del panel para evitar conservar la interfaz anterior en caché.
+
+## Cuentos · 26 de octubre de 2026
+Cinco cuentos originales, 25 escenas, texto grande a la izquierda, expresiones y gestos coordinados. Fin y detención devuelven a reposo. Los cuentos funcionan en lectura animada sin voz del navegador; la API de voz queda pendiente de escuchar muestras y elegir proveedor. No se han incorporado claves privadas ni activado pagos.
+Validación: receptor, modelo GLB real, cuentos y cancelación; reglas probadas con emulador antes de publicar. Se añade comando cuento restringido a cinco identificadores para administradores.

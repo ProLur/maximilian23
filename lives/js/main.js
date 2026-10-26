@@ -7,9 +7,10 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Maximilian } from './maximilian.js';
-import { Voz } from './voz.js';
-import { conectarRemoto } from './remoto.js';
+import { Maximilian } from './maximilian.js?v=cuentos1';
+import { Voz } from './voz.js?v=cuentos1';
+import { conectarRemoto } from './remoto.js?v=cuentos1';
+import { Cuentacuentos } from './cuentos.js?v=cuentos1';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
@@ -93,7 +94,8 @@ function placeCamera() {
 }
 
 function resize() {
-  const w = window.innerWidth, h = window.innerHeight;
+  const {width, height} = canvas.getBoundingClientRect();
+  const w = Math.max(1,width), h = Math.max(1,height);
   renderer.setSize(w, h, false);
   composer?.setSize(w, h);
   camera.aspect = w / h;
@@ -203,11 +205,17 @@ const GESTOS = {
   guino: () => max.wink(),
   saludar: () => max.wave(),
   parpadeo: () => max.blink(),
-  reposo: () => max.setExpression('reposo'),
+  reposo: () => max.reposo(),
 };
 
 /** Ejecuta un mensaje del panel: { tipo: 'decir' | 'gesto' | 'detener', ... } */
 function ejecutarMensaje(m) {
+  if (m.tipo === 'cuento') {
+    voz.detener();
+    narrador?.contar(m.cuento);
+    return;
+  }
+  if (narrador?.visible) narrador.detener();
   if (m.tipo === 'decir') {
     voz.decir(m.texto, { emocion: m.emocion || undefined, velocidad: m.velocidad, tono: m.tono });
   } else if (m.tipo === 'gesto') {
@@ -228,6 +236,8 @@ const SUBTITULOS = !CON_VOZ || params.get('subtitulos') !== '0';
 const activarBtn = document.getElementById('activar');
 const subtitulo = document.getElementById('subtitulo');
 let voz = null;
+let vozCuentos = null;
+let narrador = null;
 
 async function setupVoz(max) {
   voz = new Voz(max, {
@@ -247,13 +257,58 @@ async function setupVoz(max) {
   });
   window.maxVoz = voz;                   // para el panel remoto (fase 5) y la consola
   await voz.init();
-  activarBtn.hidden = voz.activa;
+  vozCuentos = new Voz(max, {
+    silencio: true, // La voz definitiva se elegirá tras escuchar muestras.
+    onEstado: (estado) => {
+      if (estado === 'activa') activarBtn.hidden = true;
+      if (estado === 'bloqueada' || estado === 'esperando-activacion') activarBtn.hidden = false;
+      if (estado === 'sin-voz' || estado === 'sin-audio') {
+        document.getElementById('cuento-aviso').textContent = 'No hay audio disponible. El cuento continúa para leerlo juntos.';
+      }
+    },
+  });
+  await vozCuentos.init();
+  if (!vozCuentos.disponible) vozCuentos.activa = true;
+  const libro = document.getElementById('cuento');
+  let zoomAnterior = zoom.objetivo;
+  narrador = new Cuentacuentos({max,voz:vozCuentos,
+    onEscena: (cuento, escena, i) => {
+      if (!document.body.classList.contains('modo-cuento')) zoomAnterior = zoom.objetivo;
+      document.body.classList.add('modo-cuento');
+      document.body.classList.remove('inactivo');
+      libro.hidden = false;
+      libro.style.setProperty('--cuento-color', cuento.color);
+      document.getElementById('cuento-icono').textContent = cuento.icono;
+      document.getElementById('cuento-titulo').textContent = cuento.titulo;
+      const texto = document.getElementById('cuento-texto');
+      texto.textContent = escena.texto;
+      texto.animate?.([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],{duration:450,easing:'ease-out'});
+      document.getElementById('cuento-pagina').textContent = `${i+1} de ${cuento.escenas.length}`;
+      document.getElementById('cuento-progreso').style.width = `${100*(i+1)/cuento.escenas.length}%`;
+      document.getElementById('cuento-aviso').textContent = !vozCuentos.disponible
+        ? 'Voz definitiva pendiente de elegir. Podemos leer el cuento juntos.'
+        : vozCuentos.activa ? '' : 'Toca «Activar voz» en esta pantalla para escucharlo.';
+      zoom.actual = zoom.objetivo = framings.length-1;
+      resize();
+    },
+    onFin: () => { document.getElementById('cuento-pagina').textContent = 'Fin · ¡Gracias por escuchar!'; },
+    onSalir: () => {
+      if (!document.body.classList.contains('modo-cuento')) return;
+      document.body.classList.remove('modo-cuento');
+      libro.hidden = true;
+      zoom.actual = zoom.objetivo = zoomAnterior;
+      resize();
+    },
+  });
+  document.getElementById('cerrar-cuento').addEventListener('click', () => narrador.detener());
+  activarBtn.hidden = !vozCuentos.disponible && voz.activa;
   document.addEventListener('maximilian:decir', (e) => voz.decir(e.detail.texto, e.detail));
   if (params.has('prueba')) montarPruebaVoz(voz, max);
 }
 
 function activarVoz() {
   if (voz && !voz.activa) voz.activar();
+  if (vozCuentos && !vozCuentos.activa) vozCuentos.activar(null);
 }
 activarBtn.addEventListener('click', activarVoz);
 window.addEventListener('pointerdown', activarVoz);
