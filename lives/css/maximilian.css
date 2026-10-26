@@ -203,12 +203,7 @@ body.inactivo .panel-gestos:not(:hover) { opacity: 0; pointer-events: none; }
 
 .vincular[hidden]{display:none}.vincular{position:fixed;z-index:8;left:50%;top:24px;transform:translateX(-50%);width:min(440px,calc(100vw - 48px));box-sizing:border-box;padding:20px;border:1px solid var(--borde);border-radius:20px;background:#10252ef2;box-shadow:0 12px 40px #0005}.vincular label{display:block;font-weight:700;margin-bottom:12px}.vincular>div{display:flex;gap:10px}.vincular input{min-width:0;width:100%;font:700 1.7rem system-ui;letter-spacing:.15em;background:#07171d;color:#fff;border:1px solid var(--borde);border-radius:10px;padding:10px}.vincular button{border:0;border-radius:10px;background:#3fe0d0;color:#08201e;font:700 1rem system-ui;padding:10px 16px;cursor:pointer}.vincular p{font-size:.85rem;line-height:1.4;margin:12px 0 0}.vincular.vinculado{top:auto;bottom:16px;padding:10px 16px;width:auto;max-width:calc(100vw - 140px);border-radius:12px}.vincular.vinculado label,.vincular.vinculado>div{display:none}.vincular.vinculado p{margin:0;font-size:.75rem}
 
-/* Mensajes a la derecha con espacio propio para leer sin tapar a Maximilian. */
-.subtitulo { z-index:4;left:auto;right:4vw;top:50%;bottom:auto;transform:translateY(calc(-50% + 8px));width:40vw;max-width:none;max-height:78vh;box-sizing:border-box;margin:0;padding:clamp(22px,2.5vw,42px);border:1px solid #3fe0d04d;border-radius:24px;background:#10282ff5;color:#f3fcff;box-shadow:0 20px 65px #0006;font-size:clamp(1.45rem,2.3vw,2.7rem);font-weight:550;line-height:1.48;text-align:left;overflow:auto;overflow-wrap:anywhere;white-space:pre-line;scrollbar-width:thin; }
-.subtitulo.visible { transform:translateY(-50%);pointer-events:auto; }
-
-@media(max-width:760px) {
-  .subtitulo {right:3vw;width:47vw;padding:16px;border-radius:16px;font-size:clamp(1.1rem,3vw,1.5rem);max-height:76vh;}
-
-}
+/* Mensajes centrados abajo, sin modificar el encuadre del personaje. */
+.subtitulo { z-index:4;left:50%;right:auto;top:auto;bottom:max(24px, env(safe-area-inset-bottom));transform:translate(-50%,8px);width:max-content;max-width:min(80ch,calc(100% - 32px));max-height:34vh;box-sizing:border-box;margin:0;padding:12px 22px;border:1px solid #3fe0d033;border-radius:14px;background:#041015e8;color:#f3fcff;font-size:clamp(1.05rem,2.4vw,1.8rem);font-weight:500;line-height:1.4;text-align:center;overflow:auto;overflow-wrap:anywhere;white-space:pre-line;scrollbar-width:thin; }
+.subtitulo.visible { opacity:1;transform:translate(-50%,0);pointer-events:auto; }
 @media(prefers-reduced-motion:reduce){.subtitulo{transition:none;}}

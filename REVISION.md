@@ -87,3 +87,5 @@ Todas las tarjetas del panel son acordeones con botones +/−, aria-expanded y c
 Los mensajes del panel aparecen a la derecha con letra grande, contraste alto y área de lectura desplazable para mensajes largos. El visor reserva la izquierda al personaje mientras se muestra el texto. Los cuentos conservan su presentación a la izquierda.
 
 Ajuste posterior: mostrar u ocultar mensajes no modifica las dimensiones del lienzo ni recalcula la cámara. Maximilian conserva su posición y tamaño; el texto aparece a la derecha sobre el mismo encuadre.
+
+A petición del usuario, los mensajes vuelven a la parte inferior centrada, como subtítulos. Se mantiene fijo el encuadre de Maximilian.
