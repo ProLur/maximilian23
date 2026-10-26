@@ -1,4 +1,4 @@
-import { contarPantallas, exigirPantalla } from './pantallas.js?v=piper2';
+import { contarPantallas, exigirPantalla } from './pantallas.js?v=conexion3';
 import { prepararAcordeones } from './acordeones.js?v=piper1';
 // Maximilian 23 - panel de control remoto.
 // Inicia sesion con Firebase Auth y escribe mensajes en la Realtime Database.

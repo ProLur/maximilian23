@@ -5,7 +5,7 @@ export function contarPantallas(datos, ahora) {
 }
 export async function exigirPantalla({db,D,base,ahora}) {
   const [conexion,presencia]=await Promise.all([
-    D.get(D.ref(db,'.info/connected')),
+    new Promise((resolve,reject)=>D.onValue(D.ref(db,'.info/connected'),resolve,reject,{onlyOnce:true})),
     D.get(D.ref(db,base+'/presencia')),
   ]);
   if(conexion.val()!==true)throw Error('Sin conexión con el servidor. No se ha enviado la orden.');

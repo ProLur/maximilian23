@@ -5,7 +5,7 @@ const {contarPantallas,exigirPantalla}=await import('data:text/javascript;base64
 const now=Date.now();
 assert.equal(contarPantallas(null,now),0);assert.equal(contarPantallas({a:{x:now-91000,y:'mal'}},now),0);assert.equal(contarPantallas({a:{x:now},b:{x:now-1000}},now),2);
 let datos=null,conectado=true;const lecturas=[],escrituras=[];
-const D={ref:(_,p)=>p,get:async p=>{lecturas.push(p);return{val:()=>p==='.info/connected'?conectado:datos};},push:()=>({key:'-1234567890123456789'}),serverTimestamp:()=>now,update:async(_,v)=>escrituras.push(v)};
+const D={onValue:(p,ok)=>{ok({val:()=>conectado});return()=>{};},ref:(_,p)=>p,get:async p=>{lecturas.push(p);return{val:()=>p==='.info/connected'?conectado:datos};},push:()=>({key:'-1234567890123456789'}),serverTimestamp:()=>now,update:async(_,v)=>escrituras.push(v)};
 const base='maximilian/sesiones/12345/canales/nonce';
 await assert.rejects(exigirPantalla({db:{},D,base,ahora:()=>now}),/No hay ninguna pantalla/);
 assert(lecturas.includes(base+'/presencia'));assert(!lecturas.includes('maximilian/presencia'));
