@@ -26,3 +26,6 @@ Finetuned from U.S. English lessac voice (medium quality).
 Procesamiento: ritmo base 1.0, tono elevado un 10 %, ajuste de tiempo 0.96, mezcla de señal natural (48 %) con procesamiento espectral robótico (52 %), modulación de 70 Hz y filtro 140–4800 Hz. Referencia estética: ordenador clásico de ciencia ficción. No se ha usado una grabación de Joshua como fuente.
 
 Los textos son los cuentos originales de este proyecto. No se utiliza ninguna API de síntesis ni clave comercial. Las descargas de MP3 sí cuentan como transferencia del alojamiento.
+
+
+Actualización 26/10/2026: voz infantil pausada (Piper length_scale 1.35, atempo 0.88), manteniendo tono y efecto robótico. Todos los títulos y 25 bloques regenerados localmente. Pausa de 1,8 segundos tras el título y de 2,5 segundos tras cada bloque, con pausa/continuación y cancelación.

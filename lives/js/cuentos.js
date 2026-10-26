@@ -38,8 +38,8 @@ export const CUENTOS = [
 ];
 
 export class Cuentacuentos {
-  constructor({max,voz,onTitulo=()=>{},onEscena=()=>{},onFin=()=>{},onSalir=()=>{},onEstado=()=>{}}) {
-    Object.assign(this,{max,voz,onTitulo,onEscena,onFin,onSalir,onEstado});
+  constructor({max,voz,pausaTrasTitulo=1800,pausaEntreEscenas=2500,onTitulo=()=>{},onEscena=()=>{},onFin=()=>{},onSalir=()=>{},onEstado=()=>{}}) {
+    Object.assign(this,{max,voz,pausaTrasTitulo,pausaEntreEscenas,onTitulo,onEscena,onFin,onSalir,onEstado});
     this.generacion=0;this.visible=false;this.enCurso=false;this.pausado=false;
   }
   estado(){this.onEstado({activo:this.enCurso,pausado:this.pausado});}
@@ -53,11 +53,21 @@ export class Cuentacuentos {
   continuar(){if(!this.enCurso||!this.pausado)return;this.pausado=false;this.voz.continuar?.();this.despertar?.();this.despertar=null;this.estado();}
   alternarPausa(){this.pausado?this.continuar():this.pausar();}
   esperar(){return this.pausado?new Promise(resolve=>{this.despertar=resolve;}):Promise.resolve();}
+  async descansar(ms,gen){
+    // El tiempo de descanso también se conserva al pulsar Pausa.
+    while(ms>0 && gen===this.generacion){
+      await this.esperar();if(gen!==this.generacion)return;
+      const tramo=Math.min(50,ms);
+      await new Promise(resolve=>setTimeout(resolve,tramo));
+      if(!this.pausado)ms-=tramo;
+    }
+  }
   async contar(id){
     const cuento=CUENTOS.find(c=>c.id===id);if(!cuento)return;
     this.detener();const gen=++this.generacion;this.visible=true;this.enCurso=true;this.estado();this.max.mirarAlFrente(true);
     this.onTitulo(cuento);
     await this.voz.decir(cuento.titulo,{audio:'audio/cuentos/'+cuento.id+'-titulo.mp3',emocion:'alegria',sinAtencion:true,onInicio:()=>{}});
+    await this.descansar(this.pausaTrasTitulo,gen);
     for(let i=0;i<cuento.escenas.length;i++){
       await this.esperar();if(gen!==this.generacion)return;
       const escena=cuento.escenas[i];this.onEscena(cuento,escena,i);
@@ -69,6 +79,7 @@ export class Cuentacuentos {
           if(escena.gesto==='saludar')this.max.wave();else if(escena.gesto==='guino')this.max.wink();else if(escena.gesto==='atencion')this.max.attention();
         },
       });
+      await this.descansar(this.pausaEntreEscenas,gen);
     }
     await this.esperar();if(gen!==this.generacion)return;
     this.enCurso=false;this.pausado=false;this.max.reposo();this.onFin(cuento);this.estado();

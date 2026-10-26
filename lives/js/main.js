@@ -1,4 +1,4 @@
-import { VozGrabada } from './voz-grabada.js?v=ilustrados1';
+import { VozGrabada } from './voz-grabada.js?v=infantil-pausado1';
 // Maximilian 23 - pagina publica: escena 3D, carga del modelo y controles minimos.
 
 import * as THREE from 'three';
@@ -8,10 +8,10 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Maximilian } from './maximilian.js?v=ilustrados1';
-import { Voz } from './voz.js?v=ilustrados1';
-import { conectarRemoto } from './remoto.js?v=ilustrados1';
-import { Cuentacuentos } from './cuentos.js?v=ilustrados1';
+import { Maximilian } from './maximilian.js?v=infantil-pausado1';
+import { Voz } from './voz.js?v=infantil-pausado1';
+import { conectarRemoto } from './remoto.js?v=infantil-pausado1';
+import { Cuentacuentos } from './cuentos.js?v=infantil-pausado1';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 

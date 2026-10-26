@@ -44,7 +44,7 @@ export class VozGrabada {
           this.max.startTalking();m.opciones.onInicio?.();
         };
         if(!/^audio[/]cuentos[/](estrella|tortuga|nube|zorro|semilla)-([1-5]|titulo)\.mp3$/.test(m.opciones.audio||'')){fin(Error('Audio desconocido.'));return;}
-        this.enAudio=true;this.audio.src=m.opciones.audio;
+        this.enAudio=true;this.audio.src=m.opciones.audio+'?v=infantil-pausado1';
         this.audio.play().catch(fin);
       });
     } catch(err) {

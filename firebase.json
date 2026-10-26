@@ -3,17 +3,11 @@
     "rules": "firebase/database.rules.json"
   },
   "hosting": {
-    "public": "lives",
+    "public": "hosting-minimo",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/admin",
-        "destination": "/admin.html"
-      }
     ],
     "headers": [
       {
@@ -52,7 +46,24 @@
         ]
       }
     ],
-    "site": "maximilian23-visor"
+    "site": "maximilian23-visor",
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "https://maximilian23.com/lives/",
+        "type": 302
+      },
+      {
+        "source": "/admin",
+        "destination": "https://maximilian23.com/lives/admin.html",
+        "type": 302
+      },
+      {
+        "source": "/:ruta*",
+        "destination": "https://maximilian23.com/lives/:ruta",
+        "type": 302
+      }
+    ]
   },
   "emulators": {
     "auth": {
