@@ -241,9 +241,7 @@ async function setupVoz(max) {
       if (!SUBTITULOS) return;
       if (t) subtitulo.textContent = t;
       subtitulo.classList.toggle('visible', Boolean(t));
-      document.body.classList.toggle('modo-mensaje', Boolean(t));
       if(t) subtitulo.scrollTop=0;
-      resize();
     },
     onEstado: (e) => {
       if (e === 'activa') activarBtn.hidden = true;

@@ -85,3 +85,5 @@ Pruebas: cinco receptores simulados sin cruce de órdenes; emulador real de Real
 Todas las tarjetas del panel son acordeones con botones +/−, aria-expanded y control de teclado. Sesión empieza abierta y se pliega una sola vez al detectar el primer visor conectado; se puede volver a abrir manualmente. Nueva sesión vuelve a abrirla. El resto recuerda su estado en localStorage, por UID de usuario y navegador; las preferencias no se escriben en Firebase ni se comparten entre cuentas. Si el almacenamiento está bloqueado, los acordeones siguen funcionando sin persistencia.
 
 Los mensajes del panel aparecen a la derecha con letra grande, contraste alto y área de lectura desplazable para mensajes largos. El visor reserva la izquierda al personaje mientras se muestra el texto. Los cuentos conservan su presentación a la izquierda.
+
+Ajuste posterior: mostrar u ocultar mensajes no modifica las dimensiones del lienzo ni recalcula la cámara. Maximilian conserva su posición y tamaño; el texto aparece a la derecha sobre el mismo encuadre.

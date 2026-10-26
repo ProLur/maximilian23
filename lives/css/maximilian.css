@@ -206,9 +206,9 @@ body.inactivo .panel-gestos:not(:hover) { opacity: 0; pointer-events: none; }
 /* Mensajes a la derecha con espacio propio para leer sin tapar a Maximilian. */
 .subtitulo { z-index:4;left:auto;right:4vw;top:50%;bottom:auto;transform:translateY(calc(-50% + 8px));width:40vw;max-width:none;max-height:78vh;box-sizing:border-box;margin:0;padding:clamp(22px,2.5vw,42px);border:1px solid #3fe0d04d;border-radius:24px;background:#10282ff5;color:#f3fcff;box-shadow:0 20px 65px #0006;font-size:clamp(1.45rem,2.3vw,2.7rem);font-weight:550;line-height:1.48;text-align:left;overflow:auto;overflow-wrap:anywhere;white-space:pre-line;scrollbar-width:thin; }
 .subtitulo.visible { transform:translateY(-50%);pointer-events:auto; }
-body.modo-mensaje:not(.modo-cuento) #escena { left:0;width:54vw; }
+
 @media(max-width:760px) {
   .subtitulo {right:3vw;width:47vw;padding:16px;border-radius:16px;font-size:clamp(1.1rem,3vw,1.5rem);max-height:76vh;}
-  body.modo-mensaje:not(.modo-cuento) #escena {width:47vw;}
+
 }
 @media(prefers-reduced-motion:reduce){.subtitulo{transition:none;}}
