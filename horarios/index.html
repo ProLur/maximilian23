@@ -27,7 +27,8 @@ h1,h2,h3{font-family:var(--mono);letter-spacing:.3px}
 /* ---------- barra lateral ---------- */
 #side{width:240px;flex:none;background:#0a0f14;color:#b9d8d2;display:flex;flex-direction:column;height:100vh;position:sticky;top:0;border-right:2px solid var(--brand);box-shadow:var(--glow)}
 #logo{padding:18px 16px 12px;font-family:var(--mono);font-weight:700;font-size:19px;color:var(--brand);display:flex;align-items:center;gap:10px;text-shadow:0 0 10px rgba(25,230,193,.5)}
-#logo span.b{border:2px solid var(--brand);border-radius:50%;width:40px;height:40px;display:grid;place-items:center;font-size:21px;flex:none;box-shadow:var(--glow);background:#0f2027}
+#logo span.b{width:48px;height:48px;display:grid;place-items:center;flex:none}
+#logo span.b img,.maxhead{width:100%;height:auto;filter:drop-shadow(0 0 10px rgba(25,230,193,.55))}
 #logo small{display:block;font-size:11px;font-weight:400;color:var(--muted);text-shadow:none}
 #nav{flex:1;overflow:auto;padding:4px 10px}
 #nav .sec{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin:14px 8px 6px}
@@ -222,19 +223,20 @@ table.grid.av th.clk:hover{background:var(--brand-soft)}
 </head>
 <body>
 <aside id="side">
-  <div id="logo"><span class="b">🤖</span><div class="t">MAXHORARIO<small>Horarios · Maximilian 23</small></div></div>
+  <div id="logo"><span class="b"><img src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23"></span><div class="t">MAXHORARIO<small>Horarios · Maximilian 23</small></div></div>
   <nav id="nav"></nav>
-  <div id="sidefoot">Guardado automático en este navegador. Usa «💾 Guardar» para tener una copia en archivo.</div>
+  <div id="sidefoot">Guardado automático en este navegador. Usa «Guardar» para tener una copia en archivo.</div>
 </aside>
 <div id="main">
   <header id="top">
     <h1 id="title">MAXHORARIO</h1>
     <button class="btn" onclick="undo()" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
     <button class="btn" onclick="redo()" title="Rehacer (Ctrl+Y)">↷</button>
-    <button class="btn" onclick="exportJSON()" title="Guardar el proyecto en un archivo">💾 Guardar</button>
-    <button class="btn" onclick="$('#fileIn').click()" title="Abrir un proyecto guardado">📂 Abrir</button>
-    <button class="btn" onclick="exportCSV()" title="Exportar a Excel (CSV)">📊 Excel</button>
+    <button class="btn" onclick="exportJSON()" title="Guardar el proyecto en un archivo">Guardar</button>
+    <button class="btn" onclick="$('#fileIn').click()" title="Abrir un proyecto guardado">Abrir</button>
+    <button class="btn" onclick="exportCSV()" title="Exportar a Excel (CSV)">Excel</button>
     <input type="file" id="fileIn" accept=".json,.maxh" hidden onchange="importJSON(this)">
+    <span id="cloud"></span>
   </header>
   <section id="view"></section>
 </div>
@@ -290,12 +292,12 @@ function groupName(level, L){
   return m ? [level+' '+L, m[1]+m[2].replace(/[^A-Z]/g,'')+L] : [level+' '+L, level.slice(0,3)+L];
 }
 function chooseEtapa(first){
-  openModal(`<div style="text-align:center"><div style="font-size:54px;filter:drop-shadow(0 0 14px rgba(25,230,193,.6))">🤖</div>
+  openModal(`<div style="text-align:center"><img class="maxhead" src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23" style="width:110px">
     <h3>${first ? '¡Hola! Soy MAXHORARIO' : 'Tipo de centro'}</h3>
     <p class="muted">¿Para qué tipo de centro vas a hacer los horarios? Así uso los nombres de clases, niveles y tramos adecuados.</p></div>
     <div class="choice">
-      <button onclick="setEtapa('primaria')"><span class="ico">🎒</span><b>Colegio</b><small>Infantil y Primaria<br>Clases: Infantil 3 años A, 1º A, 2º B…<br>Maestros tutores y especialistas</small></button>
-      <button class="o" onclick="setEtapa('secundaria')"><span class="ico">🎓</span><b>Instituto</b><small>ESO, Bachillerato y FP<br>Grupos: 1º ESO A, 2º Bachillerato B…<br>Profesorado por departamentos</small></button>
+      <button onclick="setEtapa('primaria')"><b>Colegio</b><small>Infantil y Primaria<br>Clases: Infantil 3 años A, 1º A, 2º B…<br>Maestros tutores y especialistas</small></button>
+      <button class="o" onclick="setEtapa('secundaria')"><b>Instituto</b><small>ESO, Bachillerato y FP<br>Grupos: 1º ESO A, 2º Bachillerato B…<br>Profesorado por departamentos</small></button>
     </div>`);
 }
 function setEtapa(x){
@@ -308,7 +310,7 @@ function setEtapa(x){
 }
 function levelsModal(){
   const e = etapa();
-  openModal(`<h3>🏫 Crear ${e.G[1].toLowerCase()} por niveles</h3>
+  openModal(`<h3>Crear ${e.G[1].toLowerCase()} por niveles</h3>
     <p class="muted">Marca los niveles y cuántas líneas (A, B, C…) tiene cada uno.</p>
     <div class="chips" style="max-height:none">${e.levels.map(l => `<label><input type="checkbox" name="lv" value="${esc(l)}">${esc(l)}</label>`).join('')}</div>
     <label class="l">Número de líneas por nivel</label><input class="f" id="lvN" type="number" min="1" max="8" value="2" style="width:90px">
@@ -363,7 +365,7 @@ function fix(){
   }
   syncLessons();
 }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('⚠ No se pudo guardar en el navegador'); } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('No se pudo guardar en el navegador'); } cloudSchedule(); }
 function mutate(fn, rerender = true){
   history.push(JSON.stringify(state)); if (history.length > 100) history.shift(); future = [];
   fn(); syncLessons(); save(); if (rerender) render(); else renderNav();
@@ -691,7 +693,7 @@ function renderNav(){
   };
   const placed = state.lessons.filter(l => l.day != null).length;
   $('#nav').innerHTML =
-    b('inicio','⌂','Inicio') +
+    b('inicio','·','Inicio') +
     `<div class="sec">Preparar</div>` +
     b('marco',1,'Marco horario', state.days.length+'×'+classSlots()) +
     b('profesores',2,TPLUR.T, state.teachers.length) +
@@ -703,10 +705,10 @@ function renderNav(){
     `<div class="sec">Horario</div>` +
     b('generar',5,'Generar') +
     b('horario',6,'Ver y ajustar', placed+'/'+state.lessons.length) +
-    b('sabana','▦','Horario general') +
+    b('sabana','·','Horario general') +
     `<div class="sec">Gestión diaria</div>` +
-    b('guardias','⛑','Guardias y ausencias') +
-    b('informes','📈','Informes');
+    b('guardias','·','Guardias y ausencias') +
+    b('informes','·','Informes');
   $('#title').innerHTML = esc(state.name || 'MAXHORARIO') + (state.course ? ' · '+esc(state.course) : '') + '<small>' + VIEWTITLE[ui.view] + '</small>';
 }
 function render(){
@@ -741,11 +743,11 @@ function vInicio(){
   const empty = !state.teachers.length && !state.activities.length;
   return `
   <div class="hero">
-    <div class="bot">🤖</div>
+    <img class="maxhead" src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23" style="width:130px">
     <div class="grow"><h2>Bienvenido a MAXHORARIO</h2>
     <p>El generador de horarios para jefaturas de estudio. Introduce los datos del centro, define las condiciones y deja que el motor calcule el horario óptimo. Después ajústalo arrastrando sesiones, gestiona guardias y ausencias y publica los horarios.</p></div>
     <div class="row">
-      ${empty ? `<button class="btn big" onclick="loadSample()">✨ Ver un ejemplo</button>` : ''}
+      ${empty ? `<button class="btn big" onclick="loadSample()">Ver un ejemplo</button>` : ''}
       <button class="btn big ${empty?'':'pri'}" onclick="go('${empty?'marco':'horario'}')">${empty ? 'Empezar de cero →' : 'Ver horario →'}</button>
     </div>
   </div>
@@ -761,17 +763,17 @@ function vInicio(){
       <div class="stat"><b class="${iss.size?'pill-bad':''}">${iss.size}</b><span>Con conflictos</span></div>
     </div></div>
     <div class="card grow" style="min-width:300px"><h3>Comprobación de datos</h3>
-      ${diag.length ? `<ul class="diag">${diag.slice(0,12).map(([k,m]) => `<li>${k==='bad'?'⛔':'⚠️'} ${m}</li>`).join('')}</ul>${diag.length>12?`<small class="muted">…y ${diag.length-12} más</small>`:''}`
+      ${diag.length ? `<ul class="diag">${diag.slice(0,12).map(([k,m]) => `<li>${k==='bad'?'':''} ${m}</li>`).join('')}</ul>${diag.length>12?`<small class="muted">…y ${diag.length-12} más</small>`:''}`
         : `<p class="pill-ok">✓ Todo correcto. Los datos son coherentes.</p>`}
     </div>
   </div>
   <div class="card"><h3>Proyecto</h3><div class="row">
     <label class="muted">Centro</label><input class="f" style="width:240px" value="${esc(state.name)}" onchange="mutate(()=>state.name=this.value)">
     <label class="muted">Curso</label><input class="f" style="width:120px" placeholder="2026-2027" value="${esc(state.course)}" onchange="mutate(()=>state.course=this.value)">
-    <label class="muted">Tipo</label><button class="btn alt" onclick="chooseEtapa()">${state.etapa==='primaria'?'🎒 Colegio':'🎓 Instituto'} · cambiar</button>
+    <label class="muted">Tipo</label><button class="btn alt" onclick="chooseEtapa()">${state.etapa==='primaria'?'Colegio':'Instituto'} · cambiar</button>
     <span class="grow"></span>
-    <button class="btn" onclick="loadSample()">✨ Cargar ejemplo</button>
-    <button class="btn danger" onclick="newProject()">🗑 Nuevo proyecto vacío</button>
+    <button class="btn" onclick="loadSample()">Cargar ejemplo</button>
+    <button class="btn danger" onclick="newProject()">Nuevo proyecto vacío</button>
   </div></div>`;
 }
 function newProject(){
@@ -786,7 +788,7 @@ function vMarco(){
   <div class="row" style="align-items:flex-start">
   <div class="card" style="width:300px"><h3>Días lectivos</h3>
     <table class="t">${state.days.map((d,i) => `<tr><td><input type="text" value="${esc(d)}" onchange="mutate(()=>state.days[${i}]=this.value,false)"></td><td style="width:30px"><button class="iconbtn" title="Quitar día" onclick="delDay(${i})">✕</button></td></tr>`).join('')}</table>
-    <div class="row" style="margin-top:10px"><button class="btn sm" onclick="addDay()">＋ Añadir día</button></div>
+    <div class="row" style="margin-top:10px"><button class="btn sm" onclick="addDay()">Añadir día</button></div>
   </div>
   <div class="card grow" style="min-width:420px"><h3>Tramos horarios</h3>
     <table class="t"><tr><th>#</th><th>Inicio</th><th>Fin</th><th>Recreo / descanso</th><th></th></tr>
@@ -794,11 +796,11 @@ function vMarco(){
       <td><input type="time" value="${s.start}" onchange="mutate(()=>state.slots[${i}].start=this.value,false)"></td>
       <td><input type="time" value="${s.end}" onchange="mutate(()=>state.slots[${i}].end=this.value,false)"></td>
       <td><input type="checkbox" ${s.recreo?'checked':''} onchange="mutate(()=>state.slots[${i}].recreo=this.checked)"></td>
-      <td style="white-space:nowrap"><button class="iconbtn" title="Insertar tramo debajo" onclick="addSlot(${i+1})">＋</button><button class="iconbtn" title="Quitar tramo" onclick="delSlot(${i})">✕</button></td></tr>`).join('')}
+      <td style="white-space:nowrap"><button class="iconbtn" title="Insertar tramo debajo" onclick="addSlot(${i+1})"></button><button class="iconbtn" title="Quitar tramo" onclick="delSlot(${i})">✕</button></td></tr>`).join('')}
     </table>
-    <div class="row" style="margin-top:10px"><button class="btn sm" onclick="addSlot(state.slots.length)">＋ Añadir tramo al final</button></div>
+    <div class="row" style="margin-top:10px"><button class="btn sm" onclick="addSlot(state.slots.length)">Añadir tramo al final</button></div>
   </div></div>
-  <div class="card"><h3>⚡ Crear tramos automáticamente</h3>
+  <div class="card"><h3>Crear tramos automáticamente</h3>
     <div class="row">
       <label>Empieza a las <input class="f" type="time" id="gS" value="08:30"></label>
       <label>Clases de <input class="f" type="number" id="gD" value="55" style="width:70px"> min</label>
@@ -874,15 +876,15 @@ function vEnt(v){
     let hc;
     if (showH){ const h = hoursOf(E.t, e.id), a = availOf(E.t, e.id); hc = `<td class="${h>a?'pill-bad':''}">${h} h${E.t==='T'?` <span class="muted">(${hoursOf('T',e.id,'clase')})</span>`:''} <span class="muted">/ ${a}</span></td>`; }
     else { let h = 0; state.activities.forEach(a => { if (subjIds(a).includes(e.id)) h += a.sessions*a.dur; }); hc = `<td>${h} h</td>`; }
-    const act = `<button class="iconbtn" title="Condiciones y disponibilidad" onclick="ui.rt='${E.t}';ui.rid['${E.t}']='${e.id}';go('restricciones')">⛔</button>`
-      + (E.t !== 'S' ? `<button class="iconbtn" title="Ver su horario" onclick="ui.ht='${E.t}';ui.hid['${E.t}']='${e.id}';go('horario')">📅</button>` : '')
-      + `<button class="iconbtn" title="Eliminar" onclick="delEnt('${E.c}','${e.id}')">🗑</button>`;
+    const act = `<button class="iconbtn" title="Condiciones y disponibilidad" onclick="ui.rt='${E.t}';ui.rid['${E.t}']='${e.id}';go('restricciones')"></button>`
+      + (E.t !== 'S' ? `<button class="iconbtn" title="Ver su horario" onclick="ui.ht='${E.t}';ui.hid['${E.t}']='${e.id}';go('horario')"></button>` : '')
+      + `<button class="iconbtn" title="Eliminar" onclick="delEnt('${E.c}','${e.id}')"></button>`;
     return `<tr>${pickBox(e.id)}${cells}${hc}<td style="white-space:nowrap;text-align:right">${act}</td></tr>`;
   }).join('');
   return `${tabs}<h2>${E.step}${E.title}</h2><p class="lead">${E.lead}</p>
   <datalist id="deptList">${depts.map(d => `<option value="${esc(d)}">`).join('')}</datalist>
   <div class="card">
-    <div class="row" style="margin-bottom:10px"><button class="btn pri" onclick="addEnt('${v}')">＋ Añadir ${E.one}</button>${E.t==='G'?`<button class="btn alt" onclick="levelsModal()">🏫 Crear por niveles</button>`:''}<button class="btn" onclick="bulkEnt('${v}')">📋 Pegar una lista</button>
+    <div class="row" style="margin-bottom:10px"><button class="btn pri" onclick="addEnt('${v}')">Añadir ${E.one}</button>${E.t==='G'?`<button class="btn alt" onclick="levelsModal()">Crear por niveles</button>`:''}<button class="btn" onclick="bulkEnt('${v}')">Pegar una lista</button>
       ${delBar(ids, `delEnts('${E.c}',${idsJ}.filter(id=>ui.pick.has(id)))`, `delEnts('${E.c}',${idsJ})`)}</div>
     ${list.length ? `<table class="t">${head}${rows}</table>` : `<div class="empty"><b>Todavía no hay ${E.title.toLowerCase()}</b>Pulsa «Añadir» o pega una lista (por ejemplo, copiada de Excel).</div>`}
   </div>`;
@@ -934,7 +936,7 @@ function delEnts(c, ids){
     for (const g of state.groups) if (has(g.roomId)) g.roomId = '';
     for (const id of ids) ui.pick.delete(id);
   });
-  toast('🗑 Eliminado: '+what);
+  toast('Eliminado: '+what);
 }
 /* casillas de selección comunes a todas las tablas */
 function pickBox(id){ return `<td style="width:30px" onclick="event.stopPropagation()"><input type="checkbox" ${ui.pick.has(id)?'checked':''} onchange="pickSet(['${id}'],this.checked)"></td>`; }
@@ -942,14 +944,14 @@ function pickHead(ids){ const all = ids.length && ids.every(id => ui.pick.has(id
 function pickSet(ids, on){ ids.forEach(id => on ? ui.pick.add(id) : ui.pick.delete(id)); render(); }
 function delBar(ids, onSel, onAll){
   const n = ids.filter(id => ui.pick.has(id)).length;
-  return `<span class="grow"></span><button class="btn danger" ${n?'':'disabled'} onclick="${onSel}">🗑 Borrar seleccionados${n?' ('+n+')':''}</button><button class="btn danger" ${ids.length?'':'disabled'} onclick="${onAll}">🗑 Borrar todo</button>`;
+  return `<span class="grow"></span><button class="btn danger" ${n?'':'disabled'} onclick="${onSel}">Borrar seleccionados${n?' ('+n+')':''}</button><button class="btn danger" ${ids.length?'':'disabled'} onclick="${onAll}">Borrar todo</button>`;
 }
 function delActs(ids){
   if (!ids.length) return;
   if (!confirm('¿Eliminar '+(ids.length === 1 ? 'esta actividad' : ids.length+' actividades')+' y sus sesiones del horario?\n(Puedes deshacer con Ctrl+Z)')) return;
   const del = new Set(ids);
   mutate(() => { state.activities = state.activities.filter(a => !del.has(a.id)); ids.forEach(id => ui.pick.delete(id)); });
-  toast('🗑 Eliminadas: '+ids.length);
+  toast('Eliminadas: '+ids.length);
 }
 
 /* ---------- vista: actividades ---------- */
@@ -969,15 +971,15 @@ function vAct(){
       <td>${a.sessions} × ${a.dur===1?'1 tramo':a.dur+' tramos'}</td>
       <td>${a.maxDay}</td>
       <td class="${pl===ls.length?'pill-ok':pl?'pill-warn':'muted'}">${pl}/${ls.length}</td>
-      <td style="white-space:nowrap;text-align:right"><button class="iconbtn" title="Editar" onclick="actModal('${a.id}')">✏️</button><button class="iconbtn" title="Duplicar" onclick="dupAct('${a.id}')">⧉</button><button class="iconbtn" title="Eliminar" onclick="delAct('${a.id}')">🗑</button></td></tr>`;
+      <td style="white-space:nowrap;text-align:right"><button class="iconbtn" title="Editar" onclick="actModal('${a.id}')"></button><button class="iconbtn" title="Duplicar" onclick="dupAct('${a.id}')">⧉</button><button class="iconbtn" title="Eliminar" onclick="delAct('${a.id}')"></button></td></tr>`;
   }).join('');
   return `<h2>3 · Actividades</h2>
   <p class="lead">Una actividad es <b>lo que hay que colocar en el horario</b>: una materia, con su profesorado y grupo(s), y cuántas sesiones semanales tiene. Admite <b>grupos unidos</b>, <b>varios profesores</b> (apoyos), <b>materias simultáneas</b> (optativas o desdobles a la misma hora), <b>aulas alternativas</b>, sesiones dobles, y actividades del profesorado sin alumnos: <b>guardias, reuniones y complementarias</b>.</p>
   <div class="card">
     <div class="row" style="margin-bottom:12px">
-      <button class="btn pri" ${canAdd?'':'disabled'} onclick="quickLoad()">⚡ Carga rápida por grupo</button>
-      <button class="btn" ${canAdd?'':'disabled'} onclick="actModal()">＋ Nueva actividad</button>
-      <button class="btn" ${state.teachers.length?'':'disabled'} onclick="actModal(null,'guardia')">⛑ Guardias / reuniones</button>
+      <button class="btn pri" ${canAdd?'':'disabled'} onclick="quickLoad()">Carga rápida por grupo</button>
+      <button class="btn" ${canAdd?'':'disabled'} onclick="actModal()">Nueva actividad</button>
+      <button class="btn" ${state.teachers.length?'':'disabled'} onclick="actModal(null,'guardia')">Guardias / reuniones</button>
       <span class="grow"></span>
       <select class="f" onchange="ui.fGroup=this.value;render()"><option value="">Todos los grupos</option>${state.groups.map(g => `<option value="${g.id}" ${ui.fGroup===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select>
       <select class="f" onchange="ui.fTeacher=this.value;render()"><option value="">Todos los profesores</option>${state.teachers.map(t => `<option value="${t.id}" ${ui.fTeacher===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select>
@@ -1016,7 +1018,7 @@ function actModal(id, type){
     </div>
     <label class="l">Materias simultáneas (optativas / desdobles) — se imparten a la vez que la principal, con otro profesor y aula</label>
     <div id="parts">${a.parts.map(partRow).join('')}</div>
-    <button class="btn sm" onclick="$('#parts').insertAdjacentHTML('beforeend', partRow())">＋ Añadir materia simultánea</button>
+    <button class="btn sm" onclick="$('#parts').insertAdjacentHTML('beforeend', partRow())">Añadir materia simultánea</button>
     <div class="mfoot">${id ? `<button class="btn danger" style="margin-right:auto" onclick="closeModal();delAct('${id}')">Eliminar</button>` : ''}<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn pri" onclick="saveAct('${id||''}')">Guardar</button></div>`);
   if (!id){ // mantener el orden de marcado de aulas
     $$('#mbox input[name=R]').forEach(x => x.onchange = () => { x.dataset.t = Date.now(); });
@@ -1048,7 +1050,7 @@ function quickLoad(gid){
   gid = gid || ui.fGroup || state.groups[0].id;
   const g = IX.G.get(gid);
   const ex = sid => state.activities.find(a => a.type === 'clase' && a.subjectId === sid && !a.parts.length && a.groupIds.length === 1 && a.groupIds[0] === gid);
-  openModal(`<h3>⚡ Carga rápida por grupo</h3>
+  openModal(`<h3>Carga rápida por grupo</h3>
     <p class="muted">Horas semanales de cada materia para el grupo y quién la imparte. Deja 0 en las que no cursa. (Optativas y desdobles se crean con «Nueva actividad».)</p>
     <label class="l">Grupo</label><select class="f" onchange="quickLoad(this.value)">${state.groups.map(x => `<option value="${x.id}" ${x.id===gid?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
     <table class="t" style="margin-top:10px"><tr><th>Materia</th><th style="width:80px">Horas</th><th style="width:110px">Sesiones de</th><th>Profesor</th><th>Aula</th></tr>
@@ -1107,12 +1109,12 @@ function vRest(){
   <p class="lead">Elige un pincel y <b>pinta</b> la disponibilidad (puedes arrastrar; clic en un día o una hora pinta la columna o la fila). <b>No disponible</b> se respeta siempre; <b>mejor no</b> se evita si es posible. Debajo, las condiciones de cada ${TNAME[t].toLowerCase()}.</p>
   <div class="row" style="margin-bottom:14px"><div class="seg">${['T','G','S','R'].map(x => `<button class="${t===x?'on':''}" onclick="ui.rt='${x}';render()">${TPLUR[x]}</button>`).join('')}</div></div>
   ${!list.length ? `<div class="card empty"><b>No hay ${TPLUR[t].toLowerCase()}</b></div>` :
-  `<div class="rlayout"><div class="card rlist">${list.map(x => { const n = Object.values(x.av).filter(v=>v).length; return `<button class="${x.id===id?'on':''}" onclick="ui.rid['${t}']='${x.id}';render()"><span>${esc(x.name)}</span><span class="muted">${n?n+' ⛔':''}</span></button>`; }).join('')}</div>
+  `<div class="rlayout"><div class="card rlist">${list.map(x => { const n = Object.values(x.av).filter(v=>v).length; return `<button class="${x.id===id?'on':''}" onclick="ui.rid['${t}']='${x.id}';render()"><span>${esc(x.name)}</span><span class="muted">${n?n+' ':''}</span></button>`; }).join('')}</div>
   <div class="card grow" style="min-width:0">
     <div class="row" style="margin-bottom:12px"><h3 style="margin:0">${esc(e.name)}</h3><span class="grow"></span>
       <div class="seg brush">${[[0,'✓ Disponible'],[1,'· Mejor no'],[2,'✕ No disponible']].map(([v,l]) => `<button class="${ui.brush===v?'on':''}" onclick="ui.brush=${v};render()">${l}</button>`).join('')}</div>
       <button class="btn sm" onclick="mutate(()=>IX['${t}'].get('${id}').av={})">Limpiar</button>
-      <button class="btn sm danger" onclick="clearAllConds('${t}')">🗑 Borrar todo (${TPLUR[t].toLowerCase()})</button></div>
+      <button class="btn sm danger" onclick="clearAllConds('${t}')">Borrar todo (${TPLUR[t].toLowerCase()})</button></div>
     ${grid}
     <div class="legend"><span><i style="background:var(--cell)"></i>Disponible</span><span><i style="background:#3a3112"></i>Mejor no</span><span><i style="background:#45161e"></i>No disponible</span></div>
     ${condForm(t, e)}
@@ -1121,7 +1123,7 @@ function vRest(){
 function clearAllConds(t){
   if (!confirm('¿Borrar la disponibilidad y las condiciones de todos los '+TPLUR[t].toLowerCase()+'?\n(Puedes deshacer con Ctrl+Z)')) return;
   mutate(() => state[COLL[t]].forEach(e => { e.av = {}; ['maxDay','minDay','maxGaps','maxConsec','freeDay','allowGaps'].forEach(f => delete e[f]); }));
-  toast('🗑 Condiciones borradas');
+  toast('Condiciones borradas');
 }
 let painting = false;
 function curEnt(){ return IX[ui.rt].get(ui.rid[ui.rt]); }
@@ -1140,36 +1142,36 @@ function vGen(){
   const un = state.lessons.filter(l => l.day == null);
   const dbg = un.map(l => [l, whyUnplaceable(l)]).filter(x => x[1]);
   return `<h2>5 · Generar horario</h2>
-  <p class="lead">El motor prueba miles de combinaciones y se queda con la mejor: sin solapamientos de profesores, grupos ni aulas, respetando todas las condiciones obligatorias y minimizando huecos de alumnos y profesores, franjas «mejor no» y sesiones en días seguidos. Las sesiones <b>fijadas 🔒</b> no se mueven: fija lo que te guste y vuelve a generar el resto.</p>
+  <p class="lead">El motor prueba miles de combinaciones y se queda con la mejor: sin solapamientos de profesores, grupos ni aulas, respetando todas las condiciones obligatorias y minimizando huecos de alumnos y profesores, franjas «mejor no» y sesiones en días seguidos. Las sesiones <b>fijadas </b> no se mueven: fija lo que te guste y vuelve a generar el resto.</p>
   <div class="card" style="text-align:center;padding:30px">
     <div class="stats" style="max-width:600px;margin:0 auto 22px;text-align:left">
       <div class="stat"><b>${tot}</b><span>Sesiones a colocar</span></div>
       <div class="stat"><b>${placed}</b><span>Colocadas ahora</span></div>
-      <div class="stat"><b>${locked}</b><span>Fijadas 🔒</span></div>
+      <div class="stat"><b>${locked}</b><span>Fijadas </span></div>
     </div>
-    ${diag.length ? `<p class="pill-bad">⛔ Hay ${diag.length} problema(s) en los datos que impedirán un horario completo. <a href="#" onclick="go('inicio');return false">Ver comprobaciones</a></p>` : ''}
+    ${diag.length ? `<p class="pill-bad">Hay ${diag.length} problema(s) en los datos que impedirán un horario completo. <a href="#" onclick="go('inicio');return false">Ver comprobaciones</a></p>` : ''}
     <div class="row" style="justify-content:center;margin-bottom:16px">
       <label>Tiempo de búsqueda:
       <select class="f" id="budget"><option value="3000">Rápido (3 s)</option><option value="10000" selected>Normal (10 s)</option><option value="30000">Intenso (30 s)</option><option value="90000">Muy intenso (90 s)</option><option value="240000">Máximo (4 min)</option></select></label>
     </div>
-    <button class="btn pri big" id="genBtn" ${tot?'':'disabled'} onclick="runSolve()">⚙️ Generar horario</button>
+    <button class="btn pri big" id="genBtn" ${tot?'':'disabled'} onclick="runSolve()">Generar horario</button>
     <div style="max-width:520px;margin:20px auto 0"><div class="progress" id="genProg"><div></div></div><p class="muted" id="genMsg" style="min-height:20px"></p></div>
     <div id="genRes"></div>
   </div>
-  ${dbg.length ? `<div class="card"><h3 class="pill-bad">🔎 Depurador: sesiones imposibles de colocar</h3><p class="help">Estas sesiones no tienen ningún tramo posible ni siquiera con el horario vacío. Revisa sus condiciones:</p>
+  ${dbg.length ? `<div class="card"><h3 class="pill-bad">Depurador: sesiones imposibles de colocar</h3><p class="help">Estas sesiones no tienen ningún tramo posible ni siquiera con el horario vacío. Revisa sus condiciones:</p>
     <ul class="diag">${dbg.slice(0,15).map(([l,why]) => `<li><b>${esc(actLabel(IX.A.get(l.actId)))}</b>: ${why.map(esc).join('; ')}</li>`).join('')}</ul></div>` : ''}
-  <div class="card"><h3>📚 Versiones del horario</h3><p class="help" style="margin-top:-6px">Guarda horarios alternativos y vuelve a cualquiera cuando quieras.</p>
-    <div class="row" style="margin-bottom:10px"><input class="f" id="verName" placeholder="Nombre (p. ej. Propuesta A)" style="width:260px"><button class="btn pri" onclick="saveVersion()">Guardar versión actual</button><span class="grow"></span><button class="btn danger" ${state.versions.length?'':'disabled'} onclick="if(confirm('¿Borrar todas las versiones guardadas?'))mutate(()=>state.versions=[])">🗑 Borrar todas</button></div>
-    ${state.versions.length ? `<table class="t"><tr><th>Versión</th><th>Fecha</th><th>Colocadas</th><th></th></tr>${state.versions.map(v => `<tr><td><b>${esc(v.name)}</b></td><td>${esc(v.date)}</td><td>${Object.values(v.pos).filter(p => p[0] != null).length}</td><td style="text-align:right"><button class="btn sm" onclick="restoreVersion('${v.id}')">Restaurar</button> <button class="iconbtn" onclick="mutate(()=>state.versions=state.versions.filter(x=>x.id!=='${v.id}'))">🗑</button></td></tr>`).join('')}</table>` : '<p class="muted">Aún no hay versiones guardadas.</p>'}
+  <div class="card"><h3>Versiones del horario</h3><p class="help" style="margin-top:-6px">Guarda horarios alternativos y vuelve a cualquiera cuando quieras.</p>
+    <div class="row" style="margin-bottom:10px"><input class="f" id="verName" placeholder="Nombre (p. ej. Propuesta A)" style="width:260px"><button class="btn pri" onclick="saveVersion()">Guardar versión actual</button><span class="grow"></span><button class="btn danger" ${state.versions.length?'':'disabled'} onclick="if(confirm('¿Borrar todas las versiones guardadas?'))mutate(()=>state.versions=[])">Borrar todas</button></div>
+    ${state.versions.length ? `<table class="t"><tr><th>Versión</th><th>Fecha</th><th>Colocadas</th><th></th></tr>${state.versions.map(v => `<tr><td><b>${esc(v.name)}</b></td><td>${esc(v.date)}</td><td>${Object.values(v.pos).filter(p => p[0] != null).length}</td><td style="text-align:right"><button class="btn sm" onclick="restoreVersion('${v.id}')">Restaurar</button> <button class="iconbtn" onclick="mutate(()=>state.versions=state.versions.filter(x=>x.id!=='${v.id}'))"></button></td></tr>`).join('')}</table>` : '<p class="muted">Aún no hay versiones guardadas.</p>'}
   </div>
   <div class="card"><h3>Herramientas</h3><div class="row">
-    <button class="btn" onclick="mutate(()=>state.lessons.forEach(l=>{if(l.day!=null)l.locked=true}));toast('Todas las sesiones colocadas quedan fijadas')">🔒 Fijar todo lo colocado</button>
-    <button class="btn" onclick="mutate(()=>state.lessons.forEach(l=>l.locked=false));toast('Todo desfijado')">🔓 Desfijar todo</button>
-    <button class="btn danger" onclick="if(confirm('¿Quitar del horario todas las sesiones no fijadas?'))mutate(()=>state.lessons.forEach(l=>{if(!l.locked){l.day=l.slot=l.room=null}}))">🧹 Vaciar horario (salvo fijadas)</button>
+    <button class="btn" onclick="mutate(()=>state.lessons.forEach(l=>{if(l.day!=null)l.locked=true}));toast('Todas las sesiones colocadas quedan fijadas')">Fijar todo lo colocado</button>
+    <button class="btn" onclick="mutate(()=>state.lessons.forEach(l=>l.locked=false));toast('Todo desfijado')">Desfijar todo</button>
+    <button class="btn danger" onclick="if(confirm('¿Quitar del horario todas las sesiones no fijadas?'))mutate(()=>state.lessons.forEach(l=>{if(!l.locked){l.day=l.slot=l.room=null}}))">Vaciar horario (salvo fijadas)</button>
   </div></div>`;
 }
 async function runSolve(){
-  const btn = $('#genBtn'); btn.disabled = true; btn.textContent = '⏳ Generando…'; $('#genRes').innerHTML = '';
+  const btn = $('#genBtn'); btn.disabled = true; btn.textContent = 'Generando…'; $('#genRes').innerHTML = '';
   const r = await solve(+$('#budget').value);
   renderNav();
   if (ui.view !== 'generar') return;
@@ -1210,10 +1212,10 @@ function cardHTML(l, t, id, opts = {}){
   if (t !== 'R'){ const rooms = [l.room, ...a.parts.map(p => p.roomId)].filter(Boolean); if (rooms.length) lines.push(rooms.map(r => nm('R',r,1)).join(', ')); }
   else if (part || l.room) {}
   const cls = ['lc', opts.cont ? 'cont' : '', ui.sel === l.id ? 'sel' : '', opts.bad ? 'bad' : ''].join(' ');
-  const title = actLabel(a) + (opts.bad ? '\n⚠ ' + opts.bad.join('\n⚠ ') : '');
+  const title = actLabel(a) + (opts.bad ? '\n' + opts.bad.join('\n') : '');
   const inter = opts.print ? '' : `draggable="true" data-lid="${l.id}" data-off="${opts.off||0}" ondragstart="dStart(event)" ondragend="dEnd()" onclick="selLesson(event,'${l.id}')"`;
   return `<div class="${cls}" style="--c:${color}" title="${esc(title)}" ${inter}>
-    <span class="ic">${l.locked?'🔒':''}${opts.bad?'⚠':''}</span>
+    <span class="ic">${l.locked?'FIJA':''}${opts.bad?' !':''}</span>
     <b>${opts.cont ? '↳ ' : ''}${esc(subj)}</b>${lines.filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('')}</div>`;
 }
 function gridHTML(t, id, opts = {}){
@@ -1264,26 +1266,26 @@ function vHor(){
     const a = IX.A.get(sel.actId), si = iss.get(sel.id);
     const why = sel.day == null ? whyUnplaceable(sel) : null;
     detail = `<div class="card" style="padding:14px"><div class="row"><span class="dot" style="background:${aColor(a)}"></span><b class="grow">${esc(aName(a))}</b><button class="iconbtn" onclick="ui.sel=null;render()">✕</button></div>
-      <p style="margin:8px 0;line-height:1.6;font-size:13px">${a.type!=='clase'?'🏷 '+TYPES[a.type].n+'<br>':''}👥 ${a.groupIds.map(g => esc(nm('G',g))).join(', ')||'—'}<br>👤 ${allTeachers(a).map(x => esc(nm('T',x))).join(', ')||'—'}<br>🚪 ${[sel.room, ...a.parts.map(p=>p.roomId)].filter(Boolean).map(r => esc(nm('R',r))).join(', ') || '—'}<br>🕘 ${sel.day!=null ? esc(dayName(sel.day))+' '+slotRange(sel.slot, a.dur) : '<i>Sin colocar</i>'}</p>
-      ${si ? `<div class="alertbox">${si.map(x => '⚠ '+esc(x)).join('<br>')}</div>` : ''}
-      ${why ? `<div class="alertbox">🔎 No tiene ningún tramo posible: ${why.map(esc).join('; ')}</div>` : ''}
+      <p style="margin:8px 0;line-height:1.6;font-size:13px">${a.type!=='clase'?''+TYPES[a.type].n+'<br>':''}${a.groupIds.map(g => esc(nm('G',g))).join(', ')||'—'}<br>${allTeachers(a).map(x => esc(nm('T',x))).join(', ')||'—'}<br>${[sel.room, ...a.parts.map(p=>p.roomId)].filter(Boolean).map(r => esc(nm('R',r))).join(', ') || '—'}<br>${sel.day!=null ? esc(dayName(sel.day))+' '+slotRange(sel.slot, a.dur) : '<i>Sin colocar</i>'}</p>
+      ${si ? `<div class="alertbox">${si.map(x => ''+esc(x)).join('<br>')}</div>` : ''}
+      ${why ? `<div class="alertbox">No tiene ningún tramo posible: ${why.map(esc).join('; ')}</div>` : ''}
       <p class="help" style="margin:0 0 8px">Clic en una celda <b style="color:var(--ok)">verde</b> para moverla; <b style="color:#e8590c">naranja</b> = ocupada (se intenta intercambiar). Teclas: <code>Supr</code> quitar · <code>F</code> fijar.</p>
-      <div class="row">${sel.day!=null ? `<button class="btn sm" onclick="toggleLock('${sel.id}')">${sel.locked?'🔓 Desfijar':'🔒 Fijar'}</button><button class="btn sm" onclick="unplace('${sel.id}')">↩ Quitar</button>` : ''}<button class="btn sm" onclick="actModal('${a.id}')">✏️ Actividad</button></div></div>`;
+      <div class="row">${sel.day!=null ? `<button class="btn sm" onclick="toggleLock('${sel.id}')">${sel.locked?'Desfijar':'Fijar'}</button><button class="btn sm" onclick="unplace('${sel.id}')">Quitar</button>` : ''}<button class="btn sm" onclick="actModal('${a.id}')">Actividad</button></div></div>`;
   }
   return `<div class="row noprint" style="margin-bottom:14px">${seg}
     <button class="iconbtn" title="Anterior" onclick="stepEnt(-1)">◀</button>
     <select class="f" onchange="ui.hid['${t}']=this.value;ui.sel=null;render()" style="min-width:200px;font-weight:600">${list.map(x => `<option value="${x.id}" ${x.id===id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
     <button class="iconbtn" title="Siguiente" onclick="stepEnt(1)">▶</button>
-    <span class="muted">${pl.reduce((n,l) => n + IX.A.get(l.actId).dur, 0)} h · ${gaps} hueco${gaps===1?'':'s'}${badHere ? ` · <span class="pill-bad">${badHere} con conflicto</span>` : ''}${warns.length ? ` · <span class="pill-warn" title="${esc(warns.join('\n'))}">⚠ ${warns.length} aviso(s)</span>` : ''}</span>
+    <span class="muted">${pl.reduce((n,l) => n + IX.A.get(l.actId).dur, 0)} h · ${gaps} hueco${gaps===1?'':'s'}${badHere ? ` · <span class="pill-bad">${badHere} con conflicto</span>` : ''}${warns.length ? ` · <span class="pill-warn" title="${esc(warns.join('\n'))}">${warns.length} aviso(s)</span>` : ''}</span>
     <span class="grow"></span>
-    <button class="btn" onclick="window.print()">🖨 Imprimir</button>
-    <button class="btn" onclick="printAll('${t}')">🖨 Todos</button>
+    <button class="btn" onclick="window.print()">Imprimir</button>
+    <button class="btn" onclick="printAll('${t}')">Todos</button>
   </div>
   <div class="hlayout">
     <div class="gmain card" style="padding:14px"><div class="row" style="margin-bottom:10px"><h2 style="font-size:18px;margin:0">${TNAME[t]}: ${esc(ent.name)}</h2><span class="muted">${esc(state.name)}${state.course?' · '+esc(state.course):''}${t==='T'&&ent.dept?' · Dpto. '+esc(ent.dept):''}</span></div>
       <div class="gridwrap">${gridHTML(t, id, {issues: iss, hl})}</div>
-      ${warns.length ? `<p class="pill-warn noprint" style="font-weight:400;font-size:13px">⚠ ${warns.map(esc).join(' · ')}</p>` : ''}
-      <div class="legend"><span><i style="background:#0f3329;border-color:var(--ok)"></i>Libre</span><span><i style="background:#33220f;border-color:var(--accent)"></i>Ocupado (intercambiar)</span><span><i style="background:#2e2610;border-color:#e9c037"></i>Incumple condición</span><span><i style="background:#26151b"></i>No disponible</span><span>🔒 Fijada</span><span>⚠ Conflicto</span></div>
+      ${warns.length ? `<p class="pill-warn noprint" style="font-weight:400;font-size:13px">${warns.map(esc).join(' · ')}</p>` : ''}
+      <div class="legend"><span><i style="background:#0f3329;border-color:var(--ok)"></i>Libre</span><span><i style="background:#33220f;border-color:var(--accent)"></i>Ocupado (intercambiar)</span><span><i style="background:#2e2610;border-color:#e9c037"></i>Incumple condición</span><span><i style="background:#26151b"></i>No disponible</span><span>FIJA = sesión fijada</span><span>Borde rojo = conflicto</span></div>
     </div>
     <div class="gside">
       ${detail}
@@ -1291,7 +1293,7 @@ function vHor(){
         <div class="tray" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="trayDrop(event,this)">
           ${un.map(l => cardHTML(l, t, id)).join('') || '<p class="muted" style="text-align:center;font-size:12px;margin:18px 0">✓ Todo colocado.<br>Arrastra aquí una sesión para quitarla del horario.</p>'}
         </div></div>
-      ${iss.size ? `<div class="card" style="padding:14px"><h3 class="pill-bad" style="margin-bottom:6px">⚠ ${iss.size} conflicto(s) en el centro</h3><p class="help" style="margin:0">Las sesiones con borde rojo chocan con otra o incumplen una condición obligatoria. Púlsalas para ver el motivo.</p></div>` : ''}
+      ${iss.size ? `<div class="card" style="padding:14px"><h3 class="pill-bad" style="margin-bottom:6px">${iss.size} conflicto(s) en el centro</h3><p class="help" style="margin:0">Las sesiones con borde rojo chocan con otra o incumplen una condición obligatoria. Púlsalas para ver el motivo.</p></div>` : ''}
     </div>
   </div>`;
 }
@@ -1305,10 +1307,10 @@ function unplace(lid){ mutate(() => { const l = state.lessons.find(x => x.id ===
 function moveTo(lid, d, s){
   const l = IX.L.get(lid); if (!l) return;
   if (l.day === d && l.slot === s) return;
-  if (l.locked && !confirm('La sesión está fijada 🔒. ¿Moverla igualmente?')) return;
+  if (l.locked && !confirm('La sesión está fijada . ¿Moverla igualmente?')) return;
   const occ = buildOcc(); if (l.day != null) delOcc(occ, l);
   const r = check(l, d, s, occ);
-  if (r.hard) return toast('⛔ ' + r.hard);
+  if (r.hard) return toast('' + r.hard);
   if (r.conf.size && l.day != null && !r.soft.length){
     const others = [...r.conf].map(x => IX.L.get(x));
     if (!others.some(o => o.locked) && others.every(o => IX.A.get(o.actId).dur === IX.A.get(l.actId).dur)){
@@ -1323,7 +1325,7 @@ function moveTo(lid, d, s){
       }
       if (ok){
         mutate(() => { const L = id => state.lessons.find(x => x.id === id); const m = L(lid); m.day = d; m.slot = s; m.room = r.room; others.forEach(o => { const x = L(o.id); x.day = od; x.slot = os; x.room = rooms[o.id]; }); });
-        ui.sel = lid; render(); return toast('⇄ Sesiones intercambiadas');
+        ui.sel = lid; render(); return toast('Sesiones intercambiadas');
       }
     }
   }
@@ -1366,7 +1368,7 @@ function vSab(){
       const arr = (occ.get(t+':'+e.id+':'+d+':'+s) || []).map(x => IX.L.get(x));
       const first = j === 0 ? ' ds' : '';
       if (!arr.length){ h += `<td class="${first.trim()}"></td>`; return; }
-      if (arr.length > 1 || arr.some(l => iss.has(l.id))){ h += `<td class="x${first}" title="Conflicto">${arr.length>1?'×'+arr.length:'⚠'}</td>`; return; }
+      if (arr.length > 1 || arr.some(l => iss.has(l.id))){ h += `<td class="x${first}" title="Conflicto">${arr.length>1?'×'+arr.length:''}</td>`; return; }
       const l = arr[0], a = IX.A.get(l.actId);
       const txt = t === 'G' ? aShort(a) : t === 'T' ? (a.groupIds.map(g => nm('G',g,1)).join('+') || TYPES[a.type].n.slice(0,4)) : a.groupIds.map(g => nm('G',g,1)).join('+');
       h += `<td class="f${first}" style="--c:${aColor(a)}" title="${esc(actLabel(a))}">${esc(txt)}</td>`;
@@ -1374,7 +1376,7 @@ function vSab(){
     h += '</tr>';
   }
   h += '</table>';
-  return `<div class="row noprint" style="margin-bottom:14px"><h2 style="margin:0">Horario general</h2><div class="seg">${['G','T','R'].map(x => `<button class="${t===x?'on':''}" onclick="ui.st='${x}';render()">${TPLUR[x]}</button>`).join('')}</div><span class="grow"></span><button class="btn" onclick="window.print()">🖨 Imprimir</button></div>
+  return `<div class="row noprint" style="margin-bottom:14px"><h2 style="margin:0">Horario general</h2><div class="seg">${['G','T','R'].map(x => `<button class="${t===x?'on':''}" onclick="ui.st='${x}';render()">${TPLUR[x]}</button>`).join('')}</div><span class="grow"></span><button class="btn" onclick="window.print()">Imprimir</button></div>
   <p class="lead noprint">Vista de conjunto («sábana») de todo el centro. Haz clic en un nombre para abrir y editar su horario.</p>
   <div class="card" style="overflow:auto;padding:10px">${list.length ? h : '<div class="empty"><b>Sin datos</b></div>'}</div>`;
 }
@@ -1429,22 +1431,22 @@ function vGuard(){
       return `<tr><td>${slotRange(l.slot, a.dur)}</td><td><span class="dot" style="background:${aColor(a)}"></span>${esc(aName(a))}</td><td>${a.groupIds.map(g => esc(nm('G',g,1))).join(', ') || '—'}</td><td>${l.room ? esc(nm('R',l.room,1)) : '—'}</td>
         <td>${a.type === 'clase' ? `<select class="f" style="width:100%" onchange="setSub('${r.id}','${l.id}',this.value)"><option value="">— Sin cubrir —</option>${onG.length?`<optgroup label="De guardia">${onG.map(opt).join('')}</optgroup>`:''}${free.length?`<optgroup label="Libres a esa hora">${free.map(opt).join('')}</optgroup>`:''}</select>` : '<span class="muted">No requiere sustitución</span>'}</td></tr>`;
     }).join('');
-    return `<div class="absrec"><div class="row"><b class="grow">👤 ${esc(t.name)}</b><input class="f" placeholder="Motivo / tarea para los alumnos" value="${esc(r.note||'')}" style="width:300px" onchange="mutate(()=>state.absences.find(x=>x.id==='${r.id}').note=this.value,false)"><button class="iconbtn noprint" onclick="mutate(()=>state.absences=state.absences.filter(x=>x.id!=='${r.id}'))">🗑</button></div>
+    return `<div class="absrec"><div class="row"><b class="grow">${esc(t.name)}</b><input class="f" placeholder="Motivo / tarea para los alumnos" value="${esc(r.note||'')}" style="width:300px" onchange="mutate(()=>state.absences.find(x=>x.id==='${r.id}').note=this.value,false)"><button class="iconbtn noprint" onclick="mutate(()=>state.absences=state.absences.filter(x=>x.id!=='${r.id}'))"></button></div>
       ${ls.length ? `<table class="t" style="margin-top:8px"><tr><th>Hora</th><th>Actividad</th><th>Grupo</th><th>Aula</th><th>Sustituto</th></tr>${rows}</table>` : '<p class="muted">No tiene sesiones ese día.</p>'}</div>`;
   }).join('');
   return `<h2>Guardias y ausencias</h2>
   <p class="lead">Cuadrante de guardias del horario y gestor de ausencias: registra quién falta un día y MAXHORARIO te propone quién puede cubrir cada clase (primero el profesorado de guardia y después quien esté libre), equilibrando el número de sustituciones.</p>
-  <div class="card"><div class="row" style="margin-bottom:12px"><h3 style="margin:0" class="grow">📋 Parte de ausencias</h3>
+  <div class="card"><div class="row" style="margin-bottom:12px"><h3 style="margin:0" class="grow">Parte de ausencias</h3>
     <label>Fecha <input class="f" type="date" value="${date}" onchange="ui.absDate=this.value;render()"></label>
     <span class="muted">${valid ? esc(dayName(dIdx)) : 'Día no lectivo'}</span>
     <select class="f" id="absT" ${valid?'':'disabled'}><option value="">Añadir profesor ausente…</option>${state.teachers.filter(t => !absentIds.includes(t.id)).map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select>
-    <button class="btn pri" ${valid?'':'disabled'} onclick="addAbs()">＋ Registrar ausencia</button>
-    <button class="btn" ${recs.length?'':'disabled'} onclick="printAbs()">🖨 Imprimir parte</button>
-    <button class="btn danger" ${recs.length?'':'disabled'} onclick="if(confirm('¿Borrar las ausencias de este día?'))mutate(()=>state.absences=state.absences.filter(r=>r.date!==ui.absDate))">🗑 Borrar día</button>
-    <button class="btn danger" ${state.absences.length?'':'disabled'} onclick="if(confirm('¿Borrar TODAS las ausencias registradas?'))mutate(()=>state.absences=[])">🗑 Borrar todo</button></div>
+    <button class="btn pri" ${valid?'':'disabled'} onclick="addAbs()">Registrar ausencia</button>
+    <button class="btn" ${recs.length?'':'disabled'} onclick="printAbs()">Imprimir parte</button>
+    <button class="btn danger" ${recs.length?'':'disabled'} onclick="if(confirm('¿Borrar las ausencias de este día?'))mutate(()=>state.absences=state.absences.filter(r=>r.date!==ui.absDate))">Borrar día</button>
+    <button class="btn danger" ${state.absences.length?'':'disabled'} onclick="if(confirm('¿Borrar TODAS las ausencias registradas?'))mutate(()=>state.absences=[])">Borrar todo</button></div>
     <div id="absList">${recHTML || '<p class="muted">No hay ausencias registradas para esta fecha.</p>'}</div>
   </div>
-  <div class="card"><h3>⛑ Cuadrante de guardias</h3><p class="help" style="margin-top:-6px">Profesorado con actividad de tipo «Guardia» en cada tramo. Créalas en Actividades → «Guardias / reuniones».</p><div class="gridwrap">${grid}</div></div>`;
+  <div class="card"><h3>Cuadrante de guardias</h3><p class="help" style="margin-top:-6px">Profesorado con actividad de tipo «Guardia» en cada tramo. Créalas en Actividades → «Guardias / reuniones».</p><div class="gridwrap">${grid}</div></div>`;
 }
 function addAbs(){
   const tid = $('#absT').value; if (!tid) return toast('Elige el profesor ausente');
@@ -1480,15 +1482,15 @@ function infData(){
 function vInf(){
   const {T, G, R} = infData();
   const depts = [...new Set(T.map(x => x.e.dept || 'Sin departamento'))].sort();
-  return `<div class="row noprint" style="margin-bottom:6px"><h2 class="grow" style="margin:0">Informes</h2><button class="btn" onclick="exportInf()">📊 Exportar a Excel</button><button class="btn" onclick="window.print()">🖨 Imprimir</button></div>
+  return `<div class="row noprint" style="margin-bottom:6px"><h2 class="grow" style="margin:0">Informes</h2><button class="btn" onclick="exportInf()">Exportar a Excel</button><button class="btn" onclick="window.print()">Imprimir</button></div>
   <p class="lead noprint">Carga horaria del profesorado por departamento, huecos y cumplimiento de condiciones; huecos de los grupos y ocupación de aulas.</p>
-  <div class="card"><h3>👤 Profesorado</h3><table class="t"><tr><th>Profesor</th><th>Departamento</th><th>Lectivas</th><th>Guardias</th><th>Otras</th><th>Total</th><th>Días</th><th>Máx./día</th><th>Huecos</th><th>Avisos</th></tr>
+  <div class="card"><h3>Profesorado</h3><table class="t"><tr><th>Profesor</th><th>Departamento</th><th>Lectivas</th><th>Guardias</th><th>Otras</th><th>Total</th><th>Días</th><th>Máx./día</th><th>Huecos</th><th>Avisos</th></tr>
   ${depts.map(dp => T.filter(x => (x.e.dept || 'Sin departamento') === dp).map(x => `<tr><td><a href="#" onclick="ui.ht='T';ui.hid.T='${x.e.id}';go('horario');return false">${esc(x.e.name)}</a></td><td>${esc(dp)}</td><td><b>${x.lect}</b></td><td>${x.guard}</td><td>${x.other}</td><td>${x.all}</td><td>${x.days}</td><td>${x.mx}</td><td>${x.gaps}</td><td class="${x.warns.length?'pill-warn':'pill-ok'}" style="font-weight:400">${x.warns.length ? x.warns.map(esc).join('; ') : '✓'}</td></tr>`).join('')).join('')}
   </table></div>
   <div class="row" style="align-items:flex-start">
-  <div class="card grow"><h3>👥 Grupos</h3><table class="t"><tr><th>Grupo</th><th>Horas semanales</th><th>Colocadas</th><th>Huecos</th></tr>
+  <div class="card grow"><h3>Grupos</h3><table class="t"><tr><th>Grupo</th><th>Horas semanales</th><th>Colocadas</th><th>Huecos</th></tr>
   ${G.map(x => `<tr><td>${esc(x.e.name)}</td><td>${x.h}</td><td class="${x.placed===x.h?'pill-ok':'pill-warn'}">${x.placed}</td><td class="${x.gaps?'pill-warn':''}">${x.gaps}</td></tr>`).join('')}</table></div>
-  <div class="card grow"><h3>🚪 Ocupación de aulas</h3><table class="t"><tr><th>Aula</th><th>Tramos ocupados</th><th style="width:40%">Ocupación</th></tr>
+  <div class="card grow"><h3>Ocupación de aulas</h3><table class="t"><tr><th>Aula</th><th>Tramos ocupados</th><th style="width:40%">Ocupación</th></tr>
   ${R.map(x => `<tr><td>${esc(x.e.name)}</td><td>${x.used}</td><td><div class="progress" style="height:10px"><div style="width:${x.pct}%"></div></div><small class="muted">${x.pct}%</small></td></tr>`).join('')}</table></div>
   </div>`;
 }
@@ -1565,7 +1567,7 @@ function loadSample(){
     [0,1,2,3,4].forEach(d => S.MAT.av[d+'-6'] = 1);          // Matemáticas mejor no a última hora
     state = s;
   });
-  ui.view = 'inicio'; render(); toast('✨ Ejemplo cargado: ahora pulsa «Generar»');
+  ui.view = 'inicio'; render(); toast('Ejemplo cargado: ahora pulsa «Generar»');
 }
 
 /* ejemplo de colegio: tutores con su clase y especialistas */
@@ -1603,7 +1605,159 @@ function samplePrimaria(){
   return s;
 }
 
-load(); render();
+/* =====================================================================
+   Nube: inicio de sesión con Google (cuenta Educarex) y guardado en su Drive.
+   Solo usa el permiso drive.file: la app ve únicamente los archivos que ella crea.
+   ===================================================================== */
+const GOOGLE_CLIENT_ID = '657014385303-nh40rev8ahjd03gnjof9k6kltnus8v5r.apps.googleusercontent.com'; // proyecto maximilian23-visor, cliente «MAXHORARIO web»
+const CLOUD_KEY = 'maxhorario_cloud';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file openid email profile';
+let cloud = { token:null, exp:0, user:null, fileId:null, fileName:'', status:'', saving:false, dirty:false };
+let tokenClient = null, cloudTimer = null, tokenWaiters = [];
+try { const c = JSON.parse(localStorage.getItem(CLOUD_KEY) || '{}'); cloud.fileId = c.fileId || null; cloud.fileName = c.fileName || ''; cloud.hint = c.email || ''; cloud.syncedAt = c.syncedAt || ''; } catch(e){}
+/* syncedAt = fecha de Drive de la última versión que este equipo subió o abrió */
+function cloudPersist(){ try { localStorage.setItem(CLOUD_KEY, JSON.stringify({fileId: cloud.fileId, fileName: cloud.fileName, email: cloud.user?.email || cloud.hint || '', syncedAt: cloud.syncedAt || ''})); } catch(e){} }
+
+function renderCloud(){
+  const el = $('#cloud'); if (!el) return;
+  if (!cloud.user){
+    el.innerHTML = `<button class="btn alt" onclick="cloudSignIn()" title="Guarda tus horarios en el Google Drive de tu cuenta Educarex">Entrar con Google</button>`;
+    return;
+  }
+  const st = cloud.saving ? 'Guardando…' : cloud.status;
+  el.innerHTML = `<button class="btn alt" onclick="cloudMenu()" title="${esc(cloud.user.email)}">${esc(cloud.user.name || cloud.user.email)}</button><small class="muted" style="font-family:var(--mono)">${esc(st)}</small>`;
+}
+function gisReady(){ return window.google && google.accounts && google.accounts.oauth2; }
+function cloudSignIn(){
+  if (!GOOGLE_CLIENT_ID) return openModal(`<h3>Guardado en Google Drive</h3><p>Falta configurar el <b>ID de cliente de Google</b> en el programa (constante <code>GOOGLE_CLIENT_ID</code>). Mientras tanto, los datos se guardan en este navegador y puedes usar «Guardar».</p><div class="mfoot"><button class="btn pri" onclick="closeModal()">Entendido</button></div>`);
+  if (location.protocol === 'file:') return toast('Para entrar con Google abre MAXHORARIO desde la web (maximilian23.com/horarios)');
+  if (!gisReady()) return toast('Cargando el acceso de Google… vuelve a intentarlo en un momento');
+  getToken(true).then(cloudAfterLogin).catch(e => toast('No se pudo iniciar sesión: ' + e.message));
+}
+/* obtiene un token de acceso; interactive=false intenta renovarlo sin molestar */
+function getToken(interactive){
+  if (cloud.token && Date.now() < cloud.exp - 60000) return Promise.resolve(cloud.token);
+  return new Promise((resolve, reject) => {
+    tokenWaiters.push({resolve, reject});
+    if (tokenWaiters.length > 1) return;
+    if (!tokenClient) tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID, scope: SCOPES,
+      callback: r => {
+        const ws = tokenWaiters; tokenWaiters = [];
+        if (r.error){ ws.forEach(w => w.reject(new Error(r.error_description || r.error))); return; }
+        cloud.token = r.access_token; cloud.exp = Date.now() + (r.expires_in || 3600) * 1000;
+        ws.forEach(w => w.resolve(cloud.token));
+      },
+      error_callback: e => { const ws = tokenWaiters; tokenWaiters = []; ws.forEach(w => w.reject(new Error(e.type === 'popup_closed' ? 'ventana cerrada' : (e.message || e.type)))); }
+    });
+    tokenClient.requestAccessToken({prompt: interactive ? '' : 'none', login_hint: cloud.user?.email || cloud.hint || undefined});
+  });
+}
+async function gapi(url, opts = {}, retry = true){
+  const token = await getToken(false).catch(() => getToken(true));
+  const r = await fetch(url, {...opts, headers: {...(opts.headers || {}), Authorization: 'Bearer ' + token}});
+  if (r.status === 401 && retry){ cloud.token = null; return gapi(url, opts, false); }
+  if (!r.ok){ let m = r.status + ''; try { m = (await r.json()).error.message; } catch(e){} throw new Error(m); }
+  return r;
+}
+const DRIVE = 'https://www.googleapis.com/drive/v3/files', UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files';
+const projName = () => 'MAXHORARIO - ' + (state.name || 'Horario') + (state.course ? ' ' + state.course : '') + '.json';
+async function driveList(){
+  const q = encodeURIComponent("appProperties has { key='maxhorario' and value='1' } and trashed=false");
+  return (await (await gapi(`${DRIVE}?q=${q}&orderBy=modifiedTime desc&fields=files(id,name,modifiedTime,webViewLink)&pageSize=50`)).json()).files || [];
+}
+async function driveCreate(name, body){
+  const meta = {name, mimeType:'application/json', appProperties:{maxhorario:'1'}};
+  const fd = new FormData();
+  fd.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+  fd.append('file', new Blob([body], {type:'application/json'}));
+  return (await gapi(`${UPLOAD}?uploadType=multipart&fields=id,name,modifiedTime`, {method:'POST', body:fd})).json();
+}
+async function driveUpdate(id, name, body){
+  let f = await (await gapi(`${UPLOAD}/${id}?uploadType=media&fields=modifiedTime`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body})).json();
+  if (name !== cloud.fileName) f = await (await gapi(`${DRIVE}/${id}?fields=modifiedTime`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})})).json();
+  return f;
+}
+async function driveGet(id){ return (await gapi(`${DRIVE}/${id}?alt=media`)).json(); }
+
+async function cloudAfterLogin(){
+  try {
+    cloud.user = await (await gapi('https://www.googleapis.com/oauth2/v3/userinfo')).json();
+    cloud.status = 'Conectado'; cloudPersist(); renderCloud();
+    toast('Sesión iniciada: ' + cloud.user.email);
+    const files = await driveList();
+    const mine = cloud.fileId && files.find(f => f.id === cloud.fileId);
+    if (mine){
+      // si se modificó desde otro equipo, manda la versión de Drive; si no, se sube la de este equipo
+      if (cloud.syncedAt && mine.modifiedTime > cloud.syncedAt){ await cloudOpen(mine.id, mine.name, true); toast('Cargada la versión más reciente de tu Drive'); }
+      else cloudSaveNow();
+      return;
+    }
+    cloud.fileId = null; cloudPersist();
+    cloudMenu(files);
+  } catch(e){ toast('Error con Google Drive: ' + e.message); }
+}
+async function cloudMenu(files){
+  if (!cloud.user) return cloudSignIn();
+  try { files = files || await driveList(); } catch(e){ return toast('' + e.message); }
+  const fmt = t => new Date(t).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'});
+  openModal(`<h3>Mis horarios en Google Drive</h3>
+    <p class="muted">Cuenta: <b>${esc(cloud.user.email)}</b>. Los archivos se guardan en tu Drive y se actualizan solos mientras trabajas. Puedes compartirlos desde Drive con tu equipo directivo.</p>
+    ${files.length ? `<table class="t"><tr><th>Archivo</th><th>Modificado</th><th></th></tr>${files.map(f => `<tr><td>${f.id === cloud.fileId ? '✅ ' : ''}${esc(f.name)}</td><td>${fmt(f.modifiedTime)}</td><td style="text-align:right;white-space:nowrap">${f.id === cloud.fileId ? '<span class="pill-ok">Abierto</span>' : `<button class="btn sm" onclick="cloudOpen('${f.id}','${esc(f.name).replace(/'/g,'&#39;')}')">Abrir</button>`} ${f.webViewLink ? `<a class="btn sm" href="${esc(f.webViewLink)}" target="_blank" rel="noopener">Ver en Drive</a>` : ''}</td></tr>`).join('')}</table>`
+      : '<p class="muted">Todavía no tienes horarios guardados en tu Drive.</p>'}
+    <div class="mfoot"><button class="btn danger" style="margin-right:auto" onclick="cloudSignOut()">Cerrar sesión</button><button class="btn" onclick="closeModal()">Cerrar</button><button class="btn pri" onclick="cloudSaveAsNew()">Guardar el proyecto actual ${cloud.fileId ? 'como copia nueva' : 'en mi Drive'}</button></div>`);
+}
+async function cloudOpen(id, name, silent){
+  if (!silent && (state.teachers.length || state.activities.length) && !confirm('¿Abrir "'+name+'"? Sustituirá lo que tienes ahora en pantalla (puedes deshacer con Ctrl+Z).')) return;
+  try {
+    const meta = await (await gapi(`${DRIVE}/${id}?fields=modifiedTime`)).json();
+    const s = await driveGet(id);
+    if (!s.days || !s.slots) throw new Error('el archivo no es un proyecto de MAXHORARIO');
+    cloud.fileId = null; // evita que el autoguardado escriba mientras se carga
+    mutate(() => { state = s; fix(); });
+    cloud.fileId = id; cloud.fileName = name; cloud.syncedAt = meta.modifiedTime; cloud.dirty = false; clearTimeout(cloudTimer);
+    cloud.status = '✓ Abierto desde Drive'; cloudPersist(); renderCloud();
+    closeModal(); ui.sel = null; go('inicio'); toast('Abierto: ' + name);
+  } catch(e){ toast('No se pudo abrir: ' + e.message); }
+}
+async function cloudSaveAsNew(){
+  try {
+    cloud.saving = true; renderCloud();
+    const f = await driveCreate(projName(), JSON.stringify(state));
+    cloud.fileId = f.id; cloud.fileName = f.name; cloud.syncedAt = f.modifiedTime; cloud.status = '✓ Guardado ' + new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+    cloudPersist(); closeModal(); toast('Guardado en tu Drive: ' + f.name);
+  } catch(e){ cloud.status = 'Sin guardar'; toast('No se pudo guardar en Drive: ' + e.message); }
+  cloud.saving = false; renderCloud();
+}
+function cloudSchedule(){
+  if (!cloud.user || !cloud.fileId) return;
+  cloud.dirty = true; cloud.status = '● Cambios sin subir'; renderCloud();
+  clearTimeout(cloudTimer); cloudTimer = setTimeout(cloudSaveNow, 4000);
+}
+async function cloudSaveNow(){
+  if (!cloud.user || !cloud.fileId) return;
+  if (cloud.saving){ clearTimeout(cloudTimer); cloudTimer = setTimeout(cloudSaveNow, 2000); return; }
+  cloud.saving = true; cloud.dirty = false; renderCloud();
+  try {
+    const name = projName();
+    const f = await driveUpdate(cloud.fileId, name, JSON.stringify(state));
+    cloud.fileName = name; cloud.syncedAt = f.modifiedTime; cloudPersist();
+    cloud.status = '✓ Guardado ' + new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+  } catch(e){ cloud.status = 'Error al guardar'; cloud.dirty = true; toast('No se pudo guardar en Drive: ' + e.message); }
+  cloud.saving = false; renderCloud();
+}
+function cloudSignOut(){
+  if (cloud.token && gisReady()) google.accounts.oauth2.revoke(cloud.token, () => {});
+  cloud = {token:null, exp:0, user:null, fileId:null, fileName:'', status:'', saving:false, dirty:false};
+  tokenClient = null; try { localStorage.removeItem(CLOUD_KEY); } catch(e){}
+  closeModal(); renderCloud(); toast('Sesión cerrada. Tus archivos siguen en tu Drive.');
+}
+window.addEventListener('beforeunload', e => { if (cloud.dirty || cloud.saving){ e.preventDefault(); e.returnValue = ''; } });
+if (GOOGLE_CLIENT_ID && location.protocol !== 'file:'){
+  const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; document.head.appendChild(sc);
+}
+
+load(); render(); renderCloud();
 if (!state.etapa) chooseEtapa(true);
 </script>
 </body>
