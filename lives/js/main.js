@@ -1,4 +1,4 @@
-import { VozGrabada } from './voz-grabada.js?v=piper2';
+import { VozGrabada } from './voz-grabada.js?v=ilustrados1';
 // Maximilian 23 - pagina publica: escena 3D, carga del modelo y controles minimos.
 
 import * as THREE from 'three';
@@ -8,10 +8,10 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Maximilian } from './maximilian.js?v=piper2';
-import { Voz } from './voz.js?v=piper2';
-import { conectarRemoto } from './remoto.js?v=piper2';
-import { Cuentacuentos } from './cuentos.js?v=piper2';
+import { Maximilian } from './maximilian.js?v=ilustrados1';
+import { Voz } from './voz.js?v=ilustrados1';
+import { conectarRemoto } from './remoto.js?v=ilustrados1';
+import { Cuentacuentos } from './cuentos.js?v=ilustrados1';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
@@ -206,6 +206,10 @@ const GESTOS = {
 
 /** Ejecuta un mensaje del panel: { tipo: 'decir' | 'gesto' | 'detener', ... } */
 function ejecutarMensaje(m) {
+  if (m.tipo === 'reproduccion') {
+    if(m.accion==='pausar')narrador?.pausar();else if(m.accion==='continuar')narrador?.continuar();
+    return;
+  }
   if (m.tipo === 'cuento') {
     voz.detener();
     narrador?.contar(m.cuento);
@@ -267,27 +271,33 @@ async function setupVoz(max) {
   if (!vozCuentos.disponible) vozCuentos.activa = true;
   const libro = document.getElementById('cuento');
   let zoomAnterior = zoom.objetivo;
+  const presentar=(cuento,escena,i)=>{
+    if(!document.body.classList.contains('modo-cuento'))zoomAnterior=zoom.objetivo;
+    document.body.classList.add('modo-cuento');document.body.classList.remove('inactivo');libro.hidden=false;
+    libro.style.setProperty('--cuento-color',cuento.color);
+    document.getElementById('cuento-icono').textContent=cuento.icono;
+    const titulo=document.getElementById('cuento-titulo');titulo.textContent=cuento.titulo;titulo.hidden=Boolean(escena);
+    const texto=document.getElementById('cuento-texto');texto.textContent=escena?.texto||'';
+    if(!matchMedia('(prefers-reduced-motion: reduce)').matches)texto.animate?.([{opacity:0},{opacity:1}],{duration:350});
+    const dibujo=document.getElementById('cuento-ilustracion');dibujo.hidden=!escena;
+    if(escena){
+      const celda=[0,1,1,2,2][i];dibujo.style.backgroundImage='url("img/cuentos/'+cuento.id+'.png")';
+      dibujo.style.backgroundPosition=(celda*50)+'% center';dibujo.style.aspectRatio=cuento.id==='zorro'?'8 / 9':'1';dibujo.setAttribute('aria-label',cuento.titulo+', ilustración '+(celda+1));
+    }
+    document.getElementById('cuento-pagina').textContent=escena?(i+1)+' de '+cuento.escenas.length:'Comenzamos';
+    document.getElementById('cuento-progreso').style.width=(escena?100*(i+1)/cuento.escenas.length:0)+'%';
+    document.getElementById('cuento-aviso').textContent=vozCuentos.activa?'':'Toca «Activar voz y cuentos» para escucharlo.';
+    zoom.actual=zoom.objetivo=framings.length-1;resize();
+  };
   narrador = new Cuentacuentos({max,voz:vozCuentos,
-    onEscena: (cuento, escena, i) => {
-      if (!document.body.classList.contains('modo-cuento')) zoomAnterior = zoom.objetivo;
-      document.body.classList.add('modo-cuento');
-      document.body.classList.remove('inactivo');
-      libro.hidden = false;
-      libro.style.setProperty('--cuento-color', cuento.color);
-      document.getElementById('cuento-icono').textContent = cuento.icono;
-      document.getElementById('cuento-titulo').textContent = cuento.titulo;
-      const texto = document.getElementById('cuento-texto');
-      texto.textContent = escena.texto;
-      texto.animate?.([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],{duration:450,easing:'ease-out'});
-      document.getElementById('cuento-pagina').textContent = `${i+1} de ${cuento.escenas.length}`;
-      document.getElementById('cuento-progreso').style.width = `${100*(i+1)/cuento.escenas.length}%`;
-      document.getElementById('cuento-aviso').textContent = !vozCuentos.disponible
-        ? 'Voz definitiva pendiente de elegir. Podemos leer el cuento juntos.'
-        : vozCuentos.activa ? '' : 'Toca «Activar voz» en esta pantalla para escucharlo.';
-      zoom.actual = zoom.objetivo = framings.length-1;
-      resize();
+    onTitulo:cuento=>presentar(cuento,null,-1),
+    onEscena:presentar,
+    onEstado:({activo,pausado})=>{
+      const boton=document.getElementById('pausa-cuento');boton.disabled=!activo;
+      boton.textContent=pausado?'▶ Continuar':'⏸ Pausa';boton.setAttribute('aria-pressed',String(pausado));
+      libro.classList.toggle('cuento-pausado',pausado);
     },
-    onFin: () => { document.getElementById('cuento-pagina').textContent = 'Fin · ¡Gracias por escuchar!'; },
+    onFin:()=>{document.getElementById('cuento-pagina').textContent='Fin · ¡Gracias por escuchar!';},
     onSalir: () => {
       if (!document.body.classList.contains('modo-cuento')) return;
       document.body.classList.remove('modo-cuento');
@@ -296,6 +306,7 @@ async function setupVoz(max) {
       resize();
     },
   });
+  document.getElementById('pausa-cuento').addEventListener('click',()=>narrador.alternarPausa());
   activarBtn.hidden = !vozCuentos.disponible && voz.activa;
   document.addEventListener('maximilian:decir', (e) => voz.decir(e.detail.texto, e.detail));
 
@@ -316,7 +327,7 @@ load().catch((err) => fail('No se ha podido cargar a Maximilian.', err));
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const dt = clock.getDelta();
-  max?.update(dt);
+  if(!narrador?.pausado)max?.update(dt);
   if (Math.abs(zoom.actual - zoom.objetivo) > 1e-4) {
     zoom.actual += (zoom.objetivo - zoom.actual) * (1 - Math.exp(-6 * Math.min(dt, 0.05)));
     placeCamera();

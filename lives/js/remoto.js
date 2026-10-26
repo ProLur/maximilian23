@@ -1,6 +1,6 @@
 import { cargarFirebase, desfaseServidor } from './firebase.js';
-import { valido } from './protocolo.js?v=sesiones1';
-import { rutaSesion } from './sesiones.js?v=sesiones1';
+import { valido } from './protocolo.js?v=ilustrados1';
+import { rutaSesion } from './sesiones.js?v=ilustrados1';
 export async function conectarRemoto({ codigo, onMensaje, onEstado = () => {} }) {
   let cerrar = () => {};
   try {

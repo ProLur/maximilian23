@@ -1,3 +1,5 @@
+import * as database from 'firebase/database';
+import { exigirPantalla } from '../lives/js/pantallas.js';
 // Solo emulador demo. Nunca usa datos de producción.
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
 import {ref,get,set,update,remove,push,serverTimestamp,runTransaction} from 'firebase/database';
@@ -50,8 +52,19 @@ try {
   const gesture=comando(admin,{tipo:'gesto',gesto:'saludar'});delete gesture.texto;delete gesture.velocidad;delete gesture.tono;
   await assertSucceeds(enviar(admin,11000,gesture));
   await assertFails(enviar(admin,11000,{...gesture,gesto:'inventado'}));
+  for(const accion of ['pausar','continuar']){
+    const m=comando(admin,{tipo:'reproduccion',accion});delete m.texto;delete m.velocidad;delete m.tono;
+    await assertSucceeds(enviar(admin,11000,m));
+    await assertFails(enviar(admin,11000,{...m,texto:'No permitido'}));
+    await assertFails(enviar(admin,11000,{...m,accion:'otra'}));
+  }
+  await assertFails(enviar(admin,11000,comando(admin,{accion:'pausar'})));
+  const {default:assert}=await import('node:assert/strict');
+  const basePantallas=ruta(11000)+'/canales/'+'a'.repeat(32);
+  await assert.rejects(exigirPantalla({db:admin,D:database,base:basePantallas,ahora:()=>Date.now()}),/No hay ninguna pantalla/);
   const p=ruta(11000)+'/canales/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/presencia/visor/'+push(ref(visor,'ids')).key;
   await assertSucceeds(set(ref(visor,p),serverTimestamp()));
+  await exigirPantalla({db:admin,D:database,base:basePantallas,ahora:()=>Date.now()});
   await assertFails(set(ref(visor2,p),serverTimestamp()));
   await assertSucceeds(remove(ref(visor,p)));
   await assertFails(set(ref(visor,ruta(11001)+'/canales/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/presencia/visor/'+push(ref(visor,'ids')).key),serverTimestamp()));

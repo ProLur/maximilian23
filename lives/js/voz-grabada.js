@@ -1,9 +1,9 @@
-import { Voz } from './voz.js?v=piper1';
+import { Voz } from './voz.js?v=ilustrados1';
 // Audios locales de los cuentos, generados con Piper. No se llama a ninguna API.
 export class VozGrabada {
   constructor(max,{onEstado=()=>{}}={}) {
     this.max=max;this.onEstado=onEstado;this.audio=new Audio();this.audio.preload='auto';
-    this.fallback=new Voz(max,{silencio:true});this.cola=[];this.generacion=0;this.activa=false;this.ocupado=false;
+    this.fallback=new Voz(max,{silencio:true});this.cola=[];this.generacion=0;this.activa=false;this.ocupado=false;this.pausada=false;
   }
   get disponible(){return true;}
   async init(){await this.fallback.init();}
@@ -15,28 +15,36 @@ export class VozGrabada {
       this.procesar();
     });
   }
+  pausar(){this.pausada=true;this.audio.pause();this.fallback.pausar();this.max.stopTalking();}
+  continuar(){
+    this.pausada=false;this.fallback.continuar();
+    if(this.enAudio && this.cancelar)this.audio.play().catch(err=>this.fallar?.(err));
+    else this.procesar();
+  }
   detener(){
-    this.generacion++;this.cancelar?.();this.audio.pause();
+    this.pausada=false;this.generacion++;this.cancelar?.();this.audio.pause();
     for(const m of this.cola)m.resolver();this.cola=[];
     this.fallback.detener();this.max.stopTalking();this.max.setExpression('reposo');
   }
   async procesar(){
-    if(this.ocupado||!this.activa||!this.cola.length)return;
+    if(this.ocupado||this.pausada||!this.activa||!this.cola.length)return;
     this.ocupado=true;const m=this.cola.shift(),gen=this.generacion;let bloqueada=false;
     try {
       await new Promise((resolve,reject)=>{
         let hecho=false,arrancado=false;
-        const fin=err=>{if(hecho)return;hecho=true;clearTimeout(reloj);this.cancelar=null;this.audio.onplaying=this.audio.onended=this.audio.onerror=null;err?reject(err):resolve();};
-        const reloj=setTimeout(()=>fin(Error('El audio no ha terminado.')),120000);
+        const fin=err=>{if(hecho)return;hecho=true;clearInterval(reloj);this.enAudio=false;this.cancelar=null;this.fallar=null;this.audio.onplaying=this.audio.onended=this.audio.onerror=null;err?reject(err):resolve();};
+        let segundos=0;const reloj=setInterval(()=>{if(!this.pausada && ++segundos>120)fin(Error('El audio no ha terminado.'));},1000);
+        this.fallar=fin;
         this.cancelar=()=>fin();
         this.audio.onended=()=>fin();this.audio.onerror=()=>fin(Error('Audio no disponible.'));
         this.audio.onplaying=()=>{
-          if(gen!==this.generacion||arrancado)return;arrancado=true;
+          if(gen!==this.generacion||this.pausada)return;
+          this.max.startTalking();if(arrancado)return;arrancado=true;
           if(m.opciones.emocion)this.max.setExpression(m.opciones.emocion);
           this.max.startTalking();m.opciones.onInicio?.();
         };
-        if(!/^audio[/]cuentos[/](estrella|tortuga|nube|zorro|semilla)-[1-5]\.mp3$/.test(m.opciones.audio||'')){fin(Error('Audio desconocido.'));return;}
-        this.audio.src=m.opciones.audio;
+        if(!/^audio[/]cuentos[/](estrella|tortuga|nube|zorro|semilla)-([1-5]|titulo)\.mp3$/.test(m.opciones.audio||'')){fin(Error('Audio desconocido.'));return;}
+        this.enAudio=true;this.audio.src=m.opciones.audio;
         this.audio.play().catch(fin);
       });
     } catch(err) {

@@ -14,7 +14,7 @@ for(const cuento of CUENTOS){
  let finish=false;
  const narrator=new Cuentacuentos({max,voz,onFin:()=>{finish=true;}});
  await narrator.contar(cuento.id);
- assert.deepEqual(seen,cuento.escenas.map(e=>e.texto));assert(finish);assert(rest>=2);assert(gestos.length>0);
+ assert.deepEqual(seen,[cuento.titulo,...cuento.escenas.map(e=>e.texto)]);assert(finish);assert(rest>=2);assert(gestos.length>0);
  const now=Date.now();assert(valido({id:'-1234567890123456789',tipo:'cuento',cuento:cuento.id,creado:now,expira:now+20000},now));
 }
 let release;let scenes=[];let finished=false;
@@ -22,7 +22,7 @@ const max={reposo(){},mirarAlFrente(){},wave(){},wink(){},attention(){}};
 const voice={detener(){release?.();},decir:()=>new Promise(resolve=>{release=resolve;})};
 const narrator=new Cuentacuentos({max,voz:voice,onEscena:(c,e,i)=>scenes.push(i),onFin:()=>{finished=true;}});
 const pending=narrator.contar('estrella');narrator.detener();await pending;
-assert.deepEqual(scenes,[0]);assert(!finished);assert(!narrator.visible);
+assert.deepEqual(scenes,[]);assert(!finished);assert(!narrator.visible);
 const before=scenes.length;await narrator.contar('desconocido');assert.equal(scenes.length,before);
 console.log('OK: cinco cuentos, 25 escenas, gestos coordinados, orden, fin y cancelacion sin escenas pendientes.');
 const {Voz}=await import(url(fs.readFileSync(new URL('lives/js/voz.js',root),'utf8')));
@@ -36,3 +36,11 @@ assert(began);audio.detener();
 await Promise.race([speech,new Promise((_,reject)=>setTimeout(()=>reject(Error('La narracion no se cancelo')),100))]);
 assert(!audio.ocupado);assert.equal(audio.vivas.size,0);
 console.log('OK: detener resuelve tambien una voz cuyo navegador no emite el evento final.');
+
+// Pause can hold the title-to-first-page boundary, and stopping releases that wait.
+let liberar;const leidas=[];
+const pvoz={detener(){liberar?.();},pausar(){},continuar(){},decir:(t)=>{leidas.push(t);return new Promise(r=>{liberar=r;});}};
+const pausas=[];const n=new Cuentacuentos({max,voz:pvoz,onEscena:(c,e,i)=>pausas.push(i)});
+const tarea=n.contar('estrella');assert.equal(leidas[0],CUENTOS[0].titulo);n.pausar();liberar();await new Promise(r=>setTimeout(r,0));assert.deepEqual(pausas,[]);assert(n.pausado);
+n.continuar();await new Promise(r=>setTimeout(r,0));assert.deepEqual(pausas,[0]);n.pausar();n.detener();await tarea;assert(!n.enCurso);assert(!n.pausado);
+console.log('OK: título antes del texto, pausa sin saltos y detención mientras está pausado.');

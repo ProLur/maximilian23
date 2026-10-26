@@ -1,12 +1,12 @@
-import { contarPantallas, exigirPantalla } from './pantallas.js?v=conexion3';
-import { prepararAcordeones } from './acordeones.js?v=piper1';
+import { contarPantallas, exigirPantalla } from './pantallas.js?v=ilustrados1';
+import { prepararAcordeones } from './acordeones.js?v=ilustrados1';
 // Maximilian 23 - panel de control remoto.
 // Inicia sesion con Firebase Auth y escribe mensajes en la Realtime Database.
 // Las reglas (firebase/database.rules.json) solo dejan escribir a las cuentas de maximilian/admins.
 
 import { cargarFirebase, configurado, desfaseServidor, RUTA } from './firebase.js';
-import { crearSesion, rutaSesion } from './sesiones.js?v=piper1';
-import { CUENTOS } from './cuentos.js?v=cuentos1';
+import { crearSesion, rutaSesion } from './sesiones.js?v=ilustrados1';
+import { CUENTOS } from './cuentos.js?v=ilustrados1';
 
 const $ = (sel) => document.querySelector(sel);
 const aviso = $('#aviso');
@@ -174,7 +174,7 @@ async function main() {
       if (!usuario) throw new Error('Inicia sesión');
       if (!sesion || Date.now()+desfase>=sesion.expira) throw new Error('La sesión ha caducado. Pulsa Nueva sesión.');
       const destinoBase=base,autor=usuario.uid;
-      if(datos.tipo==='decir'||datos.tipo==='cuento'){
+      if(datos.tipo==='decir'||datos.tipo==='cuento'||datos.tipo==='reproduccion'){
         await exigirPantalla({db,D,base:destinoBase,ahora:()=>Date.now()+desfase});
         if(!sesion || base!==destinoBase || usuario?.uid!==autor)throw Error('La sesión ha cambiado. Vuelve a enviar.');
       }
@@ -262,6 +262,20 @@ async function main() {
   $('#detener-cuento').addEventListener('click', async () => {
     if (await enviar({tipo:'detener'},$('#biblioteca'))) $('#estado-cuento').textContent = 'Se ha enviado la orden de detener el cuento.';
   });
+
+  for(const [id,accion] of [['pausar-cuento-admin','pausar'],['continuar-cuento-admin','continuar']]){
+    $('#'+id).addEventListener('click',async()=>{
+      if(await enviar({tipo:'reproduccion',accion},$('#biblioteca')))$('#estado-cuento').textContent=accion==='pausar'?'Orden de pausa enviada.':'Orden de continuar enviada.';
+    });
+  }
+  for(const cuento of CUENTOS){
+    const tarjeta=document.createElement('div');tarjeta.className='ficha-colorear';
+    const titulo=document.createElement('strong');titulo.textContent=cuento.icono+' '+cuento.titulo;
+    const enlace=document.createElement('a');enlace.href='fichas/'+cuento.id+'.pdf';enlace.target='_blank';enlace.rel='noopener';enlace.textContent='Abrir ficha para imprimir';
+    const descarga=document.createElement('a');descarga.href=enlace.href;descarga.download=cuento.id+'.pdf';descarga.textContent='Descargar PDF';
+    const vista=document.createElement('img');vista.src='fichas/'+cuento.id+'.png';vista.alt='Vista previa para colorear: '+cuento.titulo;vista.loading='lazy';
+    tarjeta.append(titulo,vista,enlace,descarga);$('#fichas').append(tarjeta);
+  }
 
   function escucharPantallas() {
     let datos = {};

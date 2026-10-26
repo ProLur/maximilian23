@@ -148,5 +148,35 @@
     "bytes": 58766,
     "sha256": "968039b434314274b75a5775f6dd05bc2220a6f7fd7a41282ef3ab8ce421cda1",
     "texto": "«¡Buenos días, pequeña!». Maximilian sonrió. Con paciencia y cariño, la semilla había despertado. ¡Ahora les tocaba crecer juntos!"
+  },
+  "estrella-titulo.mp3": {
+    "archivo": "estrella-titulo.mp3",
+    "bytes": 12790,
+    "sha256": "b88d5f94f44f4dbce2e6b0d1673a7b850426977ebea6ce68030fe863b083cb64",
+    "texto": "La estrella que bajó al patio"
+  },
+  "tortuga-titulo.mp3": {
+    "archivo": "tortuga-titulo.mp3",
+    "bytes": 16134,
+    "sha256": "d14180d8b209f2bd5d2800624da6c57325880efc511a248ca128c1a05384d0f5",
+    "texto": "Tina y el camino de las flores"
+  },
+  "nube-titulo.mp3": {
+    "archivo": "nube-titulo.mp3",
+    "bytes": 12581,
+    "sha256": "a5fe8c63e010f5375288cd08afdc8e6f23fde21a5f84090e2f24004e4ff6ec5d",
+    "texto": "La nube que guardaba la lluvia"
+  },
+  "zorro-titulo.mp3": {
+    "archivo": "zorro-titulo.mp3",
+    "bytes": 12790,
+    "sha256": "185a60b7d432a598cc2835595cb58ff1b72d77d3bff7e6364f7676a39f89081f",
+    "texto": "Leo y la sombra del bosque"
+  },
+  "semilla-titulo.mp3": {
+    "archivo": "semilla-titulo.mp3",
+    "bytes": 16343,
+    "sha256": "bf24a3e856639d3c534f3a8dd73257f5ddc261b0f5d265f95fa98cf61aa0ee66",
+    "texto": "Maximilian y la semilla dormilona"
   }
 }

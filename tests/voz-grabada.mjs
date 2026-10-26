@@ -18,6 +18,9 @@ p=voz.decir('Detener',options);voz.detener();await p;assert(!hablando);assert(!v
 bloqueado=true;p=voz.decir('Reintentar',options);await new Promise(r=>setTimeout(r,0));assert(!voz.activa);assert.equal(voz.cola.length,1);
 bloqueado=false;voz.activar();assert(hablando);voz.audio.onended();await p;assert(!hablando);
 const manifest=JSON.parse(fs.readFileSync(new URL('lives/audio/cuentos/manifest.json',root),'utf8'));
-assert.equal(Object.keys(manifest).length,25);
+assert.equal(Object.keys(manifest).length,30);
 for(const item of Object.values(manifest)){const b=fs.readFileSync(new URL('lives/audio/cuentos/'+item.archivo,root));assert(b.length>1000);assert.equal(b.length,item.bytes);}
-console.log('OK: reproducción, gestos al empezar, fin, cancelación, bloqueo y reactivación; 25 audios presentes.');
+console.log('OK: reproducción, gestos al empezar, fin, cancelación, bloqueo y reactivación; 30 audios presentes.');
+
+let comienzos=0;const audioPausa=new VozGrabada(max);await audioPausa.init();audioPausa.activar();const t=audioPausa.decir('Título',{audio:'audio/cuentos/estrella-titulo.mp3',onInicio(){comienzos++;}});audioPausa.audio.currentTime=1.25;audioPausa.pausar();assert(audioPausa.pausada);assert(!hablando);audioPausa.continuar();assert.equal(audioPausa.audio.currentTime,1.25);assert.equal(comienzos,1);assert(hablando);audioPausa.audio.onended();await t;
+console.log('OK: pausa conserva el punto de audio y continuar no reinicia el gesto.');

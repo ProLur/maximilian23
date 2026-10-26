@@ -36,3 +36,11 @@ body.modo-cuento { cursor: auto; }
   body.modo-cuento .boton-activar { top: 47vh; left: 50%; max-width: 90vw; }
 }
 @media (prefers-reduced-motion: reduce) { #cuento-progreso { transition: none; } }
+
+#cuento-titulo[hidden],.cuento-ilustracion[hidden]{display:none;}
+.cuento-lectura{display:flow-root;}
+.cuento-ilustracion{float:right;display:block;width:43%;aspect-ratio:1; margin:0 0 10px 18px;background-size:300% 100%;background-repeat:no-repeat;shape-outside:circle(48%);}
+#pausa-cuento{font-weight:750;color:#244d45;background:#ffffffaa;border:1px solid #527a6550;min-height:44px;}
+#pausa-cuento:disabled{opacity:.5;cursor:default;}
+.cuento-pausado #pausa-cuento{background:#d8e7d8;}
+@media(max-width:760px){.cuento-ilustracion{width:38%;margin-left:12px;} .cuento-pie{gap:8px;flex-wrap:wrap;}}

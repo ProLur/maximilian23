@@ -2,6 +2,7 @@ export const GESTOS = ['alegria','sorpresa','tristeza','serio','guino','saludar'
 export const CUENTO_IDS = ['estrella','tortuga','nube','zorro','semilla'];
 export function valido(m, ahora) {
   if (!m || typeof m !== 'object' || typeof m.id !== 'string' || !Number.isFinite(m.creado) || !Number.isFinite(m.expira) || m.creado > ahora + 1000 || m.expira <= ahora || m.expira > m.creado + 30000) return false;
+  if (m.tipo === 'reproduccion') return ['pausar','continuar'].includes(m.accion);
   if (m.tipo === 'detener') return true;
   if (m.tipo === 'cuento') return CUENTO_IDS.includes(m.cuento);
   if (m.tipo === 'gesto') return GESTOS.includes(m.gesto);

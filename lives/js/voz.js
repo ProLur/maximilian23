@@ -148,8 +148,12 @@ export class Voz {
     });
   }
 
+  pausar(){this.pausada=true;this.sintesis?.pause();this.max.stopTalking();}
+  continuar(){this.pausada=false;this.sintesis?.resume();if(this.ocupado)this.max.startTalking();}
+
   /** Calla de inmediato y vacia la cola. */
   detener() {
+    this.pausada=false;
     this.generacion += 1;
     this.cancelarFrase?.();
     for (const m of this.cola) m.resolver();
@@ -204,14 +208,14 @@ export class Voz {
       this.max.startTalking();
       const fin = this.silencio ? duracionLectura(frase, velocidad) : estimada;
       return new Promise((resolve) => {
+        let restante=fin*1000,ultimo=performance.now();
         const paso = () => {
-          // comprueba cada poco si se ha pulsado Detener
-          if (gen !== this.generacion || performance.now() >= limite) {
+          const ahora=performance.now();if(!this.pausada)restante-=ahora-ultimo;ultimo=ahora;
+          if (gen !== this.generacion || restante<=0) {
             this.max.stopTalking();
             resolve();
           } else setTimeout(paso, 100);
         };
-        const limite = performance.now() + fin * 1000;
         paso();
       });
     }

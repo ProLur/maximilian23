@@ -12,8 +12,8 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preload" href="models/maximilian23.glb" as="fetch" crossorigin>
-  <link rel="stylesheet" href="css/maximilian.css?v=piper2">
-  <link rel="stylesheet" href="css/cuentos.css?v=piper2">
+  <link rel="stylesheet" href="css/maximilian.css?v=ilustrados1">
+  <link rel="stylesheet" href="css/cuentos.css?v=ilustrados1">
   <script type="importmap">
     {
       "imports": {
@@ -50,8 +50,8 @@
   <section id="cuento" class="libro-cuento" hidden aria-labelledby="cuento-titulo">
     <div class="cuento-cabecera"><span class="cuento-etiqueta">LA HORA DEL CUENTO</span><span id="cuento-icono" aria-hidden="true"></span></div>
     <h1 id="cuento-titulo"></h1>
-    <p id="cuento-texto" aria-live="polite"></p>
-    <div class="cuento-pie"><span id="cuento-pagina"></span></div>
+    <div class="cuento-lectura"><span id="cuento-ilustracion" class="cuento-ilustracion" role="img" hidden></span><p id="cuento-texto" aria-live="polite"></p></div>
+    <div class="cuento-pie"><span id="cuento-pagina"></span><button id="pausa-cuento" type="button" disabled aria-pressed="false">⏸ Pausa</button></div>
     <div class="cuento-raíl" aria-hidden="true"><div id="cuento-progreso"></div></div>
     <p id="cuento-aviso" role="status"></p>
   </section>
@@ -92,6 +92,6 @@
       setTimeout(function () { window.__maxFallo('tiempo agotado'); }, 15000);
     })();
   </script>
-  <script type="module" src="js/main.js?v=piper2" onerror="__maxFallo('main.js')"></script>
+  <script type="module" src="js/main.js?v=ilustrados1" onerror="__maxFallo('main.js')"></script>
 </body>
 </html>

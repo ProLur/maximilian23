@@ -38,42 +38,39 @@ export const CUENTOS = [
 ];
 
 export class Cuentacuentos {
-  constructor({max, voz, onEscena = () => {}, onFin = () => {}, onSalir = () => {}}) {
-    Object.assign(this,{max,voz,onEscena,onFin,onSalir});
-    this.generacion=0; this.visible=false;
+  constructor({max,voz,onTitulo=()=>{},onEscena=()=>{},onFin=()=>{},onSalir=()=>{},onEstado=()=>{}}) {
+    Object.assign(this,{max,voz,onTitulo,onEscena,onFin,onSalir,onEstado});
+    this.generacion=0;this.visible=false;this.enCurso=false;this.pausado=false;
   }
-  detener() {
-    this.generacion++;
-    this.voz.detener();
-    this.max.reposo();
-    this.max.mirarAlFrente(false);
-    this.visible=false;
-    this.onSalir();
+  estado(){this.onEstado({activo:this.enCurso,pausado:this.pausado});}
+  detener(){
+    this.generacion++;this.enCurso=false;this.pausado=false;
+    this.despertar?.();this.despertar=null;
+    this.voz.detener();this.max.reposo();this.max.mirarAlFrente(false);
+    this.visible=false;this.onSalir();this.estado();
   }
-  async contar(id) {
-    const cuento=CUENTOS.find(c=>c.id===id);
-    if(!cuento) return;
-    this.detener();
-    const gen=++this.generacion;
-    this.visible=true;
-    this.max.mirarAlFrente(true);
-    for(let i=0;i<cuento.escenas.length;i++) {
-      if(gen!==this.generacion) return;
-      const escena=cuento.escenas[i];
-      this.onEscena(cuento,escena,i);
+  pausar(){if(!this.enCurso||this.pausado)return;this.pausado=true;this.voz.pausar?.();this.estado();}
+  continuar(){if(!this.enCurso||!this.pausado)return;this.pausado=false;this.voz.continuar?.();this.despertar?.();this.despertar=null;this.estado();}
+  alternarPausa(){this.pausado?this.continuar():this.pausar();}
+  esperar(){return this.pausado?new Promise(resolve=>{this.despertar=resolve;}):Promise.resolve();}
+  async contar(id){
+    const cuento=CUENTOS.find(c=>c.id===id);if(!cuento)return;
+    this.detener();const gen=++this.generacion;this.visible=true;this.enCurso=true;this.estado();this.max.mirarAlFrente(true);
+    this.onTitulo(cuento);
+    await this.voz.decir(cuento.titulo,{audio:'audio/cuentos/'+cuento.id+'-titulo.mp3',emocion:'alegria',sinAtencion:true,onInicio:()=>{}});
+    for(let i=0;i<cuento.escenas.length;i++){
+      await this.esperar();if(gen!==this.generacion)return;
+      const escena=cuento.escenas[i];this.onEscena(cuento,escena,i);
       await this.voz.decir(escena.texto,{
         audio:'audio/cuentos/'+cuento.id+'-'+(i+1)+'.mp3',
         emocion:escena.emocion,velocidad:0.88,tono:escena.emocion==='tristeza'?0.95:1.12,sinAtencion:true,
         onInicio:()=>{
-          if(gen!==this.generacion) return;
-          if(escena.gesto==='saludar')this.max.wave();
-          else if(escena.gesto==='guino')this.max.wink();
-          else if(escena.gesto==='atencion')this.max.attention();
+          if(gen!==this.generacion)return;
+          if(escena.gesto==='saludar')this.max.wave();else if(escena.gesto==='guino')this.max.wink();else if(escena.gesto==='atencion')this.max.attention();
         },
       });
     }
-    if(gen!==this.generacion) return;
-    this.max.reposo();
-    this.onFin(cuento);
+    await this.esperar();if(gen!==this.generacion)return;
+    this.enCurso=false;this.pausado=false;this.max.reposo();this.onFin(cuento);this.estado();
   }
 }
