@@ -62,6 +62,7 @@ export class Cuentacuentos {
       const escena=cuento.escenas[i];
       this.onEscena(cuento,escena,i);
       await this.voz.decir(escena.texto,{
+        audio:'audio/cuentos/'+cuento.id+'-'+(i+1)+'.mp3',
         emocion:escena.emocion,velocidad:0.88,tono:escena.emocion==='tristeza'?0.95:1.12,sinAtencion:true,
         onInicio:()=>{
           if(gen!==this.generacion) return;

@@ -1,3 +1,4 @@
+import { VozGrabada } from './voz-grabada.js?v=piper2';
 // Maximilian 23 - pagina publica: escena 3D, carga del modelo y controles minimos.
 
 import * as THREE from 'three';
@@ -7,10 +8,10 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Maximilian } from './maximilian.js?v=sesiones1';
-import { Voz } from './voz.js?v=sesiones1';
-import { conectarRemoto } from './remoto.js?v=sesiones1';
-import { Cuentacuentos } from './cuentos.js?v=sesiones1';
+import { Maximilian } from './maximilian.js?v=piper2';
+import { Voz } from './voz.js?v=piper2';
+import { conectarRemoto } from './remoto.js?v=piper2';
+import { Cuentacuentos } from './cuentos.js?v=piper2';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
@@ -253,8 +254,7 @@ async function setupVoz(max) {
   });
   window.maxVoz = voz;                   // para el panel remoto (fase 5) y la consola
   await voz.init();
-  vozCuentos = new Voz(max, {
-    silencio: true, // La voz definitiva se elegirá tras escuchar muestras.
+  vozCuentos = new VozGrabada(max, {
     onEstado: (estado) => {
       if (estado === 'activa') activarBtn.hidden = true;
       if (estado === 'bloqueada' || estado === 'esperando-activacion') activarBtn.hidden = false;

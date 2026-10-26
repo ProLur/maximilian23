@@ -1,10 +1,11 @@
-import { prepararAcordeones } from './acordeones.js?v=acordeones1';
+import { contarPantallas, exigirPantalla } from './pantallas.js?v=piper2';
+import { prepararAcordeones } from './acordeones.js?v=piper1';
 // Maximilian 23 - panel de control remoto.
 // Inicia sesion con Firebase Auth y escribe mensajes en la Realtime Database.
 // Las reglas (firebase/database.rules.json) solo dejan escribir a las cuentas de maximilian/admins.
 
 import { cargarFirebase, configurado, desfaseServidor, RUTA } from './firebase.js';
-import { crearSesion, rutaSesion } from './sesiones.js?v=sesiones1';
+import { crearSesion, rutaSesion } from './sesiones.js?v=piper1';
 import { CUENTOS } from './cuentos.js?v=cuentos1';
 
 const $ = (sel) => document.querySelector(sel);
@@ -168,10 +169,16 @@ async function main() {
   // ---------------------------------------------------------------- envio
   async function enviar(datos, destino = form) {
     error(destino, '');
+    aviso.hidden=true;
     try {
       if (!usuario) throw new Error('Inicia sesión');
       if (!sesion || Date.now()+desfase>=sesion.expira) throw new Error('La sesión ha caducado. Pulsa Nueva sesión.');
-      const id = D.push(D.ref(db, `${base}/mensajes`)).key;
+      const destinoBase=base,autor=usuario.uid;
+      if(datos.tipo==='decir'||datos.tipo==='cuento'){
+        await exigirPantalla({db,D,base:destinoBase,ahora:()=>Date.now()+desfase});
+        if(!sesion || base!==destinoBase || usuario?.uid!==autor)throw Error('La sesión ha cambiado. Vuelve a enviar.');
+      }
+      const id = D.push(D.ref(db, `${destinoBase}/mensajes`)).key;
       const comando = {
         id,
         expira: Date.now() + desfase + 30000,
@@ -183,6 +190,7 @@ async function main() {
       return true;
     } catch (err) {
       console.error(err);
+      aviso.hidden=false;aviso.textContent=err.message || 'No se ha enviado la orden.';
       error(destino, err.code === 'PERMISSION_DENIED'
         ? 'Permiso denegado: revisa las reglas y que tu cuenta esté en maximilian/admins.'
         : `No se ha podido enviar (${err.message}).`);
@@ -259,7 +267,7 @@ async function main() {
     let datos = {};
     const pintar = () => {
       const ahora = Date.now() + desfase;
-      const n = Object.values(datos).flatMap(v => Object.values(v)).filter((t) => ahora - t < 90_000).length;
+      const n = contarPantallas(datos, ahora);
       if(n > 0 && !sesionPlegada){sesionPlegada=true;acordeones.plegarSesion();}
       pantallas.hidden = false;
       pantallas.classList.toggle('activa', n > 0);

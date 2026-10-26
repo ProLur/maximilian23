@@ -89,3 +89,9 @@ Los mensajes del panel aparecen a la derecha con letra grande, contraste alto y 
 Ajuste posterior: mostrar u ocultar mensajes no modifica las dimensiones del lienzo ni recalcula la cámara. Maximilian conserva su posición y tamaño; el texto aparece a la derecha sobre el mismo encuadre.
 
 A petición del usuario, los mensajes vuelven a la parte inferior centrada, como subtítulos. Se mantiene fijo el encuadre de Maximilian.
+
+## Voz local Piper · 26 de octubre de 2026
+Se añaden 25 MP3 (unos 1,46 MB en total) para los cinco cuentos, generados localmente con la voz española davefx y un efecto electrónico suave. La reproducción espera un gesto del usuario en el visor; mueve la boca y coordina las expresiones y los gestos por escena. Detener cancela audio y cola. Si un MP3 falla, la escena continúa como lectura animada sin recurrir a voces del navegador.
+Los mensajes de texto libre siguen sin audio automático. Se entrega un generador local de MP3 para textos nuevos, que necesita este ordenador y su instalación local. No se ha configurado un servidor de síntesis ni una API comercial. Firebase transporta órdenes y el alojamiento sirve los MP3; se mantiene su consumo normal de cuota de transferencia.
+
+Perfil final elegido por el usuario: juvenil y más sintético, con procesamiento espectral. Sustituye el ajuste grave anterior. Se incorpora bloqueo de mensajes y cuentos sin presencia reciente de un visor en esa sesión: no se guarda ni se encola la orden; el texto se conserva y se muestra error. La comprobación requiere conexión del panel con el servidor. La presencia indica conexión, no acredita que el audio ya haya sonado; una desconexión abrupta puede tardar en ser detectada por Firebase.
