@@ -12,8 +12,8 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preload" href="models/maximilian23.glb" as="fetch" crossorigin>
-  <link rel="stylesheet" href="css/maximilian.css?v=cuentos1">
-  <link rel="stylesheet" href="css/cuentos.css?v=cuentos1">
+  <link rel="stylesheet" href="css/maximilian.css?v=sesiones1">
+  <link rel="stylesheet" href="css/cuentos.css?v=sesiones1">
   <script type="importmap">
     {
       "imports": {
@@ -51,23 +51,15 @@
     <div class="cuento-cabecera"><span class="cuento-etiqueta">LA HORA DEL CUENTO</span><span id="cuento-icono" aria-hidden="true"></span></div>
     <h1 id="cuento-titulo"></h1>
     <p id="cuento-texto" aria-live="polite"></p>
-    <div class="cuento-pie"><span id="cuento-pagina"></span><button id="cerrar-cuento" type="button">Terminar cuento</button></div>
+    <div class="cuento-pie"><span id="cuento-pagina"></span></div>
     <div class="cuento-raíl" aria-hidden="true"><div id="cuento-progreso"></div></div>
     <p id="cuento-aviso" role="status"></p>
   </section>
 
-  <nav id="gestos" class="panel-gestos" hidden aria-label="Gestos de Maximilian"></nav>
-
-  <form id="prueba-voz" class="panel-voz" hidden aria-label="Prueba de voz">
-    <textarea name="texto" rows="3">¡Buenos días, chicos y chicas del Juan XXIII! Hoy vamos a aprender muchas cosas nuevas.</textarea>
-    <label>Voz <select name="voz"></select></label>
-    <label>Emoción <select name="emocion"></select></label>
-    <label>Velocidad <input name="velocidad" type="range" min="0.5" max="2" step="0.05" value="1"><output>1</output></label>
-    <label>Tono <input name="tono" type="range" min="0" max="2" step="0.05" value="1.1"><output>1.1</output></label>
-    <div class="acciones">
-      <button type="submit">Decir</button>
-      <button type="button" name="detener">Detener</button>
-    </div>
+  <form id="vincular" class="vincular" hidden>
+    <label for="codigo-visor">Código de sesión de ADMIN</label>
+    <div><input id="codigo-visor" name="codigo" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="off" placeholder="58458" required aria-describedby="conexion-estado"><button type="submit">Conectar</button></div>
+    <p id="conexion-estado" role="status" aria-live="polite">Introduce las cinco cifras que aparecen en tu panel.</p>
   </form>
 
   <script>
@@ -100,6 +92,6 @@
       setTimeout(function () { window.__maxFallo('tiempo agotado'); }, 15000);
     })();
   </script>
-  <script type="module" src="js/main.js?v=cuentos1" onerror="__maxFallo('main.js')"></script>
+  <script type="module" src="js/main.js?v=sesiones1" onerror="__maxFallo('main.js')"></script>
 </body>
 </html>

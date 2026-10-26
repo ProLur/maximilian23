@@ -136,3 +136,5 @@ button.enlace { background: none; color: var(--suave); padding: 4px; font-weight
 .tarjeta-cuento small { font-size: .75rem; font-weight: 400; color: var(--suave); }
 .cuento-accion { font-size: .75rem; color: var(--cuento-color); margin-top: 4px; }
 #estado-cuento { margin: 0; color: var(--turquesa); font-size: .9rem; }
+
+#codigo-sesion {display:block;font-size:clamp(2.8rem,8vw,4.5rem);font-weight:800;letter-spacing:.18em;color:#3fe0d0;font-variant-numeric:tabular-nums;margin:16px 0;}

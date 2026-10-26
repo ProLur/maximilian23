@@ -66,3 +66,17 @@ El panel muestra primero Saludar, Guiñar el ojo, Atención, Parpadeo y Reposo, 
 ## Cuentos · 26 de octubre de 2026
 Cinco cuentos originales, 25 escenas, texto grande a la izquierda, expresiones y gestos coordinados. Fin y detención devuelven a reposo. Los cuentos funcionan en lectura animada sin voz del navegador; la API de voz queda pendiente de escuchar muestras y elegir proveedor. No se han incorporado claves privadas ni activado pagos.
 Validación: receptor, modelo GLB real, cuentos y cancelación; reglas probadas con emulador antes de publicar. Se añade comando cuento restringido a cinco identificadores para administradores.
+
+## Sesiones independientes · 26 de octubre de 2026
+
+Cada apertura de ADMIN, tras iniciar sesión con una cuenta autorizada, reserva mediante transacción un código aleatorio de cinco cifras. El código caduca a las cuatro horas. Cada pestaña tiene una sesión independiente, sin usar localStorage para compartir código entre pestañas. Nueva sesión cierra la anterior; Salir también la cierra. Cerrar solo la pestaña deja el código activo hasta su caducidad.
+
+El visor solicita el código después de cargar. Hasta conectarlo no escucha ningún canal remoto. Para cinco Maximilian independientes: abrir cinco pestañas ADMIN y vincular cada visor con uno de sus códigos. Varias pantallas con el mismo código reciben las mismas órdenes. Si se recarga ADMIN, muestra un código nuevo: hay que volver a vincular el visor.
+
+Se han retirado del index los botones y los atajos de gestos y emociones, la prueba de voz y el botón local de detener cuento. Las órdenes se envían exclusivamente desde ADMIN. El visor mantiene la conexión por código y pantalla completa.
+
+Datos: maximilian/sesiones/{codigo}/meta y canales/{nonce}/{comando,mensajes,miembros,presencia}. Una generación aleatoria de 128 bits aísla las reutilizaciones del mismo código e impide leer historiales anteriores. Las reglas impiden listar sesiones, bloquean el canal global anterior y reservan la creación de sesiones y el envío de órdenes al administrador propietario. El visor autenticado anónimamente solo puede vincularse, leer el comando de su sesión y registrar su propia presencia. Conocer un código permite ver esa sesión durante su vigencia; no concede permisos de administrador. No utilizar los mensajes para datos personales.
+
+La caducidad bloquea el acceso automáticamente mediante reglas, pero no borra físicamente los datos históricos. No se ha añadido un servicio de limpieza con facturación.
+
+Pruebas: cinco receptores simulados sin cruce de órdenes; emulador real de Realtime Database con cinco sesiones, permisos, colisiones, caducidad, cierre, reutilización con nueva generación, revocación y rechazo de comandos inválidos; modelo GLB y cuentos.

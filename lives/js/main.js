@@ -7,10 +7,10 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Maximilian } from './maximilian.js?v=cuentos1';
-import { Voz } from './voz.js?v=cuentos1';
-import { conectarRemoto } from './remoto.js?v=cuentos1';
-import { Cuentacuentos } from './cuentos.js?v=cuentos1';
+import { Maximilian } from './maximilian.js?v=sesiones1';
+import { Voz } from './voz.js?v=sesiones1';
+import { conectarRemoto } from './remoto.js?v=sesiones1';
+import { Cuentacuentos } from './cuentos.js?v=sesiones1';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
@@ -189,13 +189,7 @@ async function load() {
   window.maximilian = max;               // para probar desde la consola
   loading.classList.add('oculto');
   await setupVoz(max);
-  conectarRemoto({
-    onMensaje: ejecutarMensaje,
-    onEstado: (e) => {
-      console.info(`Control remoto: ${e}`);
-      document.body.dataset.remoto = e;
-    },
-  });
+  prepararConexion();
   document.dispatchEvent(new CustomEvent('maximilian:listo', { detail: max }));
 }
 
@@ -300,10 +294,9 @@ async function setupVoz(max) {
       resize();
     },
   });
-  document.getElementById('cerrar-cuento').addEventListener('click', () => narrador.detener());
   activarBtn.hidden = !vozCuentos.disponible && voz.activa;
   document.addEventListener('maximilian:decir', (e) => voz.decir(e.detail.texto, e.detail));
-  if (params.has('prueba')) montarPruebaVoz(voz, max);
+
 }
 
 function activarVoz() {
@@ -314,37 +307,6 @@ activarBtn.addEventListener('click', activarVoz);
 window.addEventListener('pointerdown', activarVoz);
 window.addEventListener('keydown', activarVoz);
 
-function montarPruebaVoz(voz, max) {
-  const form = document.getElementById('prueba-voz');
-  form.hidden = false;
-  const selVoz = form.elements.voz;
-  const pintarVoces = () => {
-    selVoz.replaceChildren(...voz.vocesEspanol().map((v) => new Option(`${v.name} (${v.lang})`, v.name)));
-    if (!selVoz.options.length) selVoz.append(new Option('(voz del sistema)', ''));
-    if (voz.voz) selVoz.value = voz.voz.name;
-  };
-  pintarVoces();
-  speechSynthesis?.addEventListener?.('voiceschanged', pintarVoces);
-  selVoz.addEventListener('change', () => voz.configurar({ voz: selVoz.value || null }));
-
-  form.elements.emocion.replaceChildren(
-    new Option('(ninguna)', ''),
-    ...max.expressionNames.map((n) => new Option(n, n)),
-  );
-  for (const name of ['velocidad', 'tono']) {
-    const input = form.elements[name];
-    input.addEventListener('input', () => { input.nextElementSibling.value = input.value; });
-  }
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    voz.decir(form.elements.texto.value, {
-      emocion: form.elements.emocion.value || undefined,
-      velocidad: +form.elements.velocidad.value,
-      tono: +form.elements.tono.value,
-    });
-  });
-  form.elements.detener.addEventListener('click', () => voz.detener());
-}
 
 load().catch((err) => fail('No se ha podido cargar a Maximilian.', err));
 
@@ -390,10 +352,6 @@ resize();
 // Sigue al raton o al dedo; sin ellos, Maximilian mira a su alrededor por su cuenta.
 window.addEventListener('pointermove', (e) => {
   if (!max) return;
-  if (e.target.closest?.('#gestos')) {   // sobre el cuadro de gestos: mira al frente
-    if (!max.gazeLocked) max.mirarAlFrente(true);
-    return;
-  }
   const x = (e.clientX / window.innerWidth) * 2 - 1;
   const y = -((e.clientY / window.innerHeight) * 2 - 1);
   max.lookAt(x * 1.3, y * 1.3);
@@ -421,45 +379,28 @@ function wake() {
 ['pointermove', 'pointerdown', 'keydown'].forEach((ev) => window.addEventListener(ev, wake));
 wake();
 
-// ------------------------------------------------------------------ gestos
-// Cuadro de botones a la derecha (?botones=0 lo oculta). Con el raton encima,
-// Maximilian mira al frente para que los gestos se vean de cara.
-// Teclas: 1-5 expresiones, G guino, S saludar, B parpadeo, A atencion, H hablar, F pantalla completa.
-const ACTIONS = {
-  reposo: ['Reposo', () => max.setExpression('reposo')],
-  alegria: ['Alegría', () => max.setExpression('alegria')],
-  sorpresa: ['Sorpresa', () => max.setExpression('sorpresa')],
-  tristeza: ['Tristeza', () => max.setExpression('tristeza')],
-  serio: ['Serio', () => max.setExpression('serio')],
-  guino: ['Guiño', () => max.wink()],
-  saludar: ['Saludar', () => max.wave()],
-  parpadeo: ['Parpadeo', () => max.blink()],
-  atencion: ['Atención', () => max.attention()],
-  hablar: ['Hablar', () => (max.talking ? max.stopTalking() : max.startTalking())],
-};
-const KEYS = { 1: 'reposo', 2: 'alegria', 3: 'sorpresa', 4: 'tristeza', 5: 'serio',
-  g: 'guino', s: 'saludar', b: 'parpadeo', a: 'atencion', h: 'hablar' };
 
-window.addEventListener('keydown', (e) => {
-  if (e.target.closest?.('input, textarea')) return;
-  const k = e.key.toLowerCase();
-  if (k === 'f') toggleFullscreen();
-  else if (k === '+' || k === '=') zoomBy(-0.5);
-  else if (k === '-') zoomBy(0.5);
-  else if (max && KEYS[k]) ACTIONS[KEYS[k]][1]();
-});
-
-if (params.get('botones') !== '0') {
-  const panel = document.getElementById('gestos');
-  panel.hidden = false;
-  for (const [name, [label, accion]] of Object.entries(ACTIONS)) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = label;
-    b.dataset.accion = name;
-    b.addEventListener('click', () => max && accion());
-    panel.appendChild(b);
-  }
-  panel.addEventListener('pointerenter', () => max?.mirarAlFrente(true));
-  panel.addEventListener('pointerleave', () => max?.mirarAlFrente(false));
+// Conexión explícita: no se reciben órdenes hasta introducir el código.
+function prepararConexion() {
+  const formulario=document.getElementById('vincular'), estado=document.getElementById('conexion-estado');
+  const boton=formulario.querySelector('button'), entrada=formulario.elements.codigo;
+  let conexion=null, intento=0;
+  formulario.addEventListener('submit',async e=>{
+    e.preventDefault(); const actual=++intento;
+    conexion?.cerrar();conexion=null;narrador?.detener();voz?.detener();
+    boton.disabled=true;estado.textContent='Conectando…';
+    try {
+      const codigo=entrada.value.trim();
+      conexion=await conectarRemoto({codigo,onMensaje:ejecutarMensaje,onEstado:e=>{
+        if(actual!==intento)return;
+        document.body.dataset.remoto=e;
+        estado.textContent={conectado:'Conectado a la sesión '+codigo,desconectado:'Sin conexión. Intentando reconectar…',caducada:'La sesión ha terminado. Pide un código nuevo.',error:'No se ha podido conectar. Comprueba el código.', 'error-ejecucion':'No se ha podido ejecutar la orden.'}[e]||e;
+        const conectado=e==='conectado';
+        formulario.classList.toggle('vinculado',conectado);
+        if(e==='caducada'||e==='error'){narrador?.detener();voz?.detener();}
+      }});
+    }catch(err){estado.textContent=err.message;formulario.classList.remove('vinculado');}
+    finally{boton.disabled=false;}
+  });
+  formulario.hidden=false;
 }

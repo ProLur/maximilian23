@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css?v=cuentos1">
+  <link rel="stylesheet" href="css/admin.css?v=sesiones1">
 </head>
 <body>
   <header class="cabecera">
@@ -33,6 +33,14 @@
 
     <!-- Panel -->
     <section id="panel" hidden>
+      <div class="tarjeta sesion-admin">
+        <h2>Tu sesión de Maximilian</h2>
+        <p>Introduce este código en la pantalla que quieres controlar. Cada pestaña ADMIN tiene su propia sesión.</p>
+        <output id="codigo-sesion" aria-label="Código de sesión">·····</output>
+        <p id="caducidad-sesion" role="status"></p>
+        <button id="nueva-sesion" type="button" class="secundario">Nueva sesión</button>
+        <p class="ayuda">El código vincula las pantallas. Solo tu cuenta de administrador puede enviar órdenes. Una nueva sesión desconecta la anterior.</p>
+      </div>
       <div id="acciones-directas" class="tarjeta">
         <h2>Gestos</h2>
         <p class="ayuda">Pulsa un botón sin escribir texto. Saludar y guiñar vuelven automáticamente a reposo.</p>
@@ -82,6 +90,6 @@
     </section>
   </main>
 
-  <script type="module" src="js/admin.js?v=cuentos1"></script>
+  <script type="module" src="js/admin.js?v=sesiones1"></script>
 </body>
 </html>

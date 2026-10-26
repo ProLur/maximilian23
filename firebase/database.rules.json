@@ -9,99 +9,137 @@
           ".write": false
         }
       },
-      "comando": {
-        ".read": true,
-        ".write": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && newData.exists()",
-        ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren([\"texto\",\"velocidad\",\"tono\"]) && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren([\"gesto\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'cuento' && newData.hasChildren([\"cuento\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists()))",
-        "id": {
-          ".validate": "newData.isString() && newData.val().length === 20"
-        },
-        "tipo": {
-          ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener' || newData.val() === 'cuento'"
-        },
-        "texto": {
-          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
-        },
-        "emocion": {
-          ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino'"
-        },
-        "gesto": {
-          ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino' || newData.val() === 'saludar' || newData.val() === 'atencion' || newData.val() === 'parpadeo' || newData.val() === 'reposo'"
-        },
-        "velocidad": {
-          ".validate": "newData.isNumber() && newData.val() >= 0.5 && newData.val() <= 2"
-        },
-        "tono": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
-        },
-        "creado": {
-          ".validate": "newData.isNumber() && newData.val() === now"
-        },
-        "expira": {
-          ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 30000"
-        },
-        "autor": {
-          ".validate": "newData.val() === auth.uid"
-        },
-        "$otro": {
-          ".validate": false
-        },
-        "cuento": {
-          ".validate": "newData.val() === 'estrella' || newData.val() === 'tortuga' || newData.val() === 'nube' || newData.val() === 'zorro' || newData.val() === 'semilla'"
-        }
-      },
-      "mensajes": {
-        ".read": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true",
-        ".indexOn": [
-          "creado"
-        ],
-        "$id": {
-          ".write": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && !data.exists() && newData.exists()",
-          ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren([\"texto\",\"velocidad\",\"tono\"]) && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren([\"gesto\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'cuento' && newData.hasChildren([\"cuento\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists()))",
-          "id": {
-            ".validate": "newData.isString() && newData.val().length === 20"
+      "sesiones": {
+        "$codigo": {
+          "meta": {
+            ".read": "auth != null",
+            ".write": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && newData.exists() && ((!data.exists() || data.child('expira').val() <= now) || data.child('propietario').val() === auth.uid)",
+            ".validate": "$codigo.matches(/^[0-9]{5}$/) && newData.hasChildren(['propietario','creado','expira','nonce']) && newData.child('propietario').val() === auth.uid && ((newData.child('creado').val() >= now-10000 && newData.child('creado').val() <= now+10000 && newData.child('expira').val() > now && newData.child('expira').val() <= now+14410000 && (!data.exists() || data.child('expira').val() <= now)) || (data.exists() && data.child('propietario').val() === auth.uid && newData.child('creado').val() === data.child('creado').val() && newData.child('nonce').val() === data.child('nonce').val() && newData.child('expira').val() === now))",
+            "propietario": {
+              ".validate": "newData.isString()"
+            },
+            "creado": {
+              ".validate": "newData.isNumber()"
+            },
+            "expira": {
+              ".validate": "newData.isNumber()"
+            },
+            "nonce": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)"
+            },
+            "$otro": {
+              ".validate": false
+            }
           },
-          "tipo": {
-            ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener' || newData.val() === 'cuento'"
-          },
-          "texto": {
-            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
-          },
-          "emocion": {
-            ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino'"
-          },
-          "gesto": {
-            ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino' || newData.val() === 'saludar' || newData.val() === 'atencion' || newData.val() === 'parpadeo' || newData.val() === 'reposo'"
-          },
-          "velocidad": {
-            ".validate": "newData.isNumber() && newData.val() >= 0.5 && newData.val() <= 2"
-          },
-          "tono": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
-          },
-          "creado": {
-            ".validate": "newData.isNumber() && newData.val() === now"
-          },
-          "expira": {
-            ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 30000"
-          },
-          "autor": {
-            ".validate": "newData.val() === auth.uid"
-          },
-          "$otro": {
-            ".validate": false
-          },
-          "cuento": {
-            ".validate": "newData.val() === 'estrella' || newData.val() === 'tortuga' || newData.val() === 'nube' || newData.val() === 'zorro' || newData.val() === 'semilla'"
-          }
-        }
-      },
-      "presencia": {
-        ".read": "auth != null && root.child('maximilian/admins/' + auth.uid).val() === true",
-        "$uid": {
-          "$conexion": {
-            ".write": "auth != null && auth.uid === $uid && $conexion.length === 20",
-            ".validate": "newData.isNumber() && newData.val() === now"
+          "canales": {
+            "$nonce": {
+              "miembros": {
+                "$uid": {
+                  ".read": "(auth != null && auth.uid === $uid) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                  ".write": "(auth != null && auth.uid === $uid && root.child('maximilian/sesiones/' + $codigo + '/meta').child('expira').val() > now) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                  ".validate": "newData.isString() && newData.val() === root.child('maximilian/sesiones/' + $codigo + '/meta').child('nonce').val()"
+                }
+              },
+              "comando": {
+                ".read": "((root.child('maximilian/sesiones/' + $codigo + '/meta').child('expira').val() > now) && ((auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && root.child('maximilian/sesiones/' + $codigo + '/meta').child('propietario').val() === auth.uid) || (auth != null && root.child('maximilian/sesiones/' + $codigo + '/canales/' + $nonce + '/miembros/' + auth.uid).val() === root.child('maximilian/sesiones/' + $codigo + '/meta').child('nonce').val()))) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                ".write": "(auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && root.child('maximilian/sesiones/' + $codigo + '/meta').child('propietario').val() === auth.uid && root.child('maximilian/sesiones/' + $codigo + '/meta').child('expira').val() > now && newData.exists()) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren([\"texto\",\"velocidad\",\"tono\"]) && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren([\"gesto\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'cuento' && newData.hasChildren([\"cuento\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists()))",
+                "id": {
+                  ".validate": "newData.isString() && newData.val().length === 20"
+                },
+                "tipo": {
+                  ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener' || newData.val() === 'cuento'"
+                },
+                "texto": {
+                  ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
+                },
+                "emocion": {
+                  ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino'"
+                },
+                "gesto": {
+                  ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino' || newData.val() === 'saludar' || newData.val() === 'atencion' || newData.val() === 'parpadeo' || newData.val() === 'reposo'"
+                },
+                "velocidad": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0.5 && newData.val() <= 2"
+                },
+                "tono": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+                },
+                "creado": {
+                  ".validate": "newData.isNumber() && newData.val() === now"
+                },
+                "expira": {
+                  ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 30000"
+                },
+                "autor": {
+                  ".validate": "newData.val() === auth.uid"
+                },
+                "$otro": {
+                  ".validate": false
+                },
+                "cuento": {
+                  ".validate": "newData.val() === 'estrella' || newData.val() === 'tortuga' || newData.val() === 'nube' || newData.val() === 'zorro' || newData.val() === 'semilla'"
+                }
+              },
+              "mensajes": {
+                ".read": "(auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && root.child('maximilian/sesiones/' + $codigo + '/meta').child('propietario').val() === auth.uid && root.child('maximilian/sesiones/' + $codigo + '/meta').child('expira').val() > now) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                ".indexOn": [
+                  "creado"
+                ],
+                "$id": {
+                  ".write": "(auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && root.child('maximilian/sesiones/' + $codigo + '/meta').child('propietario').val() === auth.uid && root.child('maximilian/sesiones/' + $codigo + '/meta').child('expira').val() > now && !data.exists() && newData.exists()) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                  ".validate": "newData.hasChildren(['id','tipo','creado','expira','autor']) && ((newData.child('tipo').val() === 'decir' && newData.hasChildren([\"texto\",\"velocidad\",\"tono\"]) && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'gesto' && newData.hasChildren([\"gesto\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'detener' && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists() && !newData.child('cuento').exists()) || (newData.child('tipo').val() === 'cuento' && newData.hasChildren([\"cuento\"]) && !newData.child('texto').exists() && !newData.child('emocion').exists() && !newData.child('velocidad').exists() && !newData.child('tono').exists() && !newData.child('gesto').exists()))",
+                  "id": {
+                    ".validate": "newData.isString() && newData.val().length === 20"
+                  },
+                  "tipo": {
+                    ".validate": "newData.val() === 'decir' || newData.val() === 'gesto' || newData.val() === 'detener' || newData.val() === 'cuento'"
+                  },
+                  "texto": {
+                    ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
+                  },
+                  "emocion": {
+                    ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino'"
+                  },
+                  "gesto": {
+                    ".validate": "newData.val() === 'alegria' || newData.val() === 'sorpresa' || newData.val() === 'tristeza' || newData.val() === 'serio' || newData.val() === 'guino' || newData.val() === 'saludar' || newData.val() === 'atencion' || newData.val() === 'parpadeo' || newData.val() === 'reposo'"
+                  },
+                  "velocidad": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0.5 && newData.val() <= 2"
+                  },
+                  "tono": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+                  },
+                  "creado": {
+                    ".validate": "newData.isNumber() && newData.val() === now"
+                  },
+                  "expira": {
+                    ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 30000"
+                  },
+                  "autor": {
+                    ".validate": "newData.val() === auth.uid"
+                  },
+                  "$otro": {
+                    ".validate": false
+                  },
+                  "cuento": {
+                    ".validate": "newData.val() === 'estrella' || newData.val() === 'tortuga' || newData.val() === 'nube' || newData.val() === 'zorro' || newData.val() === 'semilla'"
+                  }
+                }
+              },
+              "presencia": {
+                ".read": "(auth != null && root.child('maximilian/admins/' + auth.uid).val() === true && root.child('maximilian/sesiones/' + $codigo + '/meta').child('propietario').val() === auth.uid && root.child('maximilian/sesiones/' + $codigo + '/meta').child('expira').val() > now) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                "$uid": {
+                  "$conexion": {
+                    ".write": "(auth != null && auth.uid === $uid && $conexion.length === 20 && (!newData.exists() || (root.child('maximilian/sesiones/' + $codigo + '/meta').child('expira').val() > now && auth != null && root.child('maximilian/sesiones/' + $codigo + '/canales/' + $nonce + '/miembros/' + auth.uid).val() === root.child('maximilian/sesiones/' + $codigo + '/meta').child('nonce').val()))) && ($nonce === root.child('maximilian/sesiones/' + $codigo + '/meta/nonce').val())",
+                    ".validate": "newData.isNumber() && newData.val() === now"
+                  }
+                }
+              },
+              "$otro": {
+                ".validate": false
+              }
+            }
           }
         }
       }

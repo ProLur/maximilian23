@@ -3,6 +3,7 @@
 // Las reglas (firebase/database.rules.json) solo dejan escribir a las cuentas de maximilian/admins.
 
 import { cargarFirebase, configurado, desfaseServidor, RUTA } from './firebase.js';
+import { crearSesion, rutaSesion } from './sesiones.js?v=sesiones1';
 import { CUENTOS } from './cuentos.js?v=cuentos1';
 
 const $ = (sel) => document.querySelector(sel);
@@ -71,6 +72,9 @@ async function main() {
   });
   const desfase = await desfaseServidor(db, D);
   let usuario = null;
+  let sesion = null;
+  let base = '';
+  let cambiando = false;
   let parar = [];                        // suscripciones activas del panel
 
   // ---------------------------------------------------------------- sesion
@@ -103,7 +107,32 @@ async function main() {
     }
   });
 
-  salir.addEventListener('click', () => A.signOut(auth));
+  async function cerrarSesion() {
+    if (sesion) await D.update(D.ref(db,rutaSesion(sesion.codigo)+'/meta'),{expira:D.serverTimestamp()});
+    sesion=null; base='';
+  }
+  salir.addEventListener('click', async () => { try { await cerrarSesion(); await A.signOut(auth); } catch { mostrar('nada','No se ha podido cerrar la sesión. Revisa la conexión.'); } });
+  async function nuevaSesion() {
+    if(cambiando || !usuario) return;
+    cambiando=true;
+    const boton=$('#nueva-sesion'); boton.disabled=true;
+    try {
+      await cerrarSesion();
+      parar.forEach(fn=>fn()); parar=[];
+      sesion=await crearSesion(fb,usuario.uid,desfase);
+      base=rutaSesion(sesion.codigo)+'/canales/'+sesion.nonce;
+      $('#codigo-sesion').textContent=sesion.codigo;
+      $('#caducidad-sesion').textContent='Válido hasta las '+new Date(sesion.expira).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+      mostrar('panel'); escucharPantallas(); escucharHistorial();
+      parar.push(D.onValue(D.ref(db, RUTA+'/admins/'+usuario.uid), snap=>{
+        if(snap.val()!==true){usuario=null;parar.forEach(fn=>fn());parar=[];mostrar('sin-permiso','Permiso de administrador revocado.');}
+      }));
+      const reloj=setInterval(()=>{if(sesion && Date.now()+desfase>=sesion.expira){ $('#caducidad-sesion').textContent='Sesión caducada. Pulsa Nueva sesión.'; }},1000);
+      parar.push(()=>clearInterval(reloj));
+    } catch(err) { console.error(err); mostrar('nada','No se ha podido crear la sesión. Recarga el panel para intentarlo de nuevo.'); }
+    finally {cambiando=false;boton.disabled=false;}
+  }
+  $('#nueva-sesion').addEventListener('click',nuevaSesion);
 
   A.onAuthStateChanged(auth, async (user) => {
     parar.forEach((fn) => fn());
@@ -127,12 +156,7 @@ async function main() {
     }
     if (auth.currentUser?.uid !== user.uid) return;
     usuario = user;
-    parar.push(D.onValue(D.ref(db, `${RUTA}/admins/${user.uid}`), snap => {
-      if (snap.val() !== true) { usuario = null; parar.forEach(fn => fn()); parar = []; mostrar('sin-permiso', 'Permiso de administrador revocado.'); }
-    }));
-    mostrar('panel');
-    escucharPantallas();
-    escucharHistorial();
+    await nuevaSesion();
   });
 
   // ---------------------------------------------------------------- envio
@@ -140,7 +164,8 @@ async function main() {
     error(destino, '');
     try {
       if (!usuario) throw new Error('Inicia sesión');
-      const id = D.push(D.ref(db, `${RUTA}/mensajes`)).key;
+      if (!sesion || Date.now()+desfase>=sesion.expira) throw new Error('La sesión ha caducado. Pulsa Nueva sesión.');
+      const id = D.push(D.ref(db, `${base}/mensajes`)).key;
       const comando = {
         id,
         expira: Date.now() + desfase + 30000,
@@ -148,7 +173,7 @@ async function main() {
         creado: D.serverTimestamp(),
         autor: usuario.uid,
       };
-      await D.update(D.ref(db), { [`${RUTA}/mensajes/${id}`]: comando, [`${RUTA}/comando`]: comando });
+      await D.update(D.ref(db), { [`${base}/mensajes/${id}`]: comando, [`${base}/comando`]: comando });
       return true;
     } catch (err) {
       console.error(err);
@@ -215,7 +240,7 @@ async function main() {
       boton.disabled = true;
       $('#estado-cuento').textContent = 'Enviando cuento…';
       const ok = await enviar({tipo:'cuento',cuento:cuento.id},$('#biblioteca'));
-      $('#estado-cuento').textContent = ok ? `Enviado: ${cuento.titulo}. La narración comienza en el visor.` : '';
+      $('#estado-cuento').textContent = ok ? `Enviado: ${cuento.titulo}. Orden enviada a los visores de esta sesión.` : '';
       boton.disabled = false;
     });
     $('#cuentos').appendChild(boton);
@@ -234,13 +259,13 @@ async function main() {
       pantallas.querySelector('.texto').textContent =
         n === 0 ? 'Ninguna pantalla conectada' : n === 1 ? '1 pantalla conectada' : `${n} pantallas conectadas`;
     };
-    parar.push(D.onValue(D.ref(db, `${RUTA}/presencia`), (s) => { datos = s.val() ?? {}; pintar(); }));
+    parar.push(D.onValue(D.ref(db, `${base}/presencia`), (s) => { datos = s.val() ?? {}; pintar(); }));
     const reloj = setInterval(pintar, 15_000);
     parar.push(() => clearInterval(reloj));
   }
 
   function escucharHistorial() {
-    const q = D.query(D.ref(db, `${RUTA}/mensajes`), D.orderByChild('creado'), D.limitToLast(30));
+    const q = D.query(D.ref(db, `${base}/mensajes`), D.orderByChild('creado'), D.limitToLast(30));
     parar.push(D.onValue(q, (s) => {
       const items = [];
       s.forEach((c) => { const v = c.val(); if (v.tipo === 'decir') items.push(v); });
