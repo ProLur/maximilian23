@@ -1,4 +1,6 @@
-import { prepararCuentosAdmin } from './cuentos-admin.js?v=cuentos-admin2';
+import { tieneAcceso, escucharAcceso } from './permisos.js?v=gestion-educarex1';
+import { prepararGestionAdmin } from './gestion-admin.js?v=gestion-educarex1';
+import { prepararCuentosAdmin } from './cuentos-admin.js?v=gestion-educarex1';
 import { prepararMenu } from './menu-admin.js?v=panel-biblioteca1';
 import { contarPantallas, exigirPantalla } from './pantallas.js?v=ilustrados1';
 import { prepararAcordeones } from './acordeones.js?v=ilustrados1';
@@ -61,6 +63,7 @@ async function main() {
     return;
   }
   const { auth, A, db, D } = fb;
+  const gestionAdmin=prepararGestionAdmin(fb);
   await A.setPersistence(auth, A.browserSessionPersistence);
   $('#google').addEventListener('click', async () => {
     error(login, '');
@@ -104,8 +107,8 @@ async function main() {
       $('#codigo-sesion').textContent=sesion.codigo;
       $('#caducidad-sesion').textContent='Válido hasta las '+new Date(sesion.expira).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
       mostrar('panel'); escucharPantallas(); escucharHistorial();
-      parar.push(D.onValue(D.ref(db, RUTA+'/admins/'+usuario.uid), snap=>{
-        if(snap.val()!==true){usuario=null;parar.forEach(fn=>fn());parar=[];mostrar('sin-permiso','Permiso de administrador revocado.');}
+      parar.push(escucharAcceso(fb,usuario,permitido=>{
+        if(!permitido){usuario=null;gestionAdmin.usuario(null);parar.forEach(fn=>fn());parar=[];mostrar('sin-permiso','Permiso de administrador revocado.');}
       }));
       const reloj=setInterval(()=>{if(sesion && Date.now()+desfase>=sesion.expira){ $('#caducidad-sesion').textContent='Sesión caducada. Pulsa Nueva sesión.'; }},1000);
       parar.push(()=>clearInterval(reloj));
@@ -119,6 +122,7 @@ async function main() {
     parar = [];
     usuario = null;
     acordeones.usuario(null);
+    gestionAdmin.usuario(null);
     pantallas.hidden = true;
     if (!user) {
       mostrar('login');
@@ -127,7 +131,7 @@ async function main() {
     mostrar('nada', 'Comprobando permisos…');
     let esAdmin = false;
     try {
-      esAdmin = (await D.get(D.ref(db, `${RUTA}/admins/${user.uid}`))).val() === true;
+      esAdmin = await tieneAcceso(fb,user);
     } catch (err) {
       console.error(err);
     }
@@ -137,6 +141,7 @@ async function main() {
     }
     if (auth.currentUser?.uid !== user.uid) return;
     usuario = user;
+    gestionAdmin.usuario(user);
     acordeones.usuario(user.uid);
     await nuevaSesion();
   });

@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css?v=cuentos-admin2">
+  <link rel="stylesheet" href="css/admin.css?v=gestion-educarex1">
 </head>
 <body>
   <header class="cabecera">
@@ -39,6 +39,7 @@
           <button type="button" data-vista="gestos">Gestos y emociones</button>
           <button type="button" data-vista="cuentos">Cuentos</button>
           <button type="button" data-vista="historial">Historial</button>
+          <button id="menu-admin-propietario" type="button" data-vista="admin" hidden>Admin</button>
           <a href="cuentos/">Dibujos y fichas <span aria-hidden="true">↗</span></a>
           <a href="./" target="_blank" rel="noopener">Abrir visor <span aria-hidden="true">↗</span></a>
         </nav>
@@ -68,6 +69,15 @@
         <p id="estado-cuento" role="status" aria-live="polite"></p>
         <div class="acciones"><button id="pausar-cuento-admin" class="secundario" type="button">⏸ Pausa</button><button id="continuar-cuento-admin" class="secundario" type="button">▶ Continuar</button><button id="detener-cuento" class="peligro" type="button">Detener cuento</button></div>
         <p class="error" role="alert"></p>
+      </div>
+      <div id="gestion-permisos" class="tarjeta" data-seccion="admin" hidden>
+        <h2>Admin · Autorizar cuentas Educarex</h2>
+        <p class="ayuda">Añade el correo completo de la persona que podrá controlar a Maximilian. Entrará con su propia cuenta Educarex, sin compartir contraseñas.</p>
+        <form id="autorizar-correo"><label>Correo Educarex<input name="correo" type="email" maxlength="254" autocomplete="off" placeholder="nombre@educarex.es" required></label><button type="submit">Añadir correo</button></form>
+        <p id="estado-permisos" role="status" aria-live="polite"></p>
+        <h3>Correos añadidos desde este apartado</h3>
+        <ul id="correos-autorizados"></ul>
+        <p class="ayuda">Las cuentas autorizadas anteriormente mantienen su acceso. Este permiso no permite que otras personas añadan administradores.</p>
       </div>
       <form id="mensaje" class="tarjeta" data-seccion="mensajes" hidden>
         <h2>Mensaje</h2>
@@ -99,6 +109,6 @@
     </section>
   </main>
 
-  <script type="module" src="js/admin.js?v=cuentos-admin2"></script>
+  <script type="module" src="js/admin.js?v=gestion-educarex1"></script>
 </body>
 </html>
