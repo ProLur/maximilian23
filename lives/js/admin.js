@@ -1,3 +1,4 @@
+import { prepararMenu } from './menu-admin.js?v=panel-biblioteca1';
 import { contarPantallas, exigirPantalla } from './pantallas.js?v=ilustrados1';
 import { prepararAcordeones } from './acordeones.js?v=ilustrados1';
 // Maximilian 23 - panel de control remoto.
@@ -6,7 +7,6 @@ import { prepararAcordeones } from './acordeones.js?v=ilustrados1';
 
 import { cargarFirebase, configurado, desfaseServidor, RUTA } from './firebase.js';
 import { crearSesion, rutaSesion } from './sesiones.js?v=ilustrados1';
-import { CUENTOS } from './cuentos.js?v=ilustrados1';
 
 const $ = (sel) => document.querySelector(sel);
 const aviso = $('#aviso');
@@ -16,6 +16,7 @@ const form = $('#mensaje');
 const salir = $('#salir');
 const pantallas = $('#pantallas');
 const acordeones = prepararAcordeones(panel);
+const menu = prepararMenu(panel);
 let sesionPlegada = false;
 
 const EMOCIONES = [
@@ -66,12 +67,12 @@ async function main() {
     boton.disabled = true;
     try {
       const proveedor = new A.GoogleAuthProvider();
-      proveedor.setCustomParameters({ prompt: 'select_account' });
+      proveedor.setCustomParameters({ prompt: 'select_account', hd: 'educarex.es' });
       await A.signInWithPopup(auth, proveedor);
     } catch (err) {
       error(login, err.code === 'auth/popup-blocked'
         ? 'Permite la ventana de acceso de Google y vuelve a intentarlo.'
-        : ERRORES_AUTH[err.code] ?? 'No se ha completado el acceso con Google. Vuelve a intentarlo.');
+        : ERRORES_AUTH[err.code] ?? 'No se ha completado el acceso a Educarex. Vuelve a intentarlo.');
     } finally { boton.disabled = false; }
   });
   const desfase = await desfaseServidor(db, D);
@@ -82,34 +83,7 @@ async function main() {
   let parar = [];                        // suscripciones activas del panel
 
   // ---------------------------------------------------------------- sesion
-  login.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    error(login, '');
-    const boton = login.querySelector('[type=submit]');
-    boton.disabled = true;
-    try {
-      await A.signInWithEmailAndPassword(auth, login.email.value.trim(), login.password.value);
-      login.password.value = '';
-    } catch (err) {
-      error(login, ERRORES_AUTH[err.code] ?? `No se ha podido entrar (${err.code}).`);
-    } finally {
-      boton.disabled = false;
-    }
-  });
-
-  login.elements.olvido.addEventListener('click', async () => {
-    const email = login.email.value.trim();
-    if (!email) {
-      error(login, 'Escribe tu correo y vuelve a pulsar.');
-      return;
-    }
-    try {
-      await A.sendPasswordResetEmail(auth, email);
-      error(login, 'Si el correo está registrado, recibirás un enlace para cambiar la contraseña.');
-    } catch (err) {
-      error(login, ERRORES_AUTH[err.code] ?? `Error: ${err.code}`);
-    }
-  });
+  login.addEventListener('submit', e => e.preventDefault());
 
   async function cerrarSesion() {
     if (sesion) await D.update(D.ref(db,rutaSesion(sesion.codigo)+'/meta'),{expira:D.serverTimestamp()});
@@ -124,7 +98,7 @@ async function main() {
       await cerrarSesion();
       parar.forEach(fn=>fn()); parar=[];
       sesion=await crearSesion(fb,usuario.uid,desfase);
-      sesionPlegada=false;acordeones.abrirSesion();
+      sesionPlegada=false;acordeones.abrirSesion();menu.mostrar('sesion');
       base=rutaSesion(sesion.codigo)+'/canales/'+sesion.nonce;
       $('#codigo-sesion').textContent=sesion.codigo;
       $('#caducidad-sesion').textContent='Válido hasta las '+new Date(sesion.expira).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
@@ -239,44 +213,6 @@ async function main() {
   }
 
   // ---------------------------------------------------------------- estado
-  for (const cuento of CUENTOS) {
-    const boton = document.createElement('button');
-    boton.type = 'button';
-    boton.className = 'tarjeta-cuento';
-    boton.style.setProperty('--cuento-color', cuento.color);
-    const icono = document.createElement('span');
-    icono.className = 'cuento-mini-icono'; icono.textContent = cuento.icono;
-    const titulo = document.createElement('strong'); titulo.textContent = cuento.titulo;
-    const tema = document.createElement('small'); tema.textContent = `${cuento.tema} · 1 minuto aprox.`;
-    const accion = document.createElement('span'); accion.className = 'cuento-accion'; accion.textContent = '▶ Contar este cuento';
-    boton.append(icono,titulo,tema,accion);
-    boton.addEventListener('click', async () => {
-      boton.disabled = true;
-      $('#estado-cuento').textContent = 'Enviando cuento…';
-      const ok = await enviar({tipo:'cuento',cuento:cuento.id},$('#biblioteca'));
-      $('#estado-cuento').textContent = ok ? `Enviado: ${cuento.titulo}. Orden enviada a los visores de esta sesión.` : '';
-      boton.disabled = false;
-    });
-    $('#cuentos').appendChild(boton);
-  }
-  $('#detener-cuento').addEventListener('click', async () => {
-    if (await enviar({tipo:'detener'},$('#biblioteca'))) $('#estado-cuento').textContent = 'Se ha enviado la orden de detener el cuento.';
-  });
-
-  for(const [id,accion] of [['pausar-cuento-admin','pausar'],['continuar-cuento-admin','continuar']]){
-    $('#'+id).addEventListener('click',async()=>{
-      if(await enviar({tipo:'reproduccion',accion},$('#biblioteca')))$('#estado-cuento').textContent=accion==='pausar'?'Orden de pausa enviada.':'Orden de continuar enviada.';
-    });
-  }
-  for(const cuento of CUENTOS){
-    const tarjeta=document.createElement('div');tarjeta.className='ficha-colorear';
-    const titulo=document.createElement('strong');titulo.textContent=cuento.icono+' '+cuento.titulo;
-    const enlace=document.createElement('a');enlace.href='fichas/'+cuento.id+'.pdf';enlace.target='_blank';enlace.rel='noopener';enlace.textContent='Abrir ficha para imprimir';
-    const descarga=document.createElement('a');descarga.href=enlace.href;descarga.download=cuento.id+'.pdf';descarga.textContent='Descargar PDF';
-    const vista=document.createElement('img');vista.src='fichas/'+cuento.id+'.png';vista.alt='Vista previa para colorear: '+cuento.titulo;vista.loading='lazy';
-    tarjeta.append(titulo,vista,enlace,descarga);$('#fichas').append(tarjeta);
-  }
-
   function escucharPantallas() {
     let datos = {};
     const pintar = () => {

@@ -1,4 +1,4 @@
-import { VozGrabada } from './voz-grabada.js?v=infantil-pausado1';
+import { VozGrabada } from './voz-grabada.js?v=panel-biblioteca1';
 // Maximilian 23 - pagina publica: escena 3D, carga del modelo y controles minimos.
 
 import * as THREE from 'three';
@@ -8,15 +8,16 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Maximilian } from './maximilian.js?v=infantil-pausado1';
-import { Voz } from './voz.js?v=infantil-pausado1';
-import { conectarRemoto } from './remoto.js?v=infantil-pausado1';
-import { Cuentacuentos } from './cuentos.js?v=infantil-pausado1';
+import { Maximilian } from './maximilian.js?v=panel-biblioteca1';
+import { Voz } from './voz.js?v=panel-biblioteca1';
+import { conectarRemoto } from './remoto.js?v=panel-biblioteca1';
+import { CUENTOS, Cuentacuentos } from './cuentos.js?v=panel-biblioteca1';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
 const params = new URLSearchParams(location.search);
 // Calidad: ?calidad=alta|baja la fija; si no, se mide la fluidez y se baja sola si hace falta.
+const CUENTO_LOCAL = CUENTOS.find(c=>c.id===params.get('cuento'));
 const CALIDAD = params.get('calidad');
 const USE_BLOOM = params.get('brillo') !== '0' && CALIDAD !== 'baja';
 const FILL = 0.9;                        // fraccion de pantalla que ocupa el modelo (cuerpo entero)
@@ -191,7 +192,13 @@ async function load() {
   window.maximilian = max;               // para probar desde la consola
   loading.classList.add('oculto');
   await setupVoz(max);
-  prepararConexion();
+  if(CUENTO_LOCAL){
+    const barra=document.createElement('div');barra.className='controles-biblioteca';
+    const volver=document.createElement('a');volver.href='cuentos/';volver.textContent='← Cuentos y fichas';
+    const comenzar=document.createElement('button');comenzar.type='button';comenzar.textContent='▶ Comenzar cuento';
+    comenzar.addEventListener('click',()=>{activarVoz();narrador.contar(CUENTO_LOCAL.id);comenzar.textContent='↻ Volver a empezar';});
+    barra.append(volver,comenzar);document.body.append(barra);activarBtn.hidden=true;
+  }else prepararConexion();
   document.dispatchEvent(new CustomEvent('maximilian:listo', { detail: max }));
 }
 
@@ -281,7 +288,7 @@ async function setupVoz(max) {
     if(!matchMedia('(prefers-reduced-motion: reduce)').matches)texto.animate?.([{opacity:0},{opacity:1}],{duration:350});
     const dibujo=document.getElementById('cuento-ilustracion');dibujo.hidden=!escena;
     if(escena){
-      const celda=[0,1,1,2,2][i];dibujo.style.backgroundImage='url("img/cuentos/'+cuento.id+'.png")';
+      const celda=[0,1,1,2,2][i];dibujo.style.backgroundImage='url("img/cuentos/'+cuento.id+'.webp")';
       dibujo.style.backgroundPosition=(celda*50)+'% center';dibujo.style.aspectRatio=cuento.id==='zorro'?'8 / 9':'1';dibujo.setAttribute('aria-label',cuento.titulo+', ilustración '+(celda+1));
     }
     document.getElementById('cuento-pagina').textContent=escena?(i+1)+' de '+cuento.escenas.length:'Comenzamos';

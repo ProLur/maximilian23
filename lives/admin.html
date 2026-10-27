@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css?v=ilustrados1">
+  <link rel="stylesheet" href="css/admin.css?v=panel-biblioteca1">
 </head>
 <body>
   <header class="cabecera">
@@ -21,19 +21,28 @@
 
     <!-- Inicio de sesion -->
     <form id="login" class="tarjeta" hidden>
-      <h2>Iniciar sesión</h2>
-      <button id="google" type="button">Entrar con Google</button>
-      <p>Accede con la cuenta autorizada para controlar a Maximilian.</p>
-      <label>Correo <input name="email" type="email" autocomplete="username" required></label>
-      <label>Contraseña <input name="password" type="password" autocomplete="current-password" required></label>
-      <button type="submit">Entrar</button>
-      <button type="button" name="olvido" class="enlace">He olvidado la contraseña</button>
+      <span class="acceso-icono" aria-hidden="true">M</span>
+      <h2>Acceso a Educarex</h2>
+      <p>Entra con tu cuenta Educarex autorizada para controlar a Maximilian.</p>
+      <button id="google" type="button">Acceso a Educarex</button>
       <p class="error" role="alert"></p>
     </form>
 
     <!-- Panel -->
     <section id="panel" hidden>
-      <div class="tarjeta sesion-admin">
+      <div class="menu-panel">
+        <button id="menu-toggle" class="secundario" type="button" aria-expanded="false" aria-controls="navegacion-panel"><span aria-hidden="true">☰</span> Menú <span id="seccion-actual">Sesión</span></button>
+        <nav id="navegacion-panel" aria-label="Secciones del panel">
+          <p class="menu-etiqueta">PANEL DE CONTROL</p>
+          <button type="button" data-vista="sesion" aria-current="page">Sesión</button>
+          <button type="button" data-vista="mensajes">Mensajes</button>
+          <button type="button" data-vista="gestos">Gestos y emociones</button>
+          <button type="button" data-vista="historial">Historial</button>
+          <a href="cuentos/">Cuentos y fichas <span aria-hidden="true">↗</span></a>
+          <a href="./" target="_blank" rel="noopener">Abrir visor <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+      <div id="vista-sesion" class="tarjeta sesion-admin" data-seccion="sesion">
         <h2>Tu sesión de Maximilian</h2>
         <p>Introduce este código en la pantalla que quieres controlar. Cada pestaña ADMIN tiene su propia sesión.</p>
         <output id="codigo-sesion" aria-label="Código de sesión">·····</output>
@@ -41,7 +50,7 @@
         <button id="nueva-sesion" type="button" class="secundario">Nueva sesión</button>
         <p class="ayuda">El código vincula las pantallas. Solo tu cuenta de administrador puede enviar órdenes. Una nueva sesión desconecta la anterior.</p>
       </div>
-      <div id="acciones-directas" class="tarjeta">
+      <div id="acciones-directas" class="tarjeta" data-seccion="gestos" hidden>
         <h2>Gestos</h2>
         <p class="ayuda">Pulsa un botón sin escribir texto. Saludar y guiñar vuelven automáticamente a reposo.</p>
         <div id="gestos" class="gestos"></div>
@@ -51,22 +60,7 @@
         <p id="estado-accion" class="estado-accion" role="status" aria-live="polite"></p>
         <p class="error" role="alert"></p>
       </div>
-      <div id="biblioteca" class="tarjeta biblioteca">
-        <span class="biblioteca-etiqueta">LA HORA DEL CUENTO</span>
-        <h2>Cuéntanos un cuento, Maximilian</h2>
-        <p class="ayuda">Cinco historias con voz electrónica, gestos y texto grande. Toca una vez «Activar voz y cuentos» en el visor. Los audios se han generado localmente, sin API de pago.</p>
-        <div id="cuentos" class="cuentos-grid"></div>
-        <p id="estado-cuento" role="status" aria-live="polite"></p>
-        <div class="acciones"><button id="pausar-cuento-admin" class="secundario" type="button">⏸ Pausa</button><button id="continuar-cuento-admin" class="secundario" type="button">▶ Continuar</button></div>
-        <button id="detener-cuento" class="peligro" type="button">Detener cuento</button>
-        <p class="error" role="alert"></p>
-      </div>
-      <div id="fichas-colorear" class="tarjeta">
-        <h2>Fichas para colorear</h2>
-        <p class="ayuda">Cinco fichas A4 para infantil: dibujos grandes, contornos gruesos y espacios amplios. Abre el PDF para imprimirlo.</p>
-        <div id="fichas" class="fichas-grid"></div>
-      </div>
-      <form id="mensaje" class="tarjeta">
+      <form id="mensaje" class="tarjeta" data-seccion="mensajes" hidden>
         <h2>Mensaje</h2>
         <label class="bloque">
           <span>Texto que dirá Maximilian</span>
@@ -89,13 +83,13 @@
         <p class="error" role="alert"></p>
       </form>
 
-      <div class="tarjeta">
+      <div id="vista-historial" class="tarjeta" data-seccion="historial" hidden>
         <h2>Últimos mensajes</h2>
         <ol id="historial" class="historial"></ol>
       </div>
     </section>
   </main>
 
-  <script type="module" src="js/admin.js?v=ilustrados1"></script>
+  <script type="module" src="js/admin.js?v=panel-biblioteca1"></script>
 </body>
 </html>
