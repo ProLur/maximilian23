@@ -1,0 +1,17 @@
+# Rutinas con voz y mejoras del panel — 27/10/2026
+
+Ocho mensajes predefinidos con MP3 originales, generados con la misma voz Piper juvenil robótica y pausada de los cuentos: Buenos días, Qué tal estáis, Merienda, Recreo, Volvemos a clase, Recoger, Escuchamos y Hasta mañana. El visor necesita una interacción para activar audio según las restricciones del navegador. Los mensajes libres mantienen su funcionamiento anterior; no se sintetiza automáticamente cualquier texto nuevo.
+
+Nueva sección Mensajes con voz. Programación de una sola vez mediante fecha y hora del dispositivo, dentro de la vigencia de la sesión. Las órdenes se guardan en Firebase, pero quien ejecuta la programación es ADMIN: panel y visor abiertos, conectados y equipo despierto. Una transacción permite reclamar una tarea una sola vez entre varias pestañas. Sin pantalla, cambio de código, o más de 60 segundos de retraso, se marca como no enviada, sin reproducirla luego. Se pueden cancelar las pendientes. No hay servidor de tareas, facturación ni API de voz de pago.
+
+El cuadro del cuento conserva dimensiones dentro de la ventana. El texto se ajusta y el contenido largo desplaza solo la zona de lectura; controles y progreso permanecen dentro del marco. Se han probado palabras largas y textos extensos en 1920, 820, 390 y 320 píxeles de ancho.
+
+Borrar historial elimina únicamente los mensajes de la sesión propia activa. No borra STATS ni repite la última orden. Las reglas permiten el borrado completo del historial de esa sesión, no del de otras personas.
+
+Admin muestra todas las cuentas autorizadas, con una × para retirar acceso. Se trasladan las autorizaciones antiguas conocidas por UID a la lista de correos, preservando los permisos existentes. La cuenta propietaria conserva su UID y queda protegida frente a borrado. La retirada se aplica también a sesiones abiertas al actualizar sus permisos. Los datos de respaldo de permisos se conservan localmente fuera del repositorio.
+
+El código se asocia a la cuenta y este navegador mediante localStorage; no se usa la IP ni la huella del ordenador. Se valida propietario, generación y caducidad contra Firebase al restaurar. Recargar o abrir otra pestaña de esa cuenta reutiliza el código; Nueva sesión o Salir lo renuevan/cierran. La vigencia sigue siendo de cuatro horas. Otro navegador, perfil, modo privado o borrado de datos genera otra asociación. El visor recuerda el último código y reconecta al recargar si sigue válido. Web Locks serializa la reserva entre pestañas compatibles.
+
+STATS agrupa las aperturas y recargas del mismo navegador y usuario mediante un identificador aleatorio local. Mientras haya uso del navegador o no pasen 30 minutos sin señal, cuenta un acceso único. Cada pestaña conserva sus tramos para sumar tiempos y funciones sin sobrescribirlos. La función Nueva sesión solo aumenta cuando realmente se crea un código. Salir termina el grupo; no se almacenan IP. La protección privada de STATS se mantiene.
+
+Pruebas: unitarias de frases/protocolo, programación sin duplicados, vencidos y falta de visor, persistencia de códigos y agrupación; emulador real de reglas para mensajes, programación, borrado de historial, retirada y protección de propietario, aislamiento, STATS y permisos; Chrome con audio real, recarga, programación automática, historial, retirada y pruebas de marco. Los datos de prueba solo se usan localmente. Todo el código, audios y recursos se publica en GitHub; en Firebase solo reglas y datos de funcionamiento necesarios.

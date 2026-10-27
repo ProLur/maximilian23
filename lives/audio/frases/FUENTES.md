@@ -1,0 +1,1 @@
+Audios generados localmente con el mismo modelo, ritmo pausado y efecto juvenil robótico aprobado para los cuentos. Véase ../cuentos/FUENTES.md. No se utiliza voz del navegador ni una API de pago. Textos y archivos en manifest.json.

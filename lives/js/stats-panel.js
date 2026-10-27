@@ -1,5 +1,5 @@
-import {esPropietario} from './permisos.js?v=stats1';
-import {resumirCuentas,FUNCIONES,duracion} from './stats-datos.js?v=stats1';
+import {esPropietario} from './permisos.js?v=panel-rutinas1';
+import {resumirCuentas,FUNCIONES,duracion} from './stats-datos.js?v=panel-rutinas1';
 export function prepararStats({db,D},registro){
  const boton=document.getElementById('menu-stats'),estado=document.getElementById('stats-estado'),lista=document.getElementById('stats-cuentas'),busqueda=document.getElementById('stats-buscar'),periodo=document.getElementById('stats-periodo');let user=null,datos={},version=0;
  const fecha=t=>new Date(t).toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'});

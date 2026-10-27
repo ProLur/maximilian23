@@ -23,3 +23,16 @@ export async function crearSesion({db,D}, uid, desfase = 0) {
   }
   throw Error('No se ha podido reservar un código. Vuelve a intentarlo.');
 }
+
+export const claveSesion=uid=>'maximilian:ordenador:sesion:v1:'+uid;
+export function olvidarSesion(uid){try{localStorage.removeItem(claveSesion(uid));}catch{}}
+export async function obtenerSesion(fb,uid,desfase=0,{nueva=false}={}){
+ const obtener=async()=>{let cache=null;try{cache=JSON.parse(localStorage.getItem(claveSesion(uid)));}catch{}
+  if(!nueva&&cache&&codigoValido(cache.codigo)){
+   const meta=(await fb.D.get(fb.D.ref(fb.db,rutaSesion(cache.codigo)+'/meta'))).val();
+   if(meta?.propietario===uid&&meta.nonce===cache.nonce&&meta.expira>Date.now()+desfase)return{codigo:cache.codigo,...meta,reutilizada:true};
+  }
+  const sesion=await crearSesion(fb,uid,desfase);try{localStorage.setItem(claveSesion(uid),JSON.stringify(sesion));}catch{}return sesion;
+ };
+ return globalThis.navigator?.locks?globalThis.navigator.locks.request('maximilian-sesion-'+uid,obtener):obtener();
+}

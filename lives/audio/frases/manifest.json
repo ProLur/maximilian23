@@ -1,0 +1,50 @@
+{
+  "buenos-dias": {
+    "archivo": "buenos-dias.mp3",
+    "bytes": 63572,
+    "sha256": "4c28ed28eb12a90456e9f036ad22d22151a9fada9d6178031b226d3ecf4475e9",
+    "texto": "¡Buenos días! Soy Maximilian. Me alegra mucho veros. ¿Preparados para un día lleno de descubrimientos?"
+  },
+  "que-tal": {
+    "archivo": "que-tal.mp3",
+    "bytes": 54795,
+    "sha256": "f423487dc4545ca6fe34137fa9d7af8412eb477ebec6aeefee5247c5d15b6c29",
+    "texto": "¡Hola! ¿Qué tal estáis hoy? Vamos a escucharnos con calma. Cada uno puede contar cómo se siente."
+  },
+  "merienda": {
+    "archivo": "merienda.mp3",
+    "bytes": 66498,
+    "sha256": "70006e74f7f4fb2920fc78aa537a4edc630ddec458e7dc374ef1e74f4799397c",
+    "texto": "¡Es la hora de merendar! Nos lavamos las manos, nos sentamos y disfrutamos de nuestra merienda con tranquilidad."
+  },
+  "recreo": {
+    "archivo": "recreo.mp3",
+    "bytes": 65244,
+    "sha256": "5b8a3165547e371a776aad6636cc121b4a2c5b4b58cf0157cc3f78616eaf4be0",
+    "texto": "¡Ha llegado la hora del recreo! Vamos a jugar, compartir y cuidarnos. Recordad que todos podemos divertirnos juntos."
+  },
+  "a-clase": {
+    "archivo": "a-clase.mp3",
+    "bytes": 67334,
+    "sha256": "09d0e48ed8f258b125f0aa90b9c5ab1c6b97e2191e9f45717be39bd4efc2d154",
+    "texto": "¡Volvemos a clase! Guardamos los juguetes y entramos despacito. Nos esperan nuevas aventuras para aprender juntos."
+  },
+  "recoger": {
+    "archivo": "recoger.mp3",
+    "bytes": 58348,
+    "sha256": "bf1a37725738f809fc0e1a5000c224476dbf11168707c0528da5e4d525c22c1a",
+    "texto": "¡Vamos a recoger! Cada cosa vuelve a su lugar. Entre todos lo hacemos muy bien. ¡Gracias por ayudar!"
+  },
+  "silencio": {
+    "archivo": "silencio.mp3",
+    "bytes": 62736,
+    "sha256": "d1feba0a5fc91d4e0a5a947dcf0385711d3b065840fa6d54cab10b0e583a47eb",
+    "texto": "Vamos a bajar un poquito la voz. Respiramos despacio y escuchamos con atención. Ya estoy preparado para escucharos."
+  },
+  "hasta-manana": {
+    "archivo": "hasta-manana.mp3",
+    "bytes": 77365,
+    "sha256": "c558447d01949c00cdcaae8b8fb3ba5aa17330157e3f739bbf4c219530b5930d",
+    "texto": "¡Hasta mañana! Hoy hemos aprendido y compartido muchas cosas. Descansad y soñad bonito. Maximilian os espera para otra aventura."
+  }
+}

@@ -1,18 +1,19 @@
-import { crearRegistroStats } from './stats-registro.js?v=stats1';
-import { prepararStats } from './stats-panel.js?v=stats1';
-import { funcionComando } from './stats-datos.js?v=stats1';
-import { tieneAcceso, escucharAcceso } from './permisos.js?v=gestion-educarex1';
-import { prepararGestionAdmin } from './gestion-admin.js?v=gestion-educarex1';
-import { prepararCuentosAdmin } from './cuentos-admin.js?v=gestion-educarex1';
-import { prepararMenu } from './menu-admin.js?v=stats1';
-import { contarPantallas, exigirPantalla } from './pantallas.js?v=ilustrados1';
-import { prepararAcordeones } from './acordeones.js?v=ilustrados1';
+import { prepararRutinas } from './rutinas-admin.js?v=panel-rutinas1';
+import { crearRegistroStats } from './stats-registro.js?v=panel-rutinas1';
+import { prepararStats } from './stats-panel.js?v=panel-rutinas1';
+import { funcionComando } from './stats-datos.js?v=panel-rutinas1';
+import { tieneAcceso, escucharAcceso } from './permisos.js?v=panel-rutinas1';
+import { prepararGestionAdmin } from './gestion-admin.js?v=panel-rutinas1';
+import { prepararCuentosAdmin } from './cuentos-admin.js?v=panel-rutinas1';
+import { prepararMenu } from './menu-admin.js?v=panel-rutinas1';
+import { contarPantallas, exigirPantalla } from './pantallas.js?v=panel-rutinas1';
+import { prepararAcordeones } from './acordeones.js?v=panel-rutinas1';
 // Maximilian 23 - panel de control remoto.
 // Inicia sesion con Firebase Auth y escribe mensajes en la Realtime Database.
 // Las reglas (firebase/database.rules.json) solo dejan escribir a las cuentas de maximilian/admins.
 
 import { cargarFirebase, configurado, desfaseServidor, RUTA } from './firebase.js';
-import { crearSesion, rutaSesion } from './sesiones.js?v=ilustrados1';
+import { obtenerSesion, olvidarSesion, claveSesion, rutaSesion } from './sesiones.js?v=panel-rutinas1';
 
 const $ = (sel) => document.querySelector(sel);
 const aviso = $('#aviso');
@@ -92,6 +93,7 @@ async function main() {
   let sesion = null;
   let base = '';
   let cambiando = false;
+  const rutinas=prepararRutinas(fb,{enviar,getSesion:()=>sesion,desfase,registrar:t=>registro.registrar(t)});
   let parar = [];                        // suscripciones activas del panel
 
   // ---------------------------------------------------------------- sesion
@@ -99,32 +101,34 @@ async function main() {
 
   async function cerrarSesion() {
     if (sesion) await D.update(D.ref(db,rutaSesion(sesion.codigo)+'/meta'),{expira:D.serverTimestamp()});
+    if(usuario)olvidarSesion(usuario.uid);
     sesion=null; base='';
   }
-  salir.addEventListener('click', async () => { try { await cerrarSesion(); await registro.terminar(); await A.signOut(auth); } catch { mostrar('nada','No se ha podido cerrar la sesión. Revisa la conexión.'); } });
-  async function nuevaSesion() {
+  salir.addEventListener('click', async () => { try { await cerrarSesion(); await registro.salir(); await A.signOut(auth); } catch { mostrar('nada','No se ha podido cerrar la sesión. Revisa la conexión.'); } });
+  async function nuevaSesion(forzar=false) {
     if(cambiando || !usuario) return;
     cambiando=true;
     const boton=$('#nueva-sesion'); boton.disabled=true;
     try {
-      await cerrarSesion();
+      if(forzar)await cerrarSesion();
       parar.forEach(fn=>fn()); parar=[];
-      sesion=await crearSesion(fb,usuario.uid,desfase);
+      sesion=await obtenerSesion(fb,usuario.uid,desfase,{nueva:forzar});
       sesionPlegada=false;acordeones.abrirSesion();menu.mostrar('sesion');
       base=rutaSesion(sesion.codigo)+'/canales/'+sesion.nonce;
       $('#codigo-sesion').textContent=sesion.codigo;
       $('#caducidad-sesion').textContent='Válido hasta las '+new Date(sesion.expira).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-      registro.registrar('nuevaSesion');
+      if(!sesion.reutilizada)registro.registrar('nuevaSesion');
       mostrar('panel'); escucharPantallas(); escucharHistorial();
       parar.push(escucharAcceso(fb,usuario,permitido=>{
-        if(!permitido){usuario=null;gestionAdmin.usuario(null);stats.usuario(null);registro.terminar();parar.forEach(fn=>fn());parar=[];mostrar('sin-permiso','Permiso de administrador revocado.');}
+        if(!permitido){usuario=null;gestionAdmin.usuario(null);stats.usuario(null);rutinas.usuario(null);registro.terminar();parar.forEach(fn=>fn());parar=[];mostrar('sin-permiso','Permiso de administrador revocado.');}
       }));
       const reloj=setInterval(()=>{if(sesion && Date.now()+desfase>=sesion.expira){ $('#caducidad-sesion').textContent='Sesión caducada. Pulsa Nueva sesión.'; }},1000);
       parar.push(()=>clearInterval(reloj));
     } catch(err) { console.error(err); mostrar('nada','No se ha podido crear la sesión. Recarga el panel para intentarlo de nuevo.'); }
     finally {cambiando=false;boton.disabled=false;}
   }
-  $('#nueva-sesion').addEventListener('click',nuevaSesion);
+  $('#nueva-sesion').addEventListener('click',()=>nuevaSesion(true));
+  window.addEventListener('storage',e=>{if(usuario&&e.key===claveSesion(usuario.uid)&&e.newValue)nuevaSesion(false);});
 
   A.onAuthStateChanged(auth, async (user) => {
     parar.forEach((fn) => fn());
@@ -133,6 +137,7 @@ async function main() {
     acordeones.usuario(null);
     gestionAdmin.usuario(null);
     stats.usuario(null);
+    rutinas.usuario(null);
     registro.terminar();
     pantallas.hidden = true;
     if (!user) {
@@ -154,6 +159,7 @@ async function main() {
     usuario = user;
     gestionAdmin.usuario(user);
     stats.usuario(user);
+    rutinas.usuario(user);
     registro.iniciar(user);
     acordeones.usuario(user.uid);
     await nuevaSesion();
@@ -167,7 +173,7 @@ async function main() {
       if (!usuario) throw new Error('Inicia sesión');
       if (!sesion || Date.now()+desfase>=sesion.expira) throw new Error('La sesión ha caducado. Pulsa Nueva sesión.');
       const destinoBase=base,autor=usuario.uid;
-      if(datos.tipo==='decir'||datos.tipo==='cuento'||datos.tipo==='reproduccion'){
+      if(datos.tipo==='decir'||datos.tipo==='cuento'||datos.tipo==='reproduccion'||datos.tipo==='predefinido'){
         await exigirPantalla({db,D,base:destinoBase,ahora:()=>Date.now()+desfase});
         if(!sesion || base!==destinoBase || usuario?.uid!==autor)throw Error('La sesión ha cambiado. Vuelve a enviar.');
       }
@@ -251,17 +257,19 @@ async function main() {
     parar.push(() => clearInterval(reloj));
   }
 
+  $('#borrar-historial').addEventListener('click',async()=>{const b=$('#borrar-historial');b.disabled=true;try{if(!usuario||!sesion)throw Error('No hay sesión activa.');await D.remove(D.ref(db,base+'/mensajes'));$('#estado-historial').textContent='Historial borrado de esta sesión.';}catch{$('#estado-historial').textContent='No se ha podido borrar el historial.';}finally{b.disabled=false;}});
+
   function escucharHistorial() {
     const q = D.query(D.ref(db, `${base}/mensajes`), D.orderByChild('creado'), D.limitToLast(30));
     parar.push(D.onValue(q, (s) => {
       const items = [];
-      s.forEach((c) => { const v = c.val(); if (v.tipo === 'decir') items.push(v); });
+      s.forEach((c) => { const v = c.val(); if (v.tipo === 'decir'||v.tipo==='predefinido') items.push(v); });
       const lista = $('#historial');
       lista.replaceChildren(...items.reverse().slice(0, 10).map((m) => {
         const li = document.createElement('li');
         const hora = new Date(m.creado).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         const texto = document.createElement('span');
-        texto.textContent = m.texto;
+        texto.textContent = m.texto||('Mensaje con voz: '+m.frase);
         const meta = document.createElement('small');
         meta.textContent = m.emocion ? `${hora} · ${m.emocion}` : hora;
         const repetir = document.createElement('button');
@@ -269,8 +277,8 @@ async function main() {
         repetir.className = 'secundario';
         repetir.textContent = 'Repetir';
         repetir.addEventListener('click', () => {
-          const { tipo, texto: t, emocion, velocidad, tono } = m;
-          enviar(Object.fromEntries(Object.entries({ tipo, texto: t, emocion, velocidad, tono })
+          const { tipo, frase, texto: t, emocion, velocidad, tono } = m;
+          enviar(Object.fromEntries(Object.entries({ tipo, frase, texto: t, emocion, velocidad, tono })
             .filter(([, v]) => v !== undefined)));
         });
         li.append(texto, meta, repetir);

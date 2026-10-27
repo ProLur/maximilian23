@@ -13,7 +13,7 @@ export async function tieneAcceso({db,D},user){
 export function escucharAcceso({db,D},user,onCambio){
   const rutas=['maximilian/admins/'+user.uid],email=normalizarCorreo(user.email);
   if(user.emailVerified&&correoEducarex(email))rutas.push('maximilian/correosAutorizados/'+claveCorreo(email));
-  const valores=rutas.map(()=>null),parar=[];
-  rutas.forEach((ruta,i)=>{const actualizar=v=>{valores[i]=v;if(valores.every(v=>v!==null))onCambio(valores.some(Boolean));};parar.push(D.onValue(D.ref(db,ruta),s=>actualizar(s.val()===true),()=>actualizar(false)));});
-  return()=>parar.forEach(fn=>fn());
+  const valores=rutas.map(()=>null),parar=[];let comprobacion=null;
+  rutas.forEach((ruta,i)=>{const actualizar=v=>{valores[i]=v;if(valores.every(v=>v!==null)){clearTimeout(comprobacion);if(valores.some(Boolean))onCambio(true);else comprobacion=setTimeout(()=>onCambio(false),200);}};parar.push(D.onValue(D.ref(db,ruta),s=>actualizar(s.val()===true),()=>actualizar(false)));});
+  return()=>{clearTimeout(comprobacion);parar.forEach(fn=>fn());};
 }

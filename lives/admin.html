@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css?v=stats1">
+  <link rel="stylesheet" href="css/admin.css?v=panel-rutinas1">
 </head>
 <body>
   <header class="cabecera">
@@ -38,6 +38,7 @@
           <p class="menu-etiqueta">PANEL DE CONTROL</p>
           <button type="button" data-vista="sesion" aria-current="page">Sesión</button>
           <button type="button" data-vista="mensajes">Mensajes</button>
+          <button type="button" data-vista="rutinas">Mensajes con voz</button>
           <button type="button" data-vista="gestos">Gestos y emociones</button>
           <button type="button" data-vista="cuentos">Cuentos</button>
           <button type="button" data-vista="historial">Historial</button>
@@ -49,11 +50,18 @@
       </div>
       <div id="vista-sesion" class="tarjeta sesion-admin" data-seccion="sesion">
         <h2>Tu sesión de Maximilian</h2>
-        <p>Introduce este código en la pantalla que quieres controlar. Cada pestaña ADMIN tiene su propia sesión.</p>
+        <p>Introduce este código en la pantalla que quieres controlar. Las pestañas de ADMIN de esta cuenta comparten el código en este navegador. Recargar conserva la sesión mientras sea válida.</p>
         <output id="codigo-sesion" aria-label="Código de sesión">·····</output>
         <p id="caducidad-sesion" role="status"></p>
         <button id="nueva-sesion" type="button" class="secundario">Nueva sesión</button>
         <p class="ayuda">El código vincula las pantallas. Solo tu cuenta de administrador puede enviar órdenes. Una nueva sesión desconecta la anterior.</p>
+      </div>
+      <div id="rutinas" class="tarjeta" data-seccion="rutinas" hidden>
+        <h2>Mensajes con la voz de Maximilian</h2><p class="ayuda">La misma voz juvenil y robótica de los cuentos. Toca una vez el visor para activar el sonido.</p>
+        <div id="frases-rapidas" class="gestos"></div><h3>Programar un mensaje</h3>
+        <form id="programar-rutina"><label>Mensaje<select name="frase"></select></label><label>Fecha y hora de este dispositivo<input name="hora" type="datetime-local" step="1" required></label><button type="submit">Programar mensaje</button></form>
+        <p class="ayuda">ADMIN y la pantalla deben permanecer abiertos y conectados. La hora debe estar dentro de la vigencia del código. Sin visor, o si el ordenador se duerme y pasa más de un minuto, el mensaje quedará como no enviado.</p>
+        <p id="estado-rutina" role="status" aria-live="polite"></p><ul id="lista-programados"></ul><p class="error" role="alert"></p>
       </div>
       <div id="acciones-directas" class="tarjeta" data-seccion="gestos" hidden>
         <h2>Gestos</h2>
@@ -80,14 +88,14 @@
         <p id="estado-permisos" role="status" aria-live="polite"></p>
         <h3>Correos añadidos desde este apartado</h3>
         <ul id="correos-autorizados"></ul>
-        <p class="ayuda">Las cuentas autorizadas anteriormente mantienen su acceso. Este permiso no permite que otras personas añadan administradores.</p>
+        <p class="ayuda">Las cuentas autorizadas aparecen aquí. Pulsa × para retirar su acceso. Tu cuenta propietaria está protegida.</p>
       </div>
       <div id="vista-stats" class="tarjeta" data-seccion="stats" hidden>
         <h2>STATS · Uso por cuenta Educarex</h2>
         <p class="ayuda">Accesos y uso del panel desde esta actualización. Solo tú puedes consultar estas fichas.</p>
         <div class="stats-filtros"><label>Buscar cuenta<input id="stats-buscar" type="search" placeholder="nombre@educarex.es"></label><label>Periodo<select id="stats-periodo"><option value="30">Últimos 30 días</option><option value="7">Últimos 7 días</option><option value="todos">Todo el registro</option></select></label><button id="stats-actualizar" class="secundario" type="button">Actualizar</button></div>
         <p id="stats-estado" role="status" aria-live="polite"></p><p id="stats-resumen"></p><div id="stats-cuentas"></div>
-        <p class="ayuda">Tiempo aproximado, actualizado cada minuto mientras hay conexión. Actividad: panel visible e interacción en los últimos 2 minutos. Las pestañas suman tiempo. Abrir dibujos y fichas registra el enlace, no confirma una descarga. No se guarda el contenido de los mensajes.</p>
+        <p class="ayuda">Tiempo aproximado, actualizado cada minuto mientras hay conexión. Actividad: panel visible e interacción en los últimos 2 minutos. Las pestañas suman tiempo; una recarga continúa el mismo acceso del navegador (hasta 30 minutos sin actividad). Abrir dibujos y fichas registra el enlace, no confirma una descarga. No se guarda el contenido de los mensajes.</p>
       </div>
       <form id="mensaje" class="tarjeta" data-seccion="mensajes" hidden>
         <h2>Mensaje</h2>
@@ -114,11 +122,13 @@
 
       <div id="vista-historial" class="tarjeta" data-seccion="historial" hidden>
         <h2>Últimos mensajes</h2>
+        <button id="borrar-historial" type="button" class="peligro">Borrar historial</button>
+        <p id="estado-historial" role="status"></p>
         <ol id="historial" class="historial"></ol>
       </div>
     </section>
   </main>
 
-  <script type="module" src="js/admin.js?v=stats1"></script>
+  <script type="module" src="js/admin.js?v=panel-rutinas1"></script>
 </body>
 </html>

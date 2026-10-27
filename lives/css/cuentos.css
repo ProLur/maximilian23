@@ -44,3 +44,9 @@ body.modo-cuento { cursor: auto; }
 #pausa-cuento:disabled{opacity:.5;cursor:default;}
 .cuento-pausado #pausa-cuento{background:#d8e7d8;}
 @media(max-width:760px){.cuento-ilustracion{width:38%;margin-left:12px;} .cuento-pie{gap:8px;flex-wrap:wrap;}}
+
+/* El texto se ajusta dentro del marco, sin estirarlo. Solo la lectura desplaza. */
+.libro-cuento{height:84vh;max-height:84vh;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.cuento-cabecera,.cuento-pie,.cuento-raíl,#cuento-aviso{flex-shrink:0;}#cuento-titulo{flex-shrink:1;min-height:0;overflow:auto;overflow-wrap:anywhere;}
+.cuento-lectura{min-height:0;overflow:auto;overflow-wrap:anywhere;flex:1;scrollbar-width:thin;}#cuento-texto{overflow-wrap:anywhere;word-break:normal;}.cuento-ilustracion{max-width:43%;}
+@media(max-width:760px){.libro-cuento{height:45vh;max-height:45vh;}#cuento-titulo{max-height:28%;font-size:clamp(1.05rem,4vw,1.45rem);}.cuento-cabecera{float:none;align-self:flex-end;margin:0;}#cuento-icono{font-size:1.8rem;}.cuento-pie{font-size:.75rem;}#cuento-aviso{max-height:2.8em;overflow:auto;font-size:.7rem;}.cuento-lectura{width:100%;}}

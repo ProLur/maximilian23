@@ -1,4 +1,5 @@
-import { VozGrabada } from './voz-grabada.js?v=cuentos-admin2';
+import { FRASES } from './frases.js?v=panel-rutinas1';
+import { VozGrabada } from './voz-grabada.js?v=panel-rutinas1';
 // Maximilian 23 - pagina publica: escena 3D, carga del modelo y controles minimos.
 
 import * as THREE from 'three';
@@ -8,10 +9,10 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Maximilian } from './maximilian.js?v=cuentos-admin2';
-import { Voz } from './voz.js?v=cuentos-admin2';
-import { conectarRemoto } from './remoto.js?v=cuentos-admin2';
-import { CUENTOS, Cuentacuentos } from './cuentos.js?v=cuentos-admin2';
+import { Maximilian } from './maximilian.js?v=panel-rutinas1';
+import { Voz } from './voz.js?v=panel-rutinas1';
+import { conectarRemoto } from './remoto.js?v=panel-rutinas1';
+import { CUENTOS, Cuentacuentos } from './cuentos.js?v=panel-rutinas1';
 
 window.__maxArrancado = true;           // desactiva el aviso de index.html
 
@@ -212,24 +213,30 @@ const GESTOS = {
 };
 
 /** Ejecuta un mensaje del panel: { tipo: 'decir' | 'gesto' | 'detener', ... } */
+let generacionFrase=0;
 function ejecutarMensaje(m) {
   if (m.tipo === 'reproduccion') {
     if(m.accion==='pausar')narrador?.pausar();else if(m.accion==='continuar')narrador?.continuar();
     return;
   }
+  const numeroFrase=++generacionFrase;subtitulo.classList.remove('visible');
   if (m.tipo === 'cuento') {
     voz.detener();
     narrador?.contar(m.cuento);
     return;
   }
+  vozCuentos?.detener();
   if (narrador?.visible) narrador.detener();
-  if (m.tipo === 'decir') {
+  if (m.tipo === 'predefinido') {
+    const frase=FRASES.find(f=>f.id===m.frase);if(!frase)return;voz.detener();
+    vozCuentos.decir(frase.texto,{audio:'audio/frases/'+frase.id+'.mp3',emocion:'alegria',onInicio:()=>{subtitulo.textContent=frase.texto;subtitulo.classList.add('visible');}}).then(()=>{if(numeroFrase===generacionFrase)subtitulo.classList.remove('visible');});
+  } else if (m.tipo === 'decir') {
     voz.decir(m.texto, { emocion: m.emocion || undefined, velocidad: m.velocidad, tono: m.tono });
   } else if (m.tipo === 'gesto') {
     if (GESTOS[m.gesto]) GESTOS[m.gesto]();
     else if (max.expresiones[m.gesto]) max.setExpression(m.gesto, { duracion: 4 });
   } else if (m.tipo === 'detener') {
-    voz.detener();
+    voz.detener();vozCuentos?.detener();
   }
 }
 window.maxMensaje = ejecutarMensaje;     // para probar sin Firebase desde la consola
@@ -284,7 +291,7 @@ async function setupVoz(max) {
     libro.style.setProperty('--cuento-color',cuento.color);
     document.getElementById('cuento-icono').textContent=cuento.icono;
     const titulo=document.getElementById('cuento-titulo');titulo.textContent=cuento.titulo;titulo.hidden=Boolean(escena);
-    const texto=document.getElementById('cuento-texto');texto.textContent=escena?.texto||'';
+    const texto=document.getElementById('cuento-texto');texto.textContent=escena?.texto||'';document.querySelector('.cuento-lectura').scrollTop=0;
     if(!matchMedia('(prefers-reduced-motion: reduce)').matches)texto.animate?.([{opacity:0},{opacity:1}],{duration:350});
     const dibujo=document.getElementById('cuento-ilustracion');dibujo.hidden=!escena;
     if(escena){
@@ -416,6 +423,7 @@ function prepararConexion() {
         document.body.dataset.remoto=e;
         estado.textContent={conectado:'Conectado a la sesión '+codigo,desconectado:'Sin conexión. Intentando reconectar…',caducada:'La sesión ha terminado. Pide un código nuevo.',error:'No se ha podido conectar. Comprueba el código.', 'error-ejecucion':'No se ha podido ejecutar la orden.'}[e]||e;
         const conectado=e==='conectado';
+        try{if(conectado)localStorage.setItem('maximilian:visor:codigo',codigo);if(e==='caducada')localStorage.removeItem('maximilian:visor:codigo');}catch{}
         formulario.classList.toggle('vinculado',conectado);
         if(e==='caducada'||e==='error'){narrador?.detener();voz?.detener();}
       }});
@@ -423,4 +431,5 @@ function prepararConexion() {
     finally{boton.disabled=false;}
   });
   formulario.hidden=false;
+  try{const anterior=localStorage.getItem('maximilian:visor:codigo');if(/^[0-9]{5}$/.test(anterior||'')){entrada.value=anterior;formulario.requestSubmit();}}catch{}
 }

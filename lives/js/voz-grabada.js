@@ -43,7 +43,7 @@ export class VozGrabada {
           if(m.opciones.emocion)this.max.setExpression(m.opciones.emocion);
           this.max.startTalking();m.opciones.onInicio?.();
         };
-        if(!/^audio[/]cuentos[/](estrella|tortuga|nube|zorro|semilla)-([1-5]|titulo)\.mp3$/.test(m.opciones.audio||'')){fin(Error('Audio desconocido.'));return;}
+        if(!/^(audio[/]cuentos[/](estrella|tortuga|nube|zorro|semilla)-([1-5]|titulo)|audio[/]frases[/](buenos-dias|que-tal|merienda|recreo|a-clase|recoger|silencio|hasta-manana))\.mp3$/.test(m.opciones.audio||'')){fin(Error('Audio desconocido.'));return;}
         this.enAudio=true;this.audio.src=m.opciones.audio+'?v=infantil-pausado1';
         this.audio.play().catch(fin);
       });
