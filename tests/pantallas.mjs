@@ -15,8 +15,8 @@ const admin=fs.readFileSync(new URL('../lives/js/admin.js',import.meta.url),'utf
 const start=admin.indexOf('  async function enviar('),end=admin.indexOf("\n  form.addEventListener('submit'",start);
 assert(start>0&&end>start);
 const codigo=admin.slice(start,end);
-const errores=[];const contexto={form:{texto:{value:'Conservar este mensaje'}},error:(_,t)=>errores.push(t),aviso:{hidden:true},usuario:{uid:'docente'},sesion:{expira:now+60000},base,desfase:0,D,db:{},exigirPantalla,console:{error(){}}};
-const enviar=new Function('contexto','const {form,error,aviso,usuario,sesion,base,desfase,D,db,exigirPantalla,console}=contexto;'+codigo+'; return enviar;')(contexto);
+const errores=[];const contexto={form:{texto:{value:'Conservar este mensaje'}},error:(_,t)=>errores.push(t),aviso:{hidden:true},usuario:{uid:'docente'},sesion:{expira:now+60000},base,desfase:0,D,db:{},exigirPantalla,console:{error(){}},registro:{registrar(){}},funcionComando:()=> 'mensaje'};
+const enviar=new Function('contexto','const {form,error,aviso,usuario,sesion,base,desfase,D,db,exigirPantalla,console,registro,funcionComando}=contexto;'+codigo+'; return enviar;')(contexto);
 for(const tipo of ['decir','cuento']){
  datos=null;assert.equal(await enviar({tipo,texto:'Hola',cuento:'estrella'}),false);assert.equal(escrituras.length,0);assert(!contexto.aviso.hidden);assert.match(errores.at(-1),/No hay ninguna pantalla/);
 }

@@ -156,6 +156,42 @@
           ".write": "auth != null && auth.uid === 'maximilian-owner-d214a047-2e3c-4773-94bd-b36434ac33d4' && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'mmartinezf001@educarex.es' && newData.exists() && newData.val() === true",
           ".validate": "$correo.length <= 254 && $correo.matches(/^[a-z0-9][a-z0-9,_+-]*@educarex,es$/) && newData.val() === true"
         }
+      },
+      "estadisticas": {
+        ".read": "auth != null && auth.uid === 'maximilian-owner-d214a047-2e3c-4773-94bd-b36434ac33d4' && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'mmartinezf001@educarex.es'",
+        "$uid": {
+          "$visita": {
+            ".write": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.email.toLowerCase().matches(/^[a-z0-9][a-z0-9._+-]*@educarex[.]es$/) && (root.child('maximilian/admins/' + auth.uid).val() === true || (auth.token.email_verified === true && auth.token.email.toLowerCase().matches(/^[a-z0-9][a-z0-9._+-]*@educarex[.]es$/) && root.child('maximilian/correosAutorizados/' + auth.token.email.toLowerCase().replace('.', ',')).val() === true)) && $visita.length === 20 && newData.exists()",
+            ".validate": "newData.hasChildren(['email','inicio','actualizado','segundos','activos']) && newData.child('activos').val() <= newData.child('segundos').val() && newData.child('segundos').val() <= (now-newData.child('inicio').val())/1000+2 && (!data.child('uso').exists() || newData.child('uso').exists())",
+            "email": {
+              ".validate": "newData.isString() && newData.val() === auth.token.email.toLowerCase() && (!data.exists() || newData.val() === data.val())"
+            },
+            "inicio": {
+              ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === now) || (data.exists() && newData.val() === data.val()))"
+            },
+            "actualizado": {
+              ".validate": "newData.isNumber() && newData.val() === now"
+            },
+            "fin": {
+              ".validate": "newData.isNumber() && newData.val() === now"
+            },
+            "uso": {
+              "$funcion": {
+                ".validate": "($funcion === 'sesion' || $funcion === 'mensajes' || $funcion === 'gestos' || $funcion === 'cuentos' || $funcion === 'historial' || $funcion === 'admin' || $funcion === 'stats' || $funcion === 'recursos' || $funcion === 'visor' || $funcion === 'nuevaSesion' || $funcion === 'mensaje' || $funcion === 'detener' || $funcion === 'pausar' || $funcion === 'continuar' || $funcion === 'saludar' || $funcion === 'guino' || $funcion === 'atencion' || $funcion === 'parpadeo' || $funcion === 'reposo' || $funcion === 'alegria' || $funcion === 'sorpresa' || $funcion === 'tristeza' || $funcion === 'serio' || $funcion === 'estrella' || $funcion === 'tortuga' || $funcion === 'nube' || $funcion === 'zorro' || $funcion === 'semilla') && newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 100000 && (!data.exists() || newData.val() >= data.val())"
+              },
+              ".validate": "(!data.child('sesion').exists() || newData.child('sesion').exists()) && (!data.child('mensajes').exists() || newData.child('mensajes').exists()) && (!data.child('gestos').exists() || newData.child('gestos').exists()) && (!data.child('cuentos').exists() || newData.child('cuentos').exists()) && (!data.child('historial').exists() || newData.child('historial').exists()) && (!data.child('admin').exists() || newData.child('admin').exists()) && (!data.child('stats').exists() || newData.child('stats').exists()) && (!data.child('recursos').exists() || newData.child('recursos').exists()) && (!data.child('visor').exists() || newData.child('visor').exists()) && (!data.child('nuevaSesion').exists() || newData.child('nuevaSesion').exists()) && (!data.child('mensaje').exists() || newData.child('mensaje').exists()) && (!data.child('detener').exists() || newData.child('detener').exists()) && (!data.child('pausar').exists() || newData.child('pausar').exists()) && (!data.child('continuar').exists() || newData.child('continuar').exists()) && (!data.child('saludar').exists() || newData.child('saludar').exists()) && (!data.child('guino').exists() || newData.child('guino').exists()) && (!data.child('atencion').exists() || newData.child('atencion').exists()) && (!data.child('parpadeo').exists() || newData.child('parpadeo').exists()) && (!data.child('reposo').exists() || newData.child('reposo').exists()) && (!data.child('alegria').exists() || newData.child('alegria').exists()) && (!data.child('sorpresa').exists() || newData.child('sorpresa').exists()) && (!data.child('tristeza').exists() || newData.child('tristeza').exists()) && (!data.child('serio').exists() || newData.child('serio').exists()) && (!data.child('estrella').exists() || newData.child('estrella').exists()) && (!data.child('tortuga').exists() || newData.child('tortuga').exists()) && (!data.child('nube').exists() || newData.child('nube').exists()) && (!data.child('zorro').exists() || newData.child('zorro').exists()) && (!data.child('semilla').exists() || newData.child('semilla').exists())"
+            },
+            "$otro": {
+              ".validate": false
+            },
+            "segundos": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 604800 && (!data.exists() || newData.val() >= data.val())"
+            },
+            "activos": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 604800 && (!data.exists() || newData.val() >= data.val())"
+            }
+          }
+        }
       }
     }
   }

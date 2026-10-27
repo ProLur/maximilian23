@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css?v=gestion-educarex1">
+  <link rel="stylesheet" href="css/admin.css?v=stats1">
 </head>
 <body>
   <header class="cabecera">
@@ -26,9 +26,11 @@
       <p>Entra con tu cuenta Educarex autorizada para controlar a Maximilian.</p>
       <button id="google" type="button">Acceso a Educarex</button>
       <p class="error" role="alert"></p>
+      <p class="aviso-uso">Se registra el acceso, tiempo aproximado y funciones utilizadas para la gestión de Maximilian.</p>
     </form>
 
     <!-- Panel -->
+    <p id="stats-registro-aviso" class="ayuda" role="status" hidden></p>
     <section id="panel" hidden>
       <div class="menu-panel">
         <button id="menu-toggle" class="secundario" type="button" aria-expanded="false" aria-controls="navegacion-panel"><span aria-hidden="true">☰</span> Menú <span id="seccion-actual">Sesión</span></button>
@@ -40,6 +42,7 @@
           <button type="button" data-vista="cuentos">Cuentos</button>
           <button type="button" data-vista="historial">Historial</button>
           <button id="menu-admin-propietario" type="button" data-vista="admin" hidden>Admin</button>
+          <button id="menu-stats" type="button" data-vista="stats" hidden>STATS</button>
           <a href="cuentos/">Dibujos y fichas <span aria-hidden="true">↗</span></a>
           <a href="./" target="_blank" rel="noopener">Abrir visor <span aria-hidden="true">↗</span></a>
         </nav>
@@ -79,6 +82,13 @@
         <ul id="correos-autorizados"></ul>
         <p class="ayuda">Las cuentas autorizadas anteriormente mantienen su acceso. Este permiso no permite que otras personas añadan administradores.</p>
       </div>
+      <div id="vista-stats" class="tarjeta" data-seccion="stats" hidden>
+        <h2>STATS · Uso por cuenta Educarex</h2>
+        <p class="ayuda">Accesos y uso del panel desde esta actualización. Solo tú puedes consultar estas fichas.</p>
+        <div class="stats-filtros"><label>Buscar cuenta<input id="stats-buscar" type="search" placeholder="nombre@educarex.es"></label><label>Periodo<select id="stats-periodo"><option value="30">Últimos 30 días</option><option value="7">Últimos 7 días</option><option value="todos">Todo el registro</option></select></label><button id="stats-actualizar" class="secundario" type="button">Actualizar</button></div>
+        <p id="stats-estado" role="status" aria-live="polite"></p><p id="stats-resumen"></p><div id="stats-cuentas"></div>
+        <p class="ayuda">Tiempo aproximado, actualizado cada minuto mientras hay conexión. Actividad: panel visible e interacción en los últimos 2 minutos. Las pestañas suman tiempo. Abrir dibujos y fichas registra el enlace, no confirma una descarga. No se guarda el contenido de los mensajes.</p>
+      </div>
       <form id="mensaje" class="tarjeta" data-seccion="mensajes" hidden>
         <h2>Mensaje</h2>
         <label class="bloque">
@@ -109,6 +119,6 @@
     </section>
   </main>
 
-  <script type="module" src="js/admin.js?v=gestion-educarex1"></script>
+  <script type="module" src="js/admin.js?v=stats1"></script>
 </body>
 </html>

@@ -1,7 +1,10 @@
+import { crearRegistroStats } from './stats-registro.js?v=stats1';
+import { prepararStats } from './stats-panel.js?v=stats1';
+import { funcionComando } from './stats-datos.js?v=stats1';
 import { tieneAcceso, escucharAcceso } from './permisos.js?v=gestion-educarex1';
 import { prepararGestionAdmin } from './gestion-admin.js?v=gestion-educarex1';
 import { prepararCuentosAdmin } from './cuentos-admin.js?v=gestion-educarex1';
-import { prepararMenu } from './menu-admin.js?v=panel-biblioteca1';
+import { prepararMenu } from './menu-admin.js?v=stats1';
 import { contarPantallas, exigirPantalla } from './pantallas.js?v=ilustrados1';
 import { prepararAcordeones } from './acordeones.js?v=ilustrados1';
 // Maximilian 23 - panel de control remoto.
@@ -64,6 +67,11 @@ async function main() {
   }
   const { auth, A, db, D } = fb;
   const gestionAdmin=prepararGestionAdmin(fb);
+  const registro=crearRegistroStats(fb,{onError:msg=>{const el=$('#stats-registro-aviso');el.hidden=false;el.textContent=msg;}});
+  const stats=prepararStats(fb,registro);
+  panel.addEventListener('maximilian:seccion',e=>registro.registrar(e.detail));
+  panel.querySelector('a[href="cuentos/"]').addEventListener('click',()=>{registro.registrar('recursos');registro.guardar();});
+  panel.querySelector('a[href="./"]').addEventListener('click',()=>{registro.registrar('visor');registro.guardar();});
   await A.setPersistence(auth, A.browserSessionPersistence);
   $('#google').addEventListener('click', async () => {
     error(login, '');
@@ -93,7 +101,7 @@ async function main() {
     if (sesion) await D.update(D.ref(db,rutaSesion(sesion.codigo)+'/meta'),{expira:D.serverTimestamp()});
     sesion=null; base='';
   }
-  salir.addEventListener('click', async () => { try { await cerrarSesion(); await A.signOut(auth); } catch { mostrar('nada','No se ha podido cerrar la sesión. Revisa la conexión.'); } });
+  salir.addEventListener('click', async () => { try { await cerrarSesion(); await registro.terminar(); await A.signOut(auth); } catch { mostrar('nada','No se ha podido cerrar la sesión. Revisa la conexión.'); } });
   async function nuevaSesion() {
     if(cambiando || !usuario) return;
     cambiando=true;
@@ -106,9 +114,10 @@ async function main() {
       base=rutaSesion(sesion.codigo)+'/canales/'+sesion.nonce;
       $('#codigo-sesion').textContent=sesion.codigo;
       $('#caducidad-sesion').textContent='Válido hasta las '+new Date(sesion.expira).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+      registro.registrar('nuevaSesion');
       mostrar('panel'); escucharPantallas(); escucharHistorial();
       parar.push(escucharAcceso(fb,usuario,permitido=>{
-        if(!permitido){usuario=null;gestionAdmin.usuario(null);parar.forEach(fn=>fn());parar=[];mostrar('sin-permiso','Permiso de administrador revocado.');}
+        if(!permitido){usuario=null;gestionAdmin.usuario(null);stats.usuario(null);registro.terminar();parar.forEach(fn=>fn());parar=[];mostrar('sin-permiso','Permiso de administrador revocado.');}
       }));
       const reloj=setInterval(()=>{if(sesion && Date.now()+desfase>=sesion.expira){ $('#caducidad-sesion').textContent='Sesión caducada. Pulsa Nueva sesión.'; }},1000);
       parar.push(()=>clearInterval(reloj));
@@ -123,6 +132,8 @@ async function main() {
     usuario = null;
     acordeones.usuario(null);
     gestionAdmin.usuario(null);
+    stats.usuario(null);
+    registro.terminar();
     pantallas.hidden = true;
     if (!user) {
       mostrar('login');
@@ -142,6 +153,8 @@ async function main() {
     if (auth.currentUser?.uid !== user.uid) return;
     usuario = user;
     gestionAdmin.usuario(user);
+    stats.usuario(user);
+    registro.iniciar(user);
     acordeones.usuario(user.uid);
     await nuevaSesion();
   });
@@ -167,6 +180,7 @@ async function main() {
         autor: usuario.uid,
       };
       await D.update(D.ref(db), { [`${base}/mensajes/${id}`]: comando, [`${base}/comando`]: comando });
+      registro.registrar(funcionComando(datos));
       return true;
     } catch (err) {
       console.error(err);
