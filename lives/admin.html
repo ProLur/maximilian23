@@ -7,7 +7,7 @@
   <title>Panel de Maximilian</title>
   <meta name="theme-color" content="#0b161c">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/admin.css?v=panel-biblioteca1">
+  <link rel="stylesheet" href="css/admin.css?v=cuentos-admin2">
 </head>
 <body>
   <header class="cabecera">
@@ -37,8 +37,9 @@
           <button type="button" data-vista="sesion" aria-current="page">Sesión</button>
           <button type="button" data-vista="mensajes">Mensajes</button>
           <button type="button" data-vista="gestos">Gestos y emociones</button>
+          <button type="button" data-vista="cuentos">Cuentos</button>
           <button type="button" data-vista="historial">Historial</button>
-          <a href="cuentos/">Cuentos y fichas <span aria-hidden="true">↗</span></a>
+          <a href="cuentos/">Dibujos y fichas <span aria-hidden="true">↗</span></a>
           <a href="./" target="_blank" rel="noopener">Abrir visor <span aria-hidden="true">↗</span></a>
         </nav>
       </div>
@@ -58,6 +59,14 @@
         <p class="ayuda">Se muestran durante 4 segundos y después vuelven a reposo.</p>
         <div id="emociones" class="gestos"></div>
         <p id="estado-accion" class="estado-accion" role="status" aria-live="polite"></p>
+        <p class="error" role="alert"></p>
+      </div>
+      <div id="biblioteca" class="tarjeta biblioteca" data-seccion="cuentos" hidden>
+        <h2>Cuentos de Maximilian</h2>
+        <p class="ayuda">Elige un cuento para las pantallas de tu sesión. Maximilian lo narrará con sus ilustraciones y pausas.</p>
+        <div id="cuentos" class="cuentos-grid"></div>
+        <p id="estado-cuento" role="status" aria-live="polite"></p>
+        <div class="acciones"><button id="pausar-cuento-admin" class="secundario" type="button">⏸ Pausa</button><button id="continuar-cuento-admin" class="secundario" type="button">▶ Continuar</button><button id="detener-cuento" class="peligro" type="button">Detener cuento</button></div>
         <p class="error" role="alert"></p>
       </div>
       <form id="mensaje" class="tarjeta" data-seccion="mensajes" hidden>
@@ -90,6 +99,6 @@
     </section>
   </main>
 
-  <script type="module" src="js/admin.js?v=panel-biblioteca1"></script>
+  <script type="module" src="js/admin.js?v=cuentos-admin2"></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+import { prepararCuentosAdmin } from './cuentos-admin.js?v=cuentos-admin2';
 import { prepararMenu } from './menu-admin.js?v=panel-biblioteca1';
 import { contarPantallas, exigirPantalla } from './pantallas.js?v=ilustrados1';
 import { prepararAcordeones } from './acordeones.js?v=ilustrados1';
@@ -211,6 +212,8 @@ async function main() {
       $(selector).appendChild(b);
     }
   }
+
+  prepararCuentosAdmin(enviar);
 
   // ---------------------------------------------------------------- estado
   function escucharPantallas() {
