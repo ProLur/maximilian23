@@ -2,6 +2,10 @@
    Conditional writes use the remote ETag. If Google does not expose an ETag,
    save a new revision file instead of an unsafe blind overwrite. */
 let cloudEpoch=0;
+const standardRenderCloud=renderCloud;
+renderCloud=function(){if(DEMO_MODE){const el=$('#cloud');if(el)el.innerHTML='<span class="demo-badge">Demostración · datos separados</span>';return;}standardRenderCloud();};
+const standardCloudSignIn=cloudSignIn;
+cloudSignIn=function(){if(DEMO_MODE)return toast('El modo demostración guarda aparte y no se conecta a Drive');standardCloudSignIn();};
 function detachCloud(){clearTimeout(cloudTimer);cloudEpoch++;cloud.fileId=null;cloud.fileName='';cloud.syncedAt='';cloud.remoteVersion=null;cloud.projectId=null;cloud.dirty=false;cloud.status='Proyecto local';cloudPersist();renderCloud();}
 cloudPersist=function(){try{localStorage.setItem(CLOUD_KEY,JSON.stringify({fileId:cloud.fileId,fileName:cloud.fileName,email:cloud.user?.email||cloud.hint||'',syncedAt:cloud.syncedAt||'',projectId:cloud.projectId||null,remoteVersion:cloud.remoteVersion||null,dirty:cloud.dirty||false}));}catch{}};
 async function driveMetadata(id){const response=await gapi(DRIVE+'/'+encodeURIComponent(id)+'?fields=id,name,modifiedTime,version');return {...await response.json(),etag:response.headers?.get('ETag')};}

@@ -1,7 +1,8 @@
 const originalOpenModal=openModal;
-openModal=function(html){originalOpenModal('<button class="dismiss modal-close" aria-label="Cerrar ventana" onclick="closeModal()">×</button>'+html);};
+let modalOpener=null;
+openModal=function(html){if(!$('#modal').classList.contains('on'))modalOpener=document.activeElement;originalOpenModal('<button class="dismiss modal-close" aria-label="Cerrar ventana" onclick="closeModal()">×</button>'+html);};
 const originalCloseModal=closeModal;
-closeModal=function(){if(!state.etapa){try{const h=JSON.parse(localStorage.getItem(HELP_KEY)||'{}');h['first-visit']=true;localStorage.setItem(HELP_KEY,JSON.stringify(h));}catch{}}originalCloseModal();};
+closeModal=function(){if(!state.etapa){try{const h=JSON.parse(localStorage.getItem(HELP_KEY)||'{}');h['first-visit']=true;localStorage.setItem(HELP_KEY,JSON.stringify(h));}catch{}}originalCloseModal();if(modalOpener?.isConnected)modalOpener.focus({preventScroll:true});modalOpener=null;};
 const originalGo=go;
 go=function(view){if(solving)return toast('Detén la búsqueda para cambiar de sección');originalGo(view);};
 moveTo=function(lid,d,s){
@@ -23,8 +24,9 @@ whyUnplaceable=function(lesson){
 };
 const originalRender=render;
 render=function(){originalRender();
+  if(DEMO_MODE)$('#view').insertAdjacentHTML('afterbegin','<div class="demo-banner" role="status"><b>Modo demostración</b><span>Puedes probar todo sin modificar los datos de tu centro ni conectarte a Drive.</span></div>');
   // Keep the main action available even when the welcome card is dismissed.
-  if(ui.view==='inicio')$('#view').insertAdjacentHTML('afterbegin','<div class="page-heading"><div><span class="eyebrow">TU CENTRO · TU SEMANA</span><h2>Todo listo para organizarte</h2></div><div class="row"><button class="btn" onclick="recoveryMenu()">Recuperar copia</button><button class="btn pri" onclick="go(\'horario\')">Ver horario →</button></div></div>');
+  if(ui.view==='inicio')$('#view').insertAdjacentHTML('afterbegin','<div class="page-heading"><div><span class="eyebrow">TU CENTRO · TU SEMANA</span><h2>Organiza tu centro, paso a paso</h2></div><div class="row"><button class="btn" onclick="recoveryMenu()">Recuperar copia</button><button class="btn pri" onclick="go(\'horario\')">Ver horario →</button></div></div>');
   if(ui.view==='inicio'&&state.curriculum){
     const region=REGIONS.find(r=>r.id===state.region);
     $('#view').insertAdjacentHTML('beforeend','<div class="card curriculum-status"><div><h3>'+esc(region?.name||'Currículo de partida')+'</h3><p class="help">'+esc((state.educationStages||[]).map(s=>EDUCATION_STAGES[s]?.name||s).join(' · '))+' · Catálogo editable</p></div><button class="btn" onclick="chooseEtapa()">Comunidad y etapas</button><button class="btn" onclick="showCurriculumInfo()">Fuentes y revisión</button></div>');
@@ -41,3 +43,10 @@ function initialize(){
   load();render();renderCloud();if(!state.etapa&&helpVisible('first-visit'))chooseEtapa(true);
 }
 window.addEventListener('beforeunload',e=>{if(localSaveFailed){e.preventDefault();e.returnValue='';}});
+document.addEventListener('keydown',event=>{
+  if(event.key!=='Tab'||!$('#modal').classList.contains('on'))return;
+  const focusable=$$('#mbox button:not([disabled]),#mbox input:not([disabled]):not([type=hidden]),#mbox select:not([disabled]),#mbox textarea:not([disabled]),#mbox a[href],#mbox summary').filter(el=>el.getClientRects().length);
+  if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];
+  if(event.shiftKey&&(document.activeElement===first||!$('#mbox').contains(document.activeElement))){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&(document.activeElement===last||!$('#mbox').contains(document.activeElement))){event.preventDefault();first.focus();}
+});

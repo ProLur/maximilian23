@@ -352,5 +352,8 @@ table.grid td{height:72px}
 .curriculum-status{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .curriculum-status>div{flex:1;min-width:200px}
 .curriculum-status h3,.curriculum-status p{margin:0}
+.setup-footer{position:sticky;bottom:-30px;padding:14px 0 6px;background:var(--panel);border-top:1px solid var(--line);z-index:3}
+.demo-badge{display:inline-block;padding:5px 9px;border:1px solid #607d94;border-radius:7px;font-size:11px;color:#bdd9ed}
+.demo-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 15px;background:#192b40;border:1px solid #4e728c;border-radius:10px;color:#bed9ef;margin-bottom:18px;font-size:12px}
 @media(max-width:600px){.setup-grid{grid-template-columns:1fr 1fr}.setup-names,.curriculum-list{grid-template-columns:1fr}.setup-center button{padding:14px}.setup-checks{gap:6px}}
-@media print{.setup-notice,.curriculum-status{display:none!important}}
+@media print{.setup-notice,.curriculum-status,.demo-banner,.demo-badge{display:none!important}}

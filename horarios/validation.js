@@ -2,8 +2,8 @@
    No build step; works from file:// and static hosting. */
 'use strict';
 const SCHEMA_VERSION = 2;
-const BACKUP_KEY = 'maxhorario_recovery';
-const HELP_KEY = 'maxhorario_help_v2';
+const BACKUP_KEY = STORAGE_PREFIX + '_recovery';
+const HELP_KEY = STORAGE_PREFIX + '_help_v2';
 const clone = value => JSON.parse(JSON.stringify(value));
 function helpVisible(key) { try { return !JSON.parse(localStorage.getItem(HELP_KEY)||'{}')[key]; } catch { return true; } }
 function dismissHelp(key) { try { const h=JSON.parse(localStorage.getItem(HELP_KEY)||'{}'); h[key]=true; localStorage.setItem(HELP_KEY,JSON.stringify(h)); } catch {} render(); }

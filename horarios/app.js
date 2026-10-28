@@ -11,7 +11,9 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function localDate(date = new Date()) { return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0'); }
 const PALETTE = ['#4c6ef5','#f06595','#20c997','#fd7e14','#845ef7','#15aabf','#e64980','#82c91e','#fa5252','#7048e8','#1c7ed6','#fab005','#12b886','#e8590c','#40c057','#be4bdb','#228be6','#94d82d'];
-const KEY = 'maxhorario_v1';
+const DEMO_MODE = /(?:\?|&)demo=1(?:&|$)/.test(location.search||'');
+const STORAGE_PREFIX = DEMO_MODE ? 'maxhorario_demo' : 'maxhorario';
+const KEY = STORAGE_PREFIX + '_v1';
 const COLL = {T:'teachers', G:'groups', R:'rooms', S:'subjects'};
 const TNAME = {T:'Profesor', G:'Grupo', R:'Aula', S:'Materia'};
 const TPLUR = {T:'Profesores', G:'Grupos', R:'Aulas', S:'Materias'};
@@ -402,7 +404,7 @@ function diagnostics(){
 function vInicio(){
   const st = steps(), placed = state.lessons.filter(l => l.day != null).length, iss = allIssues();
   const diag = diagnostics();
-  const empty = !state.teachers.length && !state.activities.length;
+  const empty = !state.teachers.length && !state.groups.length && !state.subjects.length && !state.activities.length;
   return `
   ${helpVisible('welcome') ? `<div class="hero dismissible"><button class="dismiss" aria-label="Cerrar bienvenida" onclick="dismissHelp('welcome')">×</button>
     <img class="maxhead" src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23" style="width:130px">
@@ -426,7 +428,7 @@ function vInicio(){
     </div></div>
     <div class="card grow" style="min-width:300px"><h3>Comprobación de datos</h3>
       ${diag.length ? `<ul class="diag">${diag.slice(0,12).map(([k,m]) => `<li>${k==='bad'?'':''} ${m}</li>`).join('')}</ul>${diag.length>12?`<small class="muted">…y ${diag.length-12} más</small>`:''}`
-        : `<p class="pill-ok">✓ Todo correcto. Los datos son coherentes.</p>`}
+        : state.lessons.length ? `<p class="pill-ok">✓ No se han detectado incoherencias en los datos.</p>` : `<p class="muted">Completa los datos y la carga semanal en Actividades. Todavía no hay sesiones para generar un horario.</p>`}
     </div>
   </div>
   <div class="card"><h3>Proyecto</h3><div class="row">
@@ -439,7 +441,7 @@ function vInicio(){
 }
 function newProject(){
   if (!confirm('¿Empezar un proyecto nuevo? Se borrarán los datos actuales (puedes deshacer con Ctrl+Z).')) return;
-  detachCloud(); mutate(() => { state = blank(); }); go('marco'); chooseEtapa(true);
+  recoverSnapshot(); detachCloud(); mutate(() => { state = blank(); }); go('marco'); chooseEtapa(true);
 }
 
 /* ---------- vista: marco horario ---------- */
@@ -1234,7 +1236,7 @@ function samplePrimaria(){
    Solo usa el permiso drive.file: la app ve únicamente los archivos que ella crea.
    ===================================================================== */
 const GOOGLE_CLIENT_ID = '657014385303-nh40rev8ahjd03gnjof9k6kltnus8v5r.apps.googleusercontent.com'; // proyecto maximilian23-visor, cliente «MaxHorarios web»
-const CLOUD_KEY = 'maxhorario_cloud';
+const CLOUD_KEY = STORAGE_PREFIX + '_cloud';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file openid email profile';
 let cloud = { token:null, exp:0, user:null, fileId:null, fileName:'', status:'', saving:false, dirty:false };
 let tokenClient = null, cloudTimer = null, tokenWaiters = [];
@@ -1319,7 +1321,7 @@ function cloudSignOut(){
   closeModal(); renderCloud(); toast('Sesión cerrada. Tus archivos siguen en tu Drive.');
 }
 window.addEventListener('beforeunload', e => { if (cloud.dirty || cloud.saving){ e.preventDefault(); e.returnValue = ''; } });
-if (GOOGLE_CLIENT_ID && location.protocol !== 'file:'){
+if (!DEMO_MODE && GOOGLE_CLIENT_ID && location.protocol !== 'file:'){
   const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; document.head.appendChild(sc);
 }
 

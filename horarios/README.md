@@ -58,6 +58,10 @@ Referencias estatales: [Infantil](https://www.boe.es/eli/es/rd/2022/02/01/95/con
 [Bachillerato](https://www.boe.es/eli/es/rd/2022/04/05/243/con).
 Cada perfil autonómico incluye además su referencia en `curriculum.js`.
 
+Para probar sin tocar el proyecto habitual, abre el sitio con `?demo=1` al final
+de la dirección. El modo demostración usa guardados, copias y ayudas separados y
+no permite iniciar sesión en Google Drive. Se identifica con una banda visible.
+
 1. Define días y tramos sin solapamientos. Una sesión doble necesita tramos
    contiguos y no puede atravesar un recreo.
 2. Añade profesores, grupos, materias y aulas. Indica alumnos y capacidad para
@@ -109,6 +113,10 @@ Desde esta carpeta:
 ```sh
 node --test tests.cjs
 ```
+
+Al cambiar un archivo JavaScript o CSS, ejecuta `node version-assets.cjs` antes
+de publicar. Los enlaces incluyen una versión calculada del contenido para que
+el navegador no mezcle scripts o estilos antiguos con una página recién actualizada.
 
 Las pruebas ejecutan el código de producción y el código del worker en contextos
 aislados. Cubren datos inválidos, conflictos fijados, reparación, aforos, aulas
