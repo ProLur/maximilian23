@@ -337,7 +337,7 @@ function exportCSV(){
 }
 
 /* ---------- navegación ---------- */
-const VIEWTITLE = {inicio:'Inicio',marco:'Marco horario',profesores:'Profesores',grupos:'Grupos',materias:'Materias',aulas:'Aulas',actividades:'Actividades',restricciones:'Condiciones',normativa:'Horas y normativa',generar:'Generar horario',horario:'Horario',sabana:'Horario general',guardias:'Guardias y ausencias',informes:'Informes'};
+const VIEWTITLE = {inicio:'Inicio',marco:'Marco horario',profesores:'Profesores',grupos:'Grupos',materias:'Materias',aulas:'Aulas',actividades:'Actividades',privacidad:'Privacidad y cuentas educativas',restricciones:'Condiciones',normativa:'Horas y normativa',generar:'Generar horario',horario:'Horario',sabana:'Horario general',guardias:'Guardias y ausencias',informes:'Informes'};
 function steps(){
   const placed = state.lessons.filter(l => l.day != null).length;
   return [
@@ -353,7 +353,7 @@ function renderNav(){
   const st = steps();
   const b = (v, num, label, cnt='') => {
     const isStep = typeof num === 'number', done = isStep && st[num-1].done;
-    return `<button class="${ui.view===v?'on':''}" onclick="go('${v}')"><span class="num${done?' done':''}">${done && ui.view!==v ? '✓' : num}</span><span class="lbl">${label}</span><span class="cnt">${cnt}</span></button>`;
+    return `<button class="${ui.view===v?'on':''}" aria-label="${esc(label)}" title="${esc(label)}" ${ui.view===v?'aria-current="page"':''} onclick="go('${v}')"><span class="num${done?' done':''}">${done && ui.view!==v ? '✓' : num}</span><span class="lbl">${label}</span><span class="cnt">${cnt}</span></button>`;
   };
   const placed = state.lessons.filter(l => l.day != null).length;
   $('#nav').innerHTML =
@@ -372,13 +372,13 @@ function renderNav(){
     b('sabana','·','Horario general') +
     `<div class="sec">Gestión diaria</div>` +
     b('guardias','·','Guardias y ausencias') +
-    b('informes','·','Informes');
+    b('informes','·','Informes') + `<div class="sec">Información</div>` + b('privacidad','·','Privacidad y cuentas');
   $('#title').innerHTML = esc(state.name || 'MaxHorarios') + (state.course ? ' · '+esc(state.course) : '') + '<small>' + VIEWTITLE[ui.view] + '</small>';
 }
 function render(){
   applyEtapa(); syncLessons(); renderNav();
   const v = ui.view, V = $('#view');
-  const views = {inicio:vInicio, marco:vMarco, actividades:vAct, restricciones:vRest, normativa:vNormativa, generar:vGen, horario:vHor, sabana:vSab, guardias:vGuard, informes:vInf};
+  const views = {inicio:vInicio, marco:vMarco, actividades:vAct, restricciones:vRest, privacidad:vPrivacidad, normativa:vNormativa, generar:vGen, horario:vHor, sabana:vSab, guardias:vGuard, informes:vInf};
   V.innerHTML = ENT[v] ? vEnt(v) : views[v]();
 }
 
@@ -1243,9 +1243,9 @@ function samplePrimaria(){
    ===================================================================== */
 const GOOGLE_CLIENT_ID = '657014385303-nh40rev8ahjd03gnjof9k6kltnus8v5r.apps.googleusercontent.com'; // proyecto maximilian23-visor, cliente «MaxHorarios web»
 const CLOUD_KEY = STORAGE_PREFIX + '_cloud';
-const SCOPES = 'https://www.googleapis.com/auth/drive.file openid email profile';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file openid email';
 let cloud = { token:null, exp:0, user:null, fileId:null, fileName:'', status:'', saving:false, dirty:false };
-let tokenClient = null, cloudTimer = null, tokenWaiters = [];
+let tokenClient = null, cloudTimer = null, tokenWaiters = [], authEpoch=0;
 try { const c = JSON.parse(localStorage.getItem(CLOUD_KEY) || '{}'); cloud.fileId = c.fileId || null; cloud.fileName = c.fileName || ''; cloud.hint = c.email || ''; cloud.syncedAt = c.syncedAt || ''; } catch(e){}
 /* syncedAt = fecha de Drive de la última versión que este equipo subió o abrió */
 function cloudPersist(){ try { localStorage.setItem(CLOUD_KEY, JSON.stringify({fileId: cloud.fileId, fileName: cloud.fileName, email: cloud.user?.email || cloud.hint || '', syncedAt: cloud.syncedAt || ''})); } catch(e){} }
@@ -1272,22 +1272,27 @@ function getToken(interactive){
   return new Promise((resolve, reject) => {
     tokenWaiters.push({resolve, reject});
     if (tokenWaiters.length > 1) return;
+    const requestEpoch=authEpoch;
     if (!tokenClient) tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID, scope: SCOPES,
       callback: r => {
+        if(requestEpoch!==authEpoch)return;
         const ws = tokenWaiters; tokenWaiters = [];
         if (r.error){ ws.forEach(w => w.reject(new Error(r.error_description || r.error))); return; }
         cloud.token = r.access_token; cloud.exp = Date.now() + (r.expires_in || 3600) * 1000;
         ws.forEach(w => w.resolve(cloud.token));
       },
-      error_callback: e => { const ws = tokenWaiters; tokenWaiters = []; ws.forEach(w => w.reject(new Error(e.type === 'popup_closed' ? 'ventana cerrada' : (e.message || e.type)))); }
+      error_callback: e => { if(requestEpoch!==authEpoch)return;const ws = tokenWaiters; tokenWaiters = []; ws.forEach(w => w.reject(new Error(e.type === 'popup_closed' ? 'ventana cerrada' : (e.message || e.type)))); }
     });
     tokenClient.requestAccessToken({prompt: interactive ? '' : 'none', login_hint: cloud.user?.email || cloud.hint || undefined});
   });
 }
 async function gapi(url, opts = {}, retry = true){
-  const token = await getToken(false).catch(() => getToken(true));
+  const epoch=authEpoch;
+  const token = await getToken(false).catch(e=>{if(epoch!==authEpoch)throw e;return getToken(true);});
+  if(epoch!==authEpoch)throw Error('Conexión cancelada');
   const r = await fetch(url, {...opts, headers: {...(opts.headers || {}), Authorization: 'Bearer ' + token}});
+  if(epoch!==authEpoch)throw Error('Conexión cancelada');
   if (r.status === 401 && retry){ cloud.token = null; return gapi(url, opts, false); }
   if (!r.ok){ let m = r.status + ''; try { m = (await r.json()).error.message; } catch(e){} throw new Error(m); }
   return r;
@@ -1321,14 +1326,13 @@ let cloudSaveAsNew;
 let cloudSchedule;
 let cloudSaveNow;
 function cloudSignOut(){
+  authEpoch++;const waiters=tokenWaiters;tokenWaiters=[];for(const w of waiters)w.reject(Error('Conexión cancelada'));
   if (cloud.token && gisReady()) google.accounts.oauth2.revoke(cloud.token, () => {});
   cloud = {token:null, exp:0, user:null, fileId:null, fileName:'', status:'', saving:false, dirty:false};
   tokenClient = null; try { localStorage.removeItem(CLOUD_KEY); } catch(e){}
   closeModal(); renderCloud(); toast('Sesión cerrada. Tus archivos siguen en tu Drive.');
 }
 window.addEventListener('beforeunload', e => { if (cloud.dirty || cloud.saving){ e.preventDefault(); e.returnValue = ''; } });
-if (!DEMO_MODE && GOOGLE_CLIENT_ID && location.protocol !== 'file:'){
-  const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; document.head.appendChild(sc);
-}
+// Google Identity is loaded on demand after requesting a connection (privacy.js).
 
 // Initialization is called after the validation and interface modules have installed validation and UI behavior.

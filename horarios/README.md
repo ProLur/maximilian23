@@ -23,12 +23,14 @@ vista local en `http://127.0.0.1:8765` con los tipos de archivo correctos.
 - `curriculum.js`: catálogo de áreas/materias por etapa y comunidad, con fuentes.
 - `setup.js`: selección de centro/comunidad y asistente de plantillas.
 - `compliance.js`: cargas curriculares en minutos, jornada individual, habilitaciones y estado de borrador.
+- `privacy.js`: información de privacidad compartida, conexión opcional a Google y controles locales.
+- `privacidad.html`: página pública de privacidad, sin JavaScript ni inicio de sesión.
 - `tests.cjs`: pruebas de regresión sin dependencias.
 
 ## Uso
 
-La barra superior incluye **Nuevo**, **Plantilla**, **Guardar**, **Abrir** y **Excel**.
-«Nuevo» y «Plantilla» abren siempre el formulario completo para crear una estructura configurable.
+La barra superior incluye **Nuevo proyecto**, **Guardar**, **Abrir** y **Excel**.
+«Nuevo proyecto» reúne la creación del proyecto y de su plantilla en un único asistente completo.
 Permite indicar docentes, clases, duración de cada sesión, sesiones de mañana, hora de inicio, recreo, curso, titularidad, alumnos por clase, aulas adicionales, nombres
 propios y materias o módulos adicionales. Crear una plantilla sobre un proyecto
 existente requiere confirmar la sustitución; conserva una copia y permite deshacer.
@@ -152,3 +154,11 @@ Las exportaciones pendientes requieren elegir «Exportar borrador» y llevan la 
 Cada revisión o diferencia en «Qué queda por resolver» incluye «Ver», una explicación en rojo y un destino explícito. Abre el formulario del grupo o docente, el horario correspondiente, el marco o las actividades filtradas por grupo/materia. Los ciclos muestran ambos cursos. La pantalla de destino conserva la explicación y permite volver a los pendientes; guardar una revisión vuelve a la lista. Los destinos usan identificadores, por lo que no confunden personas o grupos con nombres iguales, y comprueban que el dato siga existiendo.
 
 Las actividades incluyen «Quitar filtros» y muestran tramos semanales en lugar de confundirlos con horas de reloj. Los desajustes por materia no se multiplican contra cero cuando aún falta definir el currículo. Con tramos variables, la previsión queda «Por calcular» mientras falten sesiones; una vez colocadas todas se usan sus minutos reales sin dejar un aviso permanente.
+
+## Privacidad y cuentas educativas
+
+La aplicación y el pie lateral ofrecen acceso a «Privacidad y cuentas educativas». `privacidad.html` es una página pública sin JavaScript; su contenido se genera desde la misma información de `privacy.js` al ejecutar `node version-assets.cjs`, que también actualiza las versiones de estilos de ambas páginas. La sección explica guardado local, versiones y recuperación, descargas, Drive opcional, almacenamiento de metadatos de cuenta y servicios externos. No afirma que no exista almacenamiento: el código no envía proyectos a un servidor propio de MaxHorarios. La configuración y retención de registros del alojamiento quedan fuera de la revisión de este código.
+
+Google Identity solo se carga cuando se solicita conectar; un segundo botón explícito inicia la autorización. Se piden correo y `drive.file`, sin el permiso de perfil. El token solo se conserva en memoria. Desconectar cancela solicitudes de autorización pendientes y descarta respuestas tardías para que no reaparezca una sesión cerrada. El acceso de cuentas Educarex/Workspace depende de la autorización institucional y no acredita respaldo oficial. La política no sustituye la identificación y el contacto del titular real de la web: esos datos deben completarse por su responsable.
+
+El borrado local requiere confirmación y elimina exclusivamente las claves de MaxHorarios del modo actual, las copias de recuperación y el historial en memoria. No borra Drive ni descargas. Se bloquea mientras haya búsqueda, escritura o borrado de Drive en curso. El botón «Guardar una copia antes» permite conservar un respaldo; no se prueba borrando datos reales de una cuenta.

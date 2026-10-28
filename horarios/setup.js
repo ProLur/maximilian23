@@ -97,7 +97,7 @@ function applySetup(){
     selectedCurriculum(config);
     if(config.mode==='template'||config.mode==='new'){
       const project=createTemplateProject(config);
-      if((state.teachers.length||state.groups.length||state.activities.length||state.subjects.length)&&!confirm('¿Crear una plantilla nueva? Sustituirá el proyecto actual. Se conservará una copia de recuperación y podrás deshacer.'))return;
+      if((state.teachers.length||state.groups.length||state.activities.length||state.subjects.length)&&!confirm('¿Crear un proyecto nuevo? Sustituirá el proyecto actual. Se conservará una copia de recuperación y podrás deshacer.'))return;
       recoverSnapshot();detachCloud();if(!mutate(()=>{state=project;}))return;ui.view='inicio';ui.sel=null;ui.hid={};ui.rid={};ui.pick.clear();render();setupLoadedMessage(project.teachers.length+' docentes, '+project.groups.length+' clases, '+project.rooms.length+' aulas y '+project.subjects.length+' materias. Cambia sus nombres y completa la carga semanal.');
     }else{
       const fresh=!state.activities.length&&!state.lessons.some(l=>l.day!=null);
