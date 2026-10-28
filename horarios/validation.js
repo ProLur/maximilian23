@@ -20,6 +20,16 @@ function frameIssues(project = state) {
   });
   return errors;
 }
+function validateRegulatoryData(project){
+  const data=project.regulatory;if(data==null)return;
+  const fail=()=>{throw Error('Proyecto inválido: configuración de horas y normativa incorrecta');};
+  const obj=x=>x&&typeof x==='object'&&!Array.isArray(x),num=x=>Number.isSafeInteger(x)&&x>=0&&x<=10080;
+  const ids=x=>Array.isArray(x)&&x.length<=1000&&x.every(id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{1,100}$/.test(id));
+  const base=x=>obj(x)&&typeof x.source==='string'&&x.source.length<4000&&typeof x.context==='string'&&x.context.length<2000000&&typeof x.reviewed==='boolean';
+  if(!obj(data)||!obj(data.groups)||!obj(data.teachers)||Object.keys(data.groups).length>1000||Object.keys(data.teachers).length>1000)fail();
+  for(const r of Object.values(data.groups))if(!base(r)||!['manual','murcia','extremadura'].includes(r.profile)||!num(r.weeklyMinutes)||!Array.isArray(r.rows)||r.rows.length>1000||r.rows.some(row=>!obj(row)||typeof row.name!=='string'||!num(row.minutes)||!ids(row.subjectIds)))fail();
+  for(const c of Object.values(data.teachers))if(!base(c)||!['minutes','periods'].includes(c.unit)||['min','max','presenceMin','presenceMax','extraTeaching','extraPresence'].some(k=>!num(c[k]))||!ids(c.subjectIds)||typeof c.qualificationReviewed!=='boolean'||!Array.isArray(c.teachingTypes)||c.teachingTypes.some(t=>!TYPES[t])||!c.teachingTypes.includes('clase'))fail();
+}
 function validateProject(project) {
   const fail=m=>{throw Error('Proyecto inválido: '+m);};
   if (!project || typeof project!=='object' || Array.isArray(project)) fail('se esperaba un objeto');
@@ -77,7 +87,7 @@ function validateProject(project) {
   }
   for(const v of project.versions){if(!v.pos||typeof v.pos!=='object'||Array.isArray(v.pos))fail('copia de horario incorrecta');for(const p of Object.values(v.pos))if(!Array.isArray(p)||p.length<2||p.length>4||(p[0]!=null&&(!Number.isSafeInteger(p[0])||p[0]<0))||(p[1]!=null&&(!Number.isSafeInteger(p[1])||p[1]<0)))fail('posición guardada incorrecta');}
   for(const a of project.absences){if(!/^\d{4}-\d{2}-\d{2}$/.test(a.date)||typeof a.teacherId!=='string'||!a.subs||typeof a.subs!=='object'||Array.isArray(a.subs))fail('ausencia incorrecta');}
-  return project;
+  validateRegulatoryData(project);return project;
 }
 function parseProject(value) {
   const p=clone(value), b=blank();

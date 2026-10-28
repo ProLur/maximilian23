@@ -25,15 +25,15 @@ cloudOpen=async function(id,name){
   try{const before=JSON.stringify(state),meta=await driveMetadata(id),p=parseProject(await driveGet(id));if(epoch!==cloudEpoch||before!==JSON.stringify(state))throw Error('El proyecto ha cambiado durante la descarga. Vuelve a abrirlo.');recoverSnapshot();detachCloud();mutate(()=>{state=p;});cloud.fileId=id;cloud.fileName=name;cloud.projectId=state.projectId;cloud.syncedAt=meta.modifiedTime;cloud.remoteVersion=meta.version;cloud.dirty=false;clearTimeout(cloudTimer);cloud.status='Abierto desde Drive';cloudPersist();renderCloud();closeModal();go('inicio');}catch(e){toast('No se pudo abrir: '+e.message);}
 };
 cloudSaveAsNew=async function(){
-  if(solving||cloud.saving)return toast('Espera a que termine la operación actual');
+  if(solving||cloud.saving||cloud.deleting)return toast('Espera a que termine la operación actual');
   const epoch=cloudEpoch,body=JSON.stringify(state),projectId=state.projectId;
   cloud.saving=true;renderCloud();
   try{const f=await driveCreate(projName(),body);if(epoch!==cloudEpoch||state.projectId!==projectId)return;cloud.fileId=f.id;cloud.fileName=f.name;cloud.projectId=projectId;cloud.syncedAt=f.modifiedTime;cloud.remoteVersion=null;cloud.dirty=JSON.stringify(state)!==body;cloud.status=cloud.dirty?'Cambios pendientes':'Copia guardada en Drive';cloudPersist();closeModal();if(cloud.dirty)cloudSchedule();}
   catch(e){cloud.status='Sin guardar';toast(e.message);}finally{cloud.saving=false;renderCloud();}
 };
-cloudSchedule=function(){if(!cloud.user||!cloud.fileId)return;if(cloud.projectId&&cloud.projectId!==state.projectId)return detachCloud();cloud.projectId=state.projectId;cloud.dirty=true;cloud.status='Cambios pendientes de subir';cloudPersist();renderCloud();clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudSaveNow,4000);};
+cloudSchedule=function(){if(!cloud.user||!cloud.fileId)return;if(cloud.projectId&&cloud.projectId!==state.projectId)return detachCloud();cloud.projectId=state.projectId;cloud.dirty=true;cloud.status='Cambios pendientes de subir';cloudPersist();renderCloud();clearTimeout(cloudTimer);if(!cloud.deleting)cloudTimer=setTimeout(cloudSaveNow,4000);};
 cloudSaveNow=async function(){
-  if(!cloud.user||!cloud.fileId||!cloud.dirty)return;
+  if(!cloud.user||!cloud.fileId||!cloud.dirty||cloud.deleting)return;
   if(solving||cloud.saving){clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudSaveNow,2000);return;}
   const epoch=cloudEpoch,id=cloud.fileId,projectId=state.projectId,body=JSON.stringify(state),name=projName();
   cloud.saving=true;renderCloud();
@@ -51,6 +51,33 @@ cloudSaveNow=async function(){
 const originalSignOut=cloudSignOut;
 cloudSignOut=function(){clearTimeout(cloudTimer);cloudEpoch++;originalSignOut();};
 const originalCloudMenu=cloudMenu;
-cloudMenu=async function(files){await originalCloudMenu(files);for(const btn of $$('#mbox button[data-drive-id]'))btn.onclick=()=>cloudOpen(btn.dataset.driveId,btn.dataset.driveName);};
+let driveMenuFiles=[],pendingDriveTrash=null;
+cloudMenu=async function(files){
+  if(!cloud.user)return cloudSignIn();
+  try{driveMenuFiles=files||await driveList();await originalCloudMenu(driveMenuFiles);
+    for(const btn of $$('#mbox button[data-drive-id]'))btn.onclick=()=>cloudOpen(btn.dataset.driveId,btn.dataset.driveName);
+    for(const btn of $$('#mbox button[data-trash-id]'))btn.onclick=()=>confirmDriveTrash(btn.dataset.trashId);
+  }catch(e){toast('No se pudo listar Drive: '+e.message);}
+};
+function confirmDriveTrash(id){
+  if(solving||cloud.saving||cloud.deleting)return toast('Espera a que termine la operación actual');
+  const file=driveMenuFiles.find(f=>f.id===id);if(!file)return;
+  pendingDriveTrash={id,name:file.name,epoch:cloudEpoch};
+  openModal('<h3>¿Borrar este proyecto de Drive?</h3><p><b>'+esc(file.name)+'</b></p><p>Se moverá a la papelera de Google Drive. Podrás recuperarlo desde allí durante 30 días. La copia abierta en este navegador se conserva; si es este archivo, dejará de sincronizarse.</p><div class="mfoot"><button class="btn" onclick="cancelDriveTrash()">Cancelar</button><button class="btn danger" onclick="trashDriveProject()">Sí, borrar de Drive</button></div>');
+}
+function cancelDriveTrash(){if(cloud.deleting)return;pendingDriveTrash=null;cloudMenu(driveMenuFiles);}
+async function trashDriveProject(){
+  const target=pendingDriveTrash;
+  if(!target||target.epoch!==cloudEpoch||!cloud.user||solving||cloud.saving||cloud.deleting)return;
+  pendingDriveTrash=null;cloud.deleting=true;clearTimeout(cloudTimer);renderCloud();
+  openModal('<h3>Moviendo a la papelera…</h3><p>Espera a que Drive confirme el borrado.</p>');
+  try{
+    await gapi(DRIVE+'/'+encodeURIComponent(target.id),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});
+    if(target.epoch!==cloudEpoch)return;
+    if(cloud.fileId===target.id)detachCloud();
+    driveMenuFiles=driveMenuFiles.filter(f=>f.id!==target.id);toast('Proyecto movido a la papelera. Tu copia local se conserva');await cloudMenu(driveMenuFiles);
+  }catch(e){if(target.epoch===cloudEpoch){toast('No se ha podido borrar: '+e.message);await cloudMenu(driveMenuFiles);}}
+  finally{cloud.deleting=false;renderCloud();if(cloud.dirty&&cloud.fileId)cloudSchedule();}
+}
 function recoveryMenu(){let backups=[];try{backups=JSON.parse(localStorage.getItem(BACKUP_KEY)||'[]');}catch{}openModal('<h3>Copias de recuperación</h3><p>Se conservan las tres últimas copias anteriores a operaciones de Drive o importación.</p>'+backups.map((b,i)=>'<p>'+esc(b.project.name)+' · '+esc(new Date(b.date).toLocaleString('es-ES'))+' <button class="btn" onclick="restoreRecovery('+i+')">Recuperar</button></p>').join('')+(!backups.length?'<p>No hay copias todavía.</p>':''));}
 function restoreRecovery(index){try{const p=parseProject(JSON.parse(localStorage.getItem(BACKUP_KEY)||'[]')[index].project);if(solving)throw Error('Detén la búsqueda');recoverSnapshot();detachCloud();mutate(()=>{state=p;});closeModal();}catch(e){toast(e.message);}}

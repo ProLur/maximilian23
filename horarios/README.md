@@ -22,13 +22,14 @@ vista local en `http://127.0.0.1:8765` con los tipos de archivo correctos.
 - `interface.js`: ayudas cerrables, acción permanente «Ver horario» y movimientos.
 - `curriculum.js`: catálogo de áreas/materias por etapa y comunidad, con fuentes.
 - `setup.js`: selección de centro/comunidad y asistente de plantillas.
+- `compliance.js`: cargas curriculares en minutos, jornada individual, habilitaciones y estado de borrador.
 - `tests.cjs`: pruebas de regresión sin dependencias.
 
 ## Uso
 
 La barra superior incluye **Nuevo**, **Plantilla**, **Guardar**, **Abrir** y **Excel**.
-«Nuevo» inicia un proyecto vacío; «Plantilla» prepara una estructura configurable.
-Permite indicar docentes, clases, alumnos por clase, aulas adicionales, nombres
+«Nuevo» y «Plantilla» abren siempre el formulario completo para crear una estructura configurable.
+Permite indicar docentes, clases, duración de cada sesión, sesiones de mañana, hora de inicio, recreo, curso, titularidad, alumnos por clase, aulas adicionales, nombres
 propios y materias o módulos adicionales. Crear una plantilla sobre un proyecto
 existente requiere confirmar la sustitución; conserva una copia y permite deshacer.
 
@@ -129,3 +130,19 @@ aislados. Cubren datos inválidos, conflictos fijados, reparación, aforos, aula
 alternativas, preferencias, subgrupos, sustituciones, calendario, sincronización
 simulada, recuperación, versiones completas y generación de todas las vistas.
 No realizan autenticación ni escrituras reales en Google Drive.
+
+## Horas y normativa
+
+La sección «Horas y normativa» compara por grupo los minutos exigidos, previstos y colocados por materia. Las sesiones se convierten con su duración real; una sesión de 45 minutos no se cuenta como una hora. Una distribución revisada con una cantidad incorrecta de sesiones impide iniciar la generación; los perfiles incompletos permiten trabajar como borrador. No se redondean horas para crear actividades.
+
+Las bases automáticas de carga son Primaria de Murcia (Decreto 209/2022, anexo I) y Extremadura (Decreto 107/2022 consolidado, artículo 13 y anexo IV). Murcia usa cursos; Extremadura usa ciclos. El reparto extremeño por curso es una propuesta del centro que conserva los totales del ciclo y sitúa Valores en sexto: requiere revisión y ambos cursos del ciclo para comprobarlo. Las opciones y el reparto por alumnos, las adaptaciones autorizadas y el equilibrio pedagógico no pueden certificarse sumando áreas. Los perfiles automáticos no autorizan variaciones: las excepciones deben documentarse mediante distribución manual.
+
+Para el resto de comunidades y etapas se introducen las cargas y la fuente oficial; no se presenta el catálogo nacional de nombres como una tabla de horas contrastada. Los desdobles, subgrupos y optativas simultáneas quedan pendientes de contraste del itinerario de cada alumno: no se suman como si cada alumno cursase todas las opciones.
+
+Cada docente requiere fuente de normativa o convenio, mínimos/máximos individuales tras reducciones, unidad lectiva (minutos o periodos), permanencia en minutos, trabajo fuera de la rejilla, cómputo de actividades y materias para las que se ha comprobado habilitación. No se inventa un límite nacional uniforme ni se presume jornada completa. Un cambio de comunidad, curso, titularidad, nivel, catálogo o marco exige renovar la revisión. Los datos declarados deben contrastarse con documentación individual y la vigencia de la norma. «Comprobaciones configuradas superadas» no es una certificación jurídica universal.
+
+Las exportaciones pendientes requieren elegir «Exportar borrador» y llevan la marca en el nombre y contenido. La impresión pendiente incluye una advertencia de borrador. «Guardar» sigue permitiendo descargar siempre el proyecto editable. No hay aprobación automática del horario sin completar las comprobaciones.
+
+## Borrar de Drive
+
+«Borrar» sustituye a «Ver en Drive». Muestra nombre y confirmación antes de mover el archivo a la papelera (no borrado permanente). No elimina el proyecto abierto en el navegador. Si se borra el archivo vinculado, la aplicación desconecta su sincronización; una operación en curso bloquea otra escritura o borrado. Los errores conservan el vínculo y la copia local. Las pruebas usan respuestas simuladas, sin borrar archivos de una cuenta real.

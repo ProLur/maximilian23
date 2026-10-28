@@ -337,7 +337,7 @@ function exportCSV(){
 }
 
 /* ---------- navegación ---------- */
-const VIEWTITLE = {inicio:'Inicio',marco:'Marco horario',profesores:'Profesores',grupos:'Grupos',materias:'Materias',aulas:'Aulas',actividades:'Actividades',restricciones:'Condiciones',generar:'Generar horario',horario:'Horario',sabana:'Horario general',guardias:'Guardias y ausencias',informes:'Informes'};
+const VIEWTITLE = {inicio:'Inicio',marco:'Marco horario',profesores:'Profesores',grupos:'Grupos',materias:'Materias',aulas:'Aulas',actividades:'Actividades',restricciones:'Condiciones',normativa:'Horas y normativa',generar:'Generar horario',horario:'Horario',sabana:'Horario general',guardias:'Guardias y ausencias',informes:'Informes'};
 function steps(){
   const placed = state.lessons.filter(l => l.day != null).length;
   return [
@@ -365,7 +365,7 @@ function renderNav(){
     b('materias','·','Materias', state.subjects.length) +
     b('aulas','·','Aulas', state.rooms.length) +
     b('actividades',3,'Actividades', state.activities.length) +
-    b('restricciones',4,'Condiciones') +
+    b('restricciones',4,'Condiciones') + b('normativa','·','Horas y normativa') +
     `<div class="sec">Horario</div>` +
     b('generar',5,'Generar') +
     b('horario',6,'Ver y ajustar', placed+'/'+state.lessons.length) +
@@ -378,7 +378,7 @@ function renderNav(){
 function render(){
   applyEtapa(); syncLessons(); renderNav();
   const v = ui.view, V = $('#view');
-  const views = {inicio:vInicio, marco:vMarco, actividades:vAct, restricciones:vRest, generar:vGen, horario:vHor, sabana:vSab, guardias:vGuard, informes:vInf};
+  const views = {inicio:vInicio, marco:vMarco, actividades:vAct, restricciones:vRest, normativa:vNormativa, generar:vGen, horario:vHor, sabana:vSab, guardias:vGuard, informes:vInf};
   V.innerHTML = ENT[v] ? vEnt(v) : views[v]();
 }
 
@@ -439,11 +439,7 @@ function vInicio(){
     <button class="btn" onclick="loadSample()">Cargar ejemplo</button>
   </div></div>`;
 }
-function newProject(){
-  if(solving)return toast('Detén primero la búsqueda');
-  if (!confirm('¿Empezar un proyecto nuevo? Se borrarán los datos actuales (puedes deshacer con Ctrl+Z).')) return;
-  recoverSnapshot(); detachCloud(); mutate(() => { state = blank(); }); go('marco'); chooseEtapa(true);
-}
+// Nuevo always opens the full project wizard in setup.js.
 
 /* ---------- vista: marco horario ---------- */
 function vMarco(){
@@ -845,7 +841,7 @@ async function runSolve(){
   const occ = buildOcc(); let gg = 0, gt = 0, warn = 0;
   state.groups.forEach(g => gg += gapsOf('G', g.id, occ)); state.teachers.forEach(t => { gt += gapsOf('T', t.id, occ); warn += teacherWarnings(t, occ).length; });
   $('#genRes').innerHTML = (r.u === 0 && r.issues === 0
-    ? `<h3 class="pill-ok" style="margin-top:10px">✓ Horario completo y válido. Todas las sesiones están colocadas y sin conflictos obligatorios.</h3>`
+    ? `<h3 class="pill-ok" style="margin-top:10px">✓ Todas las sesiones colocadas y sin conflictos de horario. Comprueba también la carga curricular y la jornada docente en «Horas y normativa».</h3>`
     : `<h3 class="pill-warn" style="margin-top:10px">Se han colocado ${r.total - r.u} de ${r.total} sesiones.</h3><p class="muted">Quedan ${r.u} sin colocar y ${r.issues} con conflictos. Prueba una búsqueda más intensa, relaja condiciones o colócalas a mano.</p>`)
     + `<p class="muted">${r.cancelled ? 'Búsqueda detenida. Se conserva el mejor horario encontrado. · ' : ''}Semilla: ${esc(r.seed)} · Huecos de alumnos: <b>${gg}</b> · Huecos de profesores: <b>${gt}</b> · Avisos de condiciones: <b>${warn}</b></p><button class="btn pri" onclick="go('horario')">Ver y ajustar →</button> <button class="btn" onclick="go('informes')">Ver informes</button>`;
 }
@@ -1309,7 +1305,7 @@ async function cloudMenu(files){
   const fmt = t => new Date(t).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'});
   openModal(`<h3>Mis horarios en Google Drive</h3>
     <p class="muted">Cuenta: <b>${esc(cloud.user.email)}</b>. Los archivos se guardan en tu Drive y se actualizan solos mientras trabajas. Puedes compartirlos desde Drive con tu equipo directivo.</p>
-    ${files.length ? `<table class="t"><tr><th>Archivo</th><th>Modificado</th><th></th></tr>${files.map(f => `<tr><td>${f.id === cloud.fileId ? '✅ ' : ''}${esc(f.name)}</td><td>${fmt(f.modifiedTime)}</td><td style="text-align:right;white-space:nowrap">${f.id === cloud.fileId ? '<span class="pill-ok">Abierto</span>' : `<button class="btn sm" data-drive-id="${esc(f.id)}" data-drive-name="${esc(f.name)}">Abrir</button>`} ${f.webViewLink ? `<a class="btn sm" href="${esc(f.webViewLink)}" target="_blank" rel="noopener">Ver en Drive</a>` : ''}</td></tr>`).join('')}</table>`
+    ${files.length ? `<table class="t"><tr><th>Archivo</th><th>Modificado</th><th></th></tr>${files.map(f => `<tr><td>${f.id === cloud.fileId ? '✅ ' : ''}${esc(f.name)}</td><td>${fmt(f.modifiedTime)}</td><td style="text-align:right;white-space:nowrap">${f.id === cloud.fileId ? '<span class="pill-ok">Abierto</span>' : `<button class="btn sm" data-drive-id="${esc(f.id)}" data-drive-name="${esc(f.name)}">Abrir</button>`} <button class="btn sm danger" data-trash-id="${esc(f.id)}">Borrar</button></td></tr>`).join('')}</table>`
       : '<p class="muted">Todavía no tienes horarios guardados en tu Drive.</p>'}
     <div class="mfoot"><button class="btn danger" style="margin-right:auto" onclick="cloudSignOut()">Cerrar sesión</button><button class="btn" onclick="closeModal()">Cerrar</button><button class="btn pri" onclick="cloudSaveAsNew()">Guardar el proyecto actual ${cloud.fileId ? 'como copia nueva' : 'en mi Drive'}</button></div>`);
 }
