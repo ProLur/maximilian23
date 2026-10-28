@@ -25,6 +25,11 @@ const originalRender=render;
 render=function(){originalRender();
   // Keep the main action available even when the welcome card is dismissed.
   if(ui.view==='inicio')$('#view').insertAdjacentHTML('afterbegin','<div class="page-heading"><div><span class="eyebrow">TU CENTRO · TU SEMANA</span><h2>Todo listo para organizarte</h2></div><div class="row"><button class="btn" onclick="recoveryMenu()">Recuperar copia</button><button class="btn pri" onclick="go(\'horario\')">Ver horario →</button></div></div>');
+  if(ui.view==='inicio'&&state.curriculum){
+    const region=REGIONS.find(r=>r.id===state.region);
+    $('#view').insertAdjacentHTML('beforeend','<div class="card curriculum-status"><div><h3>'+esc(region?.name||'Currículo de partida')+'</h3><p class="help">'+esc((state.educationStages||[]).map(s=>EDUCATION_STAGES[s]?.name||s).join(' · '))+' · Catálogo editable</p></div><button class="btn" onclick="chooseEtapa()">Comunidad y etapas</button><button class="btn" onclick="showCurriculumInfo()">Fuentes y revisión</button></div>');
+    if(!state.curriculum.noticeDismissed)$('#view').insertAdjacentHTML('afterbegin','<div class="setup-notice dismissible" role="status"><button class="dismiss" aria-label="Cerrar aviso de revisión" onclick="dismissCurriculumNotice()">×</button><b>Hemos cargado lo predeterminado. Revisa tu centro.</b><p>'+esc(CURRICULUM_WARNING)+'</p><button class="btn sm" onclick="go(\'materias\')">Revisar materias</button></div>');
+  }
   for(const button of $$('button.iconbtn')){if(!button.textContent.trim())button.textContent='×';if(!button.getAttribute('aria-label'))button.setAttribute('aria-label',button.title||button.textContent.trim()||'Acción');}
   for(const step of $$('.step')){step.setAttribute('role','button');step.setAttribute('tabindex','0');step.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();step.click();}};}
   for(const el of $$('#view > .lead, #view > .help')){const key='intro-'+ui.view;if(helpVisible(key)){el.classList.add('dismissible','intro-help');el.insertAdjacentHTML('afterbegin','<button class="dismiss" aria-label="Cerrar ayuda de esta sección" onclick="dismissHelp(\''+key+'\')">×</button>');}else el.remove();}

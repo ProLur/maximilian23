@@ -48,23 +48,7 @@ function groupName(level, L){
   m = level.match(/^(\d)º (.*)$/);
   return m ? [level+' '+L, m[1]+m[2].replace(/[^A-Z]/g,'')+L] : [level+' '+L, level.slice(0,3)+L];
 }
-function chooseEtapa(first){
-  openModal(`<div style="text-align:center"><img class="maxhead" src="https://maximilian23.com/Cabeza.png" alt="Maximilian 23" style="width:110px">
-    <h3>${first ? '¡Hola! Soy MaxHorarios' : 'Tipo de centro'}</h3>
-    <p class="muted">¿Para qué tipo de centro vas a hacer los horarios? Así uso los nombres de clases, niveles y tramos adecuados.</p></div>
-    <div class="choice">
-      <button onclick="setEtapa('primaria')"><b>Colegio</b><small>Infantil y Primaria<br>Clases: Infantil 3 años A, 1º A, 2º B…<br>Maestros tutores y especialistas</small></button>
-      <button class="o" onclick="setEtapa('secundaria')"><b>Instituto</b><small>ESO, Bachillerato y FP<br>Grupos: 1º ESO A, 2º Bachillerato B…<br>Profesorado por departamentos</small></button>
-    </div>`);
-}
-function setEtapa(x){
-  const fresh = !state.activities.length && !state.lessons.some(l => l.day != null);
-  mutate(() => {
-    state.etapa = x;
-    if (fresh) state.slots = ETAPAS[x].slots.map(([start, end, r]) => r ? {start, end, recreo:true} : {start, end});
-  });
-  closeModal(); toast('Tipo de centro: ' + ETAPAS[x].n);
-}
+// Centre and region setup is defined in setup.js.
 function levelsModal(){
   const e = etapa();
   openModal(`<h3>Crear ${e.G[1].toLowerCase()} por niveles</h3>
@@ -451,7 +435,6 @@ function vInicio(){
     <label class="muted">Tipo</label><button class="btn alt" onclick="chooseEtapa()">${state.etapa==='primaria'?'Colegio':'Instituto'} · cambiar</button>
     <span class="grow"></span>
     <button class="btn" onclick="loadSample()">Cargar ejemplo</button>
-    <button class="btn danger" onclick="newProject()">Nuevo proyecto vacío</button>
   </div></div>`;
 }
 function newProject(){

@@ -24,6 +24,10 @@ function validateProject(project) {
   const fail=m=>{throw Error('Proyecto inválido: '+m);};
   if (!project || typeof project!=='object' || Array.isArray(project)) fail('se esperaba un objeto');
   for(const k of ['name','course'])if(project[k]!=null&&typeof project[k]!=='string')fail(k+' debe ser texto');
+  if(project.region!=null&&(typeof project.region!=='string'||project.region.length>80))fail('comunidad autónoma incorrecta');
+  if(project.educationStages!=null&&(!Array.isArray(project.educationStages)||project.educationStages.some(s=>!['infantil','primaria','eso','bachillerato','fp'].includes(s))))fail('etapas educativas incorrectas');
+  if(project.bachModalities!=null&&(!Array.isArray(project.bachModalities)||project.bachModalities.some(s=>typeof s!=='string')))fail('modalidades incorrectas');
+  if(project.curriculum!=null&&(!project.curriculum||typeof project.curriculum!=='object'||!Array.isArray(project.curriculum.sources)||project.curriculum.sources.some(s=>!s||typeof s.title!=='string'||typeof s.url!=='string')||!Array.isArray(project.curriculum.notes)||project.curriculum.notes.some(n=>typeof n!=='string')))fail('referencias curriculares incorrectas');
   if (project.schemaVersion!=null && (!Number.isSafeInteger(project.schemaVersion)||project.schemaVersion>SCHEMA_VERSION)) fail('versión de archivo no compatible');
   const arrays=['days','slots','teachers','groups','subjects','rooms','activities','lessons','versions','absences'];
   arrays.forEach(k=>{if(!Array.isArray(project[k])) fail(k+' debe ser una lista'); if(project[k].length>20000)fail('demasiados elementos en '+k);});

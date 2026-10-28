@@ -20,9 +20,43 @@ vista local en `http://127.0.0.1:8765` con los tipos de archivo correctos.
   ejecución en Web Worker, cancelación y conservación del mejor resultado.
 - `persistence.js`: sincronización con Drive, escrituras condicionales y recuperación.
 - `interface.js`: ayudas cerrables, acción permanente «Ver horario» y movimientos.
+- `curriculum.js`: catálogo de áreas/materias por etapa y comunidad, con fuentes.
+- `setup.js`: selección de centro/comunidad y asistente de plantillas.
 - `tests.cjs`: pruebas de regresión sin dependencias.
 
 ## Uso
+
+La barra superior incluye **Nuevo**, **Plantilla**, **Guardar**, **Abrir** y **Excel**.
+«Nuevo» inicia un proyecto vacío; «Plantilla» prepara una estructura configurable.
+Permite indicar docentes, clases, alumnos por clase, aulas adicionales, nombres
+propios y materias o módulos adicionales. Crear una plantilla sobre un proyecto
+existente requiere confirmar la sustitución; conserva una copia y permite deshacer.
+
+Al elegir colegio o instituto se seleccionan debajo la comunidad o ciudad autónoma
+y las etapas impartidas. Hay 17 comunidades y las ciudades de Ceuta y Melilla.
+Se muestra una lista editable de materias antes de cargar; una recarga añade las
+que falten sin eliminar las existentes ni duplicar nombres equivalentes.
+
+El catálogo reúne áreas/materias de diferentes cursos, opciones y modalidades,
+tomando la base estatal y variantes autonómicas contrastadas. No representa una
+asignación obligatoria de todas esas materias a cada clase. Infantil carga sus tres
+áreas globalizadas; Primaria adapta desdobles y lenguas; ESO incluye materias de
+distintos cursos y opciones; Bachillerato permite elegir modalidades. Las optativas
+autonómicas de ESO/Bachillerato no constituyen un inventario exhaustivo. FP exige
+introducir los módulos del título concreto; no se inventan módulos genéricos.
+
+Las fuentes oficiales están disponibles en el asistente y en Inicio → «Fuentes y
+revisión». Se conserva la región, etapas y procedencia al guardar o exportar.
+Después de cargar aparece un mensaje que exige revisar los datos porque pueden
+contener errores. El aviso también aparece en Inicio y se puede cerrar con su X.
+La carga semanal y asignación de profesorado se completan en Actividades: la
+plantilla no presupone horas oficiales ni especialidades docentes.
+
+Referencias estatales: [Infantil](https://www.boe.es/eli/es/rd/2022/02/01/95/con),
+[Primaria](https://www.boe.es/eli/es/rd/2022/03/01/157/con),
+[ESO](https://www.boe.es/eli/es/rd/2022/03/29/217/con),
+[Bachillerato](https://www.boe.es/eli/es/rd/2022/04/05/243/con).
+Cada perfil autonómico incluye además su referencia en `curriculum.js`.
 
 1. Define días y tramos sin solapamientos. Una sesión doble necesita tramos
    contiguos y no puede atravesar un recreo.
