@@ -106,6 +106,8 @@ function occupancyResources(l){const resources=resL(l).slice();for(const [type,i
 buildIndex=function(){originalBuildIndex();for(const a of state.activities){const resources=IX.res.get(a.id).filter(([t])=>t!=='G');for(const id of a.groupIds)for(const leaf of groupLeaves(id))resources.push(['G',leaf]);const seen=new Set();IX.res.set(a.id,resources.filter(([t,id])=>{const k=t+':'+id;if(seen.has(k))return false;seen.add(k);return true;}));}};
 function activityIssues(a, mainRoom) {
   const errors=[], teachers=new Set(a.teacherIds), rooms=new Set(mainRoom?[mainRoom]:[]);
+  const students=a.groupIds.flatMap(id=>groupLeaves(id));
+  if(new Set(students).size!==students.length)errors.push('El grupo completo y sus subgrupos no pueden seleccionarse juntos en la misma actividad');
   if(!a.teacherIds.length)errors.push('La actividad necesita un profesor principal');
   if(a.type==='clase'&&(!a.groupIds.length||!a.subjectId))errors.push('La clase necesita grupo y materia');
   for(const p of a.parts){
@@ -191,7 +193,8 @@ function canSubstitute(rid,lid,tid){
 setSub=function(rid,lid,tid){if(tid&&!canSubstitute(rid,lid,tid))return toast('Ese profesor ya está ocupado, ausente o no está disponible durante toda la sesión');mutate(()=>{state.absences.find(r=>r.id===rid).subs[lid]=tid;});};
 function substitutionIssues(){const out=[];for(const r of state.absences)for(const [lid,tid]of Object.entries(r.subs||{}))if(tid&&!canSubstitute(r.id,lid,tid))out.push({rid:r.id,lid,tid});return out;}
 const originalVGuard=vGuard;
-vGuard=function(){const errors=substitutionIssues().filter(x=>state.absences.find(r=>r.id===x.rid)?.date===ui.absDate);return (errors.length?'<div class="alertbox" role="alert">Hay '+errors.length+' sustituciones que ya no son válidas. Vuelve a seleccionar un profesor antes de imprimir.</div>':'')+originalVGuard();};
+vGuard=function(){const errors=substitutionIssues().filter(x=>state.absences.find(r=>r.id===x.rid)?.date===ui.absDate);return (errors.length?'<div class="alertbox" role="alert">Hay '+errors.length+' sustituciones que ya no son válidas. Vuelve a seleccionar un profesor antes de imprimir. <button class="btn sm" onclick="clearInvalidSubstitutions()">Quitar asignaciones inválidas</button></div>':'')+originalVGuard();};
+function clearInvalidSubstitutions(){const errors=substitutionIssues().filter(x=>state.absences.find(r=>r.id===x.rid)?.date===ui.absDate);if(!errors.length)return;mutate(()=>{for(const e of errors)delete state.absences.find(r=>r.id===e.rid).subs[e.lid];});}
 const originalPrintAbs=printAbs;
 printAbs=function(){if(substitutionIssues().some(x=>state.absences.find(r=>r.id===x.rid)?.date===ui.absDate))return toast('Corrige primero las sustituciones incompatibles');originalPrintAbs();};
 saveVersion=function(){const name=$('#verName').value.trim()||'Copia '+(state.versions.length+1);mutate(()=>{const snapshot=clone(state);snapshot.versions=[];const pos={};state.lessons.forEach(l=>pos[l.id]=[l.day,l.slot,l.room,l.locked]);state.versions.push({id:uid(),name,date:new Date().toLocaleString('es-ES'),pos,snapshot});});toast('Copia completa guardada');};

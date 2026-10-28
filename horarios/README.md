@@ -118,6 +118,12 @@ Al cambiar un archivo JavaScript o CSS, ejecuta `node version-assets.cjs` antes
 de publicar. Los enlaces incluyen una versión calculada del contenido para que
 el navegador no mezcle scripts o estilos antiguos con una página recién actualizada.
 
+La revisión incluye pruebas de flujo completo (plantilla, actividades, generación,
+exportación e importación), navegación por teclado y comprobaciones de que la
+demostración no altera los guardados normales. El diagnóstico inicial limita su
+trabajo a 60 actividades distintas para mantener ágil la apertura de Generar;
+el motor examina todas las actividades durante la búsqueda.
+
 Las pruebas ejecutan el código de producción y el código del worker en contextos
 aislados. Cubren datos inválidos, conflictos fijados, reparación, aforos, aulas
 alternativas, preferencias, subgrupos, sustituciones, calendario, sincronización

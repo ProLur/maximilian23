@@ -440,6 +440,7 @@ function vInicio(){
   </div></div>`;
 }
 function newProject(){
+  if(solving)return toast('Detén primero la búsqueda');
   if (!confirm('¿Empezar un proyecto nuevo? Se borrarán los datos actuales (puedes deshacer con Ctrl+Z).')) return;
   recoverSnapshot(); detachCloud(); mutate(() => { state = blank(); }); go('marco'); chooseEtapa(true);
 }
@@ -801,7 +802,8 @@ function vGen(){
   const tot = state.lessons.length, locked = state.lessons.filter(l => l.locked).length, placed = state.lessons.filter(l => l.day != null).length;
   const diag = diagnostics().filter(d => d[0] === 'bad');
   const un = state.lessons.filter(l => l.day == null);
-  const dbg = un.map(l => [l, whyUnplaceable(l)]).filter(x => x[1]);
+  const debugByActivity=new Map(),dbg=[];
+  for(const l of un){if(!debugByActivity.has(l.actId)){if(debugByActivity.size>=60)continue;debugByActivity.set(l.actId,whyUnplaceable(l));}const why=debugByActivity.get(l.actId);if(why&&dbg.length<15)dbg.push([l,why]);}
   return `<h2>5 · Generar horario</h2>
   <p class="lead">El motor prueba miles de combinaciones y se queda con la mejor: sin solapamientos de profesores, grupos ni aulas, respetando todas las condiciones obligatorias y minimizando huecos de alumnos y profesores, franjas «mejor no» y sesiones en días seguidos. Las sesiones <b>fijadas </b> no se mueven: fija lo que te guste y vuelve a generar el resto.</p>
   <div class="card" style="text-align:center;padding:30px">
@@ -819,7 +821,7 @@ function vGen(){
     <div style="max-width:520px;margin:20px auto 0"><div class="progress" id="genProg"><div></div></div><p class="muted" id="genMsg" style="min-height:20px"></p></div>
     <button class="btn danger" id="cancelSolve" hidden onclick="cancelSolve()">Detener y conservar el mejor</button><div id="genRes" aria-live="polite"></div>
   </div>
-  ${dbg.length ? `<div class="card"><h3 class="pill-bad">Depurador: sesiones imposibles de colocar</h3><p class="help">Estas sesiones no tienen ningún tramo posible ni siquiera con el horario vacío. Revisa sus condiciones:</p>
+  ${dbg.length ? `<div class="card"><h3 class="pill-bad">Sesiones que necesitan revisión</h3><p class="help">Estas sesiones no tienen ningún tramo posible ni siquiera con el horario vacío. Diagnóstico rápido de hasta 60 actividades; el generador comprueba todas. Revisa sus condiciones:</p>
     <ul class="diag">${dbg.slice(0,15).map(([l,why]) => `<li><b>${esc(actLabel(IX.A.get(l.actId)))}</b>: ${why.map(esc).join('; ')}</li>`).join('')}</ul></div>` : ''}
   <div class="card"><h3>Copias del proyecto</h3><p class="help" style="margin-top:-6px">Las nuevas copias incluyen datos, condiciones y horario. Las versiones antiguas solo incluyen posiciones.</p>
     <div class="row" style="margin-bottom:10px"><input class="f" id="verName" placeholder="Nombre (p. ej. Propuesta A)" style="width:260px"><button class="btn pri" onclick="saveVersion()">Guardar versión actual</button><span class="grow"></span><button class="btn danger" ${state.versions.length?'':'disabled'} onclick="if(confirm('¿Borrar todas las versiones guardadas?'))mutate(()=>state.versions=[])">Borrar todas</button></div>
@@ -1138,11 +1140,12 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Delete' || e.key === 'Backspace'){ unplace(ui.sel); }
     if (e.key.toLowerCase() === 'f' && !e.ctrlKey){ toggleLock(ui.sel); }
   }
-  if (e.key === 'Enter' && $('#modal').classList.contains('on') && e.target.tagName !== 'TEXTAREA'){ const b = $('#mbox .btn.pri'); if (b) b.click(); }
+  if (e.key === 'Enter' && $('#modal').classList.contains('on') && e.target.tagName === 'INPUT' && !['checkbox','radio','file'].includes(e.target.type)){ const b = $('#mbox .btn.pri'); if (b && !b.disabled){ e.preventDefault(); b.click(); } }
 });
 
 /* ---------- datos de ejemplo ---------- */
 function loadSample(){
+  if(solving)return toast('Detén primero la búsqueda');
   if ((state.teachers.length || state.activities.length) && !confirm('¿Reemplazar los datos actuales por el ejemplo? (puedes deshacer con Ctrl+Z)')) return;
   detachCloud();
   mutate(() => {

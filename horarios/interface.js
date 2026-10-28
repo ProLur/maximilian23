@@ -1,6 +1,6 @@
 const originalOpenModal=openModal;
 let modalOpener=null;
-openModal=function(html){if(!$('#modal').classList.contains('on'))modalOpener=document.activeElement;originalOpenModal('<button class="dismiss modal-close" aria-label="Cerrar ventana" onclick="closeModal()">×</button>'+html);};
+openModal=function(html){if(!$('#modal').classList.contains('on'))modalOpener=document.activeElement;originalOpenModal('<button class="dismiss modal-close" aria-label="Cerrar ventana" onclick="closeModal()">×</button>'+html);if(!$('#mbox input.f, #mbox select.f'))$('#mbox .modal-close')?.focus();};
 const originalCloseModal=closeModal;
 closeModal=function(){if(!state.etapa){try{const h=JSON.parse(localStorage.getItem(HELP_KEY)||'{}');h['first-visit']=true;localStorage.setItem(HELP_KEY,JSON.stringify(h));}catch{}}originalCloseModal();if(modalOpener?.isConnected)modalOpener.focus({preventScroll:true});modalOpener=null;};
 const originalGo=go;
