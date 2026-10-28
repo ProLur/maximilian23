@@ -146,3 +146,9 @@ Las exportaciones pendientes requieren elegir «Exportar borrador» y llevan la 
 ## Borrar de Drive
 
 «Borrar» sustituye a «Ver en Drive». Muestra nombre y confirmación antes de mover el archivo a la papelera (no borrado permanente). No elimina el proyecto abierto en el navegador. Si se borra el archivo vinculado, la aplicación desconecta su sincronización; una operación en curso bloquea otra escritura o borrado. Los errores conservan el vínculo y la copia local. Las pruebas usan respuestas simuladas, sin borrar archivos de una cuenta real.
+
+## Avisos con acceso directo
+
+Cada revisión o diferencia en «Qué queda por resolver» incluye «Ver», una explicación en rojo y un destino explícito. Abre el formulario del grupo o docente, el horario correspondiente, el marco o las actividades filtradas por grupo/materia. Los ciclos muestran ambos cursos. La pantalla de destino conserva la explicación y permite volver a los pendientes; guardar una revisión vuelve a la lista. Los destinos usan identificadores, por lo que no confunden personas o grupos con nombres iguales, y comprueban que el dato siga existiendo.
+
+Las actividades incluyen «Quitar filtros» y muestran tramos semanales en lugar de confundirlos con horas de reloj. Los desajustes por materia no se multiplican contra cero cuando aún falta definir el currículo. Con tramos variables, la previsión queda «Por calcular» mientras falten sesiones; una vez colocadas todas se usan sus minutos reales sin dejar un aviso permanente.

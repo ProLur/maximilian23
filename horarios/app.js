@@ -611,9 +611,13 @@ function delActs(ids){
 
 /* ---------- vista: actividades ---------- */
 function vAct(){
+  if(ui.fGroup&&!state.groups.some(g=>g.id===ui.fGroup))ui.fGroup='';
+  if(ui.fTeacher&&!state.teachers.some(t=>t.id===ui.fTeacher))ui.fTeacher='';
+  ui.fSubjectIds=(ui.fSubjectIds||[]).filter(id=>state.subjects.some(s=>s.id===id));
   let acts = state.activities;
-  if (ui.fGroup) acts = acts.filter(a => a.groupIds.includes(ui.fGroup));
+  if (ui.fGroup) acts = acts.filter(a => a.groupIds.some(id=>groupsOverlap(id,ui.fGroup)));
   if (ui.fTeacher) acts = acts.filter(a => allTeachers(a).includes(ui.fTeacher));
+  if(ui.fSubjectIds?.length)acts=acts.filter(a=>subjIds(a).some(id=>ui.fSubjectIds.includes(id)));
   const canAdd = state.subjects.length && state.groups.length;
   const total = acts.reduce((s,a) => s + a.sessions*a.dur, 0);
   const rows = acts.map(a => {
@@ -636,16 +640,19 @@ function vAct(){
       <button class="btn" ${canAdd?'':'disabled'} onclick="actModal()">Nueva actividad</button>
       <button class="btn" ${state.teachers.length?'':'disabled'} onclick="actModal(null,'guardia')">Guardias / reuniones</button>
       <span class="grow"></span>
-      <select class="f" onchange="ui.fGroup=this.value;render()"><option value="">Todos los grupos</option>${state.groups.map(g => `<option value="${g.id}" ${ui.fGroup===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select>
-      <select class="f" onchange="ui.fTeacher=this.value;render()"><option value="">Todos los profesores</option>${state.teachers.map(t => `<option value="${t.id}" ${ui.fTeacher===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select>
+      ${ui.fGroup||ui.fTeacher||ui.fSubjectIds?.length?`<button class="btn sm" onclick="clearActivityFilters()">Quitar filtros</button>`:''}
+      ${ui.fSubjectIds?.length?`<span class="tag">Materia: ${ui.fSubjectIds.map(id=>esc(nm('S',id))).join(', ')}</span>`:''}
+      <select class="f" aria-label="Filtrar actividades por grupo" onchange="ui.fGroup=this.value;ui.fSubjectIds=[];render()"><option value="">Todos los grupos</option>${state.groups.map(g => `<option value="${g.id}" ${ui.fGroup===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select>
+      <select class="f" aria-label="Filtrar actividades por docente" onchange="ui.fTeacher=this.value;ui.fSubjectIds=[];render()"><option value="">Todos los profesores</option>${state.teachers.map(t => `<option value="${t.id}" ${ui.fTeacher===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select>
     </div>
     ${!canAdd ? `<div class="empty"><b>Primero añade grupos y materias</b><button class="btn" onclick="go('grupos')">Ir a Grupos</button></div>` :
-      acts.length ? `<div class="row" style="margin-bottom:8px"><span class="muted">${ui.fGroup||ui.fTeacher ? 'Mostrando las actividades filtradas («Borrar todo» borra solo estas)' : ''}</span>${delBar(acts.map(a => a.id), `delActs(${esc(JSON.stringify(acts.map(a => a.id)))}.filter(id=>ui.pick.has(id)))`, `delActs(${esc(JSON.stringify(acts.map(a => a.id)))})`)}</div>
+      acts.length ? `<div class="row" style="margin-bottom:8px"><span class="muted">${ui.fGroup||ui.fTeacher||ui.fSubjectIds?.length ? 'Mostrando las actividades filtradas («Borrar todo» borra solo estas)' : ''}</span>${delBar(acts.map(a => a.id), `delActs(${esc(JSON.stringify(acts.map(a => a.id)))}.filter(id=>ui.pick.has(id)))`, `delActs(${esc(JSON.stringify(acts.map(a => a.id)))})`)}</div>
       <table class="t"><tr>${pickHead(acts.map(a => a.id))}<th>Materia / tipo</th><th>Grupos</th><th>Profesorado</th><th>Aulas</th><th>Sesiones/semana</th><th>Máx./día</th><th>Colocadas</th><th></th></tr>${rows}</table>
-      <p class="muted" style="margin:10px 0 0">${acts.length} actividades · ${total} horas semanales. Doble clic en una fila para editarla. * = aula preferente con alternativas.</p>`
+      <p class="muted" style="margin:10px 0 0">${acts.length} actividades · ${total} tramos semanales. Doble clic en una fila para editarla. * = aula preferente con alternativas.</p>`
       : `<div class="empty"><b>No hay actividades</b>Usa la carga rápida para crear todas las de un grupo de una vez.</div>`}
   </div>`;
 }
+function clearActivityFilters(){ui.fGroup='';ui.fTeacher='';ui.fSubjectIds=[];render();}
 function partRow(p = {}){
   return `<div class="partrow">
     <select class="f pS"><option value="">Materia…</option>${state.subjects.map(s => `<option value="${s.id}" ${p.subjectId===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
@@ -655,7 +662,7 @@ function partRow(p = {}){
 }
 function actModal(id, type){
   const a = id ? state.activities.find(x => x.id === id)
-    : {type: type || 'clase', subjectId: type ? '' : state.subjects[0]?.id, teacherIds: ui.fTeacher ? [ui.fTeacher] : [], groupIds: !type && ui.fGroup ? [ui.fGroup] : [], roomIds:[], parts:[], sessions: type ? 1 : 3, dur:1, maxDay:1, spread:true};
+    : {type: type || 'clase', subjectId: type ? '' : (ui.fSubjectIds?.[0]||state.subjects[0]?.id), teacherIds: ui.fTeacher ? [ui.fTeacher] : [], groupIds: !type && ui.fGroup ? [ui.fGroup] : [], roomIds:[], parts:[], sessions: type ? 1 : 3, dur:1, maxDay:1, spread:true};
   const chips = (t, sel, name = t) => `<div class="chips">${state[COLL[t]].map(e => `<label><input type="checkbox" name="${name}" value="${e.id}" ${sel.includes(e.id)?'checked':''}>${esc(e.name)}</label>`).join('') || '<span class="muted">No hay '+TPLUR[t].toLowerCase()+'</span>'}</div>`;
   openModal(`<h3>${id ? 'Editar' : 'Nueva'} actividad</h3>
     <div class="row" style="align-items:flex-end">
