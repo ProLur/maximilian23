@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MaxHorarios</title>
-<link rel="stylesheet" href="styles.css?v=891a2c6781cf">
+<link rel="stylesheet" href="styles.css?v=581ecdb02a2c">
 </head>
 <body>
 <aside id="side">
@@ -16,6 +16,7 @@
   <header id="top">
     <h1 id="title">MaxHorarios</h1>
     <button class="btn" onclick="newProject()" title="Configurar un nuevo proyecto">Nuevo proyecto</button>
+    <button class="btn" onclick="exampleModal()" title="Probar con un centro ficticio completo">Ejemplo</button>
     <button class="btn" onclick="undo()" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
     <button class="btn" onclick="redo()" title="Rehacer (Ctrl+Y)">↷</button>
     <button class="btn" onclick="exportJSON()" title="Guardar el proyecto en un archivo">Guardar</button>
@@ -30,13 +31,14 @@
 <div id="modal" onmousedown="if(event.target===this)closeModal()"><div class="box" id="mbox" role="dialog" aria-modal="true" aria-label="Ventana de MaxHorarios"></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=52195cb8c70e"></script>
+<script src="app.js?v=df656cc135f1"></script>
 <script src="validation.js?v=1935efc0f5d1"></script>
 <script src="scheduler.js?v=7a8363e86c23"></script>
 <script src="persistence.js?v=ca05702cb07f"></script>
 <script src="curriculum.js?v=7ee0746ebe5b"></script>
-<script src="setup.js?v=462645671c9c"></script>
-<script src="compliance.js?v=3e77b9a762d5"></script>
+<script src="setup.js?v=80fbff80414f"></script>
+<script src="examples.js?v=786775278b8e"></script>
+<script src="compliance.js?v=4a0661e8c7ce"></script>
 <script src="privacy.js?v=fe7f606fe306"></script>
 <script src="interface.js?v=36e0bd2a6cfd"></script>
 <script>initialize();</script>

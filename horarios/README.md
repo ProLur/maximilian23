@@ -162,3 +162,11 @@ La aplicación y el pie lateral ofrecen acceso a «Privacidad y cuentas educativ
 Google Identity solo se carga cuando se solicita conectar; un segundo botón explícito inicia la autorización. Se piden correo y `drive.file`, sin el permiso de perfil. El token solo se conserva en memoria. Desconectar cancela solicitudes de autorización pendientes y descarta respuestas tardías para que no reaparezca una sesión cerrada. El acceso de cuentas Educarex/Workspace depende de la autorización institucional y no acredita respaldo oficial. La política no sustituye la identificación y el contacto del titular real de la web: esos datos deben completarse por su responsable.
 
 El borrado local requiere confirmación y elimina exclusivamente las claves de MaxHorarios del modo actual, las copias de recuperación y el historial en memoria. No borra Drive ni descargas. Se bloquea mientras haya búsqueda, escritura o borrado de Drive en curso. El botón «Guardar una copia antes» permite conservar un respaldo; no se prueba borrando datos reales de una cuenta.
+
+## Cursos, ejemplos y avisos
+
+El curso inicial usa el año natural actual en Europe/Madrid como primer año (por ejemplo, 2026/2027) y el desplegable ofrece cinco cursos futuros además del actual. Se conserva cualquier curso anterior de un proyecto abierto.
+
+«Ejemplo», junto a «Nuevo proyecto», pregunta Primaria/ESO y comunidad. Prepara un centro ficticio con docentes, grupos, alumnos por clase, materias regionales, aulas con aforo, actividades, disponibilidades, jornadas ilustrativas y una ausencia. Confirma antes de sustituir el proyecto, conserva recuperación, desconecta Drive y genera el horario. El resultado incluye una versión completa y, cuando haya sustituto disponible, una sustitución de ejemplo. No marca sus jornadas ni cargas ficticias como normativa revisada.
+
+La indicación de «Ver» tiene X, arrastre vertical y botones Subir/Bajar. Se recoloca dentro del documento, sin quedar fija ni superponerse a los controles. Cerrar no altera datos ni marca el problema como resuelto; vuelve a aparecer al pulsar «Ver». Se elimina la franja decorativa lateral.

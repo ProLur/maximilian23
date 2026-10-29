@@ -79,10 +79,17 @@ function doLevels(){
 let state, IX, history = [], future = [];
 let ui = { view:'inicio', ht:'G', hid:{}, sel:null, drag:null, rt:'T', rid:{}, brush:2, fGroup:'', fTeacher:'', st:'G', absDate:localDate(), pick:new Set() };
 
+function currentSchoolCourse(date=new Date()){const year=Number(new Intl.DateTimeFormat('en',{timeZone:'Europe/Madrid',year:'numeric'}).format(date));return year+'-'+(year+1);}
+function schoolCourseOptions(value='',date=new Date()){
+ const first=+currentSchoolCourse(date).slice(0,4),courses=Array.from({length:6},(_,i)=>(first+i)+'-'+(first+i+1));
+ const selected=String(value||courses[0]).replace('/','-');if(!courses.includes(selected))courses.unshift(selected);
+ return courses.map(course=>'<option value="'+esc(course)+'" '+(selected===course?'selected':'')+'>'+esc(course.replace('-','/'))+'</option>').join('');
+}
+
 /* ---------- datos ---------- */
 function blank(){
   return {
-    name:'Mi centro', course:'', etapa:null,
+    name:'Mi centro', course:currentSchoolCourse(), etapa:null,
     days:['Lunes','Martes','Miércoles','Jueves','Viernes'],
     slots:[
       {start:'08:30',end:'09:25'},{start:'09:25',end:'10:20'},{start:'10:20',end:'11:15'},
@@ -411,7 +418,7 @@ function vInicio(){
     <div class="grow"><h2>Bienvenido a MaxHorarios</h2>
     <p>Tu centro, organizado. Añade los datos, indica las condiciones y genera una propuesta de horario. Después podrás ajustarla, preparar sustituciones y exportarla.</p></div>
     <div class="row">
-      ${empty ? `<button class="btn big" onclick="loadSample()">Ver un ejemplo</button>` : ''}
+      ${empty ? `<button class="btn big" onclick="exampleModal()">Ver un ejemplo</button>` : ''}
       ${empty ? `<button class="btn pri big" onclick="go('marco')">Empezar de cero →</button>` : ''}
     </div>
   </div>` : ''}
@@ -433,10 +440,10 @@ function vInicio(){
   </div>
   <div class="card"><h3>Proyecto</h3><div class="row">
     <label class="muted">Centro</label><input class="f" style="width:240px" value="${esc(state.name)}" onchange="mutate(()=>state.name=this.value)">
-    <label class="muted">Curso</label><input class="f" style="width:120px" placeholder="2026-2027" value="${esc(state.course)}" onchange="mutate(()=>state.course=this.value)">
+    <label class="muted">Curso</label><select class="f" aria-label="Curso escolar" style="width:140px" onchange="mutate(()=>state.course=this.value)">${schoolCourseOptions(state.course)}</select>
     <label class="muted">Tipo</label><button class="btn alt" onclick="chooseEtapa()">${state.etapa==='primaria'?'Colegio':'Instituto'} · cambiar</button>
     <span class="grow"></span>
-    <button class="btn" onclick="loadSample()">Cargar ejemplo</button>
+    <button class="btn" onclick="exampleModal()">Cargar ejemplo</button>
   </div></div>`;
 }
 // Nuevo always opens the full project wizard in setup.js.
@@ -1153,58 +1160,14 @@ function loadSample(){
   detachCloud();
   mutate(() => {
     if (state.etapa === 'primaria'){ state = samplePrimaria(); return; }
-    const s = blank(); s.name = 'IES Ejemplo'; s.course = '2026-2027'; s.etapa = 'secundaria';
-    const mk = (c, n, sh, extra = {}) => { const e = {id:uid(), name:n, short:sh, av:{}, ...extra}; s[c].push(e); return e; };
-    const R = {};
-    [['101','A101'],['102','A102'],['201','A201'],['202','A202']].forEach(([n,sh]) => R[n] = mk('rooms','Aula '+n, sh, {kind:'Aula ordinaria', cap:30}));
-    R.gim = mk('rooms','Gimnasio','GIM',{kind:'Deportes'}); R.pat = mk('rooms','Pista exterior','PIS',{kind:'Deportes'});
-    R.lab = mk('rooms','Laboratorio','LAB',{kind:'Específica', cap:24}); R.mus = mk('rooms','Aula de Música','MUS',{kind:'Específica'});
-    R.pla = mk('rooms','Aula de Plástica','PLA',{kind:'Específica'}); R.tal = mk('rooms','Taller de Tecnología','TAL',{kind:'Específica'});
-    R.des = mk('rooms','Aula de desdoble','DES',{kind:'Aula pequeña', cap:15});
-    const G = {
-      '1A': mk('groups','1º ESO A','1A',{level:'1º ESO', roomId:R['101'].id}), '1B': mk('groups','1º ESO B','1B',{level:'1º ESO', roomId:R['102'].id}),
-      '2A': mk('groups','2º ESO A','2A',{level:'2º ESO', roomId:R['201'].id}), '2B': mk('groups','2º ESO B','2B',{level:'2º ESO', roomId:R['202'].id})
-    };
-    const S = {}; let ci = 0;
-    [['LEN','Lengua Castellana'],['MAT','Matemáticas'],['ING','Inglés'],['GH','Geografía e Historia'],['BIO','Biología y Geología'],['FQ','Física y Química'],['EF','Educación Física'],['MUS','Música'],['EPV','Educación Plástica'],['TEC','Tecnología'],['TUT','Tutoría'],['FRA','Francés'],['RMT','Refuerzo de Matemáticas']]
-      .forEach(([sh,n]) => S[sh] = mk('subjects', n, sh, {color: PALETTE[ci++]}));
-    const T = {};
-    [['ana','Ana García','AGA','Lengua'],['luis','Luis Pérez','LPE','Lengua'],['marta','Marta Ruiz','MRU','Matemáticas'],['jorge','Jorge López','JLO','Matemáticas'],
-     ['elena','Elena Sanz','ESA','Inglés',{freeDay:true}],['pablo','Pablo Díaz','PDI','Geografía e Historia',{maxDay:4}],['lucia','Lucía Romero','LRO','Ciencias',{maxGaps:3}],
-     ['carlos','Carlos Moreno','CMO','Educación Física',{maxConsec:3}],['sara','Sara Gil','SGI','Música'],['raul','Raúl Ortiz','ROR','Dibujo'],['irene','Irene Vega','IVE','Tecnología'],['nora','Nora Blanco','NBL','Francés',{minDay:2}]]
-      .forEach(([k,n,sh,dp,ex]) => T[k] = mk('teachers', n, sh, {dept:dp, ...ex}));
-    const add = (sub, g, t, h, rooms, dur = 1, extra = {}) => s.activities.push({id:uid(), type:'clase', subjectId:S[sub].id, groupIds:[G[g].id], teacherIds:[T[t].id], roomIds: rooms || [G[g].roomId], parts:[], sessions:h, dur, maxDay:1, spread:true, ...extra});
-    for (const g of ['1A','1B']){
-      add('LEN', g, 'ana', 4); add('MAT', g, 'marta', 4); add('ING', g, 'elena', 4); add('GH', g, 'pablo', 3);
-      add('BIO', g, 'lucia', 3, [R.lab.id, G[g].roomId]); add('EF', g, 'carlos', 2, [R.gim.id, R.pat.id]); add('MUS', g, 'sara', 2, [R.mus.id]); add('EPV', g, 'raul', 1, [R.pla.id], 2);
-    }
-    for (const g of ['2A','2B']){
-      add('LEN', g, 'luis', 4); add('MAT', g, 'jorge', 4); add('ING', g, 'elena', 3); add('GH', g, 'pablo', 3);
-      add('FQ', g, 'lucia', 3, [R.lab.id, G[g].roomId]); add('EF', g, 'carlos', 2, [R.gim.id, R.pat.id]); add('MUS', g, 'sara', 2, [R.mus.id]); add('TEC', g, 'irene', 3, [R.tal.id]);
-    }
-    add('TUT','1A','ana',1); add('TUT','1B','jorge',1); add('TUT','2A','luis',1); add('TUT','2B','lucia',1);
-    // optativas simultáneas de 2º: Francés / Refuerzo de Matemáticas (grupos 2A+2B a la vez)
-    s.activities.push({id:uid(), type:'clase', subjectId:S.FRA.id, groupIds:[G['2A'].id, G['2B'].id], teacherIds:[T.nora.id], roomIds:[R['201'].id], parts:[{subjectId:S.RMT.id, teacherIds:[T.marta.id], roomId:R.des.id}], sessions:2, dur:1, maxDay:1, spread:true});
-    // guardias y reuniones
-    const guard = (t, n) => s.activities.push({id:uid(), type:'guardia', subjectId:'', groupIds:[], teacherIds:[T[t].id], roomIds:[], parts:[], sessions:n, dur:1, maxDay:1, spread:false});
-    ['ana','luis','marta','jorge','pablo','sara','raul','irene','nora','carlos'].forEach(t => guard(t, 2)); guard('elena', 1);
-    s.activities.push({id:uid(), type:'reunion', subjectId:'', groupIds:[], teacherIds:[T.ana.id, T.luis.id], roomIds:[], parts:[], sessions:1, dur:1, maxDay:1, spread:false});
-    s.activities.push({id:uid(), type:'reunion', subjectId:'', groupIds:[], teacherIds:[T.marta.id, T.jorge.id], roomIds:[], parts:[], sessions:1, dur:1, maxDay:1, spread:false});
-    // condiciones de ejemplo
-    [0,1,2,4,5,6].forEach(sl => T.carlos.av['4-'+sl] = 2);   // Carlos no puede los viernes
-    [0,1,2,4,5,6].forEach(sl => T.sara.av['2-'+sl] = 2);     // Sara no puede los miércoles
-    T.ana.av['0-0'] = 1; T.ana.av['0-1'] = 1;                // Ana prefiere no empezar el lunes pronto
-    [0,1,2,3,4].forEach(d => T.irene.av[d+'-6'] = 2);        // Irene no puede a última hora
-    [0,1,2,3,4].forEach(d => S.EF.av[d+'-0'] = 1);           // Ed. Física mejor no a primera hora
-    [0,1,2,3,4].forEach(d => S.MAT.av[d+'-6'] = 1);          // Matemáticas mejor no a última hora
-    state = s;
+    state = sampleSecundaria();
   });
   ui.view = 'inicio'; render(); toast('Ejemplo cargado: ahora pulsa «Generar»');
 }
 
 /* ejemplo de colegio: tutores con su clase y especialistas */
 function samplePrimaria(){
-  const s = blank(); s.name = 'CEIP Ejemplo'; s.course = '2026-2027'; s.etapa = 'primaria';
+  const s = blank(); s.name = 'CEIP Ejemplo'; s.course = currentSchoolCourse(); s.etapa = 'primaria';
   s.slots = ETAPAS.primaria.slots.map(([start, end, r]) => r ? {start, end, recreo:true} : {start, end});
   const mk = (c, n, sh, extra = {}) => { const e = {id:uid(), name:n, short:sh, av:{}, ...extra}; s[c].push(e); return e; };
   const R = {gim: mk('rooms','Gimnasio','GIM',{kind:'Deportes'}), pat: mk('rooms','Patio','PAT',{kind:'Deportes'}), mus: mk('rooms','Aula de Música','MUS',{kind:'Específica'}), bib: mk('rooms','Biblioteca','BIB',{kind:'Específica'})};
@@ -1336,3 +1299,51 @@ window.addEventListener('beforeunload', e => { if (cloud.dirty || cloud.saving){
 // Google Identity is loaded on demand after requesting a connection (privacy.js).
 
 // Initialization is called after the validation and interface modules have installed validation and UI behavior.
+
+function sampleSecundaria(){
+    const s = blank(); s.name = 'IES Ejemplo'; s.course = currentSchoolCourse(); s.etapa = 'secundaria';
+    const mk = (c, n, sh, extra = {}) => { const e = {id:uid(), name:n, short:sh, av:{}, ...extra}; s[c].push(e); return e; };
+    const R = {};
+    [['101','A101'],['102','A102'],['201','A201'],['202','A202']].forEach(([n,sh]) => R[n] = mk('rooms','Aula '+n, sh, {kind:'Aula ordinaria', cap:30}));
+    R.gim = mk('rooms','Gimnasio','GIM',{kind:'Deportes'}); R.pat = mk('rooms','Pista exterior','PIS',{kind:'Deportes'});
+    R.lab = mk('rooms','Laboratorio','LAB',{kind:'Específica', cap:24}); R.mus = mk('rooms','Aula de Música','MUS',{kind:'Específica'});
+    R.pla = mk('rooms','Aula de Plástica','PLA',{kind:'Específica'}); R.tal = mk('rooms','Taller de Tecnología','TAL',{kind:'Específica'});
+    R.des = mk('rooms','Aula de desdoble','DES',{kind:'Aula pequeña', cap:15});
+    const G = {
+      '1A': mk('groups','1º ESO A','1A',{level:'1º ESO', roomId:R['101'].id}), '1B': mk('groups','1º ESO B','1B',{level:'1º ESO', roomId:R['102'].id}),
+      '2A': mk('groups','2º ESO A','2A',{level:'2º ESO', roomId:R['201'].id}), '2B': mk('groups','2º ESO B','2B',{level:'2º ESO', roomId:R['202'].id})
+    };
+    const S = {}; let ci = 0;
+    [['LEN','Lengua Castellana'],['MAT','Matemáticas'],['ING','Inglés'],['GH','Geografía e Historia'],['BIO','Biología y Geología'],['FQ','Física y Química'],['EF','Educación Física'],['MUS','Música'],['EPV','Educación Plástica'],['TEC','Tecnología'],['TUT','Tutoría'],['FRA','Francés'],['RMT','Refuerzo de Matemáticas']]
+      .forEach(([sh,n]) => S[sh] = mk('subjects', n, sh, {color: PALETTE[ci++]}));
+    const T = {};
+    [['ana','Ana García','AGA','Lengua'],['luis','Luis Pérez','LPE','Lengua'],['marta','Marta Ruiz','MRU','Matemáticas'],['jorge','Jorge López','JLO','Matemáticas'],
+     ['elena','Elena Sanz','ESA','Inglés',{freeDay:true}],['pablo','Pablo Díaz','PDI','Geografía e Historia',{maxDay:4}],['lucia','Lucía Romero','LRO','Ciencias',{maxGaps:3}],
+     ['carlos','Carlos Moreno','CMO','Educación Física',{maxConsec:3}],['sara','Sara Gil','SGI','Música'],['raul','Raúl Ortiz','ROR','Dibujo'],['irene','Irene Vega','IVE','Tecnología'],['nora','Nora Blanco','NBL','Francés',{minDay:2}]]
+      .forEach(([k,n,sh,dp,ex]) => T[k] = mk('teachers', n, sh, {dept:dp, ...ex}));
+    const add = (sub, g, t, h, rooms, dur = 1, extra = {}) => s.activities.push({id:uid(), type:'clase', subjectId:S[sub].id, groupIds:[G[g].id], teacherIds:[T[t].id], roomIds: rooms || [G[g].roomId], parts:[], sessions:h, dur, maxDay:1, spread:true, ...extra});
+    for (const g of ['1A','1B']){
+      add('LEN', g, 'ana', 4); add('MAT', g, 'marta', 4); add('ING', g, 'elena', 4); add('GH', g, 'pablo', 3);
+      add('BIO', g, 'lucia', 3, [R.lab.id, G[g].roomId]); add('EF', g, 'carlos', 2, [R.gim.id, R.pat.id]); add('MUS', g, 'sara', 2, [R.mus.id]); add('EPV', g, 'raul', 1, [R.pla.id], 2);
+    }
+    for (const g of ['2A','2B']){
+      add('LEN', g, 'luis', 4); add('MAT', g, 'jorge', 4); add('ING', g, 'elena', 3); add('GH', g, 'pablo', 3);
+      add('FQ', g, 'lucia', 3, [R.lab.id, G[g].roomId]); add('EF', g, 'carlos', 2, [R.gim.id, R.pat.id]); add('MUS', g, 'sara', 2, [R.mus.id]); add('TEC', g, 'irene', 3, [R.tal.id]);
+    }
+    add('TUT','1A','ana',1); add('TUT','1B','jorge',1); add('TUT','2A','luis',1); add('TUT','2B','lucia',1);
+    // optativas simultáneas de 2º: Francés / Refuerzo de Matemáticas (grupos 2A+2B a la vez)
+    s.activities.push({id:uid(), type:'clase', subjectId:S.FRA.id, groupIds:[G['2A'].id, G['2B'].id], teacherIds:[T.nora.id], roomIds:[R['201'].id], parts:[{subjectId:S.RMT.id, teacherIds:[T.marta.id], roomId:R.des.id}], sessions:2, dur:1, maxDay:1, spread:true});
+    // guardias y reuniones
+    const guard = (t, n) => s.activities.push({id:uid(), type:'guardia', subjectId:'', groupIds:[], teacherIds:[T[t].id], roomIds:[], parts:[], sessions:n, dur:1, maxDay:1, spread:false});
+    ['ana','luis','marta','jorge','pablo','sara','raul','irene','nora','carlos'].forEach(t => guard(t, 2)); guard('elena', 1);
+    s.activities.push({id:uid(), type:'reunion', subjectId:'', groupIds:[], teacherIds:[T.ana.id, T.luis.id], roomIds:[], parts:[], sessions:1, dur:1, maxDay:1, spread:false});
+    s.activities.push({id:uid(), type:'reunion', subjectId:'', groupIds:[], teacherIds:[T.marta.id, T.jorge.id], roomIds:[], parts:[], sessions:1, dur:1, maxDay:1, spread:false});
+    // condiciones de ejemplo
+    [0,1,2,4,5,6].forEach(sl => T.carlos.av['4-'+sl] = 2);   // Carlos no puede los viernes
+    [0,1,2,4,5,6].forEach(sl => T.sara.av['2-'+sl] = 2);     // Sara no puede los miércoles
+    T.ana.av['0-0'] = 1; T.ana.av['0-1'] = 1;                // Ana prefiere no empezar el lunes pronto
+    [0,1,2,3,4].forEach(d => T.irene.av[d+'-6'] = 2);        // Irene no puede a última hora
+    [0,1,2,3,4].forEach(d => S.EF.av[d+'-0'] = 1);           // Ed. Física mejor no a primera hora
+    [0,1,2,3,4].forEach(d => S.MAT.av[d+'-6'] = 1);          // Matemáticas mejor no a última hora
+    return s;
+}
