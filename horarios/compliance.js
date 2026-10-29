@@ -110,7 +110,7 @@ function complianceReport(){
  if(state.lessons.length&&allIssues().size)put(errors,'El horario contiene conflictos o condiciones incumplidas',{kind:'view',view:'generar',code:'conflicts'});
  return {pending,errors,items,groups,teachers,ok:!pending.length&&!errors.length};
 }
-function minutesText(n){return Math.floor(n/60)+' h '+(n%60?String(n%60)+' min':'');}
+function minutesText(n){const h=Math.floor(n/60),m=n%60;return h?h+' h'+(m?' '+m+' min':''):m+' min';}
 function vNormativa(){
  const report=complianceReport();
  return '<h2>Horas y normativa</h2><p>Comparamos minutos reales por materia y grupo, la jornada individual y las habilitaciones declaradas. Sin estos datos, el horario sigue siendo un borrador. Las reglas guardadas necesitan revisión al cambiar comunidad, curso, materias o marco horario.</p>'+complianceBanner(report)+

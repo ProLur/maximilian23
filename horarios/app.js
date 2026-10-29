@@ -201,7 +201,7 @@ function check(l, d, s, occ, fixedRoom){
     }
     if ((t === 'T' || t === 'G') && e.maxDay != null && e.maxDay !== ''){
       let c = 0; for (let q=0; q<S.length; q++){ if (q>=s && q<s+dur) continue; if (busy(occ, t+':'+id+':'+d+':'+q, l.id)) c++; }
-      if (c + dur > e.maxDay) r.soft.push(e.name+' superaría '+e.maxDay+' h ese día');
+      if (c + dur > e.maxDay) r.soft.push(e.name+' superaría '+e.maxDay+' tramos ese día');
     }
     if (t === 'T' && e.maxConsec != null && e.maxConsec !== ''){
       let run = 0, mx = 0;
@@ -209,7 +209,7 @@ function check(l, d, s, occ, fixedRoom){
         if (S[q].recreo){ run = 0; continue; }
         if ((q>=s && q<s+dur) || busy(occ, 'T:'+id+':'+d+':'+q, l.id)){ run++; mx = Math.max(mx, run); } else run = 0;
       }
-      if (mx > e.maxConsec) r.soft.push(e.name+': más de '+e.maxConsec+' h seguidas');
+      if (mx > e.maxConsec) r.soft.push(e.name+': más de '+e.maxConsec+' tramos seguidos');
     }
   }
   for (const sid of subjIds(a)){
@@ -292,7 +292,7 @@ function teacherWarnings(e, occ){
   let free = 0;
   for (let d=0; d<state.days.length; d++){
     const n = dayLoad(occ, 'T', e.id, d, null);
-    if (!n) free++; else if (e.minDay && n < e.minDay) w.push(dayName(d)+': solo '+n+' h (mín. '+e.minDay+')');
+    if (!n) free++; else if (e.minDay && n < e.minDay) w.push(dayName(d)+': solo '+n+' tramos (mín. '+e.minDay+')');
   }
   if (e.freeDay && !free) w.push('sin día libre');
   return w;
@@ -396,8 +396,8 @@ function diagnostics(){
   if (!classSlots()) w.push(['bad','No hay tramos de clase definidos.']);
   for (const t of ['T','G','R']) for (const e of state[COLL[t]]){
     const h = hoursOf(t, e.id), av = availOf(t, e.id);
-    if (t !== 'R' && h > av) w.push(['bad', `${TNAME[t]} <b>${esc(e.name)}</b>: ${h} h de actividad y solo ${av} tramos disponibles.`]);
-    if (e.maxDay != null && h > e.maxDay * state.days.length) w.push(['bad', `${TNAME[t]} <b>${esc(e.name)}</b>: ${h} h no caben con máx. ${e.maxDay} h/día.`]);
+    if (t !== 'R' && h > av) w.push(['bad', `${TNAME[t]} <b>${esc(e.name)}</b>: ${h} tramos de actividad y solo ${av} tramos disponibles.`]);
+    if (e.maxDay != null && h > e.maxDay * state.days.length) w.push(['bad', `${TNAME[t]} <b>${esc(e.name)}</b>: ${h} tramos no caben con máx. ${e.maxDay} tramos/día.`]);
   }
   for (const a of state.activities){
     if (a.type === 'clase' && !a.groupIds.length) w.push(['warn', `La actividad <b>${esc(aName(a))}</b> no tiene grupo.`]);
@@ -512,7 +512,7 @@ function delSlot(i){ mutate(() => { remap('s', s => s===i ? -1 : s>i ? s-1 : s);
 /* ---------- vistas: profesores / grupos / materias / aulas ---------- */
 const ENT = {
   profesores:{c:'teachers', t:'T', title:'Profesores', one:'profesor', step:'2 · ', lead:'El profesorado del centro con su departamento. La abreviatura aparece en las celdas del horario. Las condiciones detalladas (máximos, huecos, día libre…) están en el paso 4.',
-    cols:[['name','Nombre','text'],['short','Abrev.','text',90],['dept','Departamento','dept',180],['maxDay','Máx. h/día','number',100]]},
+    cols:[['name','Nombre','text'],['short','Abrev.','text',90],['dept','Departamento','dept',180],['maxDay','Máx. tramos/día','number',100]]},
   grupos:{c:'groups', t:'G', title:'Grupos', one:'grupo', step:'', lead:'Los grupos de alumnos (1º ESO A, 2º Bach B…). El aula de referencia se propone automáticamente al crear sus actividades.',
     cols:[['name','Nombre','text'],['short','Abrev.','text',90],['level','Nivel / etapa','text',150],['roomId','Aula de referencia','room',190]]},
   materias:{c:'subjects', t:'S', title:'Materias', one:'materia', step:'', lead:'Las materias o asignaturas. El color pinta sus sesiones en el horario. En «Condiciones» puedes indicar franjas preferidas o prohibidas para cada materia.',
@@ -526,7 +526,7 @@ function vEnt(v){
   const showH = E.t !== 'S';
   const depts = [...new Set(state.teachers.map(t => t.dept).filter(Boolean))];
   const ids = list.map(e => e.id), idsJ = esc(JSON.stringify(ids));
-  const head = `<tr>${pickHead(ids)}${E.cols.map(c => `<th style="${c[3]?'width:'+c[3]+'px':''}">${c[1]}</th>`).join('')}${showH?`<th style="width:150px">${E.t==='T'?'Horas (lectivas) / disp.':'Horas / disponibles'}</th>`:'<th style="width:120px">Horas semanales</th>'}<th style="width:110px"></th></tr>`;
+  const head = `<tr>${pickHead(ids)}${E.cols.map(c => `<th style="${c[3]?'width:'+c[3]+'px':''}">${c[1]}</th>`).join('')}${showH?`<th style="width:150px">${E.t==='T'?'Tramos (lectivos) / disp.':'Tramos / disponibles'}</th>`:'<th style="width:120px">Tramos semanales</th>'}<th style="width:110px"></th></tr>`;
   const rows = list.map(e => {
     const cells = E.cols.map(([f,,type]) => {
       if (type === 'parent') return `<td><select aria-label="Grupo al que pertenece" onchange="setF('${E.c}','${e.id}','${f}',this.value,false,true)"><option value="">Grupo completo</option>${state.groups.filter(g=>g.id!==e.id).map(g=>`<option value="${g.id}" ${e[f]===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select></td>`;
@@ -536,8 +536,8 @@ function vEnt(v){
       return `<td><input type="${type}" ${type==='number'?'min="0" placeholder="—"':''} value="${esc(e[f] ?? '')}" onchange="setF('${E.c}','${e.id}','${f}',this.value,${type==='number'})"></td>`;
     }).join('');
     let hc;
-    if (showH){ const h = hoursOf(E.t, e.id), a = availOf(E.t, e.id); hc = `<td class="${h>a?'pill-bad':''}">${h} h${E.t==='T'?` <span class="muted">(${hoursOf('T',e.id,'clase')})</span>`:''} <span class="muted">/ ${a}</span></td>`; }
-    else { let h = 0; state.activities.forEach(a => { if (subjIds(a).includes(e.id)) h += a.sessions*a.dur; }); hc = `<td>${h} h</td>`; }
+    if (showH){ const h = hoursOf(E.t, e.id), a = availOf(E.t, e.id); hc = `<td class="${h>a?'pill-bad':''}">${h} tramos${E.t==='T'?` <span class="muted">(${hoursOf('T',e.id,'clase')})</span>`:''} <span class="muted">/ ${a}</span></td>`; }
+    else { let h = 0; state.activities.forEach(a => { if (subjIds(a).includes(e.id)) h += a.sessions*a.dur; }); hc = `<td>${h} tramos</td>`; }
     const act = `<button aria-label="Condiciones y disponibilidad" class="iconbtn" title="Condiciones y disponibilidad" onclick="ui.rt='${E.t}';ui.rid['${E.t}']='${e.id}';go('restricciones')">⚙</button>`
       + (E.t !== 'S' ? `<button aria-label="Ver su horario" class="iconbtn" title="Ver su horario" onclick="ui.ht='${E.t}';ui.hid['${E.t}']='${e.id}';go('horario')">▦</button>` : '')
       + `<button aria-label="Eliminar" class="iconbtn" title="Eliminar" onclick="delEnt('${E.c}','${e.id}')">×</button>`;
@@ -722,9 +722,9 @@ function quickLoad(gid){
   const g = IX.G.get(gid);
   const ex = sid => state.activities.find(a => a.type === 'clase' && a.subjectId === sid && !a.parts.length && a.groupIds.length === 1 && a.groupIds[0] === gid);
   openModal(`<h3>Carga rápida por grupo</h3>
-    <p class="muted">Horas semanales de cada materia para el grupo y quién la imparte. Deja 0 en las que no cursa. (Optativas y desdobles se crean con «Nueva actividad».)</p>
+    <p class="muted">Tramos semanales de cada materia para el grupo y quién la imparte. Deja 0 en las que no cursa. (Optativas y desdobles se crean con «Nueva actividad».)</p>
     <label class="l">Grupo</label><select class="f" onchange="quickLoad(this.value)">${state.groups.map(x => `<option value="${x.id}" ${x.id===gid?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
-    <table class="t" style="margin-top:10px"><tr><th>Materia</th><th style="width:80px">Horas</th><th style="width:110px">Sesiones de</th><th>Profesor</th><th>Aula</th></tr>
+    <table class="t" style="margin-top:10px"><tr><th>Materia</th><th style="width:80px">Sesiones</th><th style="width:110px">Sesiones de</th><th>Profesor</th><th>Aula</th></tr>
     ${state.subjects.map(s => { const a = ex(s.id);
       return `<tr data-s="${s.id}" data-a="${a?.id||''}"><td><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</td>
         <td><input type="number" class="qh" min="0" max="40" value="${a ? a.sessions : 0}" style="border:1px solid var(--line)"></td>
@@ -733,7 +733,7 @@ function quickLoad(gid){
         <td><select class="qr"><option value="">—</option>${state.rooms.map(r => `<option value="${r.id}" ${(a ? a.roomIds[0] : g.roomId)===r.id?'selected':''}>${esc(r.name)}</option>`).join('')}</select></td></tr>`; }).join('')}
     </table>
     <div class="mfoot"><span class="muted" style="margin-right:auto" id="qTot"></span><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn pri" onclick="saveQuick('${gid}')">Guardar ${esc(g.name)}</button></div>`);
-  const upd = () => { let t = 0; $$('#mbox tr[data-s]').forEach(tr => t += (+$('.qh',tr).value||0) * (+$('.qd',tr).value)); $('#qTot').textContent = 'Total: '+t+' h de '+classSlots()*state.days.length+' tramos'; };
+  const upd = () => { let t = 0; $$('#mbox tr[data-s]').forEach(tr => t += (+$('.qh',tr).value||0) * (+$('.qd',tr).value)); $('#qTot').textContent = 'Total: '+t+' tramos de '+classSlots()*state.days.length+' tramos'; };
   $$('#mbox .qh, #mbox .qd').forEach(x => x.oninput = upd); upd();
 }
 function saveQuick(gid){
@@ -756,12 +756,12 @@ function condForm(t, e){
   const num = (f, label, ph, help) => `<label>${label}<input class="f" type="number" min="0" value="${e[f] ?? ''}" placeholder="${ph}" onchange="setF('${COLL[t]}','${e.id}','${f}',this.value,true)"><span class="help" style="font-weight:400">${help}</span></label>`;
   const chk = (f, label) => `<label class="chk"><input type="checkbox" ${e[f]?'checked':''} onchange="mutate(()=>IX['${t}'].get('${e.id}').${f}=this.checked,false)"> ${label}</label>`;
   if (t === 'T') return `<div class="conds">
-    ${num('maxDay','Máx. horas al día','sin límite','Obligatorio')}
-    ${num('minDay','Mín. horas los días que venga','sin mínimo','Evita venir por 1 hora')}
+    ${num('maxDay','Máx. tramos al día','sin límite','Obligatorio')}
+    ${num('minDay','Mín. tramos los días que venga','sin mínimo','Evita venir por un solo tramo')}
     ${num('maxGaps','Máx. huecos a la semana','sin límite','Preferencia: se procura cumplir')}
-    ${num('maxConsec','Máx. horas seguidas','sin límite','Obligatorio (el recreo corta)')}
+    ${num('maxConsec','Máx. tramos seguidos','sin límite','Obligatorio (el recreo corta)')}
     ${chk('freeDay','Quiere un día libre a la semana')}</div>`;
-  if (t === 'G') return `<div class="conds">${num('maxDay','Máx. horas al día','sin límite','Obligatorio')}${chk('allowGaps','Reducir la prioridad de evitar huecos (p. ej. Bachillerato)')}</div><p class="help">Los huecos se minimizan como preferencia. Desmarcar esta opción aumenta su penalización.</p>`;
+  if (t === 'G') return `<div class="conds">${num('maxDay','Máx. tramos al día','sin límite','Obligatorio')}${chk('allowGaps','Reducir la prioridad de evitar huecos (p. ej. Bachillerato)')}</div><p class="help">Los huecos se minimizan como preferencia. Desmarcar esta opción aumenta su penalización.</p>`;
   if (t === 'S') return `<p class="help" style="margin-top:12px">Ejemplos: Educación Física no a primera hora («mejor no»), Matemáticas preferentemente por la mañana (marca «mejor no» las últimas horas), una optativa solo los martes («no disponible» el resto).</p>`;
   return `<p class="help" style="margin-top:12px">Marca cuándo no se puede usar el aula (por ejemplo, reservada para otra etapa).</p>`;
 }
@@ -941,7 +941,7 @@ function vHor(){
     <button class="iconbtn" title="Anterior" onclick="stepEnt(-1)">◀</button>
     <select class="f" onchange="ui.hid['${t}']=this.value;ui.sel=null;render()" style="min-width:200px;font-weight:600">${list.map(x => `<option value="${x.id}" ${x.id===id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
     <button class="iconbtn" title="Siguiente" onclick="stepEnt(1)">▶</button>
-    <span class="muted">${pl.reduce((n,l) => n + IX.A.get(l.actId).dur, 0)} h · ${gaps} hueco${gaps===1?'':'s'}${badHere ? ` · <span class="pill-bad">${badHere} con conflicto</span>` : ''}${warns.length ? ` · <span class="pill-warn" title="${esc(warns.join('\n'))}">${warns.length} aviso(s)</span>` : ''}</span>
+    <span class="muted">${minutesText(pl.reduce((n,l)=>n+(teachingMinutes(l,IX.A.get(l.actId))||0),0))} · ${pl.reduce((n,l) => n + IX.A.get(l.actId).dur, 0)} tramo${pl.reduce((n,l)=>n+IX.A.get(l.actId).dur,0)===1?'':'s'} · ${gaps} hueco${gaps===1?'':'s'}${badHere ? ` · <span class="pill-bad">${badHere} con conflicto</span>` : ''}${warns.length ? ` · <span class="pill-warn" title="${esc(warns.join('\n'))}">${warns.length} aviso(s)</span>` : ''}</span>
     <span class="grow"></span>
     <button class="btn" onclick="window.print()">Imprimir</button>
     <button class="btn" onclick="printAll('${t}')">Todos</button>
@@ -1125,7 +1125,7 @@ function vInf(){
   ${depts.map(dp => T.filter(x => (x.e.dept || 'Sin departamento') === dp).map(x => `<tr><td><a href="#" onclick="ui.ht='T';ui.hid.T='${x.e.id}';go('horario');return false">${esc(x.e.name)}</a></td><td>${esc(dp)}</td><td><b>${x.lect}</b></td><td>${x.guard}</td><td>${x.other}</td><td>${x.all}</td><td>${x.days}</td><td>${x.mx}</td><td>${x.gaps}</td><td class="${x.warns.length?'pill-warn':'pill-ok'}" style="font-weight:400">${x.warns.length ? x.warns.map(esc).join('; ') : '✓'}</td></tr>`).join('')).join('')}
   </table></div>
   <div class="row" style="align-items:flex-start">
-  <div class="card grow"><h3>Grupos</h3><table class="t"><tr><th>Grupo</th><th>Horas semanales</th><th>Colocadas</th><th>Huecos</th></tr>
+  <div class="card grow"><h3>Grupos</h3><table class="t"><tr><th>Grupo</th><th>Tramos semanales</th><th>Colocadas</th><th>Huecos</th></tr>
   ${G.map(x => `<tr><td>${esc(x.e.name)}</td><td>${x.h}</td><td class="${x.placed===x.h?'pill-ok':'pill-warn'}">${x.placed}</td><td class="${x.gaps?'pill-warn':''}">${x.gaps}</td></tr>`).join('')}</table></div>
   <div class="card grow"><h3>Ocupación de aulas</h3><table class="t"><tr><th>Aula</th><th>Tramos ocupados</th><th style="width:40%">Ocupación</th></tr>
   ${R.map(x => `<tr><td>${esc(x.e.name)}</td><td>${x.used}</td><td><div class="progress" style="height:10px"><div style="width:${x.pct}%"></div></div><small class="muted">${x.pct}%</small></td></tr>`).join('')}</table></div>
