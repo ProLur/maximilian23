@@ -1228,9 +1228,9 @@
         const canPlay = decision.level === "play";
         const fileName = canPlay ? "maximilian-juega-v2.png" : "maximilian-no-juega-v2.png";
         const localUrl = `/juez/${fileName}?v=4`;
-        const rawUrl = `https://raw.githubusercontent.com/ProLur/maximilian23/main/juez/${fileName}`;
+        const fallbackUrl = `/juez/${fileName}`;
         verdictMascot.onerror = () => {
-          if (verdictMascot.src !== rawUrl) verdictMascot.src = rawUrl;
+          verdictMascot.onerror = null; verdictMascot.src = fallbackUrl;
         };
         verdictMascot.src = localUrl;
         verdictMascot.alt = "";

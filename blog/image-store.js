@@ -1,3 +1,4 @@
+import{publicImageUrl}from'./public-images.js?v=1';
 const IMAGE_API='https://aula-del-futuro-reservas.mmartinezf001.workers.dev/blog-images';
 
 async function request(user,payload){
@@ -33,7 +34,8 @@ export async function uploadImages(user,blog,postId,sources){
   if(!sources.length)return{urls:[],paths:[]};
   const dataUrls=[];
   for(const source of sources)dataUrls.push(typeof source==='string'?source:await prepareImage(source));
-  return request(user,{action:'upload',blog,postId,images:dataUrls});
+  const result=await request(user,{action:'upload',blog,postId,images:dataUrls});
+  return {...result,urls:(result.urls||[]).map(publicImageUrl)};
 }
 
 export async function deleteImages(user,blog,paths){

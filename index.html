@@ -719,13 +719,13 @@
         });
         const maxImage = document.getElementById("maxImage");
         maxImage.addEventListener("click", () => {
-            maxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+            maxImage.src = "/2.gif";
             maxImage.addEventListener("load", () => setTimeout(() => maxImage.src = "max.png", 3000), { once: true });
         });
         const mobileMaxImage = document.getElementById("mobileMaxImage");
         if (mobileMaxImage) {
             mobileMaxImage.addEventListener("click", () => {
-                mobileMaxImage.src = "https://raw.githubusercontent.com/ProLur/maximilian23/refs/heads/main/2.gif";
+                mobileMaxImage.src = "/2.gif";
                 mobileMaxImage.addEventListener("load", () => setTimeout(() => mobileMaxImage.src = "https://maximilian23.com/max.png", 3000), { once: true });
             });
         }
