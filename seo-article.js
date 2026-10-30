@@ -1,3 +1,4 @@
+import{publicImageUrl}from'./blog/public-images.js?v=1';
 // Search metadata only: this module never changes the visible article.
 export function updateArticleMetadata(item){
   const base='https://maximilian23.com';
@@ -13,7 +14,7 @@ export function updateArticleMetadata(item){
   }
   const canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=url.href;
   const ogUrl=document.querySelector('meta[property="og:url"]');if(ogUrl)ogUrl.content=url.href;
-  const image=[...(item.imageDataUrls||[]),item.imageDataUrl,item.imageUrl].find(value=>/^https?:\/\//i.test(value||''));
+  const image=[...(item.imageDataUrls||[]),item.imageDataUrl,item.imageUrl].map(publicImageUrl).filter(value=>typeof value==='string'&&(/^(https?:\/\/|\/)/i.test(value))).map(value=>new URL(value,base).href)[0];
   if(image)for(const selector of ['meta[property="og:image"]','meta[name="twitter:image"]']){
     const element=document.querySelector(selector);if(element)element.content=image;
   }
@@ -36,4 +37,5 @@ export function updateArticleMetadata(item){
 export function articleUnavailable(){
   const robots=document.querySelector('meta[name="robots"]');if(robots)robots.content='noindex, follow';
 }
+
 
