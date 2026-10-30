@@ -944,7 +944,9 @@ function vHor(){
     <span class="muted">${minutesText(pl.reduce((n,l)=>n+(teachingMinutes(l,IX.A.get(l.actId))||0),0))} · ${pl.reduce((n,l) => n + IX.A.get(l.actId).dur, 0)} tramo${pl.reduce((n,l)=>n+IX.A.get(l.actId).dur,0)===1?'':'s'} · ${gaps} hueco${gaps===1?'':'s'}${badHere ? ` · <span class="pill-bad">${badHere} con conflicto</span>` : ''}${warns.length ? ` · <span class="pill-warn" title="${esc(warns.join('\n'))}">${warns.length} aviso(s)</span>` : ''}</span>
     <span class="grow"></span>
     <button class="btn" onclick="window.print()">Imprimir</button>
-    <button class="btn" onclick="printAll('${t}')">Todos</button>
+    <button class="btn" onclick="printAll('${t}')">Imprimir todos</button>
+    <button class="btn" onclick="exportTimetablePDF(false)">Generar PDF</button>
+    <button class="btn" onclick="exportTimetablePDF(true)" title="Un PDF con todos los horarios de ${TPLUR[t].toLowerCase()}">PDF de todos</button>
   </div>
   <div class="hlayout">
     <div class="gmain card" style="padding:14px"><div class="row" style="margin-bottom:10px"><h2 style="font-size:18px;margin:0">${TNAME[t]}: ${esc(ent.name)}</h2><span class="muted">${esc(state.name)}${state.course?' · '+esc(state.course):''}${t==='T'&&ent.dept?' · Dpto. '+esc(ent.dept):''}</span></div>
